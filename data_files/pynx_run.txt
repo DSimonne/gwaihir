@@ -1,0 +1,38 @@
+# parameters
+data = ""
+mask = ""
+data2cxi = True
+auto_center_resize = True #
+#support= "/home/experiences/sixs/simonne/Documents/SIXS_June_2021/ruche_dir/reconstructions/analysis/supports/support_168_170_190_1_2_2_3116.npz"
+support_threshold = 0.27, 0.33 # pick a random number between these two numbers
+support_only_shrink = False
+support_update_period = 30
+support_smooth_width_begin = 2
+support_smooth_width_end = 1 # 0.5
+support_post_expand = 1,-2,1
+
+psf = "gaussian,1,30"  # For partial coherence
+nb_hio = 400
+nb_raar = 1000
+nb_er = 300
+nb_ml = 0
+
+nb_run = 20
+nb_run_keep = 15
+
+zero_mask = auto # masked pixels will start from imposed 0 and then let free
+crop_output= 0 # set to 0 to avoid cropping the output in the .cxi
+
+positivity = False # True
+beta = 0.9 # used for RAAR or HIO
+detwin = False # True # 
+rebin = 1,1,1
+
+# Generic parameters
+detector_distance = 1.18 # in m 
+pixel_size_detector = 55e-6   # eiger 75e-6, maxipix 55e-6
+wavelength = 9.5373e-11
+verbose = 100
+output_format= 'cxi'  # 'npz' # 'cxi' #
+live_plot = False
+mpi=run
