@@ -9,11 +9,11 @@ import glob
 import os
 
 """Python script to rotate the data for vertical configuration"""
- 
+
 # Print help
 try:
-    print ('Data dir:',  sys.argv[1])
-    print ('Scan (s):',  sys.argv[2])
+    print('Data dir:',  sys.argv[1])
+    print('Scan (s):',  sys.argv[2])
 except IndexError:
     print("""
         Arg 1: Path of target directory (before /S{scan} ... )
@@ -23,13 +23,15 @@ except IndexError:
 
 folder = sys.argv[1]
 scan_list = sys.argv[2]
-root_folder = os.getcwd() + "/" + folder  # folder of the experiment, where all scans are stored
-sample_name = "S"  # str or list of str of sample names (string in front of the scan number in the folder name).
+# folder of the experiment, where all scans are stored
+root_folder = os.getcwd() + "/" + folder
+# str or list of str of sample names (string in front of the scan number in the folder name).
+sample_name = "S"
 
 # transform string of list into python list object
 if scan_list.startswith("["):
     scans = ast.literal_eval(scan_list)
-    
+
 else:
     scans = [scan_list]
 
@@ -38,14 +40,16 @@ else:
 for scan in scans:
     print(scan)
     try:
-        filename = glob.glob(f"{root_folder}{sample_name}{scan}/data/*omega*{scan}*")[0]
+        filename = glob.glob(
+            f"{root_folder}{sample_name}{scan}/data/*omega*{scan}*")[0]
         rocking_angle = 'omega'
     except:
-        filename = glob.glob(f"{root_folder}{sample_name}{scan}/data/*mu*{scan}*")[0]
+        filename = glob.glob(
+            f"{root_folder}{sample_name}{scan}/data/*mu*{scan}*")[0]
         rocking_angle = 'mu'
 
     f_copy = filename.split(".nxs")[0] + "_R.nxs"
-    
+
     shutil.copy2(filename, f_copy)
     print("Using a copy of the data: ", f_copy)
 
@@ -77,22 +81,24 @@ for scan in scans:
         for idx in range(data.shape[0]):
             tmp = data[idx, :, :]
             data[idx, :, :] = np.fliplr(tmp)
-        print("Data well rotated by 90°.")  
+        print("Data well rotated by 90°.")
 
         print("Saving example figures...", end="\n\n")
-        plt.figure(figsize = (16, 9))
-        plt.imshow(data_og[half, :, :], vmax = 10)
+        plt.figure(figsize=(16, 9))
+        plt.imshow(data_og[half, :, :], vmax=10)
         plt.xlabel('Delta')
         plt.ylabel('Gamma')
         plt.tight_layout()
-        plt.savefig(root_folder + sample_name + str(scan) + "/data/data_before_rotation.png")
+        plt.savefig(root_folder + sample_name + str(scan) +
+                    "/data/data_before_rotation.png")
 
-        plt.figure(figsize = (16, 9))        
-        plt.imshow(data[half, :, :], vmax = 10)
+        plt.figure(figsize=(16, 9))
+        plt.imshow(data[half, :, :], vmax=10)
         plt.xlabel('Gamma')
         plt.ylabel('Delta')
         plt.tight_layout()
-        plt.savefig(root_folder + sample_name + str(scan) + "/data/data_after_rotation.png")
+        plt.savefig(root_folder + sample_name + str(scan) +
+                    "/data/data_after_rotation.png")
         plt.close()
 
         # Overwrite data in copied file

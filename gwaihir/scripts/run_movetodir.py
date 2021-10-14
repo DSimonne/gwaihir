@@ -11,12 +11,12 @@ import inspect
     Arg 1: directory
     Arg 2: Scan(s) number, list or single value
 """
- 
+
 # Print help
 try:
-    print ('OG data dir:',  sys.argv[1])
-    print ('Target data dir:',  sys.argv[2])
-    print ('Scan (s):',  sys.argv[3])
+    print('OG data dir:',  sys.argv[1])
+    print('Target data dir:',  sys.argv[2])
+    print('Scan (s):',  sys.argv[3])
 except IndexError:
     print("""
         Arg 1: Original data directory 
@@ -34,7 +34,7 @@ scan_list = sys.argv[3]
 # transform string of list into python list object
 if scan_list.startswith("["):
     scans = ast.literal_eval(scan_list)
-    
+
 else:
     scans = [scan_list]
 
@@ -64,7 +64,8 @@ for scan in scans:
 
     try:
         root_dir = inspect.getfile(gwaihir).split("__")[0]
-        shutil.copy(f"{root_dir}gwaihir/data_files/pynx_run.txt", f"{TG_folder}S{scan}/pynxraw")
+        shutil.copy(f"{root_dir}gwaihir/data_files/pynx_run.txt",
+                    f"{TG_folder}S{scan}/pynxraw")
         print(f"Copied pynx-run-no-support.txt to {TG_folder}S{scan}/pynxraw")
     except FileExistsError:
         print(f"{TG_folder}S{scan}/pynxraw/pynx-run-no-support.txt exists")
@@ -80,7 +81,8 @@ for scan in scans:
         pass
     except IndexError:
         try:
-            filename = glob.glob(f"{OG_folder}*omega*{scan}*.nxs", recursive=True)[0]
+            filename = glob.glob(
+                f"{OG_folder}*omega*{scan}*.nxs", recursive=True)[0]
             print("Omega scan.")
             shutil.copy2(filename, f"{TG_folder}S{scan}/data")
             print(f"Copied {filename} to {TG_folder}S{scan}/data")
@@ -90,5 +92,5 @@ for scan in scans:
         except IndexError:
             print("Not a mu or an omega scan.")
             pass
-            
+
     print("\n")

@@ -7,6 +7,10 @@
 #       authors:
 #         Jerome Carnis, carnis_jerome@yahoo.fr
 
+from gwaihir.runner import strain
+import sys
+import glob
+import ast
 from collections.abc import Sequence
 from datetime import datetime
 from functools import reduce
@@ -61,17 +65,14 @@ Remember that you may have to change the mask, the central pixel, the rocking an
 
 """
 
-import ast
-import glob
-import sys
 
 # Print help
 try:
-    print ('Data dir:',  sys.argv[1])
-    print ('Scan:',  sys.argv[2])
-    print ('Out-of-plane_angle:',  sys.argv[3])
-    print ('In-plane_angle:',  sys.argv[4])
-    print ('Tilt angle:',  sys.argv[5])
+    print('Data dir:',  sys.argv[1])
+    print('Scan:',  sys.argv[2])
+    print('Out-of-plane_angle:',  sys.argv[3])
+    print('In-plane_angle:',  sys.argv[4])
+    print('Tilt angle:',  sys.argv[5])
 except IndexError:
     print("""
         Arg 1: Path of target directory (before /S{scan} ... )
@@ -83,9 +84,12 @@ except IndexError:
     exit()
 
 scan = int(sys.argv[2])
-outofplane_angle = float(sys.argv[3]) # detector angle in deg (rotation around x outboard): delta ID01, delta SIXS, gamma 34ID
-inplane_angle = float(sys.argv[4])  # detector angle in deg(rotation around y vertical up): nu ID01, gamma SIXS, tth 34ID
-tilt_angle = float(sys.argv[5])  # angular step size for rocking angle, eta ID01, mu SIXS, does not matter for energy scan
+# detector angle in deg (rotation around x outboard): delta ID01, delta SIXS, gamma 34ID
+outofplane_angle = float(sys.argv[3])
+# detector angle in deg(rotation around y vertical up): nu ID01, gamma SIXS, tth 34ID
+inplane_angle = float(sys.argv[4])
+# angular step size for rocking angle, eta ID01, mu SIXS, does not matter for energy scan
+tilt_angle = float(sys.argv[5])
 
 for i, element in enumerate(sys.argv):
     if "flip" in element:
@@ -93,43 +97,47 @@ for i, element in enumerate(sys.argv):
             flip_reconstruction = True  # True if you want to get the conjugate object
             print("Flipping the reconstruction")
     else:
-    	flip_reconstruction = False  # True if you want to get the conjugate object
+        flip_reconstruction = False  # True if you want to get the conjugate object
 
 # folder of the experiment, where all scans are stored
-root_folder = os.getcwd() + "/" + sys.argv[1] 
+root_folder = os.getcwd() + "/" + sys.argv[1]
 print("Root folder:", root_folder)
 
-#Scan folder
+# Scan folder
 scan_folder = root_folder + f"S{scan}/"
 print("Scan folder:", scan_folder)
 
 # Data folder
-data_folder = scan_folder + "data/" # folder of the experiment, where all scans are stored
+# folder of the experiment, where all scans are stored
+data_folder = scan_folder + "data/"
 print("Data folder:", data_folder)
 
-save_dir = scan_folder + "result_crystal_frame/"  # images will be saved here, leave it to None otherwise (default to data directory's parent)
+# images will be saved here, leave it to None otherwise (default to data directory's parent)
+save_dir = scan_folder + "result_crystal_frame/"
 # save_dir = None
 
 comment = ''  # comment in filenames, should start with _
-sample_name = "S"  # str or list of str of sample names (string in front of the scan number in the folder name).
+# str or list of str of sample names (string in front of the scan number in the folder name).
+sample_name = "S"
 
-rocking_angle_sixs = "mu" # choose between mu or omega
+rocking_angle_sixs = "mu"  # choose between mu or omega
 # template_imagefile = 'NoMirror_ascan_mu_%05d_R.nxs'
 filename = glob.glob(f"{data_folder}*{rocking_angle_sixs}*{scan}*")[0]
-template_imagefile = filename.split("/data/")[-1].split("%05d"%scan)[0] +"%05d_R.nxs"
+template_imagefile = filename.split(
+    "/data/")[-1].split("%05d" % scan)[0] + "%05d_R.nxs"
 print("Template: ", template_imagefile)
 
 # Save all the prints from the script
-stdoutOrigin=sys.stdout
+stdoutOrigin = sys.stdout
 
 if not isinstance(save_dir, str):
-	save_dir = "result/"
+    save_dir = "result/"
 README_file = f"{save_dir}README_strain.md"
 print("Save folder:", save_dir)
 try:
-	os.mkdir(save_dir)
+    os.mkdir(save_dir)
 except:
-	pass
+    pass
 
 with open(README_file, 'w') as outfile:
     outfile.write("```bash\n")
@@ -140,21 +148,24 @@ sys.stdout = open(README_file, "a")
 #########################################################
 # parameters used when averaging several reconstruction #
 #########################################################
-sort_method = 'variance/mean'  # 'mean_amplitude' or 'variance' or 'variance/mean' or 'volume', metric for averaging
+# 'mean_amplitude' or 'variance' or 'variance/mean' or 'volume', metric for averaging
+sort_method = 'variance/mean'
 correlation_threshold = 0.90
 
 data_dirname = None
 #########################################################
 # parameters relative to the FFT window and voxel sizes #
 #########################################################
-#original_size = [168, 1024, 800]  # size of the FFT array before binning. It will be modify to take into account binning
+# original_size = [168, 1024, 800]  # size of the FFT array before binning. It will be modify to take into account binning
 # during phasing automatically. Leave it to () if the shape did not change.
 original_size = []
 phasing_binning = (1, 1, 1)  # binning factor applied during phase retrieval
-preprocessing_binning = (1, 1, 1)  # binning factors in each dimension used in preprocessing (not phase retrieval)
-#output_size = (50, 50, 50)  # (z, y, x) Fix the size of the output array, leave it as () otherwise
+# binning factors in each dimension used in preprocessing (not phase retrieval)
+preprocessing_binning = (1, 1, 1)
+# output_size = (50, 50, 50)  # (z, y, x) Fix the size of the output array, leave it as () otherwise
 output_size = None
-keep_size = False  # True to keep the initial array size for orthogonalization (slower), it will be cropped otherwise
+# True to keep the initial array size for orthogonalization (slower), it will be cropped otherwise
+keep_size = False
 fix_voxel = None  # voxel size in nm for the interpolation during the geometrical transformation. If a single value is
 # provided, the voxel size will be identical is all 3 directions. Set it to None to use the default voxel size
 # (calculated from q values, it will be different in each dimension).
@@ -162,11 +173,13 @@ fix_voxel = None  # voxel size in nm for the interpolation during the geometrica
 #############################################################
 # parameters related to displacement and strain calculation #
 #############################################################
-data_frame = 'detector'  # 'crystal' if the data was interpolated into the crystal frame using (xrayutilities) or
+# 'crystal' if the data was interpolated into the crystal frame using (xrayutilities) or
+data_frame = 'detector'
 # (transformation matrix + align_q=True)
 # 'laboratory' if the data was interpolated into the laboratory frame using the transformation matrix (align_q = False)
 # 'detector' if the data is still in the detector frame
-ref_axis_q = ("y")  # axis along which q will be aligned (data_frame= 'detector' or 'laboratory')
+# axis along which q will be aligned (data_frame= 'detector' or 'laboratory')
+ref_axis_q = ("y")
 # or is already aligned (data_frame='crystal')
 save_frame = 'crystal'  # 'crystal', 'laboratory' or 'lab_flat_sample'
 # 'crystal' to save the data with q aligned along ref_axis_q
@@ -174,23 +187,29 @@ save_frame = 'crystal'  # 'crystal', 'laboratory' or 'lab_flat_sample'
 # 'lab_flat_sample' to save the data in the laboratory frame, with all sample angles rotated back to 0
 # rotations for 'laboratory' and 'lab_flat_sample' are realized after the strain calculation
 # (which is done in the crystal frame along ref_axis_q)
-isosurface_strain = 0.5  # threshold use for removing the outer layer (strain is undefined at the exact surface voxel)
-strain_method = 'default'  # 'default' or 'defect'. If 'defect', will offset the phase in a loop and keep the smallest
+# threshold use for removing the outer layer (strain is undefined at the exact surface voxel)
+isosurface_strain = 0.5
+# 'default' or 'defect'. If 'defect', will offset the phase in a loop and keep the smallest
+strain_method = 'default'
 # magnitude value for the strain. See: F. Hofmann et al. PhysRevMaterials 4, 013801 (2020)
 phase_offset = 0  # manual offset to add to the phase, should be 0 in most cases
-phase_offset_origin = (None)  # the phase at this voxel will be set to phase_offset, None otherwise
+# the phase at this voxel will be set to phase_offset, None otherwise
+phase_offset_origin = (None)
 offset_method = 'mean'  # 'COM' or 'mean', method for removing the offset in the phase
-centering_method = 'max_com'  # 'com' (center of mass), 'max', 'max_com' (max then com), 'do_nothing'
+# 'com' (center of mass), 'max', 'max_com' (max then com), 'do_nothing'
+centering_method = 'max_com'
 # TODO: where is q for energy scans? Should we just rotate the reconstruction to have q along one axis,
 #  instead of using sample offsets?
 
 ######################################
 # define beamline related parameters #
 ######################################
-beamline = "SIXS_2019"  # name of the beamline, used for data loading and normalization by monitor and orthogonalisation
+# name of the beamline, used for data loading and normalization by monitor and orthogonalisation
+beamline = "SIXS_2019"
 # supported beamlines: 'ID01', 'SIXS_2018', 'SIXS_2019', 'CRISTAL', 'P10', '34ID'
 actuators = None
-rocking_angle = "inplane"  # # "outofplane" for a sample rotation around x outboard, "inplane" for a sample rotation
+# # "outofplane" for a sample rotation around x outboard, "inplane" for a sample rotation
+rocking_angle = "inplane"
 # around y vertical up, does not matter for energy scan
 #  "inplane" e.g. phi @ ID01, mu @ SIXS "outofplane" e.g. eta @ ID01
 sdd = 1.18  # sample to detector distance in m
@@ -201,9 +220,10 @@ beam_direction = np.array(
 # outofplane_angle = -0.01815149389135301 # detector angle in deg (rotation around x outboard): delta ID01, delta SIXS, gamma 34ID
 # inplane_angle = 37.51426377175866  # detector angle in deg(rotation around y vertical up): nu ID01, gamma SIXS, tth 34ID
 # tilt_angle = 0.007737016574585642  # angular step size for rocking angle, eta ID01, mu SIXS, does not matter for energy scan
-sample_offsets = None  # tuple of offsets in degrees of the sample around (downstream, vertical up, outboard)
+# tuple of offsets in degrees of the sample around (downstream, vertical up, outboard)
+sample_offsets = None
 # the sample offsets will be subtracted to the motor values
-specfile_name = None #'analysis/alias_dict_2021.txt'
+specfile_name = None  # 'analysis/alias_dict_2021.txt'
 # template for ID01: name of the spec file without '.spec'
 # template for SIXS_2018: full path of the alias dictionnary, typically root_folder + 'alias_dict_2019.txt'
 # template for all other beamlines: ''
@@ -211,7 +231,8 @@ specfile_name = None #'analysis/alias_dict_2021.txt'
 ##########################
 # setup for custom scans #
 ##########################
-custom_scan = False  # set it to True for a stack of images acquired without scan, e.g. with ct in a macro, or when
+# set it to True for a stack of images acquired without scan, e.g. with ct in a macro, or when
+custom_scan = False
 # there is no spec/log file available, or for 34ID
 custom_motors = {
     "delta": inplane_angle,
@@ -223,9 +244,12 @@ custom_motors = {
 # detector related parameters #
 ###############################
 detector = "Merlin"    # "Eiger2M", "Maxipix", "Eiger4M", "Merlin" or "Timepix"
-nb_pixel_x = None  # fix to declare a known detector but with less pixels (e.g. one tile HS), leave None otherwise
-nb_pixel_y = None  # fix to declare a known detector but with less pixels (e.g. one tile HS), leave None otherwise
-pixel_size = None  # use this to declare the pixel size of the "Dummy" detector if different from 55e-6
+# fix to declare a known detector but with less pixels (e.g. one tile HS), leave None otherwise
+nb_pixel_x = None
+# fix to declare a known detector but with less pixels (e.g. one tile HS), leave None otherwise
+nb_pixel_y = None
+# use this to declare the pixel size of the "Dummy" detector if different from 55e-6
+pixel_size = None
 # template_imagefile = 'mirror_ascan_mu_%05d_R.nxs'
 # template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'
 # template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs'
@@ -239,7 +263,8 @@ pixel_size = None  # use this to declare the pixel size of the "Dummy" detector 
 # parameters related to the refraction correction #
 ###################################################
 correct_refraction = False  # True for correcting the phase shift due to refraction
-optical_path_method = 'threshold'  # 'threshold' or 'defect', if 'threshold' it uses isosurface_strain to define the
+# 'threshold' or 'defect', if 'threshold' it uses isosurface_strain to define the
+optical_path_method = 'threshold'
 # support  for the optical path calculation, if 'defect' (holes) it tries to remove only outer layers even if
 # the amplitude is lower than isosurface_strain inside the crystal
 dispersion = 5.0328E-05  # delta
@@ -255,8 +280,10 @@ threshold_unwrap_refraction = 0.05  # threshold used to calculate the optical pa
 ###########
 # options #
 ###########
-simu_flag = False  # set to True if it is simulation, the parameter invert_phase will be set to 0
-invert_phase = True  # True for the displacement to have the right sign (FFT convention), False only for simulations
+# set to True if it is simulation, the parameter invert_phase will be set to 0
+simu_flag = False
+# True for the displacement to have the right sign (FFT convention), False only for simulations
+invert_phase = True
 # flip_reconstruction = False  # True if you want to get the conjugate object
 phase_ramp_removal = (
     "gradient"  # 'gradient'  # 'gradient' or 'upsampling', 'gradient' is much faster
@@ -278,10 +305,12 @@ roll_modes = (
 ############################################
 # parameters related to data visualization #
 ############################################
-align_axis = False  # for visualization, if True rotates the crystal to align axis_to_align along ref_axis after the
+# for visualization, if True rotates the crystal to align axis_to_align along ref_axis after the
+align_axis = False
 # calculation of the strain
 ref_axis = "y"  # will align axis_to_align to that axis
-axis_to_align = np.array([-0.011662456997498807, 0.957321364700986, -0.28879022106682123])
+axis_to_align = np.array(
+    [-0.011662456997498807, 0.957321364700986, -0.28879022106682123])
 # axis to align with ref_axis in the order x y z (axis 2, axis 1, axis 0)
 strain_range = 0.002  # for plots 0.001?
 phase_range = np.pi  # for plotsn np.pi/2 ?
@@ -298,9 +327,11 @@ get_temperature = False  # only available for platinum at the moment
 reflection = np.array(
     [1, 1, 1]
 )  # measured reflection, use for estimating the temperature
-reference_spacing = 2.254761  # for calibrating the thermal expansion, if None it is fixed to 3.9236/norm(reflection) Pt
+# for calibrating the thermal expansion, if None it is fixed to 3.9236/norm(reflection) Pt
+reference_spacing = 2.254761
 reference_temperature = (
-    None  # used to calibrate the thermal expansion, if None it is fixed to 293.15K (RT)
+    # used to calibrate the thermal expansion, if None it is fixed to 293.15K (RT)
+    None
 )
 
 ##########################################################
@@ -313,7 +344,7 @@ avg_threshold = 0.90  # minimum correlation within reconstructed object for aver
 # setup for phase averaging or apodization #
 ############################################
 hwidth = (
-    1 # (width-1)/2 of the averaging window for the phase, 0 means no phase averaging
+    1  # (width-1)/2 of the averaging window for the phase, 0 means no phase averaging
 )
 apodize_flag = True  # True to multiply the diffraction pattern by a filtering window
 apodize_window = (
@@ -326,22 +357,21 @@ alpha = np.array([1.0, 1.0, 1.0])  # shape parameter of the tukey window
 # end of user-defined parameters #
 ##################################
 
-from gwaihir.runner import strain
 
 strain.strain_bcdi(
-    scan, 
+    scan,
     root_folder,
     save_dir,
     data_dirname,
-    sample_name, 
-    comment, 
-    sort_method, 
+    sample_name,
+    comment,
+    sort_method,
     correlation_threshold,
-    original_size, 
-    phasing_binning, 
-    preprocessing_binning, 
-    output_size, 
-    keep_size, 
+    original_size,
+    phasing_binning,
+    preprocessing_binning,
+    output_size,
+    keep_size,
     fix_voxel,
     data_frame,
     ref_axis_q,
@@ -407,6 +437,6 @@ strain.strain_bcdi(
     mu,
     sigma,
     alpha,
-    h5_data = None,
-    GUI = False,
+    h5_data=None,
+    GUI=False,
 )

@@ -62,7 +62,7 @@ def correct_angles_detector(
     sdd,
     energy,
     GUI,
-    ):
+):
     """
     Calculate exact inplane and out-of-plane detector angles from the direct beam and Bragg peak positions,
     based on the beamline geometry.
@@ -152,7 +152,8 @@ def correct_angles_detector(
             filetypes=[("NPZ", "*.npz")],
         )
         data = np.load(file_path)["data"]
-        data = data[detector.roi[0] : detector.roi[1], detector.roi[2] : detector.roi[3]]
+        data = data[detector.roi[0]: detector.roi[1],
+                    detector.roi[2]: detector.roi[3]]
         frames_logical = np.ones(data.shape[0]).astype(
             int
         )  # use all frames from the filtered data
@@ -165,7 +166,8 @@ def correct_angles_detector(
     if high_threshold != 0:
         nb_thresholded = (data > high_threshold).sum()
         data[data > high_threshold] = 0
-        print(f"Applying photon threshold, {nb_thresholded} high intensity pixels masked")
+        print(
+            f"Applying photon threshold, {nb_thresholded} high intensity pixels masked")
 
     ###############################
     # load releavant motor values #
@@ -205,7 +207,8 @@ def correct_angles_detector(
     rocking_curve = np.zeros(nb_frames)
     if filtered_data == 0:  # take a small ROI to avoid parasitic peaks
         for idx in range(nb_frames):
-            rocking_curve[idx] = data[idx, y0 - 20 : y0 + 20, x0 - 20 : x0 + 20].sum()
+            rocking_curve[idx] = data[idx, y0 -
+                                      20: y0 + 20, x0 - 20: x0 + 20].sum()
         plot_title = "Rocking curve for a 40x40 pixels ROI"
     else:  # take the whole detector
         for idx in range(nb_frames):
@@ -215,7 +218,8 @@ def correct_angles_detector(
 
     interpolation = interp1d(tilt_values, rocking_curve, kind="cubic")
     interp_points = 5 * nb_frames
-    interp_tilt = np.linspace(tilt_values.min(), tilt_values.max(), interp_points)
+    interp_tilt = np.linspace(
+        tilt_values.min(), tilt_values.max(), interp_points)
     interp_curve = interpolation(interp_tilt)
     interp_fwhm = (
         len(np.argwhere(interp_curve >= interp_curve.max() / 2))
@@ -224,18 +228,18 @@ def correct_angles_detector(
     )
     print("FWHM by interpolation", str("{:.3f}".format(interp_fwhm)), "deg")
 
-    # added plot 
+    # added plot
     plt.close()
     fig, (ax0, ax1) = plt.subplots(2, 1, sharex='col', figsize=(10, 5))
     ax0.plot(tilt_values, rocking_curve, '.')
     ax0.plot(interp_tilt, interp_curve)
-    ax0.axvline(tilt_values[z0], color='r', alpha = 0.7, linewidth = 1)
+    ax0.axvline(tilt_values[z0], color='r', alpha=0.7, linewidth=1)
     ax0.set_ylabel('Integrated intensity')
     ax0.legend(('data', 'interpolation'))
     ax0.set_title(plot_title)
     ax1.plot(tilt_values, np.log10(rocking_curve), '.')
     ax1.plot(interp_tilt, np.log10(interp_curve))
-    ax1.axvline(tilt_values[z0], color='r', alpha = 0.7, linewidth = 1)
+    ax1.axvline(tilt_values[z0], color='r', alpha=0.7, linewidth=1)
 
     ax1.set_xlabel('Rocking angle (deg)')
     ax1.set_ylabel('Log(integrated intensity)')
@@ -266,7 +270,8 @@ def correct_angles_detector(
         f"\nDirect beam at (gam={direct_inplane}, "
         f"del={direct_outofplane}) (X, Y): {directbeam_x}, {directbeam_y}"
     )
-    print(f"Direct beam at (gam=0, del=0) (X, Y): ({x_direct_0:.2f}, {y_direct_0:.2f})")
+    print(
+        f"Direct beam at (gam=0, del=0) (X, Y): ({x_direct_0:.2f}, {y_direct_0:.2f})")
     print(
         f"\nBragg peak at (gam={setup.inplane_angle}, "
         f"del={setup.outofplane_angle}) (X, Y): ({bragg_x:.2f}, {bragg_y:.2f})"
@@ -347,7 +352,7 @@ def correct_angles_detector(
     plt.title(f'Central slice at frame {int(np.rint(z0))}')
     plt.colorbar()
 
-    plt.scatter(bragg_x, bragg_y, color='r', alpha = 0.7, linewidth = 1)
+    plt.scatter(bragg_x, bragg_y, color='r', alpha=0.7, linewidth=1)
     plt.savefig(save_dir + "central_slice.png")
     plt.show()
 
@@ -359,39 +364,39 @@ def correct_angles_detector(
     detector_data_COM = abs(data[int(round(z0)), :, :]),
     try:
         metadata = {
-            "tilt_values" : tilt_values,
-            "rocking_curve" : rocking_curve,
-            "interp_tilt" : interp_tilt,
-            "interp_curve" : interp_curve,
-            "COM_rocking_curve" : tilt_values[z0],
-            "detector_data_COM" : abs(data[int(round(z0)), :, :]),
-            "interp_fwhm" : interp_fwhm,
-            "temperature" : temperature,
-            "bragg_x" : bragg_x, 
-            "bragg_y" : bragg_y,
-            "q" : q, 
-            "qnorm" : qnorm, 
-            "dist_plane" : dist_plane, 
-            "bragg_inplane" : bragg_inplane, 
-            "bragg_outofplane" : bragg_outofplane,
+            "tilt_values": tilt_values,
+            "rocking_curve": rocking_curve,
+            "interp_tilt": interp_tilt,
+            "interp_curve": interp_curve,
+            "COM_rocking_curve": tilt_values[z0],
+            "detector_data_COM": abs(data[int(round(z0)), :, :]),
+            "interp_fwhm": interp_fwhm,
+            "temperature": temperature,
+            "bragg_x": bragg_x,
+            "bragg_y": bragg_y,
+            "q": q,
+            "qnorm": qnorm,
+            "dist_plane": dist_plane,
+            "bragg_inplane": bragg_inplane,
+            "bragg_outofplane": bragg_outofplane,
         }
     except:
         try:
             metadata = {
-                "tilt_values" : tilt_values,
-                "rocking_curve" : rocking_curve,
-                "interp_tilt" : interp_tilt,
-                "interp_curve" : interp_curve,
-                "COM_rocking_curve" : tilt_values[z0],
-                "detector_data_COM" : abs(data[int(round(z0)), :, :]),
-                "interp_fwhm" : interp_fwhm,
-                "bragg_x" : bragg_x, 
-                "bragg_y" : bragg_y,
-                "q" : q, 
-                "qnorm" : qnorm, 
-                "dist_plane" : dist_plane, 
-                "bragg_inplane" : bragg_inplane, 
-                "bragg_outofplane" : bragg_outofplane,
+                "tilt_values": tilt_values,
+                "rocking_curve": rocking_curve,
+                "interp_tilt": interp_tilt,
+                "interp_curve": interp_curve,
+                "COM_rocking_curve": tilt_values[z0],
+                "detector_data_COM": abs(data[int(round(z0)), :, :]),
+                "interp_fwhm": interp_fwhm,
+                "bragg_x": bragg_x,
+                "bragg_y": bragg_y,
+                "q": q,
+                "qnorm": qnorm,
+                "dist_plane": dist_plane,
+                "bragg_inplane": bragg_inplane,
+                "bragg_outofplane": bragg_outofplane,
             }
         except Exception as e:
             raise e

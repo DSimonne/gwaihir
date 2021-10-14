@@ -6,6 +6,7 @@
 #   (c) 07/2019-present : DESY PHOTON SCIENCE
 #       authors:
 #         Jerome Carnis, carnis_jerome@yahoo.fr
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import tkinter as tk
@@ -28,12 +29,11 @@ In reciprocal space, the following convention is used: qx downtream, qz vertical
 
 """
 
-import os
 
 # Print help
 try:
-    print ('Saving directory:',  sys.argv[1])
-    root_folder = os.getcwd() + "/" + sys.argv[1] 
+    print('Saving directory:',  sys.argv[1])
+    root_folder = os.getcwd() + "/" + sys.argv[1]
 
 except IndexError:
     print("""
@@ -44,8 +44,8 @@ except IndexError:
 
 
 try:
-    print ('Support name prefix:',  sys.argv[2])
-    fn = sys.argv[2] 
+    print('Support name prefix:',  sys.argv[2])
+    fn = sys.argv[2]
 
 except IndexError:
     print("""
@@ -61,23 +61,26 @@ save_dir = root_folder
 # root_folder = "/home/experiences/sixs/simonne/Documents/SIXS_June_2021/analysis/"
 support_threshold = 0.05  # in % of the normalized absolute value
 pynx_shape = (
-    180 ,
+    180,
     384,
     384,
 )  # shape of the array used for phasing and finding the support (after binning_pynx)
 binning_pynx = (1, 1, 1)  # binning that was used in PyNX during phasing
 output_shape = (
-    180 ,
+    180,
     384,
     392,
-) # pynx_shape #   # shape of the array for later phasing (before binning_output)
+)  # pynx_shape #   # shape of the array for later phasing (before binning_output)
 # if the data and q-values were binned beforehand, use the binned shape and binning_output=(1,1,1)
-binning_output = (1, 1, 1)  # binning that will be used in PyNX for later phasing
-qvalues_binned = True  # if True, the q values provided are expected to be binned (binning_pynx & binning_output
+# binning that will be used in PyNX for later phasing
+binning_output = (1, 1, 1)
+# if True, the q values provided are expected to be binned (binning_pynx & binning_output
+qvalues_binned = True
 
 flag_interact = False  # if False, will skip thresholding and masking
 binary_support = True  # True to save the support as an array of 0 and 1
-save_intermediate = False  # if True, will save the masked data just after the interactive masking, before applying
+# if True, will save the masked data just after the interactive masking, before applying
+save_intermediate = False
 # other filtering and interpolation
 is_ortho = False  # True if the data is already orthogonalized
 center = True  # will center the support based on the center of mass
@@ -93,7 +96,8 @@ roll_centering = (
     0,
 )  # roll applied after masking when centering by center of mass is not optimal axis=(0, 1, 2)
 background_plot = (
-    "0.5"  # in level of grey in [0,1], 0 being dark. For visual comfort during masking
+    # in level of grey in [0,1], 0 being dark. For visual comfort during masking
+    "0.5"
 )
 save_fig = True  # if True, will save the figure of the final support
 comment = ""  # should start with _
@@ -107,9 +111,11 @@ gaussian_sigma = 4.0  # sigma of the gaussian filter
 ######################################################################
 # parameters for image deconvolution using Richardson-Lucy algorithm #
 ######################################################################
-psf_iterations = 0  # number of iterations of Richardson-Lucy deconvolution, leave it to 0 if unwanted
+# number of iterations of Richardson-Lucy deconvolution, leave it to 0 if unwanted
+psf_iterations = 0
 psf_shape = (10, 10, 10)
-psf = util.gaussian_window(window_shape=psf_shape, sigma=0.3, mu=0.0, debugging=False)
+psf = util.gaussian_window(window_shape=psf_shape,
+                           sigma=0.3, mu=0.0, debugging=False)
 ###########################
 # experimental parameters #
 ###########################
@@ -121,12 +127,14 @@ pixel_y = 55e-06  # in m, vertical pixel size of the detector, including an even
 ###########################################################################
 # parameters used only when the data is in the detector frame (Bragg CDI) #
 ###########################################################################
-beamline = "SIXS_2019"  # name of the beamline, used for data loading and normalization by monitor and orthogonalisation
+# name of the beamline, used for data loading and normalization by monitor and orthogonalisation
+beamline = "SIXS_2019"
 # supported beamlines: 'ID01', 'SIXS_2018', 'SIXS_2019', 'CRISTAL', 'P10', '34ID'
 rocking_angle = "inplane"  # "outofplane" or "inplane"
 outofplane_angle = 35.2694  # detector delta ID01, delta SIXS, gamma 34ID
 inplane_angle = -2.5110  # detector nu ID01, gamma SIXS, tth 34ID
-grazing_angle = 0  # in degrees, incident angle for in-plane rocking curves (eta ID01, th 34ID, beta SIXS)
+# in degrees, incident angle for in-plane rocking curves (eta ID01, th 34ID, beta SIXS)
+grazing_angle = 0
 ##################################
 # end of user-defined parameters #
 ##################################
@@ -341,14 +349,19 @@ if flag_interact:
     mask = np.zeros(data.shape)
     xy = []  # list of points for mask
 
-    fig_mask, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2, figsize=(12, 6))
-    fig_mask.canvas.mpl_disconnect(fig_mask.canvas.manager.key_press_handler_id)
+    fig_mask, ((ax0, ax1), (ax2, ax3)) = plt.subplots(
+        nrows=2, ncols=2, figsize=(12, 6))
+    fig_mask.canvas.mpl_disconnect(
+        fig_mask.canvas.manager.key_press_handler_id)
     original_data = np.copy(data)
     original_mask = np.copy(mask)
     data[mask == 1] = 0  # will appear as grey in the log plot (nan)
-    ax0.imshow(np.log10(abs(data).sum(axis=0)), vmin=0, vmax=max_colorbar, cmap=my_cmap)
-    ax1.imshow(np.log10(abs(data).sum(axis=1)), vmin=0, vmax=max_colorbar, cmap=my_cmap)
-    ax2.imshow(np.log10(abs(data).sum(axis=2)), vmin=0, vmax=max_colorbar, cmap=my_cmap)
+    ax0.imshow(np.log10(abs(data).sum(axis=0)),
+               vmin=0, vmax=max_colorbar, cmap=my_cmap)
+    ax1.imshow(np.log10(abs(data).sum(axis=1)),
+               vmin=0, vmax=max_colorbar, cmap=my_cmap)
+    ax2.imshow(np.log10(abs(data).sum(axis=2)),
+               vmin=0, vmax=max_colorbar, cmap=my_cmap)
     ax3.set_visible(False)
     ax0.axis("scaled")
     ax1.axis("scaled")
@@ -358,16 +371,20 @@ if flag_interact:
     ax0.set_title("XY")
     ax1.set_title("XZ")
     ax2.set_title("YZ")
-    fig_mask.text(0.60, 0.45, "click to select the vertices of a polygon mask", size=12)
+    fig_mask.text(
+        0.60, 0.45, "click to select the vertices of a polygon mask", size=12)
     fig_mask.text(
         0.60, 0.40, "then p to apply and see the result; r to reset points", size=12
     )
-    fig_mask.text(0.60, 0.30, "x to pause/resume masking for pan/zoom", size=12)
-    fig_mask.text(0.60, 0.25, "up/down larger/smaller masking box ; f fill", size=12)
+    fig_mask.text(
+        0.60, 0.30, "x to pause/resume masking for pan/zoom", size=12)
+    fig_mask.text(
+        0.60, 0.25, "up/down larger/smaller masking box ; f fill", size=12)
     fig_mask.text(
         0.60, 0.20, "m mask ; b unmask ; right darker ; left brighter", size=12
     )
-    fig_mask.text(0.60, 0.15, "p plot full masked data ; a restart ; q quit", size=12)
+    fig_mask.text(
+        0.60, 0.15, "p plot full masked data ; a restart ; q quit", size=12)
     info_text = fig_mask.text(0.60, 0.05, "masking enabled", size=16)
     plt.tight_layout()
     plt.connect("key_press_event", press_key)
@@ -378,7 +395,8 @@ if flag_interact:
     mask[
         mask == -1
     ] = 0  # clear the filled points from the mask since we do not want to mask them later
-    mask[np.nonzero(mask)] = 1  # ensure that masked voxels appear as 1 in the mask
+    # ensure that masked voxels appear as 1 in the mask
+    mask[np.nonzero(mask)] = 1
     data[np.nonzero(mask)] = 0
     del fig_mask, flag_pause, flag_mask, original_data, original_mask
     gc.collect()
@@ -392,14 +410,19 @@ if flag_interact:
     flag_mask = False
     flag_aliens = True
 
-    fig_mask, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2, figsize=(12, 6))
-    fig_mask.canvas.mpl_disconnect(fig_mask.canvas.manager.key_press_handler_id)
+    fig_mask, ((ax0, ax1), (ax2, ax3)) = plt.subplots(
+        nrows=2, ncols=2, figsize=(12, 6))
+    fig_mask.canvas.mpl_disconnect(
+        fig_mask.canvas.manager.key_press_handler_id)
     original_data = np.copy(data)
     original_mask = np.copy(mask)
     frame_index = [0, 0, 0]
-    ax0.imshow(data[frame_index[0], :, :], vmin=0, vmax=max_colorbar, cmap=my_cmap)
-    ax1.imshow(data[:, frame_index[1], :], vmin=0, vmax=max_colorbar, cmap=my_cmap)
-    ax2.imshow(data[:, :, frame_index[2]], vmin=0, vmax=max_colorbar, cmap=my_cmap)
+    ax0.imshow(data[frame_index[0], :, :], vmin=0,
+               vmax=max_colorbar, cmap=my_cmap)
+    ax1.imshow(data[:, frame_index[1], :], vmin=0,
+               vmax=max_colorbar, cmap=my_cmap)
+    ax2.imshow(data[:, :, frame_index[2]], vmin=0,
+               vmax=max_colorbar, cmap=my_cmap)
     ax3.set_visible(False)
     ax0.axis("scaled")
     ax1.axis("scaled")
@@ -424,7 +447,8 @@ if flag_interact:
     mask[
         mask == -1
     ] = 0  # clear the filled points from the mask since we do not want to mask them later
-    mask[np.nonzero(mask)] = 1  # ensure that masked voxels appear as 1 in the mask
+    # ensure that masked voxels appear as 1 in the mask
+    mask[np.nonzero(mask)] = 1
     data[np.nonzero(mask)] = 0
     del fig_mask, original_data, original_mask, mask
     gc.collect()
@@ -515,8 +539,10 @@ print(
     "Original voxel sizes in detector coordinates based on "
     "experimental parameters (ver, hor): "
     "{:.2f} nm, {:.2f} nm".format(
-        12.398 * 1e-7 / energy * distance / (unbinned_shape[1] * pixel_y) * 1e9,
-        12.398 * 1e-7 / energy * distance / (unbinned_shape[2] * pixel_x) * 1e9,
+        12.398 * 1e-7 / energy * distance /
+        (unbinned_shape[1] * pixel_y) * 1e9,
+        12.398 * 1e-7 / energy * distance /
+        (unbinned_shape[2] * pixel_x) * 1e9,
     )
 )
 
@@ -623,7 +649,8 @@ if not all(
             newqy = util.crop_pad_1d(newqy, output_shape[2])  # qy along x
             newqz = util.crop_pad_1d(newqz, output_shape[1])  # qz along y
 
-        print("Length(q_output)=", len(newqx), len(newqz), len(newqy), "(qx, qz, qy)")
+        print("Length(q_output)=", len(newqx), len(
+            newqz), len(newqy), "(qx, qz, qy)")
         newvoxelsize_z = 2 * np.pi / (newqx.max() - newqx.min())  # qx along z
         newvoxelsize_x = 2 * np.pi / (newqy.max() - newqy.min())  # qy along x
         newvoxelsize_y = 2 * np.pi / (newqz.max() - newqz.min())  # qz along y
@@ -664,7 +691,8 @@ if not all(
 
     # Interpolate the support
     print("\nInterpolating the support...")
-    data = util.crop_pad(data, pynx_shape)  # the data could be cropped near the support
+    # the data could be cropped near the support
+    data = util.crop_pad(data, pynx_shape)
     fig, _, _ = gu.multislices_plot(
         data,
         sum_frames=True,
@@ -678,9 +706,12 @@ if not all(
 
     rgi = RegularGridInterpolator(
         (
-            np.arange(-pynx_shape[0] // 2, pynx_shape[0] // 2, 1) * voxelsize_z,
-            np.arange(-pynx_shape[1] // 2, pynx_shape[1] // 2, 1) * voxelsize_y,
-            np.arange(-pynx_shape[2] // 2, pynx_shape[2] // 2, 1) * voxelsize_x,
+            np.arange(-pynx_shape[0] // 2,
+                      pynx_shape[0] // 2, 1) * voxelsize_z,
+            np.arange(-pynx_shape[1] // 2,
+                      pynx_shape[1] // 2, 1) * voxelsize_y,
+            np.arange(-pynx_shape[2] // 2,
+                      pynx_shape[2] // 2, 1) * voxelsize_x,
         ),
         data,
         method="linear",
@@ -689,9 +720,12 @@ if not all(
     )
 
     new_z, new_y, new_x = np.meshgrid(
-        np.arange(-rebinned_shape[0] // 2, rebinned_shape[0] // 2, 1) * newvoxelsize_z,
-        np.arange(-rebinned_shape[1] // 2, rebinned_shape[1] // 2, 1) * newvoxelsize_y,
-        np.arange(-rebinned_shape[2] // 2, rebinned_shape[2] // 2, 1) * newvoxelsize_x,
+        np.arange(-rebinned_shape[0] // 2,
+                  rebinned_shape[0] // 2, 1) * newvoxelsize_z,
+        np.arange(-rebinned_shape[1] // 2,
+                  rebinned_shape[1] // 2, 1) * newvoxelsize_y,
+        np.arange(-rebinned_shape[2] // 2,
+                  rebinned_shape[2] // 2, 1) * newvoxelsize_x,
         indexing="ij",
     )
 

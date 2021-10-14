@@ -31,20 +31,21 @@ import bcdi.simulation.simulation_utils as simu
 import bcdi.utils.utilities as util
 import bcdi.utils.validation as valid
 
+
 def strain_bcdi(
-    scan, 
+    scan,
     root_folder,
     save_dir,
     data_dirname,
-    sample_name, 
-    comment, 
-    sort_method, 
+    sample_name,
+    comment,
+    sort_method,
     correlation_threshold,
-    original_size, 
-    phasing_binning, 
-    preprocessing_binning, 
-    output_size, 
-    keep_size, 
+    original_size,
+    phasing_binning,
+    preprocessing_binning,
+    output_size,
+    keep_size,
     fix_voxel,
     data_frame,
     ref_axis_q,
@@ -112,7 +113,7 @@ def strain_bcdi(
     alpha,
     reconstruction_file,
     GUI,
-    ):
+):
     """
     Interpolate the output of the phase retrieval into an orthonormal frame,
     and calculate the strain component along the direction of the experimental diffusion
@@ -153,7 +154,8 @@ def strain_bcdi(
         if isinstance(fix_voxel, Real):
             fix_voxel = (fix_voxel, fix_voxel, fix_voxel)
         if not isinstance(fix_voxel, Sequence):
-            raise TypeError("fix_voxel should be a sequence of three positive numbers")
+            raise TypeError(
+                "fix_voxel should be a sequence of three positive numbers")
         if any(val <= 0 for val in fix_voxel):
             raise ValueError(
                 "fix_voxel should be a positive number or "
@@ -161,7 +163,8 @@ def strain_bcdi(
             )
 
     if actuators is not None and not isinstance(actuators, dict):
-        raise TypeError("actuators should be a dictionnary of actuator fieldnames")
+        raise TypeError(
+            "actuators should be a dictionnary of actuator fieldnames")
 
     if data_frame not in {"detector", "crystal", "laboratory"}:
         raise ValueError('Uncorrect setting for "data_frame" parameter')
@@ -334,7 +337,8 @@ def strain_bcdi(
             pass
         file_path = filedialog.askopenfilenames(
             initialdir=detector.scandir,
-            filetypes=[("HDF5", "*.h5"), ("NPZ", "*.npz"), ("NPY", "*.npy"), ("CXI", "*.cxi")],
+            filetypes=[("HDF5", "*.h5"), ("NPZ", "*.npz"),
+                       ("NPY", "*.npy"), ("CXI", "*.cxi")],
         )
 
     nbfiles = len(file_path)
@@ -370,7 +374,8 @@ def strain_bcdi(
     numz = zrange * 2
     numy = yrange * 2
     numx = xrange * 2
-    print(f"Data shape used for orthogonalization and plotting: ({numz}, {numy}, {numx})")
+    print(
+        f"Data shape used for orthogonalization and plotting: ({numz}, {numy}, {numx})")
 
     ####################################################################################
     # find the best reconstruction from the list, based on mean amplitude and variance #
@@ -415,7 +420,8 @@ def strain_bcdi(
             # fig.waitforbuttonpress()
             plt.close(fig)
         # use the range of interest defined above
-        obj = util.crop_pad(obj, [2 * zrange, 2 * yrange, 2 * xrange], debugging=False)
+        obj = util.crop_pad(
+            obj, [2 * zrange, 2 * yrange, 2 * xrange], debugging=False)
 
         # align with average reconstruction
         if counter == 0:  # the fist array loaded will serve as reference object
@@ -458,7 +464,8 @@ def strain_bcdi(
         int(extent_phase),
         "(rad)",
     )
-    phase = pru.wrap(phase, start_angle=-extent_phase / 2, range_angle=extent_phase)
+    phase = pru.wrap(phase, start_angle=-extent_phase /
+                     2, range_angle=extent_phase)
     if debug:
         gu.multislices_plot(
             phase,
@@ -514,7 +521,8 @@ def strain_bcdi(
     del support
     gc.collect()
 
-    phase = pru.wrap(obj=phase, start_angle=-extent_phase / 2, range_angle=extent_phase)
+    phase = pru.wrap(obj=phase, start_angle=-extent_phase /
+                     2, range_angle=extent_phase)
 
     ##############################################################################
     # average the phase over a window or apodize to reduce noise in strain plots #
@@ -568,7 +576,8 @@ def strain_bcdi(
     ####################################################
     phase = phase - gridz * rampz - gridy * rampy - gridx * rampx
 
-    avg_obj = amp * np.exp(1j * phase)  # here the phase is again wrapped in [-pi pi[
+    # here the phase is again wrapped in [-pi pi[
+    avg_obj = amp * np.exp(1j * phase)
 
     del amp, phase, gridz, gridy, gridx, rampz, rampy, rampx
     gc.collect()
@@ -620,7 +629,8 @@ def strain_bcdi(
         # in VTK, x is downstream, y vertical, z inboard, thus need to flip the last axis
         gu.save_to_vti(
             filename=os.path.join(
-                detector.savedir, "S" + str(scan) + "_raw_amp-phase" + comment + ".vti"
+                detector.savedir, "S" +
+                str(scan) + "_raw_amp-phase" + comment + ".vti"
             ),
             voxel_size=(voxel_z, voxel_y, voxel_x),
             tuple_array=(abs(avg_obj), np.angle(avg_obj)),
@@ -638,7 +648,8 @@ def strain_bcdi(
     q_lab = q_lab / qnorm
 
     angle = simu.angle_vectors(
-        ref_vector=[q_lab[2], q_lab[1], q_lab[0]], test_vector=axis_to_array_xyz[ref_axis_q]
+        ref_vector=[q_lab[2], q_lab[1], q_lab[0]
+                    ], test_vector=axis_to_array_xyz[ref_axis_q]
     )
     print(
         f"\nNormalized diffusion vector in the laboratory frame (z*, y*, x*): "
@@ -734,7 +745,8 @@ def strain_bcdi(
         )
         if fix_voxel:
             voxel_size = fix_voxel
-            print(f"Direct space pixel size for the interpolation: {voxel_size} (nm)")
+            print(
+                f"Direct space pixel size for the interpolation: {voxel_size} (nm)")
             print("Interpolating...\n")
             obj_ortho = pu.regrid(
                 array=obj_ortho,
@@ -840,7 +852,8 @@ def strain_bcdi(
 
         if correct_refraction:
             phase_correction = (
-                2 * np.pi / (1e9 * setup.wavelength) * dispersion * optical_path
+                2 * np.pi / (1e9 * setup.wavelength) *
+                dispersion * optical_path
             )
             phase = phase + phase_correction
 
@@ -862,7 +875,8 @@ def strain_bcdi(
             # TODO: it is correct to compensate also
             #  the X-ray absorption in the reconstructed modulus?
             amp_correction = np.exp(
-                2 * np.pi / (1e9 * setup.wavelength) * absorption * optical_path
+                2 * np.pi / (1e9 * setup.wavelength) *
+                absorption * optical_path
             )
             amp = amp * amp_correction
 
@@ -917,7 +931,8 @@ def strain_bcdi(
     del support
     gc.collect()
     # Wrap the phase around 0 (no more offset)
-    phase = pru.wrap(obj=phase, start_angle=-extent_phase / 2, range_angle=extent_phase)
+    phase = pru.wrap(obj=phase, start_angle=-extent_phase /
+                     2, range_angle=extent_phase)
 
     ################################################################
     # calculate the strain depending on which axis q is aligned on #
@@ -1006,7 +1021,8 @@ def strain_bcdi(
             reference_axis=axis_to_align,
         )
 
-    print(f"\nq_final = ({q_final[0]:.4f} 1/A, {q_final[1]:.4f} 1/A, {q_final[2]:.4f} 1/A)")
+    print(
+        f"\nq_final = ({q_final[0]:.4f} 1/A, {q_final[1]:.4f} 1/A, {q_final[2]:.4f} 1/A)")
 
     ##############################################
     # pad array to fit the output_size parameter #
@@ -1024,7 +1040,8 @@ def strain_bcdi(
         f"\nVoxel size: ({voxel_size[0]:.2f} nm, {voxel_size[1]:.2f} nm,"
         f" {voxel_size[2]:.2f} nm)"
     )
-    bulk = pu.find_bulk(amp=amp, support_threshold=isosurface_strain, method="threshold")
+    bulk = pu.find_bulk(
+        amp=amp, support_threshold=isosurface_strain, method="threshold")
     if save:
         params["comment"] = comment
         np.savez_compressed(
@@ -1061,14 +1078,14 @@ def strain_bcdi(
         gu.save_to_vti(
             filename=os.path.join(
                 detector.savedir,
-                "S" + str(scan) + "_amp-" + phase_fieldname + "-strain" + comment + ".vti",
+                "S" + str(scan) + "_amp-" + phase_fieldname +
+                "-strain" + comment + ".vti",
             ),
             voxel_size=voxel_size,
             tuple_array=(amp, bulk, phase, strain),
             tuple_fieldnames=("amp", "bulk", phase_fieldname, "strain"),
             amplitude_threshold=0.01,
         )
-
 
     ######################################
     # estimate the volume of the crystal #
@@ -1107,7 +1124,8 @@ def strain_bcdi(
         tuple_colorbar=True,
         tuple_vmin=np.nan,
         tuple_vmax=np.nan,
-        tuple_title=("phase at max in xy", "phase at max in xz", "phase at max in yz"),
+        tuple_title=("phase at max in xy", "phase at max in xz",
+                     "phase at max in yz"),
         tuple_scale="linear",
         cmap=my_cmap,
         is_orthogonal=True,
@@ -1130,7 +1148,8 @@ def strain_bcdi(
     )
     plt.pause(0.1)
     if save:
-        plt.savefig(detector.savedir + "S" + str(scan) + "_bulk" + comment + ".png")
+        plt.savefig(detector.savedir + "S" + str(scan) +
+                    "_bulk" + comment + ".png")
 
     # amplitude
     fig, _, _ = gu.multislices_plot(
@@ -1157,8 +1176,10 @@ def strain_bcdi(
     fig.text(0.60, 0.35, f"Ticks spacing={tick_spacing} nm", size=20)
     fig.text(0.60, 0.30, f"Volume={int(volume)} nm3", size=20)
     fig.text(0.60, 0.25, "Sorted by " + sort_method, size=20)
-    fig.text(0.60, 0.20, f"correlation threshold={correlation_threshold}", size=20)
-    fig.text(0.60, 0.15, f"average over {avg_counter} reconstruction(s)", size=20)
+    fig.text(
+        0.60, 0.20, f"correlation threshold={correlation_threshold}", size=20)
+    fig.text(
+        0.60, 0.15, f"average over {avg_counter} reconstruction(s)", size=20)
     fig.text(0.60, 0.10, f"Planar distance={planar_dist:.5f} nm", size=20)
     if get_temperature:
         temperature = pu.bragg_temperature(
@@ -1214,13 +1235,15 @@ def strain_bcdi(
         size=20,
     )
     fig.text(0.60, 0.20, f"Ticks spacing={tick_spacing} nm", size=20)
-    fig.text(0.60, 0.15, f"average over {avg_counter} reconstruction(s)", size=20)
+    fig.text(
+        0.60, 0.15, f"average over {avg_counter} reconstruction(s)", size=20)
     if hwidth > 0:
         fig.text(0.60, 0.10, f"Averaging over {2*hwidth+1} pixels", size=20)
     else:
         fig.text(0.60, 0.10, "No phase averaging", size=20)
     if save:
-        plt.savefig(detector.savedir + f"S{scan}_displacement" + comment + ".png")
+        plt.savefig(detector.savedir +
+                    f"S{scan}_displacement" + comment + ".png")
 
     # strain
     fig, _, _ = gu.multislices_plot(
@@ -1246,14 +1269,14 @@ def strain_bcdi(
         size=20,
     )
     fig.text(0.60, 0.20, f"Ticks spacing={tick_spacing} nm", size=20)
-    fig.text(0.60, 0.15, f"average over {avg_counter} reconstruction(s)", size=20)
+    fig.text(
+        0.60, 0.15, f"average over {avg_counter} reconstruction(s)", size=20)
     if hwidth > 0:
         fig.text(0.60, 0.10, f"Averaging over {2*hwidth+1} pixels", size=20)
     else:
         fig.text(0.60, 0.10, "No phase averaging", size=20)
     if save:
         plt.savefig(detector.savedir + f"S{scan}_strain" + comment + ".png")
-
 
     print("\nEnd of script")
     plt.close()

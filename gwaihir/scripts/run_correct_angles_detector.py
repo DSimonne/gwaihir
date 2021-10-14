@@ -7,6 +7,7 @@ Remenber that you may have to change the mask, the central pixel, the rocking an
 
 """
 
+from gwaihir.runner import correct_angles
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -18,8 +19,8 @@ import glob
 
 # Print help
 try:
-    print ('Data dir:',  sys.argv[1])
-    print ('Scan:',  sys.argv[2])
+    print('Data dir:',  sys.argv[1])
+    print('Scan:',  sys.argv[2])
 except IndexError:
     print("""
         Arg 1: Path of target directory (before /S{scan} ... )
@@ -31,7 +32,7 @@ except IndexError:
 scan = int(sys.argv[2])
 
 # Root folder
-root_folder = os.getcwd() + "/" + sys.argv[1] 
+root_folder = os.getcwd() + "/" + sys.argv[1]
 print("Root folder:", root_folder)
 
 # Scan folder
@@ -39,30 +40,36 @@ scan_folder = root_folder + f"S{scan}/"
 print("Scan folder:", scan_folder)
 
 # Data folder
-data_folder = scan_folder + "data/" # folder of the experiment, where all scans are stored
+# folder of the experiment, where all scans are stored
+data_folder = scan_folder + "data/"
 print("Data folder:", data_folder)
 
 # Sample name
-sample_name = "S"  # str or list of str of sample names (string in front of the scan number in the folder name).
+# str or list of str of sample names (string in front of the scan number in the folder name).
+sample_name = "S"
 
 # Template imagefile
 try:
     filename = glob.glob(f"{data_folder}*mu*{scan}*")[0]
-    template_imagefile = filename.split("/data/")[-1].split("%05d"%scan)[0] +"%05d_R.nxs"
+    template_imagefile = filename.split(
+        "/data/")[-1].split("%05d" % scan)[0] + "%05d_R.nxs"
     print("Template: ", template_imagefile)
 
 except IndexError:
     try:
         filename = glob.glob(f"{data_folder}*omega*{scan}*")[0]
-        template_imagefile = filename.split("/data/")[-1].split("%05d"%scan)[0] +"%05d_R.nxs"
+        template_imagefile = filename.split(
+            "/data/")[-1].split("%05d" % scan)[0] + "%05d_R.nxs"
         print("Template: ", template_imagefile)
 
     except IndexError:
         # Not SixS data
-        template_imagefile = root_folder + 'mpx/data_mpx4_%05d.edf'# july and september 2021
+        template_imagefile = root_folder + \
+            'mpx/data_mpx4_%05d.edf'  # july and september 2021
 
 # Saving directory
-save_dir = scan_folder + "postprocessing/corrections/"  # images will be saved here, leave it to None otherwise (default to data directory's parent)
+# images will be saved here, leave it to None otherwise (default to data directory's parent)
+save_dir = scan_folder + "postprocessing/corrections/"
 
 # CSV file if iterating on scans
 csv_file = root_folder + "/metadata.csv"
@@ -82,7 +89,7 @@ except:
     pass
 
 # Save all the prints from the script
-stdoutOrigin=sys.stdout
+stdoutOrigin = sys.stdout
 
 with open(README_file, 'w') as outfile:
     outfile.write("```bash\n")
@@ -96,20 +103,23 @@ sys.stdout = open(README_file, "a")
 filtered_data = False  # set to True if the data is already a 3D array, False otherwise
 # Should be the same shape as in specfile
 peak_method = 'maxcom'  # Bragg peak determination: 'max', 'com' or 'maxcom'.
-normalize_flux = 'skip'  # 'monitor' to normalize the intensity by the default monitor values, 'skip' to do nothing
+# 'monitor' to normalize the intensity by the default monitor values, 'skip' to do nothing
+normalize_flux = 'skip'
 debug = False  # True to see more plots
 
 ######################################
 # define beamline related parameters #
 ######################################
-beamline = ('SIXS_2019')  # name of the beamline, used for data loading and normalization by monitor
+# name of the beamline, used for data loading and normalization by monitor
+beamline = ('SIXS_2019')
 # supported beamlines: 'ID01', 'SIXS_2018', 'SIXS_2019', 'CRISTAL', 'P10'
 actuators = None  # {'rocking_angle': 'actuator_1_3'}
 # Optional dictionary that can be used to define the entries corresponding to actuators in data files
 # (useful at CRISTAL where the location of data keeps changing)
 # e.g.  {'rocking_angle': 'actuator_1_3', 'detector': 'data_04', 'monitor': 'data_05'}
 is_series = True  # specific to series measurement at P10
-custom_scan = False  # True for a stack of images acquired without scan, e.g. with ct in a macro (no info in spec file)
+# True for a stack of images acquired without scan, e.g. with ct in a macro (no info in spec file)
+custom_scan = False
 custom_images = None  # list of image numbers for the custom_scan
 custom_monitor = None  # monitor values for normalization for the custom_scan
 custom_motors = None
@@ -139,7 +149,8 @@ hotpixels_file = "/home/david/Documents/PhDScripts/SIXS_June_2021/reconstruction
 # hotpixels_file = "/home/experiences/sixs/simonne/Documents/SIXS_June_2021/ruche_dir/reconstructions/analysis/mask_merlin_better_flipped.npy"
 # hotpixels_file = "/home/experiences/sixs/simonne/Documents/SIXS_June_2021/masks/mask_merlin_better.npy"
 # hotpixels_file = "/home/experiences/sixs/simonne/Documents/SIXS_Jan_2021/masks/mask_merlin.npy"  # root_folder + 'hotpixels_HS4670.npz'  # non empty file path or None
-flatfield_file = None  # root_folder + "flatfield_maxipix_8kev.npz"  # non empty file path or None
+# root_folder + "flatfield_maxipix_8kev.npz"  # non empty file path or None
+flatfield_file = None
 # template_imagefile ="Pt_Al2O3_ascan_mu_%05d_R.nxs"
 # template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'
 # template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs'
@@ -153,10 +164,11 @@ flatfield_file = None  # root_folder + "flatfield_maxipix_8kev.npz"  # non empty
 # define setup related parameters #
 ###################################
 beam_direction = (1, 0, 0)  # beam along z
-sample_offsets = None  # tuple of offsets in degrees of the sample around (downstream, vertical up, outboard)
+# tuple of offsets in degrees of the sample around (downstream, vertical up, outboard)
+sample_offsets = None
 # convention: the sample offsets will be subtracted to the motor values
 directbeam_x = 271  # x horizontal,  cch2 in xrayutilities
-directbeam_y = 213 # SIXS jan 2021   # y vertical,  cch1 in xrayutilities
+directbeam_y = 213  # SIXS jan 2021   # y vertical,  cch1 in xrayutilities
 # directbeam_y = 236 # SIXS june 2021   # y vertical,  cch1 in xrayutilities
 direct_inplane = 0.0  # outer angle in xrayutilities
 direct_outofplane = 0.0
@@ -166,19 +178,22 @@ energy = 8500  # in eV, offset of 6eV at ID01
 ################################################
 # parameters related to temperature estimation #
 ################################################
-get_temperature = True  # True to estimate the temperature using the reference spacing of the material. Only for Pt.
-reflection = np.array([1, 1, 1])  # measured reflection, use for estimating the temperature
+# True to estimate the temperature using the reference spacing of the material. Only for Pt.
+get_temperature = True
+# measured reflection, use for estimating the temperature
+reflection = np.array([1, 1, 1])
 # reference_spacing = None  # for calibrating the thermal expansion, if None it is fixed to Pt 3.9236/norm(reflection)
 # reference_spacing = 2.254761  # d_111 at room temperature, from scan 1353, with corrected angles, SIXS jan
-reference_spacing = 2.269545  # d_111 at room temperature, from scan 670, with corrected angles, SIXS june
-reference_temperature = None  # used to calibrate the thermal expansion, if None it is fixed to 293.15K (RT)
+# d_111 at room temperature, from scan 670, with corrected angles, SIXS june
+reference_spacing = 2.269545
+# used to calibrate the thermal expansion, if None it is fixed to 293.15K (RT)
+reference_temperature = None
 
 ##########################################################
 # end of user parameters
 ##########################################################
 
 # Run file
-from gwaihir.runner import correct_angles
 
 metadata = correct_angles.correct_angles_detector(
     filename,
@@ -219,8 +234,8 @@ metadata = correct_angles.correct_angles_detector(
     directbeam_y,
     sdd,
     energy,
-    GUI = False
-    )
+    GUI=False
+)
 
 ################################################ END OF BCDI SCRIPT ################################################################
 
@@ -230,59 +245,60 @@ sys.stdout = stdoutOrigin
 
 # Save rocking curve data
 np.savez(f"{scan_folder}postprocessing/interpolated_rocking_curve.npz",
-    tilt_values = metadata["tilt_values"],
-    rocking_curve = metadata["rocking_curve"],
-    interp_tilt = metadata["interp_tilt"],
-    interp_curve = metadata["interp_curve"],
-    )
+         tilt_values=metadata["tilt_values"],
+         rocking_curve=metadata["rocking_curve"],
+         interp_tilt=metadata["interp_tilt"],
+         interp_curve=metadata["interp_curve"],
+         )
 
 # Save in a csv file
 try:
     if beamline == "SIXS_2019":
-        # Load dataset, quite slow 
+        # Load dataset, quite slow
         data = rd.DataSet(filename)
 
-        ## Add new data
+        # Add new data
         temp_df = pd.DataFrame([[
             scan,
             metadata["q"][0], metadata["q"][1], metadata["q"][2], metadata["qnorm"], metadata["dist_plane"],
             metadata["bragg_inplane"], metadata["bragg_outofplane"],
             metadata["bragg_x"], metadata["bragg_y"],
             data.x[0], data.y[0], data.z[0], data.mu[0], data.delta[0], data.omega[0],
-            data.gamma[0], data.gamma[0] - data.mu[0], 
-            (data.mu[-1] - data.mu[-0]) / len(data.mu), data.integration_time[0], len(data.integration_time), 
+            data.gamma[0], data.gamma[0] - data.mu[0],
+            (data.mu[-1] - data.mu[-0]) /
+            len(data.mu), data.integration_time[0], len(data.integration_time),
             metadata["interp_fwhm"], metadata["COM_rocking_curve"],
-            # data.ssl3hg[0], data.ssl3vg[0], 
+            # data.ssl3hg[0], data.ssl3vg[0],
             # data.ssl1hg[0], data.ssl1vg[0]
-            ]],
-            columns = [
+        ]],
+            columns=[
                 "scan",
-                "qx", "qy", "qz", "q_norm", "d_hkl", 
+                "qx", "qy", "qz", "q_norm", "d_hkl",
                 "inplane_angle", "out_of_plane_angle",
                 "bragg_x", "bragg_y",
                 "x", "y", "z", "mu", "delta", "omega",
                 "gamma", 'gamma-mu',
-                "step size", "integration time", "steps", 
+                "step size", "integration time", "steps",
                 "FWHM", "COM_rocking_curve",
-            #     "ssl3hg", "ssl3vg", 
-            #     "ssl1hg", "ssl1vg", 
-            ])
+            #     "ssl3hg", "ssl3vg",
+            #     "ssl1hg", "ssl1vg",
+        ])
     else:
-        ## Add new data
+        # Add new data
         temp_df = pd.DataFrame([[
             scan,
             metadata["q"][0], metadata["q"][1], metadata["q"][2], metadata["qnorm"], metadata["dist_plane"],
             metadata["bragg_inplane"], metadata["bragg_outofplane"],
             metadata["bragg_x"], metadata["bragg_y"],
             metadata["interp_fwhm"], metadata["COM_rocking_curve"],
-            ]],
-            columns = [
+        ]],
+            columns=[
                 "scan",
-                "qx", "qy", "qz", "q_norm", "d_hkl", 
+                "qx", "qy", "qz", "q_norm", "d_hkl",
                 "inplane_angle", "out_of_plane_angle",
                 "bragg_x", "bragg_y",
                 "FWHM", "COM_rocking_curve",
-            ])
+        ])
 
     # Load all the logs
     try:
@@ -290,7 +306,7 @@ try:
 
         # Replace old data linked to this scan, no problem if this row does not exist yet
         indices = df[df['scan'] == scan].index
-        df.drop(indices , inplace=True)
+        df.drop(indices, inplace=True)
 
         result = pd.concat([df, temp_df])
 
@@ -298,7 +314,7 @@ try:
         result = temp_df
 
     # Save
-    result.to_csv(csv_file, index = False)
+    result.to_csv(csv_file, index=False)
     print(f"Saved logs in {csv_file}")
 
 # except AttributeError:

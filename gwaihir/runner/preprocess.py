@@ -53,76 +53,77 @@ output files saved in:   /rootdir/S1/pynxraw/ or /rootdir/S1/pynx/ depending on 
 'use_rawdata' option
 """
 
+
 def preprocess_bcdi(
     scans,
     root_folder,
     save_dir,
-    data_dirname, 
+    data_dirname,
     sample_name,
     user_comment,
     debug,
     binning,
     flag_interact,
     background_plot,
-    centering, 
-    fix_bragg, 
-    fix_size, 
-    center_fft, 
+    centering,
+    fix_bragg,
+    fix_size,
+    center_fft,
     pad_size,
-    normalize_flux, 
-    mask_zero_event, 
-    flag_medianfilter, 
+    normalize_flux,
+    mask_zero_event,
+    flag_medianfilter,
     medfilt_order,
-    reload_previous, 
-    reload_orthogonal, 
+    reload_previous,
+    reload_orthogonal,
     preprocessing_binning,
-    save_rawdata, 
-    save_to_npz, 
-    save_to_mat, 
-    save_to_vti, 
+    save_rawdata,
+    save_to_npz,
+    save_to_mat,
+    save_to_vti,
     save_asint,
-    beamline, 
-    actuators, 
-    is_series, 
-    custom_scan, 
-    custom_images, 
-    custom_monitor, 
-    rocking_angle, 
-    follow_bragg, 
+    beamline,
+    actuators,
+    is_series,
+    custom_scan,
+    custom_images,
+    custom_monitor,
+    rocking_angle,
+    follow_bragg,
     specfile_name,
-    detector, 
-    linearity_func, 
-    roi_detector, 
-    photon_threshold, 
-    photon_filter, 
-    background_file, 
-    hotpixels_file, 
-    flatfield_file, 
-    template_imagefile, 
-    nb_pixel_x, 
+    detector,
+    linearity_func,
+    roi_detector,
+    photon_threshold,
+    photon_filter,
+    background_file,
+    hotpixels_file,
+    flatfield_file,
+    template_imagefile,
+    nb_pixel_x,
     nb_pixel_y,
-    use_rawdata, 
-    interp_method, 
-    fill_value_mask, 
-    beam_direction, 
-    sample_offsets, 
-    sdd, 
-    energy, 
+    use_rawdata,
+    interp_method,
+    fill_value_mask,
+    beam_direction,
+    sample_offsets,
+    sdd,
+    energy,
     custom_motors,
-    align_q, 
-    ref_axis_q, 
-    outofplane_angle, 
-    inplane_angle, 
-    sample_inplane, 
-    sample_outofplane, 
-    offset_inplane, 
-    cch1, 
-    cch2, 
-    detrot, 
-    tiltazimuth, 
+    align_q,
+    ref_axis_q,
+    outofplane_angle,
+    inplane_angle,
+    sample_inplane,
+    sample_outofplane,
+    offset_inplane,
+    cch1,
+    cch2,
+    detrot,
+    tiltazimuth,
     tilt,
     GUI,
-    ):
+):
     """
     Prepare experimental data for Bragg CDI phasing: crop/pad, center, mask, normalize and
     filter the data.
@@ -158,7 +159,6 @@ def preprocess_bcdi(
         print(event, "Click on the figure instead of closing it!")
         sys.exit()
 
-
     def on_click(event):
         """
         Function to interact with a plot, return the position of clicked pixel.
@@ -184,7 +184,6 @@ def preprocess_bcdi(
                 )
                 xy = []
                 previous_axis = None
-
 
     def press_key(event):
         """
@@ -295,7 +294,6 @@ def preprocess_bcdi(
         except AttributeError:  # mouse pointer out of axes
             pass
 
-
     #########################
     # check some parameters #
     #########################
@@ -374,7 +372,8 @@ def preprocess_bcdi(
     )
 
     if fill_value_mask not in {0, 1}:
-        raise ValueError(f"fill_value_mask should be 0 or 1, got {fill_value_mask}")
+        raise ValueError(
+            f"fill_value_mask should be 0 or 1, got {fill_value_mask}")
 
     valid.valid_item(align_q, allowed_types=bool, name=valid_name)
     if align_q:
@@ -462,7 +461,8 @@ def preprocess_bcdi(
 
         comment = user_comment  # re-initialize comment
         tmp_str = f"Scan {scan_idx}/{len(scans)}: S{scan_nb}"
-        print(f'\n{"#" * len(tmp_str)}\n' + tmp_str + "\n" + f'{"#" * len(tmp_str)}')
+        print(f'\n{"#" * len(tmp_str)}\n' +
+              tmp_str + "\n" + f'{"#" * len(tmp_str)}')
 
         # initialize the paths
         setup.init_paths(
@@ -578,9 +578,12 @@ def preprocess_bcdi(
                     or (detector.binning[1] != 1)
                     or (detector.binning[2] != 1)
                 ):
-                    print("Binning the reloaded orthogonal data by", detector.binning)
-                    data = util.bin_data(data, binning=detector.binning, debugging=False)
-                    mask = util.bin_data(mask, binning=detector.binning, debugging=False)
+                    print("Binning the reloaded orthogonal data by",
+                          detector.binning)
+                    data = util.bin_data(
+                        data, binning=detector.binning, debugging=False)
+                    mask = util.bin_data(
+                        mask, binning=detector.binning, debugging=False)
                     mask[np.nonzero(mask)] = 1
                     if len(q_values) != 0:
                         qx = q_values[0]
@@ -588,13 +591,13 @@ def preprocess_bcdi(
                         qy = q_values[2]
                         numz, numy, numx = len(qx), len(qz), len(qy)
                         qx = qx[
-                            : numz - (numz % detector.binning[0]) : detector.binning[0]
+                            : numz - (numz % detector.binning[0]): detector.binning[0]
                         ]  # along z downstream
                         qz = qz[
-                            : numy - (numy % detector.binning[1]) : detector.binning[1]
+                            : numy - (numy % detector.binning[1]): detector.binning[1]
                         ]  # along y vertical
                         qy = qy[
-                            : numx - (numx % detector.binning[2]) : detector.binning[2]
+                            : numx - (numx % detector.binning[2]): detector.binning[2]
                         ]  # along x outboard
                         del numz, numy, numx
             else:  # the data is in the detector frame
@@ -641,7 +644,8 @@ def preprocess_bcdi(
         if not reload_orthogonal:
             if save_rawdata:
                 np.savez_compressed(
-                    detector.savedir + "S" + str(scan_nb) + "_data_before_masking_stack",
+                    detector.savedir + "S" +
+                    str(scan_nb) + "_data_before_masking_stack",
                     data=data,
                 )
                 if save_to_mat:
@@ -801,7 +805,8 @@ def preprocess_bcdi(
                         + ".png"
                     )
                     if flag_interact:
-                        fig.canvas.mpl_disconnect(fig.canvas.manager.key_press_handler_id)
+                        fig.canvas.mpl_disconnect(
+                            fig.canvas.manager.key_press_handler_id)
                         cid = plt.connect("close_event", close_event)
                         fig.waitforbuttonpress()
                         plt.disconnect(cid)
@@ -843,7 +848,8 @@ def preprocess_bcdi(
             # probably dead pixels
             temp_mask = np.zeros((ny, nx))
             temp_mask[np.sum(data, axis=0) == 0] = 1
-            mask[np.repeat(temp_mask[np.newaxis, :, :], repeats=nz, axis=0) == 1] = 1
+            mask[np.repeat(temp_mask[np.newaxis, :, :],
+                           repeats=nz, axis=0) == 1] = 1
             del temp_mask
 
         ###########################################
@@ -861,7 +867,8 @@ def preprocess_bcdi(
         )
         if debug:
             plt.savefig(
-                detector.savedir + f"data_before_masking_sum_S{scan_nb}_{nz}_{ny}_{nx}_"
+                detector.savedir +
+                f"data_before_masking_sum_S{scan_nb}_{nz}_{ny}_{nx}_"
                 f"{detector.binning[0]}_"
                 f"{detector.binning[1]}_{detector.binning[2]}.png"
             )
@@ -883,7 +890,8 @@ def preprocess_bcdi(
             tuple_vmin=0,
             tuple_vmax=np.nan,
             tuple_scale="log",
-            tuple_title=("data at max in xy", "data at max in xz", "data at max in yz"),
+            tuple_title=("data at max in xy", "data at max in xz",
+                         "data at max in yz"),
             is_orthogonal=not use_rawdata,
             reciprocal_space=False,
         )
@@ -942,7 +950,8 @@ def preprocess_bcdi(
                 ) = (
                     data.shape
                 )  # in nexus z downstream, y vertical / in q z vertical, x downstream
-                print("\ndqx, dqy, dqz = ", qx[1] - qx[0], qy[1] - qy[0], qz[1] - qz[0])
+                print("\ndqx, dqy, dqz = ",
+                      qx[1] - qx[0], qy[1] - qy[0], qz[1] - qz[0])
                 # in nexus z downstream, y vertical / in q z vertical, x downstream
                 qx0 = qx.min()
                 dqx = (qx.max() - qx0) / nqx
@@ -953,7 +962,8 @@ def preprocess_bcdi(
 
                 gu.save_to_vti(
                     filename=os.path.join(
-                        detector.savedir, f"S{scan_nb}_ortho_int" + comment + ".vti"
+                        detector.savedir, f"S{scan_nb}_ortho_int" +
+                        comment + ".vti"
                     ),
                     voxel_size=(dqx, dqz, dqy),
                     tuple_array=data,
@@ -975,13 +985,17 @@ def preprocess_bcdi(
             fig_mask, ((ax0, ax1), (ax2, ax3)) = plt.subplots(
                 nrows=2, ncols=2, figsize=(12, 6)
             )
-            fig_mask.canvas.mpl_disconnect(fig_mask.canvas.manager.key_press_handler_id)
+            fig_mask.canvas.mpl_disconnect(
+                fig_mask.canvas.manager.key_press_handler_id)
             original_data = np.copy(data)
             original_mask = np.copy(mask)
             frame_index = starting_frame
-            ax0.imshow(data[frame_index[0], :, :], vmin=0, vmax=max_colorbar, cmap=my_cmap)
-            ax1.imshow(data[:, frame_index[1], :], vmin=0, vmax=max_colorbar, cmap=my_cmap)
-            ax2.imshow(data[:, :, frame_index[2]], vmin=0, vmax=max_colorbar, cmap=my_cmap)
+            ax0.imshow(data[frame_index[0], :, :], vmin=0,
+                       vmax=max_colorbar, cmap=my_cmap)
+            ax1.imshow(data[:, frame_index[1], :], vmin=0,
+                       vmax=max_colorbar, cmap=my_cmap)
+            ax2.imshow(data[:, :, frame_index[2]], vmin=0,
+                       vmax=max_colorbar, cmap=my_cmap)
             ax3.set_visible(False)
             ax0.axis("scaled")
             ax1.axis("scaled")
@@ -1059,7 +1073,8 @@ def preprocess_bcdi(
             fig_mask, ((ax0, ax1), (ax2, ax3)) = plt.subplots(
                 nrows=2, ncols=2, figsize=(12, 6)
             )
-            fig_mask.canvas.mpl_disconnect(fig_mask.canvas.manager.key_press_handler_id)
+            fig_mask.canvas.mpl_disconnect(
+                fig_mask.canvas.manager.key_press_handler_id)
             original_data = np.copy(data)
             updated_mask = np.zeros((nz, ny, nx))
             data[mask == 1] = 0  # will appear as grey in the log plot (nan)
@@ -1087,7 +1102,8 @@ def preprocess_bcdi(
             fig_mask.text(
                 0.60, 0.40, "x to pause/resume polygon masking for pan/zoom", size=12
             )
-            fig_mask.text(0.60, 0.35, "p plot mask ; r reset current points", size=12)
+            fig_mask.text(
+                0.60, 0.35, "p plot mask ; r reset current points", size=12)
             fig_mask.text(
                 0.60,
                 0.30,
@@ -1142,7 +1158,8 @@ def preprocess_bcdi(
             for idx in range(
                 pad_width[0], nz - pad_width[1]
             ):  # filter only frames whith data (not padded)
-                data[idx, :, :] = scipy.signal.medfilt2d(data[idx, :, :], [3, 3])
+                data[idx, :, :] = scipy.signal.medfilt2d(
+                    data[idx, :, :], [3, 3])
         else:
             print("\nSkipping median filtering")
 
@@ -1184,7 +1201,8 @@ def preprocess_bcdi(
             plt.savefig(
                 detector.savedir
                 + f"middle_frame_S{scan_nb}_{nz}_{ny}_{nx}_{detector.binning[0]}_"
-                f"{detector.binning[1]}_{detector.binning[2]}" + comment + ".png"
+                f"{detector.binning[1]}_{detector.binning[2]}" +
+                comment + ".png"
             )
             if not flag_interact:
                 plt.close(fig)
@@ -1200,8 +1218,10 @@ def preprocess_bcdi(
                 reciprocal_space=True,
             )
             plt.savefig(
-                detector.savedir + f"sum_S{scan_nb}_{nz}_{ny}_{nx}_{detector.binning[0]}_"
-                f"{detector.binning[1]}_{detector.binning[2]}" + comment + ".png"
+                detector.savedir +
+                f"sum_S{scan_nb}_{nz}_{ny}_{nx}_{detector.binning[0]}_"
+                f"{detector.binning[1]}_{detector.binning[2]}" +
+                comment + ".png"
             )
             if not flag_interact:
                 plt.close(fig)
@@ -1218,8 +1238,10 @@ def preprocess_bcdi(
                 reciprocal_space=True,
             )
             plt.savefig(
-                detector.savedir + f"mask_S{scan_nb}_{nz}_{ny}_{nx}_{detector.binning[0]}_"
-                f"{detector.binning[1]}_{detector.binning[2]}" + comment + ".png"
+                detector.savedir +
+                f"mask_S{scan_nb}_{nz}_{ny}_{nx}_{detector.binning[0]}_"
+                f"{detector.binning[1]}_{detector.binning[2]}" +
+                comment + ".png"
             )
             if not flag_interact:
                 plt.close(fig)
@@ -1231,13 +1253,15 @@ def preprocess_bcdi(
         if (
             detector.binning[0] != 1 and not reload_orthogonal
         ):  # data was already binned for reload_orthogonal
-            data = util.bin_data(data, (detector.binning[0], 1, 1), debugging=False)
-            mask = util.bin_data(mask, (detector.binning[0], 1, 1), debugging=False)
+            data = util.bin_data(
+                data, (detector.binning[0], 1, 1), debugging=False)
+            mask = util.bin_data(
+                mask, (detector.binning[0], 1, 1), debugging=False)
             mask[np.nonzero(mask)] = 1
             if not use_rawdata and len(q_values) != 0:
                 numz = len(qx)
                 qx = qx[
-                    : numz - (numz % detector.binning[0]) : detector.binning[0]
+                    : numz - (numz % detector.binning[0]): detector.binning[0]
                 ]  # along Z
                 del numz
         print("\nData size after binning the stacking dimension:", data.shape)
@@ -1245,13 +1269,16 @@ def preprocess_bcdi(
         ##################################################################
         # final check of the shape to comply with FFT shape requirements #
         ##################################################################
-        final_shape = util.smaller_primes(data.shape, maxprime=7, required_dividers=(2,))
+        final_shape = util.smaller_primes(
+            data.shape, maxprime=7, required_dividers=(2,))
         com = tuple(map(lambda x: int(np.rint(x)), center_of_mass(data)))
         crop_center = pu.find_crop_center(
             array_shape=data.shape, crop_shape=final_shape, pivot=com
         )
-        data = util.crop_pad(data, output_shape=final_shape, crop_center=crop_center)
-        mask = util.crop_pad(mask, output_shape=final_shape, crop_center=crop_center)
+        data = util.crop_pad(data, output_shape=final_shape,
+                             crop_center=crop_center)
+        mask = util.crop_pad(mask, output_shape=final_shape,
+                             crop_center=crop_center)
         print("\nData size after considering FFT shape requirements:", data.shape)
         nz, ny, nx = data.shape
         comment = f"{comment}_{nz}_{ny}_{nx}" + binning_comment
@@ -1284,16 +1311,19 @@ def preprocess_bcdi(
                 plot_colorbar=True,
                 scale="log",
                 is_orthogonal=True,
-                levels=np.linspace(0, np.ceil(np.log10(max_z)), 150, endpoint=False),
+                levels=np.linspace(0, np.ceil(
+                    np.log10(max_z)), 150, endpoint=False),
                 reciprocal_space=True,
             )
             fig.savefig(
-                detector.savedir + f"final_reciprocal_space_S{scan_nb}" + comment + ".png"
+                detector.savedir +
+                f"final_reciprocal_space_S{scan_nb}" + comment + ".png"
             )
             plt.close(fig)
 
         if save_to_npz:
-            np.savez_compressed(detector.savedir + f"S{scan_nb}_pynx" + comment, data=data)
+            np.savez_compressed(detector.savedir +
+                                f"S{scan_nb}_pynx" + comment, data=data)
             np.savez_compressed(
                 detector.savedir + f"S{scan_nb}_maskpynx" + comment, mask=mask
             )
@@ -1302,11 +1332,13 @@ def preprocess_bcdi(
             # save to .mat, the new order is x y z (outboard, vertical up, downstream)
             savemat(
                 detector.savedir + f"S{scan_nb}_data.mat",
-                {"data": np.moveaxis(data.astype(np.float32), [0, 1, 2], [-1, -2, -3])},
+                {"data": np.moveaxis(data.astype(np.float32), [
+                                     0, 1, 2], [-1, -2, -3])},
             )
             savemat(
                 detector.savedir + f"S{scan_nb}_mask.mat",
-                {"data": np.moveaxis(mask.astype(np.int8), [0, 1, 2], [-1, -2, -3])},
+                {"data": np.moveaxis(mask.astype(np.int8), [
+                                     0, 1, 2], [-1, -2, -3])},
             )
 
         ############################
@@ -1323,7 +1355,8 @@ def preprocess_bcdi(
             is_orthogonal=not use_rawdata,
             reciprocal_space=True,
         )
-        plt.savefig(detector.savedir + f"finalsum_S{scan_nb}" + comment + ".png")
+        plt.savefig(detector.savedir +
+                    f"finalsum_S{scan_nb}" + comment + ".png")
         if not flag_interact:
             plt.close(fig)
 
@@ -1338,7 +1371,8 @@ def preprocess_bcdi(
             is_orthogonal=not use_rawdata,
             reciprocal_space=True,
         )
-        plt.savefig(detector.savedir + f"finalmask_S{scan_nb}" + comment + ".png")
+        plt.savefig(detector.savedir +
+                    f"finalmask_S{scan_nb}" + comment + ".png")
         if not flag_interact:
             plt.close(fig)
 
@@ -1359,7 +1393,7 @@ def preprocess_bcdi(
 
         with open(f"{detector.savedir}pynx_run.txt", "r") as f:
             text_file = f.readlines()
-            
+
             text_file[1] = f"data = \"{detector.savedir}S{scan_nb}_pynx{comment}.npz\"\n"
             text_file[2] = f"mask = \"{detector.savedir}S{scan_nb}_maskpynx{comment}.npz\"\n"
 

@@ -27,7 +27,7 @@ else:
         with tb.open_file(filename, "r") as f:
             data = f.root.entry_1.image_1.data[:]
             std[filename] = np.std(np.abs(data))
-            
+
     print(f"Keeping {n_keep} reconstructions ...")
     nb_files = len(cxi_files)
     sorted_dict = sorted(std.items(), key=operator.itemgetter(1))

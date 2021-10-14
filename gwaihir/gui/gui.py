@@ -91,91 +91,95 @@ class Interface(object):
             print("Login used for slurm:", self.user_name)
             print("If wrong login, please change self.user_name attribute")
         except:
-            print("Could not get user name, please create self.user_name attribute for batch jobs")
+            print(
+                "Could not get user name, please create self.user_name attribute for batch jobs")
 
-        # Widgets for initialization 
+        # Widgets for initialization
         self._list_widgets_init = interactive(self.initialize_directories,
-            ### Define scan related parameters
-            label_scan = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                              # Define scan related parameters
+                                              label_scan=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
 
-            sample_name = widgets.Text(
-                value = "S",
-                placeholder = "",
-                description = 'Sample Name',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),
+                                              sample_name=widgets.Text(
+                                                  value="S",
+                                                  placeholder="",
+                                                  description='Sample Name',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='45%'),
+                                                  style={'description_width': 'initial'}),
 
-            scans = widgets.BoundedIntText(
-                value = "01415",
-                description = 'Scan nb:',
-                min = 0,
-                max = 9999999,
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),
+                                              scans=widgets.BoundedIntText(
+                                                  value="01415",
+                                                  description='Scan nb:',
+                                                  min=0,
+                                                  max=9999999,
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='45%'),
+                                                  style={'description_width': 'initial'}),
 
-            data_directory = widgets.Text(
-                value = os.getcwd() + "/data_dir/",
-                placeholder = "Path to data directory",
-                description = 'Data directory',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                              data_directory=widgets.Text(
+                                                  value=os.getcwd() + "/data_dir/",
+                                                  placeholder="Path to data directory",
+                                                  description='Data directory',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-            final_directory = widgets.Text(
-                value = os.getcwd() + "/TestGui/",
-                placeholder = "Path to target directory (parent to all scan directories)",
-                description = 'Target directory',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                              final_directory=widgets.Text(
+                                                  value=os.getcwd() + "/TestGui/",
+                                                  placeholder="Path to target directory (parent to all scan directories)",
+                                                  description='Target directory',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-            user_comment = widgets.Text(
-                value = "",
-                description = 'Comment',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                placeholder = "Comment regarding Dataset...",
-                style = {'description_width': 'initial'}),
+                                              user_comment=widgets.Text(
+                                                  value="",
+                                                  description='Comment',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='90%'),
+                                                  placeholder="Comment regarding Dataset...",
+                                                  style={'description_width': 'initial'}),
 
-            debug = widgets.Checkbox(
-                value = False,
-                description = 'Debug',
-                disabled = False,
-                tooltip = 'True to interact with plots, False to close it automatically',
-                indent = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
+                                              debug=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Debug',
+                                                  disabled=False,
+                                                  tooltip='True to interact with plots, False to close it automatically',
+                                                  indent=False,
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
 
-            run_dir_init = widgets.ToggleButton(
-                value = False,
-                description = 'Initialize directories ...',
-                disabled = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                icon = 'step-forward',
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),
+                                              run_dir_init=widgets.ToggleButton(
+                                                  value=False,
+                                                  description='Initialize directories ...',
+                                                  disabled=False,
+                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                  icon='step-forward',
+                                                  layout=Layout(width='45%'),
+                                                  style={'description_width': 'initial'}),
 
-            reload_previous_data = widgets.ToggleButton(
-                value = False,
-                description = 'Reload previous data (.gwr) from target directory ...',
-                disabled = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                icon = 'step-forward',
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),
-            )
-        self._list_widgets_init.children[7].observe(self.init_handler, names = "value")
-        self._list_widgets_init.children[8].observe(self.init_handler, names = "value")
+                                              reload_previous_data=widgets.ToggleButton(
+                                                  value=False,
+                                                  description='Reload previous data (.gwr) from target directory ...',
+                                                  disabled=False,
+                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                  icon='step-forward',
+                                                  layout=Layout(width='45%'),
+                                                  style={'description_width': 'initial'}),
+                                              )
+        self._list_widgets_init.children[7].observe(
+            self.init_handler, names="value")
+        self._list_widgets_init.children[8].observe(
+            self.init_handler, names="value")
 
         self.tab_init = widgets.VBox([
             self._list_widgets_init.children[0],
@@ -186,689 +190,785 @@ class Interface(object):
             self._list_widgets_init.children[6],
             widgets.HBox(self._list_widgets_init.children[7:9]),
             self._list_widgets_init.children[-1],
-            ])
+        ])
 
         # Widgets for preprocessing
         self._list_widgets_preprocessing = interactive(self.initialize_parameters,
-            ### Define beamline related parameters
-            label_beamline = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters specific to the beamline", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       # Define beamline related parameters
+                                                       label_beamline=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters specific to the beamline",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            beamline = widgets.Dropdown(
-                options = ['ID01', 'SIXS_2018', 'SIXS_2019', 'CRISTAL', 'P10', 'NANOMAX', '34ID'],
-                value = "SIXS_2019",
-                description = 'Beamline',
-                continuous_update = False,
-                disabled = True,
-                tooltip = "Name of the beamline, used for data loading and normalization by monitor",
-                style = {'description_width': 'initial'}),
+                                                       beamline=widgets.Dropdown(
+                                                           options=['ID01', 'SIXS_2018', 'SIXS_2019',
+                                                                    'CRISTAL', 'P10', 'NANOMAX', '34ID'],
+                                                           value="SIXS_2019",
+                                                           description='Beamline',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           tooltip="Name of the beamline, used for data loading and normalization by monitor",
+                                                           style={'description_width': 'initial'}),
 
-            actuators = widgets.Text(
-                value = "{}",
-                placeholder = "{}",
-                continuous_update = False,
-                description = 'Actuators',
-                tooltip = "Optional dictionary that can be used to define the entries corresponding to actuators in data files (useful at CRISTAL where the location of data keeps changing)",
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
+                                                       actuators=widgets.Text(
+                                                           value="{}",
+                                                           placeholder="{}",
+                                                           continuous_update=False,
+                                                           description='Actuators',
+                                                           tooltip="Optional dictionary that can be used to define the entries corresponding to actuators in data files (useful at CRISTAL where the location of data keeps changing)",
+                                                           readout=True,
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           disabled=True),
 
-            is_series = widgets.Checkbox(
-                value = False,
-                description = 'Is series (P10)',
-                disabled = True,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                continuous_update = False,
-                tooltip = 'specific to series measurement at P10',
-                icon = 'check'),
+                                                       is_series=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Is series (P10)',
+                                                           disabled=True,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           continuous_update=False,
+                                                           tooltip='specific to series measurement at P10',
+                                                           icon='check'),
 
-            custom_scan = widgets.Checkbox(
-                value = False,
-                description = 'Custom scan',
-                continuous_update = False,
-                disabled = True,
-                indent = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'set it to True for a stack of images acquired without scan, e.g. with ct in a macro, or when there is no spec/log file available',
-                icon = 'check'),
+                                                       custom_scan=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Custom scan',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           indent=False,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='set it to True for a stack of images acquired without scan, e.g. with ct in a macro, or when there is no spec/log file available',
+                                                           icon='check'),
 
-            custom_images = widgets.IntText(
-                value = 3, # np.arange(11353, 11453, 1)  # list of image numbers for the custom_scan
-                description='Custom images',
-                continuous_update = False,
-                disabled = True,
-                style = {'description_width': 'initial'}),
+                                                       custom_images=widgets.IntText(
+                                                           # np.arange(11353, 11453, 1)  # list of image numbers for the custom_scan
+                                                           value=3,
+                                                           description='Custom images',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           style={'description_width': 'initial'}),
 
-            custom_monitor = widgets.IntText(
-                value = 51, # np.ones(51),  # monitor values for normalization for the custom_scan
-                description='Custom monitor',
-                continuous_update = False,
-                disabled = True,
-                style = {'description_width': 'initial'}),
+                                                       custom_monitor=widgets.IntText(
+                                                           # np.ones(51),  # monitor values for normalization for the custom_scan
+                                                           value=51,
+                                                           description='Custom monitor',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           style={'description_width': 'initial'}),
 
-            specfile_name = widgets.Text(
-                placeholder = "alias_dict_2019.txt",
-                value = "",
-                description = 'Specfile name',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                       specfile_name=widgets.Text(
+                                                           placeholder="alias_dict_2019.txt",
+                                                           value="",
+                                                           description='Specfile name',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='90%'),
+                                                           style={'description_width': 'initial'}),
 
-            rocking_angle = widgets.Dropdown(
-                options = ['inplane', 'outofplane', 'energy'],
-                value = "inplane",
-                continuous_update = False,
-                description = 'Rocking angle',
-                disabled = True,
-                tooltip = "Name of the beamline, used for data loading and normalization by monitor",
-                layout = Layout(height = "50px"),
-                style = {'description_width': 'initial'}),
+                                                       rocking_angle=widgets.Dropdown(
+                                                           options=[
+                                                               'inplane', 'outofplane', 'energy'],
+                                                           value="inplane",
+                                                           continuous_update=False,
+                                                           description='Rocking angle',
+                                                           disabled=True,
+                                                           tooltip="Name of the beamline, used for data loading and normalization by monitor",
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           style={'description_width': 'initial'}),
 
-            follow_bragg = widgets.Checkbox(
-                value = False,
-                description = 'Follow bragg',
-                disabled = True,
-                continuous_update = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'Only for energy scans, set to True if the detector was also scanned to follow the Bragg peak',
-                layout = Layout(height = "50px"),
-                icon = 'check'),
-
-
-            ### Parameters used in masking
-            label_masking = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in masking", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
-
-            flag_interact = widgets.Checkbox(
-                value = False,
-                description = 'Manual masking',
-                continuous_update = False,
-                disabled = True,
-                indent = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'True to interact with plots and manually mask points',
-                layout = Layout(height = "50px"),
-                icon = 'check'),
-
-            background_plot = widgets.FloatText(
-                value = 0.5,
-                step = 0.01,
-                max = 1,
-                min = 0,
-                continuous_update = False,
-                description = 'Background plot:',
-                layout = Layout(width='30%', height = "50px"),
-                tooltip = "In level of grey in [0,1], 0 being dark. For visual comfort during masking",
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
+                                                       follow_bragg=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Follow bragg',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='Only for energy scans, set to True if the detector was also scanned to follow the Bragg peak',
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           icon='check'),
 
 
-            ### Parameters related to data cropping/padding/centering
-            label_centering = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data cropping/padding/centering</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       # Parameters used in masking
+                                                       label_masking=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in masking",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            centering = widgets.Dropdown(
-                options = ["max", "com", "manual"],
-                value = "max",
-                description = 'Centering of Bragg peak method:',
-                continuous_update = False,
-                disabled = True,
-                layout = Layout(width='45%'),
-                tooltip = "Bragg peak determination: 'max' or 'com', 'max' is better usually. It will be overridden by 'fix_bragg' if not empty",
-                style = {'description_width': 'initial'}),
+                                                       flag_interact=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Manual masking',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           indent=False,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='True to interact with plots and manually mask points',
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           icon='check'),
 
-            fix_bragg = widgets.Text(
-                placeholder = "[z_bragg, y_bragg, x_bragg]",
-                description = 'Bragg peak position', # fix the Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector
-                disabled = True, # It is useful if hotpixels or intense aliens. Leave it [] otherwise.
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),
-
-            fix_size = widgets.Text(
-                placeholder = "[zstart, zstop, ystart, ystop, xstart, xstop]",
-                description = 'Fix array size', # crop the array to predefined size considering the full detector, leave it to [] otherwise [zstart, zstop, ystart, ystop, xstart, xstop]. ROI will be defaulted to []
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),  
-
-            center_fft = widgets.Dropdown(
-                options = ['crop_sym_ZYX','crop_asym_ZYX','pad_asym_Z_crop_sym_YX', 'pad_sym_Z_crop_asym_YX','pad_sym_Z', 'pad_asym_Z', 'pad_sym_ZYX','pad_asym_ZYX', 'skip'],
-                value = "crop_sym_ZYX",
-                description = 'Center FFT',
-                continuous_update = False,
-                layout = Layout(height = "50px"),
-                disabled = True,
-                style = {'description_width': 'initial'}),
-
-            pad_size = widgets.Text(
-                placeholder = "[256, 512, 512]",
-                description = 'Array size after padding', # used in 'pad_sym_Z_crop_sym_YX', 'pad_sym_Z', 'pad_sym_ZYX'
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='50%', height = "50px"),
-                style = {'description_width': 'initial'}), 
-
-            ### Parameters used in intensity normalization
-            normalize_flux = widgets.Dropdown(
-                options = ["skip", "monitor"],
-                value = "skip",
-                description = 'Normalize flux',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(height = "50px"),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'Monitor to normalize the intensity by the default monitor values, skip to do nothing',
-                # icon = 'check',
-                style = {'description_width': 'initial'}),
+                                                       background_plot=widgets.FloatText(
+                                                           value=0.5,
+                                                           step=0.01,
+                                                           max=1,
+                                                           min=0,
+                                                           continuous_update=False,
+                                                           description='Background plot:',
+                                                           layout=Layout(
+                                                               width='30%', height="50px"),
+                                                           tooltip="In level of grey in [0,1], 0 being dark. For visual comfort during masking",
+                                                           readout=True,
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           disabled=True),
 
 
-            ### Parameters for data filtering
-            label_filtering = widgets.HTML(
-                description="""<p style='font-weight: bold;font-size:1.2em'>Parameters for data filtering</p>""", 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       # Parameters related to data cropping/padding/centering
+                                                       label_centering=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data cropping/padding/centering</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            mask_zero_event = widgets.Checkbox(
-                value = False,
-                description = 'Mask zero event',
-                disabled = True,
-                continuous_update = False,
-                indent = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'Mask pixels where the sum along the rocking curve is zero - may be dead pixels',
-                icon = 'check'),
+                                                       centering=widgets.Dropdown(
+                                                           options=[
+                                                               "max", "com", "manual"],
+                                                           value="max",
+                                                           description='Centering of Bragg peak method:',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               width='45%'),
+                                                           tooltip="Bragg peak determination: 'max' or 'com', 'max' is better usually. It will be overridden by 'fix_bragg' if not empty",
+                                                           style={'description_width': 'initial'}),
 
-            flag_medianfilter = widgets.Dropdown(
-                options = ['skip','median','interp_isolated', 'mask_isolated'],
-                value = "skip",
-                description = 'Flag median filter',
-                continuous_update = False,
-                disabled = True,
-                tooltip = "set to 'median' for applying med2filter [3,3], set to 'interp_isolated' to interpolate isolated empty pixels based on 'medfilt_order' parameter, set to 'mask_isolated' it will mask isolated empty pixels, set to 'skip' will skip filtering",
-                style = {'description_width': 'initial'}),
+                                                       fix_bragg=widgets.Text(
+                                                           placeholder="[z_bragg, y_bragg, x_bragg]",
+                                                           # fix the Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector
+                                                           description='Bragg peak position',
+                                                           # It is useful if hotpixels or intense aliens. Leave it [] otherwise.
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='45%'),
+                                                           style={'description_width': 'initial'}),
 
-            medfilt_order = widgets.IntText(
-                value = 7,
-                description='Med filter order:',
-                disabled = True,
-                continuous_update = False,
-                tooltip = "for custom median filter, number of pixels with intensity surrounding the empty pixel",
-                style = {'description_width': 'initial'}),
+                                                       fix_size=widgets.Text(
+                                                           placeholder="[zstart, zstop, ystart, ystop, xstart, xstop]",
+                                                           description='Fix array size',  # crop the array to predefined size considering the full detector, leave it to [] otherwise [zstart, zstop, ystart, ystop, xstart, xstop]. ROI will be defaulted to []
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='45%'),
+                                                           style={'description_width': 'initial'}),
 
-            binning = widgets.Text(
-                value = "(1, 1, 1)",
-                placeholder = "(1, 1, 1)",
-                description = 'Binning for phasing',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='20%', height = "50px"),
-                style = {'description_width': 'initial'},
-                tooltip = "binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
+                                                       center_fft=widgets.Dropdown(
+                                                           options=['crop_sym_ZYX', 'crop_asym_ZYX', 'pad_asym_Z_crop_sym_YX', 'pad_sym_Z_crop_asym_YX',
+                                                                    'pad_sym_Z', 'pad_asym_Z', 'pad_sym_ZYX', 'pad_asym_ZYX', 'skip'],
+                                                           value="crop_sym_ZYX",
+                                                           description='Center FFT',
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           disabled=True,
+                                                           style={'description_width': 'initial'}),
 
-            ### Parameters used when reloading processed data
-            label_reload = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when reloading processed data</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       pad_size=widgets.Text(
+                                                           placeholder="[256, 512, 512]",
+                                                           # used in 'pad_sym_Z_crop_sym_YX', 'pad_sym_Z', 'pad_sym_ZYX'
+                                                           description='Array size after padding',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='50%', height="50px"),
+                                                           style={'description_width': 'initial'}),
 
-            reload_previous = widgets.Checkbox(
-                value = False,
-                description = 'Reload previous',
-                continuous_update = False,
-                disabled = True,
-                indent = False,
-                layout = Layout(height = "50px"),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'True to resume a previous masking (load data and mask)',
-                icon = 'check'),
+                                                       # Parameters used in intensity normalization
+                                                       normalize_flux=widgets.Dropdown(
+                                                           options=[
+                                                               "skip", "monitor"],
+                                                           value="skip",
+                                                           description='Normalize flux',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='Monitor to normalize the intensity by the default monitor values, skip to do nothing',
+                                                           # icon = 'check',
+                                                           style={'description_width': 'initial'}),
 
-            reload_orthogonal = widgets.Checkbox(
-                value = False,
-                description = 'Reload orthogonal',
-                continuous_update = False,
-                disabled = True,
-                indent = False,
-                layout = Layout(height = "50px"),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'True if the reloaded data is already intepolated in an orthonormal frame',
-                icon = 'check'),
 
-            preprocessing_binning = widgets.Text(
-                value = "(1, 1, 1)",
-                placeholder = "(1, 1, 1)", # binning factors in each dimension of the binned data to be reloaded
-                description = 'Binning used in data to be reloaded',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='30%', height = "50px"),
-                style = {'description_width': 'initial'},
-                tooltip = "binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
+                                                       # Parameters for data filtering
+                                                       label_filtering=widgets.HTML(
+                                                           description="""<p style='font-weight: bold;font-size:1.2em'>Parameters for data filtering</p>""",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            ### Saving options
-            label_saving = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when saving the data</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       mask_zero_event=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Mask zero event',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           indent=False,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='Mask pixels where the sum along the rocking curve is zero - may be dead pixels',
+                                                           icon='check'),
 
-            save_rawdata = widgets.Checkbox(
-                value = False,
-                description = 'Save raw data',
-                disabled = True,
-                continuous_update = False,
-                indent = False,
-                layout = Layout(width = "20%", height = "50px"),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'Save also the raw data when use_rawdata is False',
-                icon = 'check'),
+                                                       flag_medianfilter=widgets.Dropdown(
+                                                           options=[
+                                                               'skip', 'median', 'interp_isolated', 'mask_isolated'],
+                                                           value="skip",
+                                                           description='Flag median filter',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           tooltip="set to 'median' for applying med2filter [3,3], set to 'interp_isolated' to interpolate isolated empty pixels based on 'medfilt_order' parameter, set to 'mask_isolated' it will mask isolated empty pixels, set to 'skip' will skip filtering",
+                                                           style={'description_width': 'initial'}),
 
-            save_to_npz = widgets.Checkbox(
-                value = True,
-                description = 'Save to npz',
-                disabled = True,
-                continuous_update = False,
-                indent = False,
-                layout = Layout(width = "20%", height = "50px"),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'True to save the processed data in npz format',
-                icon = 'check'),
+                                                       medfilt_order=widgets.IntText(
+                                                           value=7,
+                                                           description='Med filter order:',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           tooltip="for custom median filter, number of pixels with intensity surrounding the empty pixel",
+                                                           style={'description_width': 'initial'}),
 
-            save_to_mat = widgets.Checkbox(
-                value = False,
-                description = 'Save to mat',
-                disabled = True,
-                continuous_update = False,
-                indent = False,
-                layout = Layout(width = "20%", height = "50px"),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'True to save also in .mat format',
-                icon = 'check'),
+                                                       binning=widgets.Text(
+                                                           value="(1, 1, 1)",
+                                                           placeholder="(1, 1, 1)",
+                                                           description='Binning for phasing',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='20%', height="50px"),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
-            save_to_vti = widgets.Checkbox(
-                value = False,
-                description = 'Save to vti',
-                continuous_update = False,
-                disabled = True,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                indent = False,
-                layout = Layout(width = "20%", height = "50px"),
-                tooltip = 'Save the orthogonalized diffraction pattern to VTK file',
-                icon = 'check'),
+                                                       # Parameters used when reloading processed data
+                                                       label_reload=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when reloading processed data</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            save_asint = widgets.Checkbox(
-                value = False,
-                description = 'Save as integers',
-                continuous_update = False,
-                disabled = True,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                indent = False,
-                layout = Layout(width = "20%", height = "50px"),
-                tooltip = 'if True, the result will be saved as an array of integers (save space)',
-                icon = 'check'),
+                                                       reload_previous=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Reload previous',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='True to resume a previous masking (load data and mask)',
+                                                           icon='check'),
 
-            ### Detector related parameters
-            label_detector = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the detector used</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       reload_orthogonal=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Reload orthogonal',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='True if the reloaded data is already intepolated in an orthonormal frame',
+                                                           icon='check'),
 
-            detector = widgets.Dropdown(
-                options = ["Eiger2M", "Maxipix", "Eiger4M", "Merlin", "Timepix"],
-                value = "Merlin",
-                description = 'Detector',
-                continuous_update = False,
-                disabled = True,
-                style = {'description_width': 'initial'}),
+                                                       preprocessing_binning=widgets.Text(
+                                                           value="(1, 1, 1)",
+                                                           # binning factors in each dimension of the binned data to be reloaded
+                                                           placeholder="(1, 1, 1)",
+                                                           description='Binning used in data to be reloaded',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='30%', height="50px"),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
-            roi_detector = widgets.Text(
-                placeholder = "[low_y_bound, high_y_bound, low_x_bound, high_x_bound]",
-                description = 'Fix roi area, will overwrite cropping parameters', # fix the Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector
-                disabled = True, # It is useful if hotpixels or intense aliens. Leave it [] otherwise.
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                       # Saving options
+                                                       label_saving=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when saving the data</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            photon_threshold = widgets.IntText(
-                value = 0,
-                description = 'Photon Threshold:',
-                disabled = True,
-                continuous_update = False,
-                tooltip = "data[data < photon_threshold] = 0",
-                style = {'description_width': 'initial'}),
+                                                       save_rawdata=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Save raw data',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               width="20%", height="50px"),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='Save also the raw data when use_rawdata is False',
+                                                           icon='check'),
 
-            photon_filter = widgets.Dropdown(
-                options = ['loading','postprocessing'],
-                value = "loading",
-                continuous_update = False,
-                description = 'Photon filter',
-                disabled = True,
-                tooltip = "When the photon threshold should be applied, if 'loading', it is applied before binning; if 'postprocessing', it is applied at the end of the script before saving",
-                style = {'description_width': 'initial'}),
+                                                       save_to_npz=widgets.Checkbox(
+                                                           value=True,
+                                                           description='Save to npz',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               width="20%", height="50px"),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='True to save the processed data in npz format',
+                                                           icon='check'),
 
-            background_file = widgets.Text(
-                value = "",
-                placeholder = f"{self.work_dir}/background.npz'",
-                description = 'Background file',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                       save_to_mat=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Save to mat',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               width="20%", height="50px"),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='True to save also in .mat format',
+                                                           icon='check'),
 
-            flatfield_file = widgets.Text(
-                value = "",
-                placeholder = f"{self.work_dir}/flatfield_maxipix_8kev.npz",
-                description = 'Flatfield file',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                       save_to_vti=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Save to vti',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               width="20%", height="50px"),
+                                                           tooltip='Save the orthogonalized diffraction pattern to VTK file',
+                                                           icon='check'),
 
-            hotpixels_file = widgets.Text(
-                value = f"{self.work_dir}/SIXS_June_2021/reconstructions/analysis/mask_merlin_better_flipped.npy",
-                placeholder = f"{self.work_dir}/mask_merlin.npz",
-                description = 'Hotpixels file',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                       save_asint=widgets.Checkbox(
+                                                           value=False,
+                                                           description='Save as integers',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               width="20%", height="50px"),
+                                                           tooltip='if True, the result will be saved as an array of integers (save space)',
+                                                           icon='check'),
 
-            template_imagefile = widgets.Text(
-                value = 'Pt_ascan_mu_%05d.nxs',
-                description = 'Template imagefile',
-                disabled = True,
-                tooltip = """Template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'; Template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs';
+                                                       # Detector related parameters
+                                                       label_detector=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the detector used</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
+
+                                                       detector=widgets.Dropdown(
+                                                           options=[
+                                                               "Eiger2M", "Maxipix", "Eiger4M", "Merlin", "Timepix"],
+                                                           value="Merlin",
+                                                           description='Detector',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           style={'description_width': 'initial'}),
+
+                                                       roi_detector=widgets.Text(
+                                                           placeholder="[low_y_bound, high_y_bound, low_x_bound, high_x_bound]",
+                                                           # fix the Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector
+                                                           description='Fix roi area, will overwrite cropping parameters',
+                                                           # It is useful if hotpixels or intense aliens. Leave it [] otherwise.
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='90%'),
+                                                           style={'description_width': 'initial'}),
+
+                                                       photon_threshold=widgets.IntText(
+                                                           value=0,
+                                                           description='Photon Threshold:',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           tooltip="data[data < photon_threshold] = 0",
+                                                           style={'description_width': 'initial'}),
+
+                                                       photon_filter=widgets.Dropdown(
+                                                           options=[
+                                                               'loading', 'postprocessing'],
+                                                           value="loading",
+                                                           continuous_update=False,
+                                                           description='Photon filter',
+                                                           disabled=True,
+                                                           tooltip="When the photon threshold should be applied, if 'loading', it is applied before binning; if 'postprocessing', it is applied at the end of the script before saving",
+                                                           style={'description_width': 'initial'}),
+
+                                                       background_file=widgets.Text(
+                                                           value="",
+                                                           placeholder=f"{self.work_dir}/background.npz'",
+                                                           description='Background file',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='90%'),
+                                                           style={'description_width': 'initial'}),
+
+                                                       flatfield_file=widgets.Text(
+                                                           value="",
+                                                           placeholder=f"{self.work_dir}/flatfield_maxipix_8kev.npz",
+                                                           description='Flatfield file',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='90%'),
+                                                           style={'description_width': 'initial'}),
+
+                                                       hotpixels_file=widgets.Text(
+                                                           value=f"{self.work_dir}/SIXS_June_2021/reconstructions/analysis/mask_merlin_better_flipped.npy",
+                                                           placeholder=f"{self.work_dir}/mask_merlin.npz",
+                                                           description='Hotpixels file',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='90%'),
+                                                           style={'description_width': 'initial'}),
+
+                                                       template_imagefile=widgets.Text(
+                                                           value='Pt_ascan_mu_%05d.nxs',
+                                                           description='Template imagefile',
+                                                           disabled=True,
+                                                           tooltip="""Template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'; Template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs';
                             Template for SIXS_2019: 'spare_ascan_mu_%05d.nxs';
                             Template for Cristal: 'S%d.nxs';
                             Template for P10: '_master.h5'; 
                             Template for NANOMAX: '%06d.h5'; 
                             Template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'""",
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                           layout=Layout(
+                                                               width='90%'),
+                                                           style={'description_width': 'initial'}),
 
-            nb_pixel_x = widgets.IntText(
-                description = 'Nb pixel x',
-                disabled = True,
-                continuous_update = False,
-                tooltip = "fix to declare a known detector but with less pixels",
-                style = {'description_width': 'initial'}),
+                                                       nb_pixel_x=widgets.IntText(
+                                                           description='Nb pixel x',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           tooltip="fix to declare a known detector but with less pixels",
+                                                           style={'description_width': 'initial'}),
 
-            nb_pixel_y = widgets.IntText(
-                description = 'Nb pixel y',
-                disabled = True,
-                continuous_update = False,
-                tooltip = "fix to declare a known detector but with less pixels",
-                style = {'description_width': 'initial'}),
+                                                       nb_pixel_y=widgets.IntText(
+                                                           description='Nb pixel y',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           tooltip="fix to declare a known detector but with less pixels",
+                                                           style={'description_width': 'initial'}),
 
-            ### Define parameters below if you want to orthogonalize the data before phasing
-            label_ortho = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters to define the data orthogonalization</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       # Define parameters below if you want to orthogonalize the data before phasing
+                                                       label_ortho=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters to define the data orthogonalization</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            use_rawdata = widgets.Checkbox(
-                value = False,
-                continuous_update = False,
-                description = 'Orthogonalize data',
-                disabled = True,
-                indent = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'False for using data gridded in laboratory frame/ True for using data in detector frame',
-                icon = 'check'),
+                                                       use_rawdata=widgets.Checkbox(
+                                                           value=False,
+                                                           continuous_update=False,
+                                                           description='Orthogonalize data',
+                                                           disabled=True,
+                                                           indent=False,
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip='False for using data gridded in laboratory frame/ True for using data in detector frame',
+                                                           icon='check'),
 
-            interp_method = widgets.Dropdown(
-                options = ['linearization','xrayutilities'],
-                value = "linearization",
-                continuous_update = False,
-                description = 'Interpolation method',
-                disabled = True,
-                # tooltip = "",
-                style = {'description_width': 'initial'}),
+                                                       interp_method=widgets.Dropdown(
+                                                           options=[
+                                                               'linearization', 'xrayutilities'],
+                                                           value="linearization",
+                                                           continuous_update=False,
+                                                           description='Interpolation method',
+                                                           disabled=True,
+                                                           # tooltip = "",
+                                                           style={'description_width': 'initial'}),
 
-            fill_value_mask = widgets.Dropdown(
-                options = [0, 1],
-                value = 0,
-                description = 'Fill value mask',
-                continuous_update = False,
-                disabled = True,
-                tooltip = "It will define how the pixels outside of the data range are processed during the interpolation. Because of the large number of masked pixels, phase retrieval converges better if the pixels are not masked (0 intensity imposed). The data is by default set to 0 outside of the defined range.",
-                style = {'description_width': 'initial'}),
+                                                       fill_value_mask=widgets.Dropdown(
+                                                           options=[0, 1],
+                                                           value=0,
+                                                           description='Fill value mask',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           tooltip="It will define how the pixels outside of the data range are processed during the interpolation. Because of the large number of masked pixels, phase retrieval converges better if the pixels are not masked (0 intensity imposed). The data is by default set to 0 outside of the defined range.",
+                                                           style={'description_width': 'initial'}),
 
-            beam_direction = widgets.Text(
-                value = "(1, 0, 0)",
-                placeholder = "(1, 0, 0)",
-                description = 'Beam direction in lab. frame',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='50%'),
-                style = {'description_width': 'initial'},
-                tooltip = "Beam direction in the laboratory frame (downstream, vertical up, outboard), beam along z"),
+                                                       beam_direction=widgets.Text(
+                                                           value="(1, 0, 0)",
+                                                           placeholder="(1, 0, 0)",
+                                                           description='Beam direction in lab. frame',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='50%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="Beam direction in the laboratory frame (downstream, vertical up, outboard), beam along z"),
 
-            sample_offsets = widgets.Text(
-                value = "(0, 0)",
-                placeholder = "(0, 0, 90, 0)",
-                description = 'Sample offsets',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='25%'),
-                style = {'description_width': 'initial'},
-                tooltip = """Tuple of offsets in degrees of the sample for each sample circle (outer first). 
+                                                       sample_offsets=widgets.Text(
+                                                           value="(0, 0)",
+                                                           placeholder="(0, 0, 90, 0)",
+                                                           description='Sample offsets',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='25%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="""Tuple of offsets in degrees of the sample for each sample circle (outer first). 
                             Convention: the sample offsets will be subtracted to the motor values"""),
 
-            sdd = widgets.FloatText(
-                value = 1.18,
-                step = 0.01,
-                description = 'Sample Detector Dist. (m):',
-                continuous_update = False,
-                disabled = True,
-                tooltip = "sample to detector distance in m",
-                style = {'description_width': 'initial'}),
+                                                       sdd=widgets.FloatText(
+                                                           value=1.18,
+                                                           step=0.01,
+                                                           description='Sample Detector Dist. (m):',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           tooltip="sample to detector distance in m",
+                                                           style={'description_width': 'initial'}),
 
-            energy = widgets.IntText(
-                value = 8500,
-                description = 'X-ray energy in eV',
-                continuous_update = False,
-                disabled = True,
-                layout = Layout(height = "50px"),
-                style = {'description_width': 'initial'}),
+                                                       energy=widgets.IntText(
+                                                           value=8500,
+                                                           description='X-ray energy in eV',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               height="50px"),
+                                                           style={'description_width': 'initial'}),
 
-            custom_motors = widgets.Text(
-                value = "{}",
-                placeholder = "{}",
-                description = 'Custom motors',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='90%', height = "50px"),
-                style = {'description_width': 'initial'},
-                tooltip = "Use this to declare motor positions"),
-            # {"mu": 0, "phi": -15.98, "chi": 90, "theta": 0, "delta": -0.5685, "gamma": 33.3147}
-            # use this to declare motor positions if there is not log file
-            # example: {"eta": np.linspace(16.989, 18.989, num=100, endpoint=False), "phi": 0, "nu": -0.75, "delta": 36.65}
-            # ID01: eta, phi, nu, delta
-            # CRISTAL: mgomega, gamma, delta
-            # SIXS: beta, mu, gamma, delta
-            # P10: om, phi, chi, mu, gamma, delta
-            # NANOMAX: theta, phi, gamma, delta, energy, radius
-            # 34ID: mu, phi (incident angle), chi, theta (inplane), delta (inplane), gamma (outofplane)
+                                                       custom_motors=widgets.Text(
+                                                           value="{}",
+                                                           placeholder="{}",
+                                                           description='Custom motors',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='90%', height="50px"),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="Use this to declare motor positions"),
+                                                       # {"mu": 0, "phi": -15.98, "chi": 90, "theta": 0, "delta": -0.5685, "gamma": 33.3147}
+                                                       # use this to declare motor positions if there is not log file
+                                                       # example: {"eta": np.linspace(16.989, 18.989, num=100, endpoint=False), "phi": 0, "nu": -0.75, "delta": 36.65}
+                                                       # ID01: eta, phi, nu, delta
+                                                       # CRISTAL: mgomega, gamma, delta
+                                                       # SIXS: beta, mu, gamma, delta
+                                                       # P10: om, phi, chi, mu, gamma, delta
+                                                       # NANOMAX: theta, phi, gamma, delta, energy, radius
+                                                       # 34ID: mu, phi (incident angle), chi, theta (inplane), delta (inplane), gamma (outofplane)
 
 
-            ### Parameters for xrayutilities to orthogonalize the data before phasing
-            label_xru = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in xrayutilities to orthogonalize the data before phasing (initialize the directories before)</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       # Parameters for xrayutilities to orthogonalize the data before phasing
+                                                       label_xru=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in xrayutilities to orthogonalize the data before phasing (initialize the directories before)</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            #xrayutilities uses the xyz crystal frame: for incident angle = 0, x is downstream, y outboard, and z vertical up
-            align_q = widgets.Checkbox(
-                value = True,
-                description = 'Align q',
-                continuous_update = False,
-                disabled = True,
-                indent = False,
-                layout = Layout(width='20%'),
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = """used only when interp_method is 'linearization', if True it rotates the crystal to align q along one axis of the array""",
-                icon = 'check'),
+                                                       # xrayutilities uses the xyz crystal frame: for incident angle = 0, x is downstream, y outboard, and z vertical up
+                                                       align_q=widgets.Checkbox(
+                                                           value=True,
+                                                           description='Align q',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           indent=False,
+                                                           layout=Layout(
+                                                               width='20%'),
+                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           tooltip="""used only when interp_method is 'linearization', if True it rotates the crystal to align q along one axis of the array""",
+                                                           icon='check'),
 
-            ref_axis_q = widgets.Dropdown(
-                options = ["x", "y", "z"],
-                value = "y",
-                description = 'Ref axis q',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                tooltip = "q will be aligned along that axis",
-                style = {'description_width': 'initial'}),
+                                                       ref_axis_q=widgets.Dropdown(
+                                                           options=[
+                                                               "x", "y", "z"],
+                                                           value="y",
+                                                           description='Ref axis q',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='20%'),
+                                                           tooltip="q will be aligned along that axis",
+                                                           style={'description_width': 'initial'}),
 
-            outofplane_angle = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                description = 'Outofplane angle',
-                continuous_update = False,
-                disabled = True,
-                layout = Layout(width='25%'),
-                style = {'description_width': 'initial'}),
+                                                       outofplane_angle=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           description='Outofplane angle',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               width='25%'),
+                                                           style={'description_width': 'initial'}),
 
-            inplane_angle = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                description = 'Inplane angle',
-                continuous_update = False,
-                disabled = True,
-                layout = Layout(width='25%'),
-                style = {'description_width': 'initial'}),
+                                                       inplane_angle=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           description='Inplane angle',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               width='25%'),
+                                                           style={'description_width': 'initial'}),
 
-            sample_inplane = widgets.Text(
-                value = "(1, 0, 0)",
-                placeholder = "(1, 0, 0)",
-                description = 'Sample inplane',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'},
-                tooltip = "Sample inplane reference direction along the beam at 0 angles"),
+                                                       sample_inplane=widgets.Text(
+                                                           value="(1, 0, 0)",
+                                                           placeholder="(1, 0, 0)",
+                                                           description='Sample inplane',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='20%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="Sample inplane reference direction along the beam at 0 angles"),
 
-            sample_outofplane = widgets.Text(
-                value = "(0, 0, 1)",
-                placeholder = "(0, 0, 1)",
-                description = 'Sample outofplane',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'},
-                tooltip = "Surface normal of the sample at 0 angles"),
+                                                       sample_outofplane=widgets.Text(
+                                                           value="(0, 0, 1)",
+                                                           placeholder="(0, 0, 1)",
+                                                           description='Sample outofplane',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='20%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="Surface normal of the sample at 0 angles"),
 
-            offset_inplane = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                description = 'Offset inplane',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'},
-                tooltip = "Outer detector angle offset, not important if you use raw data"),
+                                                       offset_inplane=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           description='Offset inplane',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='20%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="Outer detector angle offset, not important if you use raw data"),
 
-            cch1 = widgets.IntText(
-                value = 271,
-                description = 'cch1',
-                continuous_update = False,
-                disabled = True,
-                layout = Layout(width='15%'),
-                tooltip = "cch1 parameter from xrayutilities 2D detector calibration, vertical",
-                style = {'description_width': 'initial'}),
+                                                       cch1=widgets.IntText(
+                                                           value=271,
+                                                           description='cch1',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               width='15%'),
+                                                           tooltip="cch1 parameter from xrayutilities 2D detector calibration, vertical",
+                                                           style={'description_width': 'initial'}),
 
-            cch2 = widgets.IntText(
-                value = 213,
-                description = 'cch2',
-                continuous_update = False,
-                disabled = True,
-                layout = Layout(width='15%'),
-                tooltip = "cch2 parameter from xrayutilities 2D detector calibration, horizontal",
-                style = {'description_width': 'initial'}),
+                                                       cch2=widgets.IntText(
+                                                           value=213,
+                                                           description='cch2',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               width='15%'),
+                                                           tooltip="cch2 parameter from xrayutilities 2D detector calibration, horizontal",
+                                                           style={'description_width': 'initial'}),
 
-            direct_inplane = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                min = 0,
-                max = 360,
-                continuous_update = False,
-                description = 'Direct inplane angle:', # detector angle in deg(rotation around y vertical up, typically gamma), corrected
-                layout = Layout(width='30%'),
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
+                                                       direct_inplane=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           min=0,
+                                                           max=360,
+                                                           continuous_update=False,
+                                                           # detector angle in deg(rotation around y vertical up, typically gamma), corrected
+                                                           description='Direct inplane angle:',
+                                                           layout=Layout(
+                                                               width='30%'),
+                                                           readout=True,
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           disabled=True),
 
-            direct_outofplane = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                min = 0,
-                max = 360,
-                continuous_update = False,
-                description = 'Direct outofplane angle:',# detector angle in deg (rotation around x outboard, typically delta), corrected
-                layout = Layout(width='30%'),
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
+                                                       direct_outofplane=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           min=0,
+                                                           max=360,
+                                                           continuous_update=False,
+                                                           # detector angle in deg (rotation around x outboard, typically delta), corrected
+                                                           description='Direct outofplane angle:',
+                                                           layout=Layout(
+                                                               width='30%'),
+                                                           readout=True,
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           disabled=True),
 
-            detrot = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                description = 'Detector rotation',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'},
-                tooltip = "Detrot parameter from xrayutilities 2D detector calibration"),
+                                                       detrot=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           description='Detector rotation',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='20%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="Detrot parameter from xrayutilities 2D detector calibration"),
 
-            tiltazimuth = widgets.FloatText(
-                value = 360,
-                step = 0.01,
-                description = 'Tilt azimuth',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='15%'),
-                style = {'description_width': 'initial'},
-                tooltip = "tiltazimuth parameter from xrayutilities 2D detector calibration"),
+                                                       tiltazimuth=widgets.FloatText(
+                                                           value=360,
+                                                           step=0.01,
+                                                           description='Tilt azimuth',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='15%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="tiltazimuth parameter from xrayutilities 2D detector calibration"),
 
-            tilt = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                description = 'Tilt',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='15%'),
-                style = {'description_width': 'initial'},
-                tooltip = "tilt parameter from xrayutilities 2D detector calibration"),
+                                                       tilt=widgets.FloatText(
+                                                           value=0,
+                                                           step=0.01,
+                                                           description='Tilt',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           layout=Layout(
+                                                               width='15%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           tooltip="tilt parameter from xrayutilities 2D detector calibration"),
 
-            # Run preprocess
-            label_preprocess = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the data processing before phasing</p>", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                       # Run preprocess
+                                                       label_preprocess=widgets.HTML(
+                                                           description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the data processing before phasing</p>",
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           layout=Layout(width='90%', height="35px")),
 
-            init_para = widgets.ToggleButton(
-                value = False,
-                description = 'Initialize parameters ...',
-                disabled = True,
-                continuous_update = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'},
-                icon = 'fast-forward')
-            )
-        self._list_widgets_preprocessing.children[1].observe(self.beamline_handler, names = "value")
-        self._list_widgets_preprocessing.children[8].observe(self.energy_scan_handler, names = "value")
-        self._list_widgets_preprocessing.children[14].observe(self.bragg_peak_centering_handler, names = "value")
-        self._list_widgets_preprocessing.children[26].observe(self.reload_data_handler, names = "value")
-        self._list_widgets_preprocessing.children[47].observe(self.interpolation_handler, names = "value")
-        self._list_widgets_preprocessing.children[-2].observe(self.preprocess_handler, names = "value")
+                                                       init_para=widgets.ToggleButton(
+                                                           value=False,
+                                                           description='Initialize parameters ...',
+                                                           disabled=True,
+                                                           continuous_update=False,
+                                                           button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                           layout=Layout(
+                                                               width='40%'),
+                                                           style={
+                                                               'description_width': 'initial'},
+                                                           icon='fast-forward')
+                                                       )
+        self._list_widgets_preprocessing.children[1].observe(
+            self.beamline_handler, names="value")
+        self._list_widgets_preprocessing.children[8].observe(
+            self.energy_scan_handler, names="value")
+        self._list_widgets_preprocessing.children[14].observe(
+            self.bragg_peak_centering_handler, names="value")
+        self._list_widgets_preprocessing.children[26].observe(
+            self.reload_data_handler, names="value")
+        self._list_widgets_preprocessing.children[47].observe(
+            self.interpolation_handler, names="value")
+        self._list_widgets_preprocessing.children[-2].observe(
+            self.preprocess_handler, names="value")
 
         self.tab_detector = widgets.VBox([
             self._list_widgets_preprocessing.children[35],
@@ -880,7 +980,7 @@ class Interface(object):
             self._list_widgets_preprocessing.children[42],
             self._list_widgets_preprocessing.children[43],
             widgets.HBox(self._list_widgets_preprocessing.children[44:46]),
-            ])
+        ])
 
         self.tab_ortho = widgets.VBox([
             self._list_widgets_preprocessing.children[46],
@@ -896,7 +996,7 @@ class Interface(object):
             widgets.HBox(self._list_widgets_preprocessing.children[61:63]),
             widgets.HBox(self._list_widgets_preprocessing.children[63:67]),
             widgets.HBox(self._list_widgets_preprocessing.children[67:70]),
-            ])
+        ])
 
         self.tab_beamline = widgets.VBox([
             self._list_widgets_preprocessing.children[0],
@@ -907,7 +1007,7 @@ class Interface(object):
             widgets.HBox(self._list_widgets_preprocessing.children[8:10]),
             self._list_widgets_preprocessing.children[10],
             widgets.HBox(self._list_widgets_preprocessing.children[11:13]),
-            ])
+        ])
 
         self.tab_reduction = widgets.VBox([
             self._list_widgets_preprocessing.children[13],
@@ -917,14 +1017,14 @@ class Interface(object):
             self._list_widgets_preprocessing.children[20],
             widgets.HBox(self._list_widgets_preprocessing.children[21:24]),
             self._list_widgets_preprocessing.children[24],
-            ])
+        ])
 
         self.tab_save_load = widgets.VBox([
             self._list_widgets_preprocessing.children[25],
             widgets.HBox(self._list_widgets_preprocessing.children[26:29]),
             self._list_widgets_preprocessing.children[29],
             widgets.HBox(self._list_widgets_preprocessing.children[30:35]),
-            ])
+        ])
 
         self.tab_preprocess = widgets.VBox([
             self.tab_beamline,
@@ -933,79 +1033,90 @@ class Interface(object):
             self._list_widgets_preprocessing.children[-3],
             self._list_widgets_preprocessing.children[-2],
             self._list_widgets_preprocessing.children[-1]
-            ])
+        ])
 
-
-        # Widgets for angles correction 
+        # Widgets for angles correction
         self._list_widgets_correct = interactive(self.correct_angles,
-            label_correct = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Find the real values for the Bragg peak angles, needs correct xru parameters.", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                 label_correct=widgets.HTML(
+                                                     description="<p style='font-weight: bold;font-size:1.2em'>Find the real values for the Bragg peak angles, needs correct xru parameters.",
+                                                     style={
+                                                         'description_width': 'initial'},
+                                                     layout=Layout(width='90%', height="35px")),
 
-            csv_file = widgets.Text(
-                value = os.getcwd() + "/metadata.csv",
-                placeholder = "Path to csv file",
-                description = 'Csv file',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                 csv_file=widgets.Text(
+                                                     value=os.getcwd() + "/metadata.csv",
+                                                     placeholder="Path to csv file",
+                                                     description='Csv file',
+                                                     disabled=True,
+                                                     continuous_update=False,
+                                                     layout=Layout(
+                                                         width='90%'),
+                                                     style={'description_width': 'initial'}),
 
-            temp_bool = widgets.Checkbox(
-                value = False,
-                description = 'Estimate the temperature (Pt only)',
-                disabled = True,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'Click to estimate the mean temperature of the sample from the Bragg peak angles',
-                # icon = 'check',
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'}),
+                                                 temp_bool=widgets.Checkbox(
+                                                     value=False,
+                                                     description='Estimate the temperature (Pt only)',
+                                                     disabled=True,
+                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                     tooltip='Click to estimate the mean temperature of the sample from the Bragg peak angles',
+                                                     # icon = 'check',
+                                                     layout=Layout(
+                                                         width='40%'),
+                                                     style={'description_width': 'initial'}),
 
-            reflection = widgets.Text(
-                value = "[1, 1, 1]",
-                placeholder = "[1, 1, 1]",
-                description = 'Reflection',
-                disabled = True,
-                continuous_update = False,
-                layout = Layout(width='30%'),
-                style = {'description_width': 'initial'},
-                tooltip = "Sample inplane reference direction along the beam at 0 angles"),
+                                                 reflection=widgets.Text(
+                                                     value="[1, 1, 1]",
+                                                     placeholder="[1, 1, 1]",
+                                                     description='Reflection',
+                                                     disabled=True,
+                                                     continuous_update=False,
+                                                     layout=Layout(
+                                                         width='30%'),
+                                                     style={
+                                                         'description_width': 'initial'},
+                                                     tooltip="Sample inplane reference direction along the beam at 0 angles"),
 
-            reference_spacing = widgets.FloatText(
-                value = 2.269545,
-                step = 0.000001,
-                min = 0,
-                max = 100,
-                description = 'Interplanar distance (A):',
-                layout = Layout(width='30%'),
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
+                                                 reference_spacing=widgets.FloatText(
+                                                     value=2.269545,
+                                                     step=0.000001,
+                                                     min=0,
+                                                     max=100,
+                                                     description='Interplanar distance (A):',
+                                                     layout=Layout(
+                                                         width='30%'),
+                                                     readout=True,
+                                                     style={
+                                                         'description_width': 'initial'},
+                                                     disabled=True),
 
-            reference_temperature = widgets.FloatText(
-                value = 298.15,
-                step = 0.01,
-                min = 0,
-                max = 2000,
-                description = 'Reference temperature:',
-                layout = Layout(width='30%'),
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
+                                                 reference_temperature=widgets.FloatText(
+                                                     value=298.15,
+                                                     step=0.01,
+                                                     min=0,
+                                                     max=2000,
+                                                     description='Reference temperature:',
+                                                     layout=Layout(
+                                                         width='30%'),
+                                                     readout=True,
+                                                     style={
+                                                         'description_width': 'initial'},
+                                                     disabled=True),
 
-            angles_bool = widgets.ToggleButton(
-                value = False,
-                description = 'Correct angles',
-                disabled = True,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                tooltip = 'Click to correct the Bragg peak angles',
-                icon = 'fast-forward',
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'}),
-            )
-        self._list_widgets_correct.children[2].observe(self.temp_handler, names = "value")
-        self._list_widgets_correct.children[-2].observe(self.correct_angles_handler, names = "value")
+                                                 angles_bool=widgets.ToggleButton(
+                                                     value=False,
+                                                     description='Correct angles',
+                                                     disabled=True,
+                                                     button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                     tooltip='Click to correct the Bragg peak angles',
+                                                     icon='fast-forward',
+                                                     layout=Layout(
+                                                         width='40%'),
+                                                     style={'description_width': 'initial'}),
+                                                 )
+        self._list_widgets_correct.children[2].observe(
+            self.temp_handler, names="value")
+        self._list_widgets_correct.children[-2].observe(
+            self.correct_angles_handler, names="value")
         self.tab_correct = widgets.VBox([
             self._list_widgets_correct.children[0],
             self._list_widgets_correct.children[1],
@@ -1013,548 +1124,605 @@ class Interface(object):
             widgets.HBox(self._list_widgets_correct.children[3:6]),
             self._list_widgets_correct.children[6],
             self._list_widgets_correct.children[-1],
-            ])
+        ])
 
         # Widgets for strain
         self._list_widgets_strain = interactive(self.strain_gui,
-            label_averaging = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when averaging several reconstruction", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                label_averaging=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when averaging several reconstruction",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
 
-            sort_method = widgets.Dropdown(
-                options = ['mean_amplitude', 'variance', 'variance/mean', 'volume'],
-                value = "variance/mean",
-                description = 'Sorting method',
-                disabled = False,
-                style = {'description_width': 'initial'}),
+                                                sort_method=widgets.Dropdown(
+                                                    options=['mean_amplitude', 'variance',
+                                                             'variance/mean', 'volume'],
+                                                    value="variance/mean",
+                                                    description='Sorting method',
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
 
-            correlation_threshold = widgets.FloatText(
-                value = 0.9,
-                step = 0.01,
-                max = 1,
-                min = 0,
-                continuous_update = False,
-                description = 'Correlation threshold:',
-                style = {'description_width': 'initial'},
-                disabled = False),
+                                                correlation_threshold=widgets.FloatText(
+                                                    value=0.9,
+                                                    step=0.01,
+                                                    max=1,
+                                                    min=0,
+                                                    continuous_update=False,
+                                                    description='Correlation threshold:',
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
 
-            label_FFT = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters relative to the FFT window and voxel sizes", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                label_FFT=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Parameters relative to the FFT window and voxel sizes",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
 
-            original_size = widgets.Text(
-                placeholder = "[256, 512, 512]",
-                description = 'Size of the FFT array before binning',
-                disabled = False,
-                layout = Layout(width='45%'),
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
+                                                original_size=widgets.Text(
+                                                    placeholder="[256, 512, 512]",
+                                                    description='Size of the FFT array before binning',
+                                                    disabled=False,
+                                                    layout=Layout(width='45%'),
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
 
-            phasing_binning = widgets.Text(
-                value = "(1, 1, 1)",
-                placeholder = "(1, 1, 1)",
-                description = 'Binning factor used in phase retrieval',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'},
-                ),
+                                                phasing_binning=widgets.Text(
+                                                    value="(1, 1, 1)",
+                                                    placeholder="(1, 1, 1)",
+                                                    description='Binning factor used in phase retrieval',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='45%'),
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                ),
 
-            preprocessing_binning = widgets.Text(
-                value = "(1, 1, 1)",
-                placeholder = "(1, 1, 1)",
-                description = 'Binning factors used in preprocessing',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'},
-                ),
+                                                preprocessing_binning=widgets.Text(
+                                                    value="(1, 1, 1)",
+                                                    placeholder="(1, 1, 1)",
+                                                    description='Binning factors used in preprocessing',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='45%'),
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                ),
 
-            output_size = widgets.Text(
-                placeholder = "[256, 512, 512]",
-                description = 'Output size',
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
+                                                output_size=widgets.Text(
+                                                    placeholder="[256, 512, 512]",
+                                                    description='Output size',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
 
-            keep_size = widgets.Checkbox(
-                value = False,
-                description = 'Keep the initial array size for orthogonalization (slower)',# True to keep the initial array size for orthogonalization (slower), it will be cropped otherwise
-                disabled = False,
-                layout = Layout(width='45%'),
-                # icon = 'check',
-                style = {'description_width': 'initial'}),
+                                                keep_size=widgets.Checkbox(
+                                                    value=False,
+                                                    # True to keep the initial array size for orthogonalization (slower), it will be cropped otherwise
+                                                    description='Keep the initial array size for orthogonalization (slower)',
+                                                    disabled=False,
+                                                    layout=Layout(width='45%'),
+                                                    # icon = 'check',
+                                                    style={'description_width': 'initial'}),
 
-            fix_voxel = widgets.BoundedIntText(
-                placeholder = "10",
-                description = 'Fix voxel size, put 0 to set free:',
-                min = 0,
-                max = 9999999,
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
+                                                fix_voxel=widgets.BoundedIntText(
+                                                    placeholder="10",
+                                                    description='Fix voxel size, put 0 to set free:',
+                                                    min=0,
+                                                    max=9999999,
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
 
-            label_disp_strain = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to displacement and strain calculation", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                label_disp_strain=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to displacement and strain calculation",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
 
-            data_frame = widgets.ToggleButtons(
-                options = ['detector', 'crystal', "laboratory"],
-                value = "detector",
-                description = 'Data frame',
-                tooltips = [
-                    "If the data is still in the detector frame",
-                    "If the data was interpolated into the crystal frame using (xrayutilities) or (transformation matrix + align_q=True)", 
-                    "If the data was interpolated into the laboratory frame using the transformation matrix (align_q = False)"
-                    ],
-                disabled = False,
-                style = {'description_width': 'initial'}),
+                                                data_frame=widgets.ToggleButtons(
+                                                    options=[
+                                                        'detector', 'crystal', "laboratory"],
+                                                    value="detector",
+                                                    description='Data frame',
+                                                    tooltips=[
+                                                        "If the data is still in the detector frame",
+                                                        "If the data was interpolated into the crystal frame using (xrayutilities) or (transformation matrix + align_q=True)",
+                                                        "If the data was interpolated into the laboratory frame using the transformation matrix (align_q = False)"
+                                                    ],
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
 
-            ref_axis_q = widgets.Dropdown(
-                options = ["x", "y", "z"],
-                value = "y",
-                description = 'Ref axis q',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='15%'),
-                tooltip = "q will be aligned along that axis",
-                style = {'description_width': 'initial'}),
+                                                ref_axis_q=widgets.Dropdown(
+                                                    options=["x", "y", "z"],
+                                                    value="y",
+                                                    description='Ref axis q',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='15%'),
+                                                    tooltip="q will be aligned along that axis",
+                                                    style={'description_width': 'initial'}),
 
-            save_frame = widgets.ToggleButtons(
-                options = ['crystal', 'laboratory', "lab_flat_sample"],
-                value = "lab_flat_sample",
-                description = 'Final frame',
-                tooltips = [
-                    "Save the data with q aligned along ref_axis_q",
-                    "Save the data in the laboratory frame (experimental geometry)", 
-                    "Save the data in the laboratory frame, with all sample angles rotated back to 0"
-                    ],
-                # rotations for 'laboratory' and 'lab_flat_sample' are realized after the strain calculation
-                # (which is done in the crystal frame along ref_axis_q)
-                disabled = False,
-                style = {'description_width': 'initial'}),
+                                                save_frame=widgets.ToggleButtons(
+                                                    options=[
+                                                        'crystal', 'laboratory', "lab_flat_sample"],
+                                                    value="lab_flat_sample",
+                                                    description='Final frame',
+                                                    tooltips=[
+                                                        "Save the data with q aligned along ref_axis_q",
+                                                        "Save the data in the laboratory frame (experimental geometry)",
+                                                        "Save the data in the laboratory frame, with all sample angles rotated back to 0"
+                                                    ],
+                                                    # rotations for 'laboratory' and 'lab_flat_sample' are realized after the strain calculation
+                                                    # (which is done in the crystal frame along ref_axis_q)
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
 
-            isosurface_strain = widgets.FloatText(
-                value = 0.3,
-                step = 0.01,
-                max = 1,
-                min = 0,
-                continuous_update = False,
-                description = 'Isosurface strain:',
-                tooltip = "Threshold use for removing the outer layer (strain is undefined at the exact surface voxel)",
-                readout = True,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'},
-                disabled = False),
+                                                isosurface_strain=widgets.FloatText(
+                                                    value=0.3,
+                                                    step=0.01,
+                                                    max=1,
+                                                    min=0,
+                                                    continuous_update=False,
+                                                    description='Isosurface strain:',
+                                                    tooltip="Threshold use for removing the outer layer (strain is undefined at the exact surface voxel)",
+                                                    readout=True,
+                                                    layout=Layout(width='20%'),
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
 
-            strain_method = widgets.ToggleButtons(
-                options = ['default', 'defect'],
-                value = "default",
-                description = 'Strain method',
-                tooltips = [
-                    "",
-                    "Will offset the phase in a loop and keep the smallest magnitude value for the strain. See: F. Hofmann et al. PhysRevMaterials 4, 013801 (2020)"
-                    ],
-                disabled = False,
-                style = {'description_width': 'initial'}),
+                                                strain_method=widgets.ToggleButtons(
+                                                    options=[
+                                                        'default', 'defect'],
+                                                    value="default",
+                                                    description='Strain method',
+                                                    tooltips=[
+                                                        "",
+                                                        "Will offset the phase in a loop and keep the smallest magnitude value for the strain. See: F. Hofmann et al. PhysRevMaterials 4, 013801 (2020)"
+                                                    ],
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
 
-            phase_offset = widgets.FloatText(
-                value = 0,
-                step = 0.01,
-                min = 0,
-                max = 360,
-                continuous_update = False,
-                description = 'Phase offset:',
-                layout = Layout(width='15%'),
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = False),
+                                                phase_offset=widgets.FloatText(
+                                                    value=0,
+                                                    step=0.01,
+                                                    min=0,
+                                                    max=360,
+                                                    continuous_update=False,
+                                                    description='Phase offset:',
+                                                    layout=Layout(width='15%'),
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
 
-            phase_offset_origin = widgets.Text(
-                placeholder = "(x, y, z), leave None for automatic.",
-                description = 'Phase offset origin',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'},
-                ),
+                                                phase_offset_origin=widgets.Text(
+                                                    placeholder="(x, y, z), leave None for automatic.",
+                                                    description='Phase offset origin',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='40%'),
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                ),
 
-            offset_method = widgets.Dropdown(
-                options = ["COM", "mean"],
-                value = "mean",
-                description = 'Offset method:',
-                continuous_update = False,
-                disabled = False,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'}),
+                                                offset_method=widgets.Dropdown(
+                                                    options=["COM", "mean"],
+                                                    value="mean",
+                                                    description='Offset method:',
+                                                    continuous_update=False,
+                                                    disabled=False,
+                                                    layout=Layout(width='20%'),
+                                                    style={'description_width': 'initial'}),
 
-            centering_method = widgets.Dropdown(
-                options = ["COM", "max", "max_COM"],
-                value = "max_COM",
-                description = 'Centering method:',
-                continuous_update = False,
-                disabled = False,
-                layout = Layout(width='25%'),
-                style = {'description_width': 'initial'}),
+                                                centering_method=widgets.Dropdown(
+                                                    options=[
+                                                        "COM", "max", "max_COM"],
+                                                    value="max_COM",
+                                                    description='Centering method:',
+                                                    continuous_update=False,
+                                                    disabled=False,
+                                                    layout=Layout(width='25%'),
+                                                    style={'description_width': 'initial'}),
 
-            label_refraction = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the refraction correction", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                label_refraction=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the refraction correction",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
 
-            correct_refraction = widgets.Checkbox(
-                value = False,
-                description = 'Correct refraction',
-                disabled = False,
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            optical_path_method = widgets.ToggleButtons(
-                options = ['threshold', 'defect'],
-                value = "threshold",
-                description = 'Optical path method',
-                tooltips = [
-                    "Uses isosurface_strain to define the support  for the optical path calculation",
-                    "Tries to remove only outer layers even if the amplitude is lower than isosurface_strain inside the crystal"
-                    ],
-                disabled = True,
-                style = {'description_width': 'initial'}),
-            
-            dispersion = widgets.FloatText(
-                value = 0.000050328,
-                continuous_update = False,
-                description = 'Dispersion (delta):',
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
-            
-            absorption = widgets.FloatText(
-                value = 0.000050328,
-                continuous_update = False,
-                description = 'Absorption (beta):',
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
-            
-            threshold_unwrap_refraction = widgets.FloatText(
-                value = 0.05,
-                # threshold used to calculate the optical path
-                # the threshold for refraction/absorption corrections should be low, to correct for an object larger than the real one,
-                # otherwise it messes up the phase
-                step = 0.01,
-                continuous_update = False,
-                description = 'Threshold unwrap refraction:',
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = True),
-            
-            label_options = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Options", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
-            
-            simu_flag = widgets.Checkbox(
-                value = False,
-                description = 'Simulated data',
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                layout = Layout(width='33%'),
-                style = {'description_width': 'initial'}
-                ),
-            
-            invert_phase = widgets.Checkbox(
-                value = True, # False only for simulations
-                description = 'Invert phase', # True for the displacement to have the right sign (FFT convention), False only for simulations
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                layout = Layout(width='33%'),
-                style = {'description_width': 'initial'}
-                ),
-            
-            flip_reconstruction = widgets.Checkbox(
-                value = False,
-                description = 'Get conjugated object',  # True if you want to get the conjugate object
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                layout = Layout(width='33%'),
-                style = {'description_width': 'initial'}
-                ),
-            
-            phase_ramp_removal = widgets.Dropdown(
-                options = ["gradient", "upsampling"],
-                value = "gradient",
-                description = 'Phase ramp removal:',
-                continuous_update = False,
-                disabled = False,
-                style = {'description_width': 'initial'}),
-            
-            threshold_gradient = widgets.FloatText(
-                value = 1.0,
-                step = 0.01,
-                continuous_update = False,
-                description = 'Upper threshold gradient:',# upper threshold of the gradient of the phase, use for ramp removal
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = False),
-            
-            save_raw = widgets.Checkbox(
-                value = False,
-                description = 'Save raw data', # True to save the amp-phase.vti before orthogonalizatio
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            save_support = widgets.Checkbox(
-                value = False,
-                description = 'Save support',# True to save the non-orthogonal support for later phase retrieval
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            save = widgets.Checkbox(
-                value = True,
-                description = 'Save output',  # True to save amp.npz, phase.npz, strain.npz and vtk files
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            debug = widgets.Checkbox(
-                value = False,
-                description = 'Debug', # set to True to show all plots for debugging
-                disabled = False,
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            roll_modes = widgets.Text(
-                value = "(0, 0, 0)",
-                placeholder = "(0, 0, 0)",
-                description = 'Roll modes', # axis=(0, 1, 2), correct a roll of few pixels after the decomposition into modes in PyNX
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='30%'),
-                style = {'description_width': 'initial'},
-                ),
-            
-            label_data_vis = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data visualization", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
-            
-            align_axis = widgets.Checkbox(
-                value = False,
-                description = 'Align axis', # if True rotates the crystal to align axis_to_align along ref_axis after the calculation of the strain
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            ref_axis = widgets.Dropdown(
-                options = ["x", "y", "z"],
-                value = "y",
-                description = 'Ref axis for align axis',  # will align axis_to_align to that axis
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                tooltip = "q will be aligned along that axis",
-                style = {'description_width': 'initial'}),
-            
-            axis_to_align = widgets.Text(
-                value = "[0.0, 0.0, 0.0]",
-                placeholder = "[0.0, 0.0, 0.0]",
-                description = 'Axis to align for ref axis', # axis to align with ref_axis in the order x y z (axis 2, axis 1, axis 0)
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
-            
-            strain_range = widgets.FloatText(
-                value = 0.002,
-                step = 0.00001,
-                continuous_update = False,
-                description = 'Strain range:',
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = False),
-            
-            phase_range = widgets.FloatText(
-                value = np.round(np.pi, 3),
-                step = 0.001,
-                continuous_update = False,
-                description = 'Phase range:',
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = False),
-            
-            grey_background = widgets.Checkbox(
-                value = True,
-                description = 'Grey background in plots',  # True to set the background to grey in phase and strain plots
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                layout = Layout(width='25%'),
-                style = {'description_width': 'initial'}
-                ),
-            
-            tick_spacing =  widgets.BoundedIntText(
-                value = "100",
-                description = 'Tick spacing:',
-                min = 0,
-                max = 5000,
-                layout = Layout(width='25%'),
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
-            
-            tick_direction = widgets.Dropdown(
-                options = ["out", "in", "inout"],
-                value = "inout",
-                description = 'Tick direction:',
-                layout = Layout(width='25%'),
-                continuous_update = False,
-                disabled = False,
-                style = {'description_width': 'initial'}),
-            
-            tick_length =  widgets.BoundedIntText(
-                value = "3",
-                description = 'Tick length:',
-                min = 0,
-                max = 50,
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='20%'),
-                style = {'description_width': 'initial'}),
-            
-            tick_width =  widgets.BoundedIntText(
-                value = "1",
-                description = 'Tick width:',
-                min = 0,
-                max = 10,
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='45%'),
-                style = {'description_width': 'initial'}),
-            
-            label_average = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Parameters for averaging several reconstructed objects", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
-            
-            avg_method = widgets.Dropdown(
-                options = ["reciprocal_space", "real_space"],
-                value = "reciprocal_space",
-                description = 'Average method:',
-                continuous_update = False,
-                disabled = False,
-                style = {'description_width': 'initial'}),
-            
-            avg_threshold = widgets.FloatText(
-                value = 0.90,
-                step = 0.01,
-                continuous_update = False,
-                description = 'Average threshold:',  # minimum correlation within reconstructed object for averaging
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = False),
-            
-            label_apodize = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Setup for phase averaging or apodization", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
-                        
-            apodize_flag = widgets.Checkbox(
-                value = True,
-                description = 'Multiply diffraction pattern by filtering window',
-                disabled = False,
-                # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                # icon = 'check',
-                style = {'description_width': 'initial'}
-                ),
-            
-            apodize_window = widgets.Dropdown(
-                options = ["normal", "tukey", "blackman"],
-                value = "blackman",
-                description = 'Filtering window',
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
-            
-            hwidth = widgets.BoundedIntText(
-                value = 1,
-                continuous_update = False,
-                description = 'Width of apodizing window:',
-                readout = True,
-                style = {'description_width': 'initial'},
-                disabled = False),
+                                                correct_refraction=widgets.Checkbox(
+                                                    value=False,
+                                                    description='Correct refraction',
+                                                    disabled=False,
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
 
-            mu = widgets.Text(
-                value = "[0.0, 0.0, 0.0]",
-                placeholder = "[0.0, 0.0, 0.0]",
-                description = 'Mu of gaussian window',
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
-            
-            sigma = widgets.Text(
-                value = "[0.30, 0.30, 0.30]",
-                placeholder = "[0.30, 0.30, 0.30]",
-                description = 'Sigma of gaussian window',
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
-            
-            alpha = widgets.Text(
-                value = "[1.0, 1.0, 1.0]",
-                placeholder = "[1.0, 1.0, 1.0]",
-                description = 'Alpha of gaussian window',
-                disabled = False,
-                continuous_update = False,
-                style = {'description_width': 'initial'}),
+                                                optical_path_method=widgets.ToggleButtons(
+                                                    options=[
+                                                        'threshold', 'defect'],
+                                                    value="threshold",
+                                                    description='Optical path method',
+                                                    tooltips=[
+                                                        "Uses isosurface_strain to define the support  for the optical path calculation",
+                                                        "Tries to remove only outer layers even if the amplitude is lower than isosurface_strain inside the crystal"
+                                                    ],
+                                                    disabled=True,
+                                                    style={'description_width': 'initial'}),
 
-            label_strain = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Path to file", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                                dispersion=widgets.FloatText(
+                                                    value=0.000050328,
+                                                    continuous_update=False,
+                                                    description='Dispersion (delta):',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=True),
 
-            folder_strain = widgets.Text(
-                value = os.getcwd(),
-                placeholder = os.getcwd(),
-                description = 'Data folder:',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                absorption=widgets.FloatText(
+                                                    value=0.000050328,
+                                                    continuous_update=False,
+                                                    description='Absorption (beta):',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=True),
 
-            reconstruction_file = widgets.Dropdown(
-                options = sorted(glob.glob(os.getcwd() + "/*.h5") + glob.glob(os.getcwd() + "/*.cxi") + glob.glob(os.getcwd() + "/*.npy") + glob.glob(os.getcwd() + "/*.npz")),
-                description = 'Compatible file list',
-                disabled = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                                threshold_unwrap_refraction=widgets.FloatText(
+                                                    value=0.05,
+                                                    # threshold used to calculate the optical path
+                                                    # the threshold for refraction/absorption corrections should be low, to correct for an object larger than the real one,
+                                                    # otherwise it messes up the phase
+                                                    step=0.01,
+                                                    continuous_update=False,
+                                                    description='Threshold unwrap refraction:',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=True),
 
-            run_strain = widgets.ToggleButton(
-                value = False,
-                description = 'Run strain analysis',
-                disabled = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                icon = 'fast-forward',
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'}),
-                )
-        self._list_widgets_strain.children[-4].observe(self.folder_strain_handler, names = "value")
+                                                label_options=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Options",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
+
+                                                simu_flag=widgets.Checkbox(
+                                                    value=False,
+                                                    description='Simulated data',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    layout=Layout(width='33%'),
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                invert_phase=widgets.Checkbox(
+                                                    value=True,  # False only for simulations
+                                                    # True for the displacement to have the right sign (FFT convention), False only for simulations
+                                                    description='Invert phase',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    layout=Layout(width='33%'),
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                flip_reconstruction=widgets.Checkbox(
+                                                    value=False,
+                                                    # True if you want to get the conjugate object
+                                                    description='Get conjugated object',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    layout=Layout(width='33%'),
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                phase_ramp_removal=widgets.Dropdown(
+                                                    options=[
+                                                        "gradient", "upsampling"],
+                                                    value="gradient",
+                                                    description='Phase ramp removal:',
+                                                    continuous_update=False,
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                threshold_gradient=widgets.FloatText(
+                                                    value=1.0,
+                                                    step=0.01,
+                                                    continuous_update=False,
+                                                    # upper threshold of the gradient of the phase, use for ramp removal
+                                                    description='Upper threshold gradient:',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
+
+                                                save_raw=widgets.Checkbox(
+                                                    value=False,
+                                                    description='Save raw data',  # True to save the amp-phase.vti before orthogonalizatio
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                save_support=widgets.Checkbox(
+                                                    value=False,
+                                                    # True to save the non-orthogonal support for later phase retrieval
+                                                    description='Save support',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                save=widgets.Checkbox(
+                                                    value=True,
+                                                    description='Save output',  # True to save amp.npz, phase.npz, strain.npz and vtk files
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                debug=widgets.Checkbox(
+                                                    value=False,
+                                                    description='Debug',  # set to True to show all plots for debugging
+                                                    disabled=False,
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                roll_modes=widgets.Text(
+                                                    value="(0, 0, 0)",
+                                                    placeholder="(0, 0, 0)",
+                                                    # axis=(0, 1, 2), correct a roll of few pixels after the decomposition into modes in PyNX
+                                                    description='Roll modes',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='30%'),
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                ),
+
+                                                label_data_vis=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data visualization",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
+
+                                                align_axis=widgets.Checkbox(
+                                                    value=False,
+                                                    # if True rotates the crystal to align axis_to_align along ref_axis after the calculation of the strain
+                                                    description='Align axis',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                ref_axis=widgets.Dropdown(
+                                                    options=["x", "y", "z"],
+                                                    value="y",
+                                                    description='Ref axis for align axis',  # will align axis_to_align to that axis
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='20%'),
+                                                    tooltip="q will be aligned along that axis",
+                                                    style={'description_width': 'initial'}),
+
+                                                axis_to_align=widgets.Text(
+                                                    value="[0.0, 0.0, 0.0]",
+                                                    placeholder="[0.0, 0.0, 0.0]",
+                                                    # axis to align with ref_axis in the order x y z (axis 2, axis 1, axis 0)
+                                                    description='Axis to align for ref axis',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                strain_range=widgets.FloatText(
+                                                    value=0.002,
+                                                    step=0.00001,
+                                                    continuous_update=False,
+                                                    description='Strain range:',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
+
+                                                phase_range=widgets.FloatText(
+                                                    value=np.round(np.pi, 3),
+                                                    step=0.001,
+                                                    continuous_update=False,
+                                                    description='Phase range:',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
+
+                                                grey_background=widgets.Checkbox(
+                                                    value=True,
+                                                    # True to set the background to grey in phase and strain plots
+                                                    description='Grey background in plots',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    layout=Layout(width='25%'),
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                tick_spacing=widgets.BoundedIntText(
+                                                    value="100",
+                                                    description='Tick spacing:',
+                                                    min=0,
+                                                    max=5000,
+                                                    layout=Layout(width='25%'),
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                tick_direction=widgets.Dropdown(
+                                                    options=[
+                                                        "out", "in", "inout"],
+                                                    value="inout",
+                                                    description='Tick direction:',
+                                                    layout=Layout(width='25%'),
+                                                    continuous_update=False,
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                tick_length=widgets.BoundedIntText(
+                                                    value="3",
+                                                    description='Tick length:',
+                                                    min=0,
+                                                    max=50,
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='20%'),
+                                                    style={'description_width': 'initial'}),
+
+                                                tick_width=widgets.BoundedIntText(
+                                                    value="1",
+                                                    description='Tick width:',
+                                                    min=0,
+                                                    max=10,
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='45%'),
+                                                    style={'description_width': 'initial'}),
+
+                                                label_average=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Parameters for averaging several reconstructed objects",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
+
+                                                avg_method=widgets.Dropdown(
+                                                    options=[
+                                                        "reciprocal_space", "real_space"],
+                                                    value="reciprocal_space",
+                                                    description='Average method:',
+                                                    continuous_update=False,
+                                                    disabled=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                avg_threshold=widgets.FloatText(
+                                                    value=0.90,
+                                                    step=0.01,
+                                                    continuous_update=False,
+                                                    # minimum correlation within reconstructed object for averaging
+                                                    description='Average threshold:',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
+
+                                                label_apodize=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Setup for phase averaging or apodization",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
+
+                                                apodize_flag=widgets.Checkbox(
+                                                    value=True,
+                                                    description='Multiply diffraction pattern by filtering window',
+                                                    disabled=False,
+                                                    # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                    # icon = 'check',
+                                                    style={
+                                                        'description_width': 'initial'}
+                                                ),
+
+                                                apodize_window=widgets.Dropdown(
+                                                    options=[
+                                                        "normal", "tukey", "blackman"],
+                                                    value="blackman",
+                                                    description='Filtering window',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                hwidth=widgets.BoundedIntText(
+                                                    value=1,
+                                                    continuous_update=False,
+                                                    description='Width of apodizing window:',
+                                                    readout=True,
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    disabled=False),
+
+                                                mu=widgets.Text(
+                                                    value="[0.0, 0.0, 0.0]",
+                                                    placeholder="[0.0, 0.0, 0.0]",
+                                                    description='Mu of gaussian window',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                sigma=widgets.Text(
+                                                    value="[0.30, 0.30, 0.30]",
+                                                    placeholder="[0.30, 0.30, 0.30]",
+                                                    description='Sigma of gaussian window',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                alpha=widgets.Text(
+                                                    value="[1.0, 1.0, 1.0]",
+                                                    placeholder="[1.0, 1.0, 1.0]",
+                                                    description='Alpha of gaussian window',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    style={'description_width': 'initial'}),
+
+                                                label_strain=widgets.HTML(
+                                                    description="<p style='font-weight: bold;font-size:1.2em'>Path to file",
+                                                    style={
+                                                        'description_width': 'initial'},
+                                                    layout=Layout(width='90%', height="35px")),
+
+                                                folder_strain=widgets.Text(
+                                                    value=os.getcwd(),
+                                                    placeholder=os.getcwd(),
+                                                    description='Data folder:',
+                                                    disabled=False,
+                                                    continuous_update=False,
+                                                    layout=Layout(width='90%'),
+                                                    style={'description_width': 'initial'}),
+
+                                                reconstruction_file=widgets.Dropdown(
+                                                    options=sorted(glob.glob(os.getcwd() + "/*.h5") + glob.glob(os.getcwd() + "/*.cxi") + \
+                                                                   glob.glob(os.getcwd() + "/*.npy") + glob.glob(os.getcwd() + "/*.npz")),
+                                                    description='Compatible file list',
+                                                    disabled=False,
+                                                    layout=Layout(width='90%'),
+                                                    style={'description_width': 'initial'}),
+
+                                                run_strain=widgets.ToggleButton(
+                                                    value=False,
+                                                    description='Run strain analysis',
+                                                    disabled=False,
+                                                    button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                    icon='fast-forward',
+                                                    layout=Layout(width='40%'),
+                                                    style={'description_width': 'initial'}),
+                                                )
+        self._list_widgets_strain.children[-4].observe(
+            self.folder_strain_handler, names="value")
         self.tab_strain = widgets.VBox([
             self._list_widgets_strain.children[0],
             widgets.HBox(self._list_widgets_strain.children[1:3]),
@@ -1588,497 +1756,564 @@ class Interface(object):
             self._list_widgets_strain.children[-3],
             self._list_widgets_strain.children[-2],
             self._list_widgets_strain.children[-1],
-            ])
+        ])
 
         # Widgets for logs
         self.tab_logs = interactive(self.display_logs,
-            label_logs = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui, saved as self.logs", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                    label_logs=widgets.HTML(
+                                        description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui, saved as self.logs",
+                                        style={'description_width': 'initial'},
+                                        layout=Layout(width='90%', height="35px")),
 
-            csv_file = widgets.Text(
-                value = os.getcwd() + "/metadata.csv",
-                placeholder = "Path to csv file",
-                description = 'Csv file',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                    csv_file=widgets.Text(
+                                        value=os.getcwd() + "/metadata.csv",
+                                        placeholder="Path to csv file",
+                                        description='Csv file',
+                                        disabled=False,
+                                        continuous_update=False,
+                                        layout=Layout(width='90%'),
+                                        style={'description_width': 'initial'}),
 
-            show_logs = widgets.ToggleButton(
-                value = False,
-                description = 'Show logs',
-                disabled = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                icon = 'fast-forward',
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'}),
-            )
+                                    show_logs=widgets.ToggleButton(
+                                        value=False,
+                                        description='Show logs',
+                                        disabled=False,
+                                        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                        icon='fast-forward',
+                                        layout=Layout(width='40%'),
+                                        style={'description_width': 'initial'}),
+                                    )
 
         # Widgets for plotting
         self.tab_data = interactive(self.load_data,
-            label_plot = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Loads data files (.cxi or npz/npy) and displays it in the gui", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                    label_plot=widgets.HTML(
+                                        description="<p style='font-weight: bold;font-size:1.2em'>Loads data files (.cxi or npz/npy) and displays it in the gui",
+                                        style={'description_width': 'initial'},
+                                        layout=Layout(width='90%', height="35px")),
 
-            folder = widgets.Text(
-                value = os.getcwd(),
-                placeholder = os.getcwd(),
-                description = 'Data folder:',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                    folder=widgets.Text(
+                                        value=os.getcwd(),
+                                        placeholder=os.getcwd(),
+                                        description='Data folder:',
+                                        disabled=False,
+                                        continuous_update=False,
+                                        layout=Layout(width='90%'),
+                                        style={'description_width': 'initial'}),
 
-            file_list = widgets.Dropdown(
-                options = sorted(glob.glob(os.getcwd() + "/*.npz") + glob.glob(os.getcwd() + "/*.cxi") + glob.glob(os.getcwd() + "/*.h5")) + [""],
-                description = 'Compatible file list',
-                disabled = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                    file_list=widgets.Dropdown(
+                                        options=sorted(glob.glob(os.getcwd() + "/*.npz") + glob.glob(
+                                            os.getcwd() + "/*.cxi") + glob.glob(os.getcwd() + "/*.h5")) + [""],
+                                        description='Compatible file list',
+                                        disabled=False,
+                                        layout=Layout(width='90%'),
+                                        style={'description_width': 'initial'}),
 
-            data_use = widgets.ToggleButtons(
-                options = [
-                    ("Clear output", False),
-                    ('2D plotting', "two_d_plot"),
-                    ("Create support", "create_support"),
-                    ("Extract support", "extract_support"),
-                    ("Smooth support", "smooth_support"),
-                    ("3D plotting", "three_d_plot")
-                    ],
-                value = False,
-                description = 'Load data',
-                tooltips = [
-                    "Clear the output and unload data from gui, saves RAM",
-                    "Load data and present plotting options", 
-                    "Load data and present support creation options"
-                    ],
-                disabled = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                icon = 'fast-forward',
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
-            )
-        self.tab_data.children[1].observe(self.folder_plot_handler, names = "value")
+                                    data_use=widgets.ToggleButtons(
+                                        options=[
+                                            ("Clear output", False),
+                                            ('2D plotting', "two_d_plot"),
+                                            ("Create support", "create_support"),
+                                            ("Extract support", "extract_support"),
+                                            ("Smooth support", "smooth_support"),
+                                            ("3D plotting", "three_d_plot")
+                                        ],
+                                        value=False,
+                                        description='Load data',
+                                        tooltips=[
+                                            "Clear the output and unload data from gui, saves RAM",
+                                            "Load data and present plotting options",
+                                            "Load data and present support creation options"
+                                        ],
+                                        disabled=False,
+                                        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                        icon='fast-forward',
+                                        layout=Layout(width='90%'),
+                                        style={'description_width': 'initial'}),
+                                    )
+        self.tab_data.children[1].observe(
+            self.folder_plot_handler, names="value")
 
         # Widgets for PyNX
         self._list_widgets_pynx = interactive(self.init_pynx,
-                    label_data = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Data files",
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
+                                              label_data=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Data files",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
 
-                    folder = widgets.Text(
-                        value = os.getcwd(),
-                        placeholder = os.getcwd(),
-                        description = 'Data folder:',
-                        disabled = False,
-                        continuous_update = False,
-                        layout = Layout(width='90%'),
-                        style = {'description_width': 'initial'}),
+                                              folder=widgets.Text(
+                                                  value=os.getcwd(),
+                                                  placeholder=os.getcwd(),
+                                                  description='Data folder:',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-                    iobs = widgets.Dropdown(
-                        options = sorted(glob.glob(os.getcwd() + "*.npz")) + [""],
-                        description = 'Dataset',
-                        disabled = False,
-                        layout = Layout(width='90%'),
-                        style = {'description_width': 'initial'}),
+                                              iobs=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  description='Dataset',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-                    mask = widgets.Dropdown(
-                        options = sorted(glob.glob(os.getcwd() + "*.npz")) + [""],
-                        description = 'Mask',
-                        disabled = False,
-                        layout = Layout(width='90%'),
-                        style = {'description_width': 'initial'}),
+                                              mask=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  description='Mask',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-                    support  = widgets.Dropdown(
-                        options = sorted(glob.glob(os.getcwd() + "*.npz")) + [""],
-                        value = "",
-                        description = 'Support',
-                        disabled = False,
-                        layout = Layout(width='90%'),
-                        style = {'description_width': 'initial'}),
+                                              support=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  value="",
+                                                  description='Support',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-                    obj = widgets.Dropdown(
-                        options = sorted(glob.glob(os.getcwd() + "*.npz")) + [""],
-                        value = "",
-                        description = 'Object',
-                        disabled = False,
-                        layout = Layout(width='90%'),
-                        style = {'description_width': 'initial'}),
+                                              obj=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  value="",
+                                                  description='Object',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
 
-                    auto_center_resize = widgets.Checkbox(
-                        value = False,
-                        description = 'Auto center and resize',
-                        continuous_update = False,
-                        disabled = False,
-                        indent = False,
-                        layout = Layout(height = "50px"),
-                        icon = 'check'),
+                                              auto_center_resize=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Auto center and resize',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(height="50px"),
+                                                  icon='check'),
 
-                    max_size  = widgets.BoundedIntText(
-                        value = 256,
-                        step = 1,
-                        min = 0,
-                        max = 1000,
-                        layout = Layout(height = "50px", width = "40%"),
-                        continuous_update = False,
-                        description = 'Maximum array size for cropping:',
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
+                                              max_size=widgets.BoundedIntText(
+                                                  value=256,
+                                                  step=1,
+                                                  min=0,
+                                                  max=1000,
+                                                  layout=Layout(
+                                                      height="50px", width="40%"),
+                                                  continuous_update=False,
+                                                  description='Maximum array size for cropping:',
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
 
-                    label_support = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Support parameters",
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
+                                              label_support=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Support parameters",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
 
-                    support_threshold = widgets.Text(
-                        value = "(0.23, 0.30)",
-                        placeholder = "(0.23, 0.30)",
-                        description = 'Support threshold',
-                        disabled = False,
-                        layout = Layout(height = "50px", width = "40%"),
-                        continuous_update = False,
-                        style = {'description_width': 'initial'}),
+                                              support_threshold=widgets.Text(
+                                                  value="(0.23, 0.30)",
+                                                  placeholder="(0.23, 0.30)",
+                                                  description='Support threshold',
+                                                  disabled=False,
+                                                  layout=Layout(
+                                                      height="50px", width="40%"),
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
 
-                    support_only_shrink = widgets.Checkbox(
-                        value = False,
-                        description = 'Support only shrink',
-                        continuous_update = False,
-                        disabled = False,
-                        indent = False,
-                        layout = Layout(height = "50px", width = "15%"),
-                        icon = 'check'),
+                                              support_only_shrink=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Support only shrink',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(
+                                                      height="50px", width="15%"),
+                                                  icon='check'),
 
-                    support_update_period  = widgets.BoundedIntText(
-                        value = 20,
-                        step = 5,
-                        layout = Layout(height = "50px", width = "25%"),
-                        continuous_update = False,
-                        description = 'Support update period:',
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
+                                              support_update_period=widgets.BoundedIntText(
+                                                  value=20,
+                                                  step=5,
+                                                  layout=Layout(
+                                                      height="50px", width="25%"),
+                                                  continuous_update=False,
+                                                  description='Support update period:',
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
 
-                    support_smooth_width =  widgets.Text(
-                        value = "(2, 1, 600)",
-                        placeholder = "(2, 1, 600)",
-                        description = 'Support smooth width',
-                        disabled = False,
-                        layout = Layout(height = "50px", width = "35%"),
-                        continuous_update = False,
-                        style = {'description_width': 'initial'}),
+                                              support_smooth_width=widgets.Text(
+                                                  value="(2, 1, 600)",
+                                                  placeholder="(2, 1, 600)",
+                                                  description='Support smooth width',
+                                                  disabled=False,
+                                                  layout=Layout(
+                                                      height="50px", width="35%"),
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
 
-                    support_post_expand = widgets.Text(
-                        value = "(1, -2, 1)",
-                        placeholder = "(1, -2, 1)",
-                        description = 'Support post expand',
-                        disabled = False,
-                        layout = Layout(height = "50px", width = "35%"),
-                        continuous_update = False,
-                        style = {'description_width': 'initial'}),
-                                
-                    label_psf = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Point spread function parameters",
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
+                                              support_post_expand=widgets.Text(
+                                                  value="(1, -2, 1)",
+                                                  placeholder="(1, -2, 1)",
+                                                  description='Support post expand',
+                                                  disabled=False,
+                                                  layout=Layout(
+                                                      height="50px", width="35%"),
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
 
-                    psf = widgets.Checkbox(
-                        value = False,
-                        description = 'Use point spread function:',
-                        continuous_update = False,
-                        disabled = False,
-                        indent = False,
-                        layout = Layout(height = "50px"),
-                        icon = 'check'),
+                                              label_psf=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Point spread function parameters",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
 
-                    psf_model = widgets.Dropdown(
-                        options = ["gaussian", "lorentzian", "pseudo-voigt"],
-                        value = "gaussian",
-                        description = 'PSF peak shape',
-                        continuous_update = False,
-                        disabled = True,
-                        style = {'description_width': 'initial'}),
+                                              psf=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Use point spread function:',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(height="50px"),
+                                                  icon='check'),
 
-                    fwhm = widgets.FloatText(
-                        value = 1,
-                        step = 0.01,
-                        min = 0,
-                        continuous_update = False,
-                        description = "FWHM:",
-                        layout = Layout(width='15%', height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = True),
+                                              psf_model=widgets.Dropdown(
+                                                  options=[
+                                                      "gaussian", "lorentzian", "pseudo-voigt"],
+                                                  value="gaussian",
+                                                  description='PSF peak shape',
+                                                  continuous_update=False,
+                                                  disabled=True,
+                                                  style={'description_width': 'initial'}),
 
-                    eta = widgets.FloatText(
-                        value = 0.05,
-                        step = 0.01,
-                        max = 1,
-                        min = 0,
-                        continuous_update = False,
-                        description = 'Eta:',
-                        layout = Layout(width='15%', height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = True),
-                    
-                    update_psf = widgets.BoundedIntText(
-                        value = 20,
-                        step = 5,
-                        continuous_update = False,
-                        description = 'Update PSF every:',
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = True),
-                                
-                    label_algo = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Iterative algorithms parameters",
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
-                    
-                    use_operators = widgets.Checkbox(
-                        value = False,
-                        description = 'Use operator chain:',
-                        continuous_update = False,
-                        disabled = False,
-                        indent = False,
-                        layout = Layout(height = "35px", width = "15%"),
-                        icon = 'check'),
-                    
-                    operator_chain = widgets.Text(
-                        value = "",
-                        placeholder = "",
-                        description = 'Operator chain',
-                        layout = Layout(height = "35px", width = "70%"),
-                        disabled = True,
-                        continuous_update = False,
-                        style = {'description_width': 'initial'}),
-                    
-                    nb_raar = widgets.BoundedIntText(
-                        value = 1000,
-                        min = 0,
-                        max = 9999,
-                        step = 10,
-                        continuous_update = False,
-                        description = 'Nb of RAAR:',
-                        layout = Layout(height = "35px", width = "20%"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    nb_hio = widgets.BoundedIntText(
-                        value = 400,
-                        min = 0,
-                        max = 9999,
-                        step = 10,
-                        continuous_update = False,
-                        description = 'Nb of HIO:',
-                        layout = Layout(height = "35px", width = "20%"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    nb_er = widgets.BoundedIntText(
-                        value = 300,
-                        min = 0,
-                        max = 9999,
-                        step = 10,
-                        continuous_update = False,
-                        description = 'Nb of ER:',
-                        layout = Layout(height = "35px", width = "20%"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    nb_ml = widgets.BoundedIntText(
-                        value = 0,
-                        min = 0,
-                        max = 9999,
-                        step = 10,
-                        continuous_update = False,
-                        description = 'Nb of ML:',
-                        layout = Layout(height = "35px", width = "20%"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    nb_run = widgets.BoundedIntText(
-                        value = 30,
-                        continuous_update = False,
-                        description = 'Number of run:',
-                        layout = Layout(height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
+                                              fwhm=widgets.FloatText(
+                                                  value=1,
+                                                  step=0.01,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description="FWHM:",
+                                                  layout=Layout(
+                                                      width='15%', height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=True),
 
-                    label_filtering = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Filtering criteria for reconstructions",
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
-                    
-                    filter_criteria = widgets.Dropdown(
-                        options = [
-                            ("No filtering", "no_filtering"),
-                            ("Standard deviation", "standard_deviation"),
-                            ("Log-likelihood (LLK)", "LLK"),
-                            ("LLK > Standard deviation", "LLK_standard_deviation"),
-                            # ("Standard deviation > LLK", "standard_deviation_LLK"),
-                            ],
-                        value = "LLK_standard_deviation", 
-                        description = 'Filtering criteria',
-                        disabled = False,
-                        layout = Layout(width='90%'),
-                        style = {'description_width': 'initial'}),
-                    
-                    nb_run_keep = widgets.BoundedIntText(
-                        value = 10,
-                        continuous_update = False,
-                        description = 'Number of run to keep:',
-                        layout = Layout(height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                                
-                    label_options = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Options",
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
-                    
-                    live_plot = widgets.BoundedIntText(
-                        value = 200,
-                        step = 10,
-                        max = 500,
-                        min = 0,
-                        continuous_update = False,
-                        description = 'Plot every:',
-                        readout = True,
-                        layout = Layout(height = "50px", width = "20%"),
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    positivity = widgets.Checkbox(
-                        value = False,
-                        description = 'Force positivity',
-                        continuous_update = False,
-                        disabled = False,
-                        indent = False,
-                        style = {'description_width': 'initial'},
-                        layout = Layout(height = "50px", width = "20%"),
-                        icon = 'check'),
-                    
-                    beta = widgets.FloatText(
-                        value = 0.9,
-                        step = 0.01,
-                        max = 1,
-                        min = 0,
-                        continuous_update = False,
-                        description = 'Beta parameter for RAAR and HIO:',
-                        layout = Layout(width='35%', height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    detwin = widgets.Checkbox(
-                        value = False,
-                        description = 'Detwinning',
-                        continuous_update = False,
-                        disabled = False,
-                        indent = False,
-                        style = {'description_width': 'initial'},
-                        layout = Layout(height = "50px", width = "15%"),
-                        icon = 'check'),
-                    
-                    rebin = widgets.Text(
-                        value = "(1, 1, 1)",
-                        placeholder = "(1, 1, 1)",
-                        description = 'Rebin',
-                        layout = Layout(height = "50px"),
-                        disabled = False,
-                        continuous_update = False,
-                        style = {'description_width': 'initial'}),
-                    
-                    verbose = widgets.BoundedIntText(
-                        value = 100,
-                        min = 10,
-                        max = 300,
-                        continuous_update = False,
-                        description = 'Verbose:',
-                        layout = Layout(height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
-                    
-                    pixel_size_detector = widgets.BoundedIntText(
-                        value = 55,
-                        continuous_update = False,
-                        description = 'Pixel size of detector (um):',
-                        layout = Layout(height = "50px"),
-                        readout = True,
-                        style = {'description_width': 'initial'},
-                        disabled = False),
+                                              eta=widgets.FloatText(
+                                                  value=0.05,
+                                                  step=0.01,
+                                                  max=1,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description='Eta:',
+                                                  layout=Layout(
+                                                      width='15%', height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=True),
 
-                    label_phase_retrieval = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the phase retrieval</p>", # 
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
+                                              update_psf=widgets.BoundedIntText(
+                                                  value=20,
+                                                  step=5,
+                                                  continuous_update=False,
+                                                  description='Update PSF every:',
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=True),
 
-                    run_phase_retrieval = widgets.ToggleButtons(
-                        options = [
-                        ('No phase retrieval', False), 
-                        ('Run batch job', "batch"), 
-                        ("Run script locally", "local_script"), 
-                        ("Use operators", "operators"),
-                        ],
-                        value = False,
-                        tooltips = [
-                            "Click to be able to change parameters",
-                            "Collect parameters to run a job on slurm, will automatically apply a std deviation filter and run modes decomposition, freed the kernel",
-                            "Run script on jupyter notebook environment, uses notebook kernel, will be performed in background also but more slowly, good if you cannot use jobs.",
-                            "Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
-                            ],
-                        description = 'Run phase retrieval ...',
-                        disabled = False,
-                        continuous_update = False,
-                        button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                        layout = Layout(width='100%', height = "50px"),
-                        style = {'description_width': 'initial'},
-                        icon = 'fast-forward'),
+                                              label_algo=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Iterative algorithms parameters",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
 
-                    label_run_pynx_tools = widgets.HTML(
-                        description="<p style='font-weight: bold;font-size:1.2em'>Click below to use a phase retrieval tool</p>", # 
-                        style = {'description_width': 'initial'},
-                        layout = Layout(width='90%', height = "35px")),
+                                              use_operators=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Use operator chain:',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(
+                                                      height="35px", width="15%"),
+                                                  icon='check'),
 
-                    run_pynx_tools = widgets.ToggleButtons(
-                        options = [
-                        ('No tool running', False),
-                        ("Modes decomposition","modes"), 
-                        ("Filter reconstructions","filter")
-                        ],
-                        value = False,
-                        tooltips = [
-                            "Click to be able to change parameters",
-                            "Run modes decomposition in data folder, selects *LLK*.cxi files",
-                            "Filter reconstructions"
-                            ],
-                        description = "Choose analysis:",
-                        disabled = False,
-                        continuous_update = False,
-                        button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                        layout = Layout(width='100%', height = "50px"),
-                        style = {'description_width': 'initial'},
-                        icon = 'fast-forward')
-                   )
-        self._list_widgets_pynx.children[1].observe(self.folder_pynx_handler, names = "value")
-        self._list_widgets_pynx.children[15].observe(self.pynx_psf_handler, names = "value")
-        self._list_widgets_pynx.children[16].observe(self.pynx_peak_shape_handler, names = "value")
-        self._list_widgets_pynx.children[21].observe(self.pynx_operator_handler, names = "value")
-        self._list_widgets_pynx.children[-4].observe(self.run_pynx_handler, names = "value")
-        self._list_widgets_pynx.children[-2].observe(self.run_pynx_handler, names = "value")
+                                              operator_chain=widgets.Text(
+                                                  value="",
+                                                  placeholder="",
+                                                  description='Operator chain',
+                                                  layout=Layout(
+                                                      height="35px", width="70%"),
+                                                  disabled=True,
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
+
+                                              nb_raar=widgets.BoundedIntText(
+                                                  value=1000,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of RAAR:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_hio=widgets.BoundedIntText(
+                                                  value=400,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of HIO:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_er=widgets.BoundedIntText(
+                                                  value=300,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of ER:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_ml=widgets.BoundedIntText(
+                                                  value=0,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of ML:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_run=widgets.BoundedIntText(
+                                                  value=30,
+                                                  continuous_update=False,
+                                                  description='Number of run:',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              label_filtering=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Filtering criteria for reconstructions",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              filter_criteria=widgets.Dropdown(
+                                                  options=[
+                                                      ("No filtering",
+                                                       "no_filtering"),
+                                                      ("Standard deviation",
+                                                       "standard_deviation"),
+                                                      ("Log-likelihood (LLK)", "LLK"),
+                                                      ("LLK > Standard deviation",
+                                                       "LLK_standard_deviation"),
+                                                      # ("Standard deviation > LLK", "standard_deviation_LLK"),
+                                                  ],
+                                                  value="LLK_standard_deviation",
+                                                  description='Filtering criteria',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              nb_run_keep=widgets.BoundedIntText(
+                                                  value=10,
+                                                  continuous_update=False,
+                                                  description='Number of run to keep:',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              label_options=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Options",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              live_plot=widgets.BoundedIntText(
+                                                  value=200,
+                                                  step=10,
+                                                  max=500,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description='Plot every:',
+                                                  readout=True,
+                                                  layout=Layout(
+                                                      height="50px", width="20%"),
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              positivity=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Force positivity',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(
+                                                      height="50px", width="20%"),
+                                                  icon='check'),
+
+                                              beta=widgets.FloatText(
+                                                  value=0.9,
+                                                  step=0.01,
+                                                  max=1,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description='Beta parameter for RAAR and HIO:',
+                                                  layout=Layout(
+                                                      width='35%', height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              detwin=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Detwinning',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(
+                                                      height="50px", width="15%"),
+                                                  icon='check'),
+
+                                              rebin=widgets.Text(
+                                                  value="(1, 1, 1)",
+                                                  placeholder="(1, 1, 1)",
+                                                  description='Rebin',
+                                                  layout=Layout(height="50px"),
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
+
+                                              verbose=widgets.BoundedIntText(
+                                                  value=100,
+                                                  min=10,
+                                                  max=300,
+                                                  continuous_update=False,
+                                                  description='Verbose:',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              pixel_size_detector=widgets.BoundedIntText(
+                                                  value=55,
+                                                  continuous_update=False,
+                                                  description='Pixel size of detector (um):',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              label_phase_retrieval=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the phase retrieval</p>",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              run_phase_retrieval=widgets.ToggleButtons(
+                                                  options=[
+                                                      ('No phase retrieval', False),
+                                                      ('Run batch job', "batch"),
+                                                      ("Run script locally",
+                                                       "local_script"),
+                                                      ("Use operators",
+                                                       "operators"),
+                                                  ],
+                                                  value=False,
+                                                  tooltips=[
+                                                      "Click to be able to change parameters",
+                                                      "Collect parameters to run a job on slurm, will automatically apply a std deviation filter and run modes decomposition, freed the kernel",
+                                                      "Run script on jupyter notebook environment, uses notebook kernel, will be performed in background also but more slowly, good if you cannot use jobs.",
+                                                      "Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
+                                                  ],
+                                                  description='Run phase retrieval ...',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                  layout=Layout(
+                                                      width='100%', height="50px"),
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  icon='fast-forward'),
+
+                                              label_run_pynx_tools=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Click below to use a phase retrieval tool</p>",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              run_pynx_tools=widgets.ToggleButtons(
+                                                  options=[
+                                                      ('No tool running', False),
+                                                      ("Modes decomposition",
+                                                       "modes"),
+                                                      ("Filter reconstructions",
+                                                       "filter")
+                                                  ],
+                                                  value=False,
+                                                  tooltips=[
+                                                      "Click to be able to change parameters",
+                                                      "Run modes decomposition in data folder, selects *LLK*.cxi files",
+                                                      "Filter reconstructions"
+                                                  ],
+                                                  description="Choose analysis:",
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                  layout=Layout(
+                                                      width='100%', height="50px"),
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  icon='fast-forward')
+                                              )
+        self._list_widgets_pynx.children[1].observe(
+            self.folder_pynx_handler, names="value")
+        self._list_widgets_pynx.children[15].observe(
+            self.pynx_psf_handler, names="value")
+        self._list_widgets_pynx.children[16].observe(
+            self.pynx_peak_shape_handler, names="value")
+        self._list_widgets_pynx.children[21].observe(
+            self.pynx_operator_handler, names="value")
+        self._list_widgets_pynx.children[-4].observe(
+            self.run_pynx_handler, names="value")
+        self._list_widgets_pynx.children[-2].observe(
+            self.run_pynx_handler, names="value")
         self.tab_pynx = widgets.VBox([
             widgets.VBox(self._list_widgets_pynx.children[:6]),
             widgets.HBox(self._list_widgets_pynx.children[6:8]),
@@ -2102,73 +2337,77 @@ class Interface(object):
             self._list_widgets_pynx.children[-3],
             self._list_widgets_pynx.children[-2],
             self._list_widgets_pynx.children[-1],
-            ])
+        ])
 
         # Widgets for facet analysis
         self.tab_facet = interactive(self.facet_analysis,
-            label_facet = widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>Extract facet specific data from vtk file", # 
-                style = {'description_width': 'initial'},
-                layout = Layout(width='90%', height = "35px")),
+                                     label_facet=widgets.HTML(
+                                         description="<p style='font-weight: bold;font-size:1.2em'>Extract facet specific data from vtk file",
+                                         style={
+                                             'description_width': 'initial'},
+                                         layout=Layout(width='90%', height="35px")),
 
-            facet_folder = widgets.Text(
-                value = os.getcwd() + f"/postprocessing/",
-                placeholder = os.getcwd() + f"/postprocessing/",
-                description = 'Facet data (.vtk) folder:',
-                disabled = False,
-                continuous_update = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                     facet_folder=widgets.Text(
+                                         value=os.getcwd() + f"/postprocessing/",
+                                         placeholder=os.getcwd() + f"/postprocessing/",
+                                         description='Facet data (.vtk) folder:',
+                                         disabled=False,
+                                         continuous_update=False,
+                                         layout=Layout(width='90%'),
+                                         style={'description_width': 'initial'}),
 
-            facet_filename = widgets.Dropdown(
-                options = sorted(glob.glob(os.getcwd() + f"/postprocessing/")) + [""],
-                description = 'Vtk data',
-                disabled = False,
-                layout = Layout(width='90%'),
-                style = {'description_width': 'initial'}),
+                                     facet_filename=widgets.Dropdown(
+                                         options=sorted(
+                                             glob.glob(os.getcwd() + f"/postprocessing/")) + [""],
+                                         description='Vtk data',
+                                         disabled=False,
+                                         layout=Layout(width='90%'),
+                                         style={'description_width': 'initial'}),
 
-            load_data = widgets.ToggleButton(
-                value = False,
-                description = 'Load vtk data',
-                disabled = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                icon = 'fast-forward',
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'}),
-            )
-        self.tab_facet.children[1].observe(self.folder_facet_handler, names = "value")
+                                     load_data=widgets.ToggleButton(
+                                         value=False,
+                                         description='Load vtk data',
+                                         disabled=False,
+                                         button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                         icon='fast-forward',
+                                         layout=Layout(width='40%'),
+                                         style={'description_width': 'initial'}),
+                                     )
+        self.tab_facet.children[1].observe(
+            self.folder_facet_handler, names="value")
 
         # Widgets for readme tab
-        self.tab_readme = interactive(self.display_readme, 
-                                contents = widgets.ToggleButtons(
-                                    options = ['Preprocessing', 'Phase retrieval', 'Postprocessing', "Facet analysis"],
-                                    value = 'Phase retrieval',
-                                    description = 'Show info about:',
-                                    disabled = False,
-                                    tooltips = [
-                                            'Nothing is shown', 'Insight in the functions used for preprocessing',
-                                            'Insight in the functions used for phase retrieval',
-                                            'Insight in the functions used for postprocessing'
-                                            'Insight in the functions used for facet analysis'
-                                            ],
-                                    style = {'description_width': 'initial'}))
+        self.tab_readme = interactive(self.display_readme,
+                                      contents=widgets.ToggleButtons(
+                                          options=[
+                                              'Preprocessing', 'Phase retrieval', 'Postprocessing', "Facet analysis"],
+                                          value='Phase retrieval',
+                                          description='Show info about:',
+                                          disabled=False,
+                                          tooltips=[
+                                              'Nothing is shown', 'Insight in the functions used for preprocessing',
+                                              'Insight in the functions used for phase retrieval',
+                                              'Insight in the functions used for postprocessing'
+                                              'Insight in the functions used for facet analysis'
+                                          ],
+                                          style={'description_width': 'initial'}))
 
         # Create the final window
         if pynx_import:
             self.window = widgets.Tab(
-                            children=[
-                                self.tab_init,
-                                self.tab_detector,
-                                self.tab_ortho, 
-                                self.tab_preprocess,
-                                self.tab_correct, 
-                                self.tab_logs,
-                                self.tab_pynx,
-                                self.tab_strain,
-                                self.tab_data,
-                                self.tab_facet,
-                                self.tab_readme,
-                            ])
+                children=[
+                    self.tab_init,
+                    self.tab_detector,
+                    self.tab_ortho,
+                    self.tab_preprocess,
+                    self.tab_correct,
+                    self.tab_logs,
+                    self.tab_pynx,
+                    self.tab_strain,
+                    self.tab_data,
+                    self.tab_facet,
+                    self.tab_readme,
+                ])
             self.window.set_title(0, 'Scan detail')
             self.window.set_title(1, 'Detector')
             self.window.set_title(2, 'Setup')
@@ -2185,19 +2424,19 @@ class Interface(object):
 
         elif not pynx_import:
             self.window = widgets.Tab(
-                            children=[
-                                self.tab_init,
-                                self.tab_detector,
-                                self.tab_ortho, 
-                                self.tab_preprocess,
-                                self.tab_correct, 
-                                self.tab_logs,
-                                # self.tab_pynx,
-                                self.tab_strain,
-                                self.tab_data,
-                                self.tab_facet,
-                                self.tab_readme,
-                            ])
+                children=[
+                    self.tab_init,
+                    self.tab_detector,
+                    self.tab_ortho,
+                    self.tab_preprocess,
+                    self.tab_correct,
+                    self.tab_logs,
+                    # self.tab_pynx,
+                    self.tab_strain,
+                    self.tab_data,
+                    self.tab_facet,
+                    self.tab_readme,
+                ])
             self.window.set_title(0, 'Scan detail')
             self.window.set_title(1, 'Detector')
             self.window.set_title(2, 'Setup')
@@ -2214,16 +2453,16 @@ class Interface(object):
 
     # Widgets interactive functions
     def initialize_directories(self,
-        label_scan,
-        sample_name,
-        scans,
-        data_directory,
-        final_directory,
-        user_comment,
-        debug,
-        run_dir_init,
-        reload_previous_data,
-        ):
+                               label_scan,
+                               sample_name,
+                               scans,
+                               data_directory,
+                               final_directory,
+                               user_comment,
+                               debug,
+                               run_dir_init,
+                               reload_previous_data,
+                               ):
         """
         Function to move file from datadir to folder where it will be used by preprocess.bcdi
 
@@ -2239,12 +2478,13 @@ class Interface(object):
             # Transform string of list into python list object if multiple scans
             # if scans.startswith("["): # Should not happen in the gui
             #     self.Dataset.scans = ast.literal_eval(scans)
-                
+
             # else:
-            #     self.Dataset.scans = [scans]# 
-            
+            #     self.Dataset.scans = [scans]#
+
             # Create Dataset attribute (class from other module)
-            self.Dataset = gui_iterable.Dataset(scans = scans, sample_name = sample_name, data_directory = data_directory, root_folder = final_directory)
+            self.Dataset = gui_iterable.Dataset(
+                scans=scans, sample_name=sample_name, data_directory=data_directory, root_folder=final_directory)
 
             self.Dataset.user_comment = user_comment
             self.Dataset.debug = debug
@@ -2252,7 +2492,8 @@ class Interface(object):
             # Scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scans}/"
             print("Scan folder:", self.Dataset.scan_folder)
-            self.tab_facet.children[1].value = self.Dataset.scan_folder + f"postprocessing/{self.Dataset.scans}_fa.vtk"
+            self.tab_facet.children[1].value = self.Dataset.scan_folder + \
+                f"postprocessing/{self.Dataset.scans}_fa.vtk"
             self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
             self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
@@ -2260,25 +2501,30 @@ class Interface(object):
             # Filename for SIXS, should be temporary
             try:
                 try:
-                    self.Dataset.path_to_data = glob.glob(f"{self.Dataset.data_directory}*mu*{self.Dataset.scans}*")[0]
+                    self.Dataset.path_to_data = glob.glob(
+                        f"{self.Dataset.data_directory}*mu*{self.Dataset.scans}*")[0]
                     print("File path:", self.Dataset.path_to_data)
                 except IndexError:
-                        self.Dataset.path_to_data = glob.glob(f"{self.Dataset.data_directory}*omega*{self.Dataset.scans}*")[0]
-                        print("Omega scan") 
+                    self.Dataset.path_to_data = glob.glob(
+                        f"{self.Dataset.data_directory}*omega*{self.Dataset.scans}*")[0]
+                    print("Omega scan")
 
                 # If rotated before
-                self.Dataset.template_imagefile = self.Dataset.path_to_data.split("%05d"%self.Dataset.scans)[0]+"%05d.nxs" 
-                print("File template:", self.Dataset.template_imagefile, end = "\n\n")
+                self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
+                    "%05d" % self.Dataset.scans)[0]+"%05d.nxs"
+                print("File template:", self.Dataset.template_imagefile, end="\n\n")
 
                 # Save file name
-                self._list_widgets_preprocessing.children[43].value = self.Dataset.template_imagefile.split("/")[-1]
+                self._list_widgets_preprocessing.children[43].value = self.Dataset.template_imagefile.split(
+                    "/")[-1]
 
             except IndexError:
                 self.Dataset.template_imagefile = ""
                 self.Dataset.path_to_data = ""
 
             # Data folder
-            self.Dataset.data_folder = self.Dataset.scan_folder + "data/" # folder of the experiment, where all scans are stored
+            # folder of the experiment, where all scans are stored
+            self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
 
             # Create final directory is not yet existing
             if not os.path.isdir(self.Dataset.root_folder):
@@ -2296,41 +2542,53 @@ class Interface(object):
             # Scan directory
             try:
                 os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}")
-                print(f"Created {self.Dataset.root_folder}S{self.Dataset.scans}")
+                print(
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}")
             except FileExistsError:
                 print(f"{self.Dataset.root_folder}S{self.Dataset.scans} exists")
                 pass
 
             # /data directory
             try:
-                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
-                print(f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                os.mkdir(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                print(
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/data")
             except FileExistsError:
                 print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/data exists")
                 pass
 
             # /pynxraw directory
             try:
-                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
-                print(f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                os.mkdir(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                print(
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw exists")
+                print(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw exists")
                 pass
 
             # /postprocessing directory
             try:
-                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
-                print(f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing", end = "\n\n")
+                os.mkdir(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                print(
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing", end="\n\n")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing exists", end = "\n\n")
+                print(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing exists", end="\n\n")
                 pass
 
             # move data file
             try:
-                shutil.copy2(self.Dataset.path_to_data, f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
-                print(f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scans}/data")
-            except (FileExistsError,shutil.SameFileError):
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/data/{self.Dataset.path_to_data} exists")
+                shutil.copy2(self.Dataset.path_to_data,
+                             f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                print(
+                    f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scans}/data")
+            except (FileExistsError, shutil.SameFileError):
+                print(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/data/{self.Dataset.path_to_data} exists")
             except (AttributeError, FileNotFoundError):
                 pass
 
@@ -2344,37 +2602,46 @@ class Interface(object):
 
             # Move notebooks
             if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb"):
-                shutil.copy(f"{self.path_package}bcdi/data_files/PhasingNotebook.ipynb", f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
-                print(f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                shutil.copy(f"{self.path_package}bcdi/data_files/PhasingNotebook.ipynb",
+                            f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                print(
+                    f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
             else:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb exists")
+                print(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb exists")
 
             if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb"):
-                shutil.copy(f"{self.path_package}bcdi/data_files/CompareFacetsEvolution.ipynb", f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
-                print(f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                shutil.copy(f"{self.path_package}bcdi/data_files/CompareFacetsEvolution.ipynb",
+                            f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                print(
+                    f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
             else:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb exists")
+                print(
+                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-            self.folder_pynx_handler(change = self._list_widgets_pynx.children[1].value)
+            self.folder_pynx_handler(
+                change=self._list_widgets_pynx.children[1].value)
 
             self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-            self.folder_plot_handler(change = self.tab_data.children[1].value)
+            self.folder_plot_handler(change=self.tab_data.children[1].value)
 
             self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
-            self.folder_strain_handler(change = self._list_widgets_strain.children[-4].value)
- 
-            self.tab_facet.children[1].value = self.Dataset.scan_folder + f"postprocessing/"
-            self.folder_facet_handler(change = self.tab_facet.children[1].value)
+            self.folder_strain_handler(
+                change=self._list_widgets_strain.children[-4].value)
+
+            self.tab_facet.children[1].value = self.Dataset.scan_folder + \
+                f"postprocessing/"
+            self.folder_facet_handler(change=self.tab_facet.children[1].value)
 
             # Button to save data
             button_save_as_gwr = Button(
-                description = "Save work as .gwr file",
-                continuous_update = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'},
-                icon = 'fast-forward')
+                description="Save work as .gwr file",
+                continuous_update=False,
+                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                layout=Layout(width='40%'),
+                style={'description_width': 'initial'},
+                icon='fast-forward')
             display(button_save_as_gwr)
 
             @button_save_as_gwr.on_click
@@ -2385,87 +2652,86 @@ class Interface(object):
                 self.Dataset.to_gwr()
 
         elif reload_previous_data:
-            # Reload previous data that was saved as .gwr file, initialize all related widgets values, authorize all functions 
+            # Reload previous data that was saved as .gwr file, initialize all related widgets values, authorize all functions
             print("plop")
 
         elif not run_dir_init and not reload_previous_data:
             clear_output(True)
 
-
     def initialize_parameters(self,
-        label_beamline,
-        beamline,
-        actuators, 
-        is_series, 
-        custom_scan, 
-        custom_images, 
-        custom_monitor, 
-        specfile_name, 
-        rocking_angle, 
-        follow_bragg,
-        label_masking, 
-        flag_interact, 
-        background_plot,
-        label_centering, 
-        centering, 
-        fix_bragg, 
-        fix_size, 
-        center_fft, 
-        pad_size,
-        normalize_flux, 
-        label_filtering, 
-        mask_zero_event, 
-        flag_medianfilter, 
-        medfilt_order, 
-        binning,
-        label_reload, 
-        reload_previous, 
-        reload_orthogonal, 
-        preprocessing_binning,
-        label_saving, 
-        save_rawdata, 
-        save_to_npz, 
-        save_to_mat, 
-        save_to_vti, 
-        save_asint,
-        label_detector, 
-        detector, 
-        roi_detector,
-        photon_threshold, 
-        photon_filter, 
-        background_file, 
-        hotpixels_file, 
-        flatfield_file,
-        template_imagefile,
-        nb_pixel_x, 
-        nb_pixel_y,
-        label_ortho, 
-        use_rawdata, 
-        interp_method, 
-        fill_value_mask, 
-        beam_direction, 
-        sample_offsets, 
-        sdd, 
-        energy, 
-        custom_motors,
-        label_xru, 
-        align_q, 
-        ref_axis_q, 
-        outofplane_angle, 
-        inplane_angle, 
-        sample_inplane, 
-        sample_outofplane, 
-        offset_inplane, 
-        cch1, 
-        cch2, 
-        direct_inplane, 
-        direct_outofplane, 
-        detrot, 
-        tiltazimuth, 
-        tilt,
-        label_preprocess, 
-        init_para
-        ):
+                              label_beamline,
+                              beamline,
+                              actuators,
+                              is_series,
+                              custom_scan,
+                              custom_images,
+                              custom_monitor,
+                              specfile_name,
+                              rocking_angle,
+                              follow_bragg,
+                              label_masking,
+                              flag_interact,
+                              background_plot,
+                              label_centering,
+                              centering,
+                              fix_bragg,
+                              fix_size,
+                              center_fft,
+                              pad_size,
+                              normalize_flux,
+                              label_filtering,
+                              mask_zero_event,
+                              flag_medianfilter,
+                              medfilt_order,
+                              binning,
+                              label_reload,
+                              reload_previous,
+                              reload_orthogonal,
+                              preprocessing_binning,
+                              label_saving,
+                              save_rawdata,
+                              save_to_npz,
+                              save_to_mat,
+                              save_to_vti,
+                              save_asint,
+                              label_detector,
+                              detector,
+                              roi_detector,
+                              photon_threshold,
+                              photon_filter,
+                              background_file,
+                              hotpixels_file,
+                              flatfield_file,
+                              template_imagefile,
+                              nb_pixel_x,
+                              nb_pixel_y,
+                              label_ortho,
+                              use_rawdata,
+                              interp_method,
+                              fill_value_mask,
+                              beam_direction,
+                              sample_offsets,
+                              sdd,
+                              energy,
+                              custom_motors,
+                              label_xru,
+                              align_q,
+                              ref_axis_q,
+                              outofplane_angle,
+                              inplane_angle,
+                              sample_inplane,
+                              sample_outofplane,
+                              offset_inplane,
+                              cch1,
+                              cch2,
+                              direct_inplane,
+                              direct_outofplane,
+                              detrot,
+                              tiltazimuth,
+                              tilt,
+                              label_preprocess,
+                              init_para
+                              ):
         """
         Initialize the parameters of using in script taken from bcdi package, necessary for preprocessing, correction and strain
 
@@ -2486,10 +2752,10 @@ class Interface(object):
             self.Dataset.binning = binning
             self.Dataset.flag_interact = flag_interact
             self.Dataset.background_plot = str(background_plot)
-            if centering == "manual": # will be overridden
+            if centering == "manual":  # will be overridden
                 self.Dataset.centering = "max"
             else:
-                self.Dataset.centering = centering                
+                self.Dataset.centering = centering
             self.Dataset.fix_bragg = fix_bragg
             self.Dataset.fix_size = fix_size
             self.Dataset.center_fft = center_fft
@@ -2550,9 +2816,11 @@ class Interface(object):
             self.Dataset.data_dirname = None
 
             # Extract dict, list and tuple from strings
-            list_parameters = ["fix_bragg", "fix_size", "pad_size", "roi_detector"]
+            list_parameters = ["fix_bragg",
+                               "fix_size", "pad_size", "roi_detector"]
 
-            tuple_parameters = ["binning", "preprocessing_binning", "beam_direction", "sample_offsets", "sample_inplane", "sample_outofplane"]
+            tuple_parameters = ["binning", "preprocessing_binning", "beam_direction",
+                                "sample_offsets", "sample_inplane", "sample_outofplane"]
 
             dict_parameters = ["actuators", "custom_motors"]
 
@@ -2561,7 +2829,8 @@ class Interface(object):
                     if getattr(self.Dataset, p) == "":
                         setattr(self.Dataset, p, [])
                     else:
-                        setattr(self.Dataset, p, literal_eval(getattr(self.Dataset, p)))
+                        setattr(self.Dataset, p, literal_eval(
+                            getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 print(f"Wrong list syntax for {p}")
@@ -2571,7 +2840,8 @@ class Interface(object):
                     if getattr(self.Dataset, p) == "":
                         setattr(self.Dataset, p, ())
                     else:
-                        setattr(self.Dataset, p, literal_eval(getattr(self.Dataset, p)))
+                        setattr(self.Dataset, p, literal_eval(
+                            getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 print(f"Wrong tuple syntax for {p}")
@@ -2579,12 +2849,13 @@ class Interface(object):
             try:
                 for p in dict_parameters:
                     if getattr(self.Dataset, p) == "":
-                        setattr(self.Dataset, p, None) # or {}
+                        setattr(self.Dataset, p, None)  # or {}
                     else:
                         if literal_eval(getattr(self.Dataset, p)) == {}:
                             setattr(self.Dataset, p, None)
                         else:
-                            setattr(self.Dataset, p, literal_eval(getattr(self.Dataset, p)))
+                            setattr(self.Dataset, p, literal_eval(
+                                getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 print(f"Wrong dict syntax for {p}")
@@ -2604,13 +2875,12 @@ class Interface(object):
 
             if self.Dataset.specfile_name == "":
                 self.Dataset.specfile_name = None
-                
+
             if self.Dataset.nb_pixel_x == 0:
                 self.Dataset.nb_pixel_x = None
 
             if self.Dataset.nb_pixel_y == 0:
                 self.Dataset.nb_pixel_y = None
-
 
             # self.Dataset.roi_detector = [self.Dataset.y_bragg - 160, self.Dataset.y_bragg + 160, self.Dataset.x_bragg - 160, self.Dataset.x_bragg + 160]
             # self.Dataset.roi_detector = None
@@ -2621,12 +2891,12 @@ class Interface(object):
             print("Parameters initialized...")
 
             button_run_preprocess = Button(
-                description = "Run data preprocessing...",
-                continuous_update = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'},
-                icon = 'fast-forward')
+                description="Run data preprocessing...",
+                continuous_update=False,
+                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                layout=Layout(width='40%'),
+                style={'description_width': 'initial'},
+                icon='fast-forward')
             display(button_run_preprocess)
 
             @button_run_preprocess.on_click
@@ -2637,110 +2907,114 @@ class Interface(object):
                     self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
                     save_dir = None
-                    
+
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
-                    save_dir = self.Dataset.root_folder + f"S{self.Dataset.scans}/pynxraw/"
+                    save_dir = self.Dataset.root_folder + \
+                        f"S{self.Dataset.scans}/pynxraw/"
 
                 # On lance BCDI
                 preprocess.preprocess_bcdi(
-                    scans = self.Dataset.scans,
-                    sample_name = self.Dataset.sample_name,
-                    root_folder = root_folder,
-                    save_dir = save_dir,
-                    data_dirname = self.Dataset.data_dirname,
-                    user_comment = self.Dataset.user_comment,
-                    debug = self.Dataset.debug,
-                    binning = self.Dataset.binning,
-                    flag_interact = self.Dataset.flag_interact,
-                    background_plot = self.Dataset.background_plot,
-                    centering = self.Dataset.centering,
-                    fix_bragg = self.Dataset.fix_bragg,
-                    fix_size = self.Dataset.fix_size,
-                    center_fft = self.Dataset.center_fft,
-                    pad_size = self.Dataset.pad_size,
-                    normalize_flux = self.Dataset.normalize_flux,
-                    mask_zero_event = self.Dataset.mask_zero_event,
-                    flag_medianfilter = self.Dataset.flag_medianfilter,
-                    medfilt_order = self.Dataset.medfilt_order,
-                    reload_previous = self.Dataset.reload_previous,
-                    reload_orthogonal = self.Dataset.reload_orthogonal,
-                    preprocessing_binning = self.Dataset.preprocessing_binning,
-                    save_rawdata = self.Dataset.save_rawdata,
-                    save_to_npz = self.Dataset.save_to_npz,
-                    save_to_mat = self.Dataset.save_to_mat,
-                    save_to_vti = self.Dataset.save_to_vti,
-                    save_asint = self.Dataset.save_asint,
-                    beamline = self.Dataset.beamline,
-                    actuators = self.Dataset.actuators,
-                    is_series = self.Dataset.is_series,
-                    custom_scan = self.Dataset.custom_scan,
-                    custom_images = self.Dataset.custom_images,
-                    custom_monitor = self.Dataset.custom_monitor,
-                    rocking_angle = self.Dataset.rocking_angle,
-                    follow_bragg = self.Dataset.follow_bragg,
-                    specfile_name = self.Dataset.specfile_name,
-                    detector = self.Dataset.detector,
-                    linearity_func = self.Dataset.linearity_func,
-                    roi_detector = self.Dataset.roi_detector,
-                    photon_threshold = self.Dataset.photon_threshold,
-                    photon_filter = self.Dataset.photon_filter,
-                    background_file = self.Dataset.background_file,
-                    hotpixels_file = self.Dataset.hotpixels_file,
-                    flatfield_file = self.Dataset.flatfield_file,
-                    template_imagefile = self.Dataset.template_imagefile,
-                    nb_pixel_x = self.Dataset.nb_pixel_x,
-                    nb_pixel_y = self.Dataset.nb_pixel_y,
-                    use_rawdata = self.Dataset.use_rawdata,
-                    interp_method = self.Dataset.interp_method,
-                    fill_value_mask = self.Dataset.fill_value_mask,
-                    beam_direction = self.Dataset.beam_direction,
-                    sample_offsets = self.Dataset.sample_offsets,
-                    sdd = self.Dataset.sdd,
-                    energy = self.Dataset.energy,
-                    custom_motors = self.Dataset.custom_motors,
-                    align_q = self.Dataset.align_q,
-                    ref_axis_q = self.Dataset.ref_axis_q,
-                    outofplane_angle = self.Dataset.outofplane_angle,
-                    inplane_angle = self.Dataset.inplane_angle,
-                    sample_inplane = self.Dataset.sample_inplane,
-                    sample_outofplane = self.Dataset.sample_outofplane,
-                    offset_inplane = self.Dataset.offset_inplane,
-                    cch1 = self.Dataset.cch1,
-                    cch2 = self.Dataset.cch2,
-                    detrot = self.Dataset.detrot,
-                    tiltazimuth = self.Dataset.tiltazimuth,
-                    tilt = self.Dataset.tilt,
+                    scans=self.Dataset.scans,
+                    sample_name=self.Dataset.sample_name,
+                    root_folder=root_folder,
+                    save_dir=save_dir,
+                    data_dirname=self.Dataset.data_dirname,
+                    user_comment=self.Dataset.user_comment,
+                    debug=self.Dataset.debug,
+                    binning=self.Dataset.binning,
+                    flag_interact=self.Dataset.flag_interact,
+                    background_plot=self.Dataset.background_plot,
+                    centering=self.Dataset.centering,
+                    fix_bragg=self.Dataset.fix_bragg,
+                    fix_size=self.Dataset.fix_size,
+                    center_fft=self.Dataset.center_fft,
+                    pad_size=self.Dataset.pad_size,
+                    normalize_flux=self.Dataset.normalize_flux,
+                    mask_zero_event=self.Dataset.mask_zero_event,
+                    flag_medianfilter=self.Dataset.flag_medianfilter,
+                    medfilt_order=self.Dataset.medfilt_order,
+                    reload_previous=self.Dataset.reload_previous,
+                    reload_orthogonal=self.Dataset.reload_orthogonal,
+                    preprocessing_binning=self.Dataset.preprocessing_binning,
+                    save_rawdata=self.Dataset.save_rawdata,
+                    save_to_npz=self.Dataset.save_to_npz,
+                    save_to_mat=self.Dataset.save_to_mat,
+                    save_to_vti=self.Dataset.save_to_vti,
+                    save_asint=self.Dataset.save_asint,
+                    beamline=self.Dataset.beamline,
+                    actuators=self.Dataset.actuators,
+                    is_series=self.Dataset.is_series,
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_images=self.Dataset.custom_images,
+                    custom_monitor=self.Dataset.custom_monitor,
+                    rocking_angle=self.Dataset.rocking_angle,
+                    follow_bragg=self.Dataset.follow_bragg,
+                    specfile_name=self.Dataset.specfile_name,
+                    detector=self.Dataset.detector,
+                    linearity_func=self.Dataset.linearity_func,
+                    roi_detector=self.Dataset.roi_detector,
+                    photon_threshold=self.Dataset.photon_threshold,
+                    photon_filter=self.Dataset.photon_filter,
+                    background_file=self.Dataset.background_file,
+                    hotpixels_file=self.Dataset.hotpixels_file,
+                    flatfield_file=self.Dataset.flatfield_file,
+                    template_imagefile=self.Dataset.template_imagefile,
+                    nb_pixel_x=self.Dataset.nb_pixel_x,
+                    nb_pixel_y=self.Dataset.nb_pixel_y,
+                    use_rawdata=self.Dataset.use_rawdata,
+                    interp_method=self.Dataset.interp_method,
+                    fill_value_mask=self.Dataset.fill_value_mask,
+                    beam_direction=self.Dataset.beam_direction,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    sdd=self.Dataset.sdd,
+                    energy=self.Dataset.energy,
+                    custom_motors=self.Dataset.custom_motors,
+                    align_q=self.Dataset.align_q,
+                    ref_axis_q=self.Dataset.ref_axis_q,
+                    outofplane_angle=self.Dataset.outofplane_angle,
+                    inplane_angle=self.Dataset.inplane_angle,
+                    sample_inplane=self.Dataset.sample_inplane,
+                    sample_outofplane=self.Dataset.sample_outofplane,
+                    offset_inplane=self.Dataset.offset_inplane,
+                    cch1=self.Dataset.cch1,
+                    cch2=self.Dataset.cch2,
+                    detrot=self.Dataset.detrot,
+                    tiltazimuth=self.Dataset.tiltazimuth,
+                    tilt=self.Dataset.tilt,
                     GUI=True,
                 )
 
                 # Scan folder, refresh
                 self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-                self.folder_pynx_handler(change = self._list_widgets_pynx.children[1].value)
+                self.folder_pynx_handler(
+                    change=self._list_widgets_pynx.children[1].value)
 
                 self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-                self.folder_plot_handler(change = self.tab_data.children[1].value)
+                self.folder_plot_handler(
+                    change=self.tab_data.children[1].value)
 
                 self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
-                self.folder_strain_handler(change = self._list_widgets_strain.children[-4].value)
-     
-                self.tab_facet.children[1].value = self.Dataset.scan_folder + f"postprocessing/"
-                self.folder_facet_handler(change = self.tab_facet.children[1].value)
+                self.folder_strain_handler(
+                    change=self._list_widgets_strain.children[-4].value)
 
+                self.tab_facet.children[1].value = self.Dataset.scan_folder + \
+                    f"postprocessing/"
+                self.folder_facet_handler(
+                    change=self.tab_facet.children[1].value)
 
         if not init_para:
             clear_output(True)
 
-
     def correct_angles(self,
-        label_correct,
-        csv_file,
-        temp_bool,
-        reflection,
-        reference_spacing,
-        reference_temperature,
-        angles_bool,
-        ):
+                       label_correct,
+                       csv_file,
+                       temp_bool,
+                       reflection,
+                       reference_spacing,
+                       reference_temperature,
+                       angles_bool,
+                       ):
         """
         Use this script to extract and save the rocking curve as well as the detector image at the rocking curve's COM
         Will correct the values of the inplane and outofplane angles corresponding to the COM of the Bragg peak, values used then to compute q_hkl
@@ -2772,12 +3046,12 @@ class Interface(object):
                 # Check beamline for save folder
                 if self.Dataset.beamline == "SIXS_2019":
                     root_folder = self.Dataset.root_folder
-                    
+
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
-                
+
                 save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/corrections/"
-                    
+
                 # Create final directory is not yet existing
                 if not os.path.isdir(save_dir):
                     full_path = ""
@@ -2788,48 +3062,49 @@ class Interface(object):
                         except FileExistsError:
                             pass
             except AttributeError:
-                print("Make sure you initialize the parameters by running the data preprocessing...")
+                print(
+                    "Make sure you initialize the parameters by running the data preprocessing...")
                 return
 
             try:
                 # On lance la correction
                 metadata = correct_angles.correct_angles_detector(
-                    filename = self.Dataset.path_to_data,
-                    direct_inplane = self.Dataset.direct_inplane,
-                    direct_outofplane = self.Dataset.direct_outofplane,
-                    get_temperature = self.Dataset.temp_bool,
-                    reflection = self.Dataset.reflection,
-                    reference_spacing = self.Dataset.reference_spacing, 
-                    reference_temperature = self.Dataset.reference_temperature,
-                    high_threshold = 1000000,  
-                    save_dir = save_dir,
-                    scan = self.Dataset.scans,
-                    root_folder = root_folder,
-                    sample_name = self.Dataset.sample_name,
-                    filtered_data = False,
-                    peak_method = self.Dataset.centering,
-                    normalize_flux = self.Dataset.normalize_flux,
-                    debug = self.Dataset.debug,
-                    beamline = self.Dataset.beamline,
-                    actuators = self.Dataset.actuators,
-                    is_series = self.Dataset.is_series,
-                    custom_scan = self.Dataset.custom_scan,
-                    custom_images = self.Dataset.custom_images,
-                    custom_monitor = self.Dataset.custom_monitor,
-                    custom_motors = self.Dataset.custom_motors,
-                    rocking_angle = self.Dataset.rocking_angle,
-                    specfile_name = self.Dataset.specfile_name,
-                    detector = self.Dataset.detector,
-                    roi_detector = self.Dataset.roi_detector,
-                    hotpixels_file = self.Dataset.hotpixels_file, 
-                    flatfield_file = self.Dataset.flatfield_file,
-                    template_imagefile = self.Dataset.template_imagefile,
-                    beam_direction = self.Dataset.beam_direction,
-                    sample_offsets = self.Dataset.sample_offsets,
-                    directbeam_x = self.Dataset.cch1,
-                    directbeam_y = self.Dataset.cch2,
-                    sdd = self.Dataset.sdd,
-                    energy = self.Dataset.energy,
+                    filename=self.Dataset.path_to_data,
+                    direct_inplane=self.Dataset.direct_inplane,
+                    direct_outofplane=self.Dataset.direct_outofplane,
+                    get_temperature=self.Dataset.temp_bool,
+                    reflection=self.Dataset.reflection,
+                    reference_spacing=self.Dataset.reference_spacing,
+                    reference_temperature=self.Dataset.reference_temperature,
+                    high_threshold=1000000,
+                    save_dir=save_dir,
+                    scan=self.Dataset.scans,
+                    root_folder=root_folder,
+                    sample_name=self.Dataset.sample_name,
+                    filtered_data=False,
+                    peak_method=self.Dataset.centering,
+                    normalize_flux=self.Dataset.normalize_flux,
+                    debug=self.Dataset.debug,
+                    beamline=self.Dataset.beamline,
+                    actuators=self.Dataset.actuators,
+                    is_series=self.Dataset.is_series,
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_images=self.Dataset.custom_images,
+                    custom_monitor=self.Dataset.custom_monitor,
+                    custom_motors=self.Dataset.custom_motors,
+                    rocking_angle=self.Dataset.rocking_angle,
+                    specfile_name=self.Dataset.specfile_name,
+                    detector=self.Dataset.detector,
+                    roi_detector=self.Dataset.roi_detector,
+                    hotpixels_file=self.Dataset.hotpixels_file,
+                    flatfield_file=self.Dataset.flatfield_file,
+                    template_imagefile=self.Dataset.template_imagefile,
+                    beam_direction=self.Dataset.beam_direction,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    directbeam_x=self.Dataset.cch1,
+                    directbeam_y=self.Dataset.cch2,
+                    sdd=self.Dataset.sdd,
+                    energy=self.Dataset.energy,
                     GUI=True
                 )
 
@@ -2843,7 +3118,8 @@ class Interface(object):
                 print("Saving corrected angles values...")
                 self._list_widgets_preprocessing.children[58].value = self.Dataset.bragg_outofplane
                 self._list_widgets_preprocessing.children[59].value = self.Dataset.bragg_inplane
-                self.Dataset.tilt_angle = np.round(np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
+                self.Dataset.tilt_angle = np.round(
+                    np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
 
             # except ValueError:
             #     print("Inplane or outofplane ?")
@@ -2857,54 +3133,53 @@ class Interface(object):
         if not angles_bool:
             clear_output(True)
 
-
     def init_pynx(self,
-        label_data,
-        folder,
-        iobs,
-        mask,
-        support,
-        obj,
-        auto_center_resize,
-        max_size,
-        label_support,
-        support_threshold,
-        support_only_shrink,
-        support_update_period,
-        support_smooth_width,
-        support_post_expand,
-        label_psf,
-        psf,
-        psf_model,
-        fwhm,
-        eta,
-        update_psf,
-        label_algo,
-        use_operators,
-        operator_chain,
-        nb_hio,
-        nb_raar,
-        nb_er,
-        nb_ml,
-        nb_run,
-        label_filtering,
-        filter_criteria,
-        nb_run_keep,
-        label_options,
-        live_plot,
-        # zero_mask,
-        # crop_output,
-        positivity,
-        beta,
-        detwin,
-        rebin,
-        verbose,
-        pixel_size_detector,
-        label_phase_retrieval,
-        run_phase_retrieval,
-        label_run_pynx_tools,
-        run_pynx_tools,
-        ):
+                  label_data,
+                  folder,
+                  iobs,
+                  mask,
+                  support,
+                  obj,
+                  auto_center_resize,
+                  max_size,
+                  label_support,
+                  support_threshold,
+                  support_only_shrink,
+                  support_update_period,
+                  support_smooth_width,
+                  support_post_expand,
+                  label_psf,
+                  psf,
+                  psf_model,
+                  fwhm,
+                  eta,
+                  update_psf,
+                  label_algo,
+                  use_operators,
+                  operator_chain,
+                  nb_hio,
+                  nb_raar,
+                  nb_er,
+                  nb_ml,
+                  nb_run,
+                  label_filtering,
+                  filter_criteria,
+                  nb_run_keep,
+                  label_options,
+                  live_plot,
+                  # zero_mask,
+                  # crop_output,
+                  positivity,
+                  beta,
+                  detwin,
+                  rebin,
+                  verbose,
+                  pixel_size_detector,
+                  label_phase_retrieval,
+                  run_phase_retrieval,
+                  label_run_pynx_tools,
+                  run_pynx_tools,
+                  ):
         """
         Get parameters from widgets and run phase retrieval
         """
@@ -2943,25 +3218,29 @@ class Interface(object):
         self.Dataset.detwin = detwin
         self.Dataset.rebin = rebin
         self.Dataset.verbose = verbose
-        self.Dataset.pixel_size_detector = np.round(pixel_size_detector*1e-6, 6)
+        self.Dataset.pixel_size_detector = np.round(
+            pixel_size_detector*1e-6, 6)
         self.run_phase_retrieval = run_phase_retrieval
         self.run_pynx_tools = run_pynx_tools
 
         # Extract dict, list and tuple from strings
-        self.Dataset.support_threshold = literal_eval(self.Dataset.support_threshold)
-        self.Dataset.support_smooth_width = literal_eval(self.Dataset.support_smooth_width)
-        self.Dataset.support_post_expand = literal_eval(self.Dataset.support_post_expand)
+        self.Dataset.support_threshold = literal_eval(
+            self.Dataset.support_threshold)
+        self.Dataset.support_smooth_width = literal_eval(
+            self.Dataset.support_smooth_width)
+        self.Dataset.support_post_expand = literal_eval(
+            self.Dataset.support_post_expand)
         self.Dataset.rebin = literal_eval(self.Dataset.rebin)
 
         # "" strings should be None
         if self.Dataset.iobs == "":
             self.Dataset.iobs = None
             iobs = None
-            
+
         if self.Dataset.mask == "":
             self.Dataset.mask = None
             mask = None
-      
+
         if self.Dataset.support == "":
             self.Dataset.support = None
             support = None
@@ -2972,7 +3251,7 @@ class Interface(object):
 
         if self.Dataset.live_plot == 0:
             self.Dataset.live_plot = False
-        
+
         print("Scan n°", self.Dataset.scans)
 
         self.Dataset.energy = self._list_widgets_preprocessing.children[53].value
@@ -2982,10 +3261,12 @@ class Interface(object):
         print("CXI input: Energy = %8.2feV" % self.Dataset.energy)
         print(f"CXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
         print("CXI input: detector distance = %8.2fm" % self.Dataset.sdd)
-        print(f"CXI input: detector pixel size = {self.Dataset.pixel_size_detector}")
+        print(
+            f"CXI input: detector pixel size = {self.Dataset.pixel_size_detector}")
 
         # PyNX arguments text files
-        self.Dataset.pynx_parameter_gui_file = self.Dataset.scan_folder + '/pynxraw/pynx_run_gui.txt'
+        self.Dataset.pynx_parameter_gui_file = self.Dataset.scan_folder + \
+            '/pynxraw/pynx_run_gui.txt'
         self.Dataset.pynx_parameter_cli_file = self.Dataset.scan_folder + '/pynxraw/pynx_run.txt'
 
         # Phase retrieval
@@ -2993,17 +3274,17 @@ class Interface(object):
             if self.run_phase_retrieval == "batch" or self.run_phase_retrieval == "local_script":
                 self.text_file = []
                 self.Dataset.live_plot = False
-                
+
                 # Load files
                 self.text_file.append("# Parameters\n")
                 for file, parameter in [(self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
                     if file:
                         self.text_file.append(f"{parameter} = \"{file}\"\n")
-                        
+
                 if support:
                     self.text_file += [
-                    f"support = \"{self.Dataset.support}\"\n",
-                    '\n']
+                        f"support = \"{self.Dataset.support}\"\n",
+                        '\n']
                 # else no support, just don't write it
 
                 # Other support parameters
@@ -3015,15 +3296,17 @@ class Interface(object):
                     f'support_smooth_width_end = {self.Dataset.support_smooth_width[1]}\n',
                     f'support_post_expand = {self.Dataset.support_post_expand}\n'
                     '\n',
-                    ]
+                ]
 
                 # PSF
                 if self.Dataset.psf:
                     if self.Dataset.psf_model != "pseudo-voigt":
-                        self.text_file.append(f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm}\"\n")
-                        
+                        self.text_file.append(
+                            f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm}\"\n")
+
                     if self.Dataset.psf_model == "pseudo-voigt":
-                        self.text_file.append(f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm},{self.Dataset.eta}\"\n")
+                        self.text_file.append(
+                            f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm},{self.Dataset.eta}\"\n")
                 # no PSF, just don't write anything
 
                 # Filtering the reconstructions
@@ -3036,9 +3319,10 @@ class Interface(object):
                     nb_keep_std = self.Dataset.nb_run_keep
 
                 elif self.Dataset.filter_criteria == "LLK_standard_deviation":
-                    nb_keep_LLK = self.Dataset.nb_run_keep + (self.Dataset.nb_run - self.Dataset.nb_run_keep) // 2
+                    nb_keep_LLK = self.Dataset.nb_run_keep + \
+                        (self.Dataset.nb_run - self.Dataset.nb_run_keep) // 2
                     nb_keep_std = self.Dataset.nb_run_keep
-          
+
                 # Other parameters
                 self.text_file += [
                     'data2cxi = True\n',
@@ -3072,25 +3356,31 @@ class Interface(object):
                     f'live_plot = {self.Dataset.live_plot}\n',
                     "mpi=run\n",
                 ]
-                
+
                 with open(self.Dataset.pynx_parameter_gui_file, "w") as v:
                     for line in self.text_file:
                         v.write(line)
-                        
-                print(f"Saved parameters in {self.Dataset.pynx_parameter_gui_file}")
-                
+
+                print(
+                    f"Saved parameters in {self.Dataset.pynx_parameter_gui_file}")
+
                 if self.run_phase_retrieval == "batch":
                     """
                     Runs modes directly and saves all data in an "all" subdir, filter based on LLK
                     """
-                    print(f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
-                    print("\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
-                    os.system(f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
-                
+                    print(
+                        f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
+                    print(
+                        "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
+                    os.system(
+                        f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
+
                 elif self.run_phase_retrieval == "local_script":
                     try:
-                        print(f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &", end="\n\n")
-                        os.system(f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &")
+                        print(
+                            f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &", end="\n\n")
+                        os.system(
+                            f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &")
                     except KeyboardInterrupt:
                         print("Phase retrieval stopped by user ...")
 
@@ -3098,7 +3388,7 @@ class Interface(object):
                 # Extract data
                 print("Log likelihood is updated every 50 iterations.")
 
-                self.Dataset.calc_llk = 50 # for now
+                self.Dataset.calc_llk = 50  # for now
 
                 if self.Dataset.iobs:
                     if self.Dataset.iobs.endswith(".npy"):
@@ -3111,7 +3401,7 @@ class Interface(object):
                         except:
                             print("Could not load 'data' array from npz file")
 
-                    if self.Dataset.rebin != (1,1,1):
+                    if self.Dataset.rebin != (1, 1, 1):
                         try:
                             iobs = bin_data(iobs, self.Dataset.rebin)
                         except Exception as e:
@@ -3124,16 +3414,19 @@ class Interface(object):
                     if self.Dataset.mask.endswith(".npy"):
                         mask = np.load(self.Dataset.mask).astype(np.int8)
                         nb = mask.sum()
-                        print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (nb, nb * 100 / mask.size))
+                        print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                            nb, nb * 100 / mask.size))
                     elif self.Dataset.mask.endswith(".npz"):
                         try:
-                            mask = np.load(self.Dataset.mask)["mask"].astype(np.int8)
+                            mask = np.load(self.Dataset.mask)[
+                                "mask"].astype(np.int8)
                             nb = mask.sum()
-                            print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (nb, nb * 100 / mask.size))
+                            print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                                nb, nb * 100 / mask.size))
                         except:
-                            print("Could not load 'mask' array from npz file")            
+                            print("Could not load 'mask' array from npz file")
 
-                    if self.Dataset.rebin != (1,1,1):
+                    if self.Dataset.rebin != (1, 1, 1):
                         try:
                             mask = bin_data(mask, self.Dataset.rebin)
                         except Exception as e:
@@ -3153,17 +3446,19 @@ class Interface(object):
                         except:
                             # print("Could not load 'data' array from npz file")
                             try:
-                                support = np.load(self.Dataset.support)["support"]
+                                support = np.load(self.Dataset.support)[
+                                    "support"]
                                 print("CXI input: loading support")
                             except:
                                 # print("Could not load 'support' array from npz file")
                                 try:
-                                    support = np.load(self.Dataset.support)["obj"]
+                                    support = np.load(
+                                        self.Dataset.support)["obj"]
                                     print("CXI input: loading support")
                                 except:
                                     print("Could not load support")
 
-                    if self.Dataset.rebin != (1,1,1):
+                    if self.Dataset.rebin != (1, 1, 1):
                         try:
                             support = bin_data(support, self.Dataset.rebin)
                         except Exception as e:
@@ -3183,7 +3478,7 @@ class Interface(object):
                         except:
                             print("Could not load 'data' array from npz file")
 
-                    if self.Dataset.rebin != (1,1,1):
+                    if self.Dataset.rebin != (1, 1, 1):
                         try:
                             obj = bin_data(obj, self.Dataset.rebin)
                         except Exception as e:
@@ -3200,7 +3495,8 @@ class Interface(object):
                         # Find center of mass
                         z0, y0, x0 = center_of_mass(iobs)
                         print("Center of mass at:", z0, y0, x0)
-                        iz0, iy0, ix0 = int(round(z0)), int(round(y0)), int(round(x0))
+                        iz0, iy0, ix0 = int(round(z0)), int(
+                            round(y0)), int(round(x0))
 
                         # Max symmetrical box around center of mass
                         nx = 2 * min(ix0, nx0 - ix0)
@@ -3213,15 +3509,18 @@ class Interface(object):
                             nz = min(nz, self.Dataset.max_size)
 
                         # Crop data to fulfill FFT size requirements
-                        nz1, ny1, nx1 = smaller_primes((nz, ny, nx), maxprime=7, required_dividers=(2,))
+                        nz1, ny1, nx1 = smaller_primes(
+                            (nz, ny, nx), maxprime=7, required_dividers=(2,))
 
-                        print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+                        print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
+                              (nz0, ny0, nx0, nz1, ny1, nx1))
                         iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
                                     ix0 - nx1 // 2:ix0 + nx1 // 2]
                         if mask is not None:
                             mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
                                         ix0 - nx1 // 2:ix0 + nx1 // 2]
-                            print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+                            print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
+                                  (nz0, ny0, nx0, nz1, ny1, nx1))
 
                     else:
                         ny0, nx0 = iobs.shape
@@ -3240,65 +3539,70 @@ class Interface(object):
                             nz = min(nz, self.Dataset.max_size)
 
                         # Crop data to fulfill FFT size requirements
-                        ny1, nx1 = smaller_primes((ny, nx), maxprime=7, required_dividers=(2,))
+                        ny1, nx1 = smaller_primes(
+                            (ny, nx), maxprime=7, required_dividers=(2,))
 
-                        print("Centering & reshaping data: (%d, %d) -> (%d, %d)" % (ny0, nx0, ny1, nx1))
-                        iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 // 2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+                        print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
+                              (ny0, nx0, ny1, nx1))
+                        iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
+                                    2, ix0 - nx1 // 2:ix0 + nx1 // 2]
 
                         if mask is not None:
-                            mask = mask[iy0 - ny1 // 2:iy0 + ny1 // 2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-                
-                print("\n#############################################################################################################\n")    
-                
+                            mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
+                                        2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+                print("\n#############################################################################################################\n")
+
                 try:
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
                         print(f"Run {i}")
-                        if i>4:
+                        if i > 4:
                             print("\nStopping liveplot to go faster\n")
                             self.Dataset.live_plot = False
 
                         # Create cdi object with data and mask, load the main parameters
                         cdi = CDI(iobs,
-                                  support = support,
-                                  obj = obj,
-                                  mask = mask,
-                                  wavelength = self.Dataset.wavelength,
-                                  pixel_size_detector = self.Dataset.pixel_size_detector,
-                                  detector_distance = self.Dataset.sdd,
-                                 )
+                                  support=support,
+                                  obj=obj,
+                                  mask=mask,
+                                  wavelength=self.Dataset.wavelength,
+                                  pixel_size_detector=self.Dataset.pixel_size_detector,
+                                  detector_distance=self.Dataset.sdd,
+                                  )
 
                         # Save diffraction pattern
-                        if i==0:
+                        if i == 0:
                             cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
-                                                                        self.Dataset.root_folder,
-                                                                        self.Dataset.sample_name,
-                                                                        self.Dataset.scans,
-                                                                        self.Dataset.iobs.split("/")[-1].split(".")[0]
-                                                                        )
+                                self.Dataset.root_folder,
+                                self.Dataset.sample_name,
+                                self.Dataset.scans,
+                                self.Dataset.iobs.split("/")[-1].split(".")[0]
+                            )
                             if not os.path.exists(cxi_filename):
                                 cdi.save_data_cxi(
-                                    filename = cxi_filename,
-                                    sample_name = "",
-                                    experiment_id = "",
-                                    instrument = ""
-                                    )
+                                    filename=cxi_filename,
+                                    sample_name="",
+                                    experiment_id="",
+                                    instrument=""
+                                )
 
                         # Change support threshold for supports update
                         if isinstance(self.Dataset.support_threshold, float):
                             self.Dataset.threshold_relative = self.Dataset.support_threshold
                         elif isinstance(self.Dataset.support_threshold, tuple):
-                            self.Dataset.threshold_relative = np.random.uniform(self.Dataset.support_threshold[0], self.Dataset.support_threshold[1])
+                            self.Dataset.threshold_relative = np.random.uniform(
+                                self.Dataset.support_threshold[0], self.Dataset.support_threshold[1])
                         print(f"Threshold: {self.Dataset.threshold_relative}")
 
                         # Create support object
                         sup = SupportUpdate(
-                            threshold_relative = self.Dataset.threshold_relative,
-                            smooth_width = self.Dataset.support_smooth_width, 
-                            force_shrink = self.Dataset.support_only_shrink,
-                            method='rms', 
-                            post_expand = self.Dataset.support_post_expand,
-                            )
+                            threshold_relative=self.Dataset.threshold_relative,
+                            smooth_width=self.Dataset.support_smooth_width,
+                            force_shrink=self.Dataset.support_only_shrink,
+                            method='rms',
+                            post_expand=self.Dataset.support_post_expand,
+                        )
 
                         # Initialize the free pixels for LLK
                         # cdi = InitFreePixels() * cdi
@@ -3307,20 +3611,20 @@ class Interface(object):
                         if not self.Dataset.support:
                             sup_init = "autocorrelation"
                             if isinstance(self.Dataset.live_plot, int):
-                                if i>4:
+                                if i > 4:
                                     cdi = ScaleObj() * AutoCorrelationSupport(
-                                        threshold = 0.1, # extra argument
-                                        verbose = True) * cdi
+                                        threshold=0.1,  # extra argument
+                                        verbose=True) * cdi
 
                                 else:
                                     cdi = ShowCDI() * ScaleObj() * AutoCorrelationSupport(
-                                        threshold = 0.1, # extra argument
-                                        verbose = True) * cdi
+                                        threshold=0.1,  # extra argument
+                                        verbose=True) * cdi
 
                             else:
                                 cdi = ScaleObj() * AutoCorrelationSupport(
-                                    threshold = 0.1, # extra argument
-                                    verbose = True) * cdi
+                                    threshold=0.1,  # extra argument
+                                    verbose=True) * cdi
                         else:
                             sup_init = "support"
 
@@ -3330,105 +3634,106 @@ class Interface(object):
                             if self.Dataset.psf:
                                 if self.Dataset.support_update_period == 0:
                                     cdi = HIO(
-                                            beta = self.Dataset.beta, 
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot
-                                            )** self.Dataset.nb_hio * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    ) ** self.Dataset.nb_hio * cdi
                                     cdi = RAAR(
-                                            beta = self.Dataset.beta, 
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot
-                                            )** (self.Dataset.nb_raar//2) * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    ) ** (self.Dataset.nb_raar//2) * cdi
 
                                     # PSF is introduced at 66% of HIO and RAAR
                                     if psf_model != "pseudo-voigt":
                                         cdi = InitPSF(
-                                                model = self.Dataset.psf_model,
-                                                fwhm = self.Dataset.fwhm,
-                                                ) * cdi
-                                        
+                                            model=self.Dataset.psf_model,
+                                            fwhm=self.Dataset.fwhm,
+                                        ) * cdi
+
                                     elif psf_model == "pseudo-voigt":
                                         cdi = InitPSF(
-                                                model = self.Dataset.psf_model,
-                                                fwhm = self.Dataset.fwhm,
-                                                eta = self.Dataset.eta,
-                                                ) * cdi
-                                        
+                                            model=self.Dataset.psf_model,
+                                            fwhm=self.Dataset.fwhm,
+                                            eta=self.Dataset.eta,
+                                        ) * cdi
+
                                     cdi = RAAR(
-                                            beta = self.Dataset.beta, 
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot, 
-                                            update_psf = self.Dataset.update_psf
-                                            )** (self.Dataset.nb_raar//2) * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot,
+                                        update_psf=self.Dataset.update_psf
+                                    ) ** (self.Dataset.nb_raar//2) * cdi
                                     cdi = ER(
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot,
-                                            update_psf = self.Dataset.update_psf
-                                            )** self.Dataset.nb_er * cdi
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot,
+                                        update_psf=self.Dataset.update_psf
+                                    ) ** self.Dataset.nb_er * cdi
 
                                 else:
                                     hio_power = self.Dataset.nb_hio//self.Dataset.support_update_period
-                                    raar_power = (self.Dataset.nb_raar//2)//self.Dataset.support_update_period
+                                    raar_power = (
+                                        self.Dataset.nb_raar//2)//self.Dataset.support_update_period
                                     er_power = self.Dataset.nb_er//self.Dataset.support_update_period
 
                                     cdi = (sup * HIO(
-                                                    beta = self.Dataset.beta, 
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot
-                                                    )**self.Dataset.support_update_period
-                                            )** hio_power * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    )**self.Dataset.support_update_period
+                                    ) ** hio_power * cdi
                                     cdi = (sup * RAAR(
-                                                    beta = self.Dataset.beta, 
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot
-                                                    )**self.Dataset.support_update_period
-                                            )** raar_power * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    )**self.Dataset.support_update_period
+                                    ) ** raar_power * cdi
 
                                     # PSF is introduced at 66% of HIO and RAAR so from cycle n°924
                                     if psf_model != "pseudo-voigt":
                                         cdi = InitPSF(
-                                                model = self.Dataset.psf_model,
-                                                fwhm = self.Dataset.fwhm,
-                                                ) * cdi
-                                        
+                                            model=self.Dataset.psf_model,
+                                            fwhm=self.Dataset.fwhm,
+                                        ) * cdi
+
                                     elif psf_model == "pseudo-voigt":
                                         cdi = InitPSF(
-                                                model = self.Dataset.psf_model,
-                                                fwhm = self.Dataset.fwhm,
-                                                eta = self.Dataset.eta,
-                                                ) * cdi
-                                        
+                                            model=self.Dataset.psf_model,
+                                            fwhm=self.Dataset.fwhm,
+                                            eta=self.Dataset.eta,
+                                        ) * cdi
+
                                     cdi = (sup * RAAR(
-                                                    beta = self.Dataset.beta, 
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot, 
-                                                    update_psf = self.Dataset.update_psf
-                                                    )**self.Dataset.support_update_period
-                                            )** raar_power * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot,
+                                        update_psf=self.Dataset.update_psf
+                                    )**self.Dataset.support_update_period
+                                    ) ** raar_power * cdi
                                     cdi = (sup * ER(
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot,
-                                                    update_psf = self.Dataset.update_psf
-                                                    )**self.Dataset.support_update_period
-                                            )** er_power * cdi
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot,
+                                        update_psf=self.Dataset.update_psf
+                                    )**self.Dataset.support_update_period
+                                    ) ** er_power * cdi
 
                             if not self.Dataset.psf:
                                 if self.Dataset.support_update_period == 0:
 
                                     cdi = HIO(
-                                            beta = self.Dataset.beta, 
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot
-                                            )** self.Dataset.nb_hio * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    ) ** self.Dataset.nb_hio * cdi
                                     cdi = RAAR(
-                                            beta = self.Dataset.beta, 
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot
-                                            )** self.Dataset.nb_raar * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    ) ** self.Dataset.nb_raar * cdi
                                     cdi = ER(
-                                            calc_llk = self.Dataset.calc_llk, 
-                                            show_cdi = self.Dataset.live_plot
-                                            )** self.Dataset.nb_er * cdi
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    ) ** self.Dataset.nb_er * cdi
 
                                 else:
                                     hio_power = self.Dataset.nb_hio//self.Dataset.support_update_period
@@ -3436,57 +3741,59 @@ class Interface(object):
                                     er_power = self.Dataset.nb_er//self.Dataset.support_update_period
 
                                     cdi = (sup * HIO(
-                                                    beta = self.Dataset.beta, 
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot
-                                                    )**self.Dataset.support_update_period
-                                            )** hio_power * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    )**self.Dataset.support_update_period
+                                    ) ** hio_power * cdi
                                     cdi = (sup * RAAR(
-                                                    beta = self.Dataset.beta, 
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot
-                                                    )**self.Dataset.support_update_period
-                                            )** raar_power * cdi
+                                        beta=self.Dataset.beta,
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    )**self.Dataset.support_update_period
+                                    ) ** raar_power * cdi
                                     cdi = (sup * ER(
-                                                    calc_llk = self.Dataset.calc_llk, 
-                                                    show_cdi = self.Dataset.live_plot
-                                                    )**self.Dataset.support_update_period
-                                            )** er_power * cdi
-
+                                        calc_llk=self.Dataset.calc_llk,
+                                        show_cdi=self.Dataset.live_plot
+                                    )**self.Dataset.support_update_period
+                                    ) ** er_power * cdi
 
                             cdi.save_obj_cxi("{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                                                                                                            self.Dataset.folder,
-                                                                                                            self.Dataset.scans,
-                                                                                                            i,
-                                                                                                            cdi.get_llk()[0],
-                                                                                                            self.Dataset.threshold_relative,
-                                                                                                            iobs.shape[0],
-                                                                                                            iobs.shape[1],
-                                                                                                            iobs.shape[2],
-                                                                                                            sup_init,
-                                                                                                            )
-                                            )
+                                self.Dataset.folder,
+                                self.Dataset.scans,
+                                i,
+                                cdi.get_llk()[0],
+                                self.Dataset.threshold_relative,
+                                iobs.shape[0],
+                                iobs.shape[1],
+                                iobs.shape[2],
+                                sup_init,
+                            )
+                            )
 
                             print("Saved as result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                                                                                                            self.Dataset.scans,
-                                                                                                            i,
-                                                                                                            cdi.get_llk()[0],
-                                                                                                            self.Dataset.threshold_relative,
-                                                                                                            iobs.shape[0],
-                                                                                                            iobs.shape[1],
-                                                                                                            iobs.shape[2],
-                                                                                                            sup_init,
-                                                                                                            )
-                                            )
+                                self.Dataset.scans,
+                                i,
+                                cdi.get_llk()[0],
+                                self.Dataset.threshold_relative,
+                                iobs.shape[0],
+                                iobs.shape[1],
+                                iobs.shape[2],
+                                sup_init,
+                            )
+                            )
                         except SupportTooLarge:
-                            print("Threshold value probably too low, support too large too continue")
+                            print(
+                                "Threshold value probably too low, support too large too continue")
                             pass
 
-                        print("\n#############################################################################################################\n")    
-                
+                        print(
+                            "\n#############################################################################################################\n")
+
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
-                        self.filter_reconstructions(self.Dataset.folder, self.Dataset.nb_run, self.Dataset.nb_run_keep, self.Dataset.filter_criteria)
+                        self.filter_reconstructions(
+                            self.Dataset.folder, self.Dataset.nb_run, self.Dataset.nb_run_keep, self.Dataset.filter_criteria)
 
                 except KeyboardInterrupt:
                     clear_output(True)
@@ -3498,20 +3805,20 @@ class Interface(object):
                 self.run_modes_decomposition(self.Dataset.folder)
 
             elif self.run_pynx_tools == "filter":
-                self.filter_reconstructions(self.Dataset.folder, self.Dataset.nb_run, self.Dataset.nb_run_keep, self.Dataset.filter_criteria)
+                self.filter_reconstructions(
+                    self.Dataset.folder, self.Dataset.nb_run, self.Dataset.nb_run_keep, self.Dataset.filter_criteria)
 
         # Clean output
         if not self.run_phase_retrieval and not self.run_pynx_tools:
             clear_output(True)
 
-
     @staticmethod
     def filter_reconstructions(
-        folder, 
-        nb_run, 
-        nb_keep, 
+        folder,
+        nb_run,
+        nb_keep,
         filter_criteria
-        ):
+    ):
         """
         Filter the phase retrieval output depending on a given parameter, for now only LLK and standard deviation are available.
         This allows the user to run a lot of reconstructions but to then automatically keep the "best" ones, according to this parameter.
@@ -3529,8 +3836,9 @@ class Interface(object):
                 with tb.open_file(filename, "r") as f:
                     data = f.root.entry_1.image_1.data[:]
                     filtering_criteria_value[filename] = np.std(np.abs(data))
-            
-            sorted_dict = sorted(filtering_criteria_value.items(), key=operator_lib.itemgetter(1))
+
+            sorted_dict = sorted(
+                filtering_criteria_value.items(), key=operator_lib.itemgetter(1))
 
             for f, filtering_criteria_value in sorted_dict[nb_keep:]:
                 print(f"Removed scan {f}")
@@ -3539,14 +3847,15 @@ class Interface(object):
         def filter_by_LLK(cxi_files, nb_keep):
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
-            
+
             for filename in cxi_files:
                 print("Extracting llk value for poisson statistics for ", filename)
                 with tb.open_file(filename, "r") as f:
                     llk = f.root.entry_1.image_1.process_1.results.llk_poisson[...]
                     filtering_criteria_value[filename] = llk
 
-            sorted_dict = sorted(filtering_criteria_value.items(), key=operator_lib.itemgetter(1))
+            sorted_dict = sorted(
+                filtering_criteria_value.items(), key=operator_lib.itemgetter(1))
 
             for f, filtering_criteria_value in sorted_dict[nb_keep:]:
                 print(f"Removed scan {f}")
@@ -3563,29 +3872,35 @@ class Interface(object):
             else:
                 if filter_criteria == "standard_deviation":
                     filter_by_std(cxi_files, nb_keep)
-                    
+
                 elif filter_criteria == "LLK":
                     filter_by_LLK(cxi_files, nb_keep)
 
                 elif filter_criteria == "standard_deviation_LLK":
                     filter_by_std(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
-                    print(f"Iterating on remaining files in {folder}/*LLK*.cxi")
-                    cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
+                    print(
+                        f"Iterating on remaining files in {folder}/*LLK*.cxi")
+                    cxi_files = sorted(
+                        glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
                     if cxi_files == []:
-                        print(f"No *LLK*.cxi files remaining in {folder}/result_scan*LLK*.cxi")
+                        print(
+                            f"No *LLK*.cxi files remaining in {folder}/result_scan*LLK*.cxi")
                     else:
-                        filter_by_LLK(cxi_files, nb_keep)     
+                        filter_by_LLK(cxi_files, nb_keep)
 
                 elif filter_criteria == "LLK_standard_deviation":
                     filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
-                    print(f"Iterating on remaining files in {folder}/*LLK*.cxi")
-                    cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
+                    print(
+                        f"Iterating on remaining files in {folder}/*LLK*.cxi")
+                    cxi_files = sorted(
+                        glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
                     if cxi_files == []:
-                        print(f"No *LLK*.cxi files remaining in {folder}/result_scan*LLK*.cxi")
+                        print(
+                            f"No *LLK*.cxi files remaining in {folder}/result_scan*LLK*.cxi")
                     else:
                         filter_by_std(cxi_files, nb_keep)
 
@@ -3595,91 +3910,92 @@ class Interface(object):
             print("cxi files filtering stopped by user ...")
 
     def run_modes_decomposition(self,
-        folder
-        ):
+                                folder
+                                ):
         """
         Run a decomposition into modes of the phase retrieval solutions, saves only the first mode
         """
         try:
-            print(f"Using {self.path_scripts}/pynx-cdi-analysis.py (py38-stable environment)")
+            print(
+                f"Using {self.path_scripts}/pynx-cdi-analysis.py (py38-stable environment)")
             print(f"Using {folder}/*LLK* files.")
             print("Running pynx-cdi-analysis.py *LLK* modes=1")
             print(f"Output in {folder}/modes_gui.h5")
-            os.system(f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5")
+            os.system(
+                f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5")
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
 
-
     def strain_gui(self,
-        label_averaging,
-        sort_method, 
-        correlation_threshold,
-        label_FFT,
-        phasing_binning, 
-        original_size, 
-        preprocessing_binning, 
-        output_size, 
-        keep_size, 
-        fix_voxel,
-        label_disp_strain,
-        data_frame,
-        save_frame,
-        ref_axis_q,
-        isosurface_strain,
-        strain_method,
-        phase_offset,
-        phase_offset_origin,
-        offset_method,
-        centering_method,
-        label_refraction,
-        correct_refraction,
-        optical_path_method,
-        dispersion,
-        absorption,
-        threshold_unwrap_refraction,
-        label_options,
-        simu_flag,
-        invert_phase,
-        flip_reconstruction,
-        phase_ramp_removal,
-        threshold_gradient,
-        save_raw,
-        save_support,
-        save,
-        debug,
-        roll_modes,
-        label_data_vis,
-        align_axis,
-        ref_axis,
-        axis_to_align,
-        strain_range,
-        phase_range,
-        grey_background,
-        tick_spacing,
-        tick_direction,
-        tick_length,
-        tick_width,
-        label_average,
-        avg_method,
-        avg_threshold,
-        label_apodize,
-        apodize_flag,
-        apodize_window,
-        hwidth,
-        mu,
-        sigma,
-        alpha,
-        label_strain,
-        folder_strain,
-        reconstruction_file,
-        run_strain,
-        ):
+                   label_averaging,
+                   sort_method,
+                   correlation_threshold,
+                   label_FFT,
+                   phasing_binning,
+                   original_size,
+                   preprocessing_binning,
+                   output_size,
+                   keep_size,
+                   fix_voxel,
+                   label_disp_strain,
+                   data_frame,
+                   save_frame,
+                   ref_axis_q,
+                   isosurface_strain,
+                   strain_method,
+                   phase_offset,
+                   phase_offset_origin,
+                   offset_method,
+                   centering_method,
+                   label_refraction,
+                   correct_refraction,
+                   optical_path_method,
+                   dispersion,
+                   absorption,
+                   threshold_unwrap_refraction,
+                   label_options,
+                   simu_flag,
+                   invert_phase,
+                   flip_reconstruction,
+                   phase_ramp_removal,
+                   threshold_gradient,
+                   save_raw,
+                   save_support,
+                   save,
+                   debug,
+                   roll_modes,
+                   label_data_vis,
+                   align_axis,
+                   ref_axis,
+                   axis_to_align,
+                   strain_range,
+                   phase_range,
+                   grey_background,
+                   tick_spacing,
+                   tick_direction,
+                   tick_length,
+                   tick_width,
+                   label_average,
+                   avg_method,
+                   avg_threshold,
+                   label_apodize,
+                   apodize_flag,
+                   apodize_window,
+                   hwidth,
+                   mu,
+                   sigma,
+                   alpha,
+                   label_strain,
+                   folder_strain,
+                   reconstruction_file,
+                   run_strain,
+                   ):
         """
         Loading argument from strain tab widgets but also values of parameters used in preprocessing that are common
         Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase. 
         Also plots images depending on the given isosurface.
         """
-        
+
         if run_strain:
             # Disable all widgets until the end of the program, will update automatticaly after
             for w in self._list_widgets_strain.children[:-1]:
@@ -3692,14 +4008,14 @@ class Interface(object):
                 w.disabled = True
 
             # parameters used when averaging several reconstruction #
-            self.Dataset.sort_method = sort_method 
+            self.Dataset.sort_method = sort_method
             self.Dataset.correlation_threshold = correlation_threshold
             # parameters relative to the FFT window and voxel sizes #
-            self.Dataset.phasing_binning = phasing_binning 
-            self.Dataset.original_size = original_size 
-            self.Dataset.preprocessing_binning = preprocessing_binning 
-            self.Dataset.output_size = output_size 
-            self.Dataset.keep_size = keep_size 
+            self.Dataset.phasing_binning = phasing_binning
+            self.Dataset.original_size = original_size
+            self.Dataset.preprocessing_binning = preprocessing_binning
+            self.Dataset.output_size = output_size
+            self.Dataset.keep_size = keep_size
             self.Dataset.fix_voxel = fix_voxel
             # parameters related to displacement and strain calculation #
             self.Dataset.data_frame = data_frame
@@ -3712,7 +4028,7 @@ class Interface(object):
             self.Dataset.offset_method = offset_method
             self.Dataset.centering_method = centering_method
             # pixel_size,
-            # parameters related to the refraction correction # 
+            # parameters related to the refraction correction #
             self.Dataset.correct_refraction = correct_refraction
             self.Dataset.optical_path_method = optical_path_method
             self.Dataset.dispersion = dispersion
@@ -3740,7 +4056,7 @@ class Interface(object):
             self.Dataset.tick_direction = tick_direction
             self.Dataset.tick_length = tick_length
             self.Dataset.tick_width = tick_width
-            # parameters for averaging several reconstructed objects #  
+            # parameters for averaging several reconstructed objects #
             self.Dataset.avg_method = avg_method
             self.Dataset.avg_threshold = avg_threshold
             # setup for phase averaging or apodization
@@ -3753,16 +4069,19 @@ class Interface(object):
             self.Dataset.reconstruction_file = reconstruction_file
 
             # Extract dict, list and tuple from strings
-            list_parameters = ["original_size", "output_size", "axis_to_align", "mu", "sigma", "alpha"]
+            list_parameters = ["original_size", "output_size",
+                               "axis_to_align", "mu", "sigma", "alpha"]
 
-            tuple_parameters = ["phasing_binning", "preprocessing_binning", "phase_offset_origin", "roll_modes"]
+            tuple_parameters = [
+                "phasing_binning", "preprocessing_binning", "phase_offset_origin", "roll_modes"]
 
             try:
                 for p in list_parameters:
                     if getattr(self.Dataset, p) == "":
                         setattr(self.Dataset, p, [])
                     else:
-                        setattr(self.Dataset, p, literal_eval(getattr(self.Dataset, p)))
+                        setattr(self.Dataset, p, literal_eval(
+                            getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 print(f"Wrong list syntax for {p}")
@@ -3772,11 +4091,11 @@ class Interface(object):
                     if getattr(self.Dataset, p) == "":
                         setattr(self.Dataset, p, ())
                     else:
-                        setattr(self.Dataset, p, literal_eval(getattr(self.Dataset, p)))
+                        setattr(self.Dataset, p, literal_eval(
+                            getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 print(f"Wrong tuple syntax for {p}")
-
 
             # Empty parameters are set to None (bcdi syntax)
             if self.Dataset.output_size == []:
@@ -3794,10 +4113,10 @@ class Interface(object):
             try:
                 if self.Dataset.beamline == "SIXS_2019":
                     root_folder = self.Dataset.root_folder
-                
+
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
-                
+
                 save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scans}/result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
@@ -3811,7 +4130,7 @@ class Interface(object):
 
                 print("You need to initialize all the parameters with the preprocess tab first, some parameters are used here such as the energy, detector distance, ...""")
                 return
-                    
+
             # Create final directory is not yet existing
             if not os.path.isdir(save_dir):
                 full_path = ""
@@ -3821,88 +4140,88 @@ class Interface(object):
                         os.mkdir(full_path)
                     except FileExistsError:
                         pass
-                
+
             try:
                 self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final = strain.strain_bcdi(
-                    scan = self.Dataset.scans, 
-                    root_folder = root_folder,
-                    save_dir = save_dir,
-                    data_dirname = self.Dataset.data_dirname,
-                    sample_name = self.Dataset.sample_name, 
-                    comment = self.Dataset.user_comment, 
-                    sort_method = self.Dataset.sort_method, 
-                    correlation_threshold = self.Dataset.correlation_threshold,
-                    original_size = self.Dataset.original_size, 
-                    phasing_binning = self.Dataset.phasing_binning, 
-                    preprocessing_binning = self.Dataset.preprocessing_binning, 
-                    output_size = self.Dataset.output_size, 
-                    keep_size = self.Dataset.keep_size, 
-                    fix_voxel = self.Dataset.fix_voxel,
-                    data_frame = self.Dataset.data_frame,
-                    ref_axis_q = self.Dataset.ref_axis_q,
-                    save_frame = self.Dataset.save_frame,
-                    isosurface_strain = self.Dataset.isosurface_strain,
-                    strain_method = self.Dataset.strain_method,
-                    phase_offset = self.Dataset.phase_offset,
-                    phase_offset_origin = self.Dataset.phase_offset_origin,
-                    offset_method = self.Dataset.offset_method,
-                    centering_method = self.Dataset.centering_method,
-                    beamline = self.Dataset.beamline,
-                    actuators = self.Dataset.actuators,
-                    rocking_angle = self.Dataset.rocking_angle,
-                    sdd = self.Dataset.sdd,
-                    energy = self.Dataset.energy,
-                    beam_direction = self.Dataset.beam_direction,
-                    outofplane_angle = self.Dataset.outofplane_angle,
-                    inplane_angle = self.Dataset.inplane_angle,
-                    tilt_angle = self.Dataset.tilt_angle,
-                    sample_offsets = self.Dataset.sample_offsets,
-                    specfile_name = self.Dataset.specfile_name,
-                    custom_scan = self.Dataset.custom_scan,
-                    custom_motors = self.Dataset.custom_motors,
-                    detector = self.Dataset.detector,
-                    nb_pixel_x = self.Dataset.nb_pixel_x,
-                    nb_pixel_y = self.Dataset.nb_pixel_y,
-                    pixel_size = self.Dataset.pixel_size,
-                    template_imagefile = self.Dataset.template_imagefile,
-                    correct_refraction = self.Dataset.correct_refraction,
-                    optical_path_method = self.Dataset.optical_path_method,
-                    dispersion = self.Dataset.dispersion,
-                    absorption = self.Dataset.absorption,
-                    threshold_unwrap_refraction = self.Dataset.threshold_unwrap_refraction,
-                    simu_flag = self.Dataset.simu_flag,
-                    invert_phase = self.Dataset.invert_phase,
-                    flip_reconstruction = self.Dataset.flip_reconstruction,
-                    phase_ramp_removal = self.Dataset.phase_ramp_removal,
-                    threshold_gradient = self.Dataset.threshold_gradient,
-                    save_raw = self.Dataset.save_raw,
-                    save_support = self.Dataset.save_support,
-                    save = self.Dataset.save,
-                    debug = self.Dataset.debug,
-                    roll_modes = self.Dataset.roll_modes,
-                    align_axis = self.Dataset.align_axis,
-                    ref_axis = self.Dataset.ref_axis,
-                    axis_to_align = self.Dataset.axis_to_align,
-                    strain_range = self.Dataset.strain_range,
-                    phase_range = self.Dataset.phase_range,
-                    grey_background = self.Dataset.grey_background,
-                    tick_spacing = self.Dataset.tick_spacing,
-                    tick_direction = self.Dataset.tick_direction,
-                    tick_length = self.Dataset.tick_length,
-                    tick_width = self.Dataset.tick_width,
-                    get_temperature = self.Dataset.temp_bool,
-                    reflection = self.Dataset.reflection,
-                    reference_spacing = self.Dataset.reference_spacing,
-                    reference_temperature = self.Dataset.reference_temperature,
-                    avg_method = self.Dataset.avg_method,
-                    avg_threshold = self.Dataset.avg_threshold,
-                    hwidth = self.Dataset.hwidth,
-                    apodize_flag = self.Dataset.apodize_flag,
-                    apodize_window = self.Dataset.apodize_window,
-                    mu = self.Dataset.mu,
-                    sigma = self.Dataset.sigma,
-                    alpha = self.Dataset.alpha,
-                    reconstruction_file = self.Dataset.reconstruction_file,
+                    scan=self.Dataset.scans,
+                    root_folder=root_folder,
+                    save_dir=save_dir,
+                    data_dirname=self.Dataset.data_dirname,
+                    sample_name=self.Dataset.sample_name,
+                    comment=self.Dataset.user_comment,
+                    sort_method=self.Dataset.sort_method,
+                    correlation_threshold=self.Dataset.correlation_threshold,
+                    original_size=self.Dataset.original_size,
+                    phasing_binning=self.Dataset.phasing_binning,
+                    preprocessing_binning=self.Dataset.preprocessing_binning,
+                    output_size=self.Dataset.output_size,
+                    keep_size=self.Dataset.keep_size,
+                    fix_voxel=self.Dataset.fix_voxel,
+                    data_frame=self.Dataset.data_frame,
+                    ref_axis_q=self.Dataset.ref_axis_q,
+                    save_frame=self.Dataset.save_frame,
+                    isosurface_strain=self.Dataset.isosurface_strain,
+                    strain_method=self.Dataset.strain_method,
+                    phase_offset=self.Dataset.phase_offset,
+                    phase_offset_origin=self.Dataset.phase_offset_origin,
+                    offset_method=self.Dataset.offset_method,
+                    centering_method=self.Dataset.centering_method,
+                    beamline=self.Dataset.beamline,
+                    actuators=self.Dataset.actuators,
+                    rocking_angle=self.Dataset.rocking_angle,
+                    sdd=self.Dataset.sdd,
+                    energy=self.Dataset.energy,
+                    beam_direction=self.Dataset.beam_direction,
+                    outofplane_angle=self.Dataset.outofplane_angle,
+                    inplane_angle=self.Dataset.inplane_angle,
+                    tilt_angle=self.Dataset.tilt_angle,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    specfile_name=self.Dataset.specfile_name,
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_motors=self.Dataset.custom_motors,
+                    detector=self.Dataset.detector,
+                    nb_pixel_x=self.Dataset.nb_pixel_x,
+                    nb_pixel_y=self.Dataset.nb_pixel_y,
+                    pixel_size=self.Dataset.pixel_size,
+                    template_imagefile=self.Dataset.template_imagefile,
+                    correct_refraction=self.Dataset.correct_refraction,
+                    optical_path_method=self.Dataset.optical_path_method,
+                    dispersion=self.Dataset.dispersion,
+                    absorption=self.Dataset.absorption,
+                    threshold_unwrap_refraction=self.Dataset.threshold_unwrap_refraction,
+                    simu_flag=self.Dataset.simu_flag,
+                    invert_phase=self.Dataset.invert_phase,
+                    flip_reconstruction=self.Dataset.flip_reconstruction,
+                    phase_ramp_removal=self.Dataset.phase_ramp_removal,
+                    threshold_gradient=self.Dataset.threshold_gradient,
+                    save_raw=self.Dataset.save_raw,
+                    save_support=self.Dataset.save_support,
+                    save=self.Dataset.save,
+                    debug=self.Dataset.debug,
+                    roll_modes=self.Dataset.roll_modes,
+                    align_axis=self.Dataset.align_axis,
+                    ref_axis=self.Dataset.ref_axis,
+                    axis_to_align=self.Dataset.axis_to_align,
+                    strain_range=self.Dataset.strain_range,
+                    phase_range=self.Dataset.phase_range,
+                    grey_background=self.Dataset.grey_background,
+                    tick_spacing=self.Dataset.tick_spacing,
+                    tick_direction=self.Dataset.tick_direction,
+                    tick_length=self.Dataset.tick_length,
+                    tick_width=self.Dataset.tick_width,
+                    get_temperature=self.Dataset.temp_bool,
+                    reflection=self.Dataset.reflection,
+                    reference_spacing=self.Dataset.reference_spacing,
+                    reference_temperature=self.Dataset.reference_temperature,
+                    avg_method=self.Dataset.avg_method,
+                    avg_threshold=self.Dataset.avg_threshold,
+                    hwidth=self.Dataset.hwidth,
+                    apodize_flag=self.Dataset.apodize_flag,
+                    apodize_window=self.Dataset.apodize_window,
+                    mu=self.Dataset.mu,
+                    sigma=self.Dataset.sigma,
+                    alpha=self.Dataset.alpha,
+                    reconstruction_file=self.Dataset.reconstruction_file,
                     GUI=True,
                 )
 
@@ -3912,11 +4231,12 @@ class Interface(object):
                 print("Strain analysis stopped by user ...")
 
             finally:
-                # At the end of the function 
+                # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
                 self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-                self.folder_plot_handler(change = self.tab_data.children[1].value)
+                self.folder_plot_handler(
+                    change=self.tab_data.children[1].value)
 
         if not run_strain:
             for w in self._list_widgets_strain.children[:-1]:
@@ -3930,13 +4250,12 @@ class Interface(object):
 
             clear_output(True)
 
-
     def facet_analysis(self,
-        label_facet,
-        facet_folder,
-        facet_filename,
-        load_data,
-        ):
+                       label_facet,
+                       facet_folder,
+                       facet_filename,
+                       load_data,
+                       ):
         """
         Allows one to:
             load a vtk file (previously created in paraview via theFacetAnalyser plugin)
@@ -3955,31 +4274,34 @@ class Interface(object):
             pathdir = self.Dataset.facet_filename.replace(fn, "")
 
             try:
-                self.Facets = facet_analysis.Facets(filename = fn, pathdir = pathdir)
-                print("Facets object saved as self.Facets, call help(self.Facets) for more details.")
+                self.Facets = facet_analysis.Facets(
+                    filename=fn, pathdir=pathdir)
+                print(
+                    "Facets object saved as self.Facets, call help(self.Facets) for more details.")
             except:
                 return "Wrong file."
 
             # Button to rotate data
             button_rotate = Button(
-                description = "Work on facet data",
-                continuous_update = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'},
-                icon = 'fast-forward')
+                description="Work on facet data",
+                continuous_update=False,
+                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                layout=Layout(width='40%'),
+                style={'description_width': 'initial'},
+                icon='fast-forward')
 
             # Button to view data
             button_view_particle = Button(
-                description = "View particle",
-                continuous_update = False,
-                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                layout = Layout(width='40%'),
-                style = {'description_width': 'initial'},
-                icon = 'fast-forward')
+                description="View particle",
+                continuous_update=False,
+                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                layout=Layout(width='40%'),
+                style={'description_width': 'initial'},
+                icon='fast-forward')
 
             # Common button as widget
-            buttons_facets = widgets.HBox([button_rotate, button_view_particle])
+            buttons_facets = widgets.HBox(
+                [button_rotate, button_view_particle])
 
             @button_rotate.on_click
             def action_button_rotate(selfbutton):
@@ -3988,63 +4310,63 @@ class Interface(object):
 
                 # Run interactive function
                 @interact(
-                    facet_a_id = widgets.Dropdown(
-                        options = [i+1 for i in range(self.Facets.nb_facets)],
-                        value = 1,
-                        description = 'Facet a id:',
-                        disabled = False,
-                        continuous_update = True,
-                        layout = Layout(width='45%'),
-                        style = {'description_width': 'initial'}),
-                    facet_b_id = widgets.Dropdown(
-                        options = [i+1 for i in range(self.Facets.nb_facets)],
-                        value = 2,
-                        description = 'Facet b id:',
-                        disabled = False,
-                        continuous_update = True,
-                        layout = Layout(width='45%'),
-                        style = {'description_width': 'initial'}),
-                    u0 = widgets.Text(
-                        value = "[1, 1, 1]",
-                        placeholder = "[1, 1, 1]",
-                        description = 'Vector perpendicular to facet a:',
-                        disabled = False,
-                        continuous_update = False,
+                    facet_a_id=widgets.Dropdown(
+                        options=[i+1 for i in range(self.Facets.nb_facets)],
+                        value=1,
+                        description='Facet a id:',
+                        disabled=False,
+                        continuous_update=True,
+                        layout=Layout(width='45%'),
+                        style={'description_width': 'initial'}),
+                    facet_b_id=widgets.Dropdown(
+                        options=[i+1 for i in range(self.Facets.nb_facets)],
+                        value=2,
+                        description='Facet b id:',
+                        disabled=False,
+                        continuous_update=True,
+                        layout=Layout(width='45%'),
+                        style={'description_width': 'initial'}),
+                    u0=widgets.Text(
+                        value="[1, 1, 1]",
+                        placeholder="[1, 1, 1]",
+                        description='Vector perpendicular to facet a:',
+                        disabled=False,
+                        continuous_update=False,
                         # layout = Layout(width='20%'),
-                        style = {'description_width': 'initial'},),
-                    v0 = widgets.Text(
-                        value = "[1, -1, 0]",
-                        placeholder = "[1, -1, 0]",
-                        description = 'Vector perpendicular to facet b:',
-                        disabled = False,
-                        continuous_update = False,
+                        style={'description_width': 'initial'},),
+                    v0=widgets.Text(
+                        value="[1, -1, 0]",
+                        placeholder="[1, -1, 0]",
+                        description='Vector perpendicular to facet b:',
+                        disabled=False,
+                        continuous_update=False,
                         # layout = Layout(width='20%'),
-                        style = {'description_width': 'initial'},),
-                    w0 = widgets.Text(
-                        value = "[1, 1, -2]",
-                        placeholder = "[1, 1, -2]",
-                        description = 'Cross product of u0 and v0:',
-                        disabled = False,
-                        continuous_update = False,
+                        style={'description_width': 'initial'},),
+                    w0=widgets.Text(
+                        value="[1, 1, -2]",
+                        placeholder="[1, 1, -2]",
+                        description='Cross product of u0 and v0:',
+                        disabled=False,
+                        continuous_update=False,
                         # layout = Layout(width='20%'),
-                        style = {'description_width': 'initial'},),
-                    hkl_reference = widgets.Text(
-                        value = "[1, 1, 1]",
-                        placeholder = "[1, 1, 1]",
-                        description = 'Reference for interplanar angles:',
-                        disabled = False,
-                        continuous_update = False,
+                        style={'description_width': 'initial'},),
+                    hkl_reference=widgets.Text(
+                        value="[1, 1, 1]",
+                        placeholder="[1, 1, 1]",
+                        description='Reference for interplanar angles:',
+                        disabled=False,
+                        continuous_update=False,
                         # layout = Layout(width='20%'),
-                        style = {'description_width': 'initial'},),
-                    view = widgets.Text(
-                        value = "[90, 0]",
-                        placeholder = "[90, 0]",
-                        description = 'Elevation and azimuth of the axes in degrees:',
-                        disabled = False,
-                        continuous_update = False,
-                        layout = Layout(width='70%'),
-                        style = {'description_width': 'initial'},),
-                    )
+                        style={'description_width': 'initial'},),
+                    view=widgets.Text(
+                        value="[90, 0]",
+                        placeholder="[90, 0]",
+                        description='Elevation and azimuth of the axes in degrees:',
+                        disabled=False,
+                        continuous_update=False,
+                        layout=Layout(width='70%'),
+                        style={'description_width': 'initial'},),
+                )
                 def fix_facets(
                     facet_a_id,
                     facet_b_id,
@@ -4053,7 +4375,7 @@ class Interface(object):
                     w0,
                     hkl_reference,
                     view,
-                    ):
+                ):
                     """Function to interactively visualize the two facets tht will be chosen, to also help pick two vectors"""
 
                     # Save parameters value
@@ -4066,27 +4388,31 @@ class Interface(object):
                     self.Facets.view = view
 
                     # Extract list from strings
-                    list_parameters = ["u0", "v0", "w0", "hkl_reference", "view"]
+                    list_parameters = ["u0", "v0",
+                                       "w0", "hkl_reference", "view"]
                     try:
                         for p in list_parameters:
                             if getattr(self.Facets, p) == "":
                                 setattr(self.Facets, p, [])
                             else:
-                                setattr(self.Facets, p, literal_eval(getattr(self.Facets, p)))
+                                setattr(self.Facets, p, literal_eval(
+                                    getattr(self.Facets, p)))
                             # print(f"{p}:", getattr(self.Dataset, p))
                     except ValueError:
                         print(f"Wrong list syntax for {p}")
 
                     # Plot the chosen facet to help the user to pick the facets he wants to use to orient the particule
-                    self.Facets.extract_facet(facet_id = self.Facets.facet_a_id, plot = True, view = self.Facets.view, output = False, save = False)
-                    self.Facets.extract_facet(facet_id = self.Facets.facet_b_id, plot = True, view = self.Facets.view, output = False, save = False)
+                    self.Facets.extract_facet(
+                        facet_id=self.Facets.facet_a_id, plot=True, view=self.Facets.view, output=False, save=False)
+                    self.Facets.extract_facet(
+                        facet_id=self.Facets.facet_b_id, plot=True, view=self.Facets.view, output=False, save=False)
 
                     display(Markdown("""# Field data"""))
                     display(self.Facets.field_data)
 
                     button_fix_facets = Button(
-                        description = "Fix parameters and extract data.",
-                        layout = Layout(width='50%', height='35px'))
+                        description="Fix parameters and extract data.",
+                        layout=Layout(width='50%', height='35px'))
                     display(button_fix_facets)
 
                     @button_fix_facets.on_click
@@ -4100,28 +4426,34 @@ class Interface(object):
                         display(Markdown("""# Computing the rotation matrix"""))
 
                         # Take those facets' vectors
-                        u = np.array([self.Facets.field_data.n0[self.Facets.facet_a_id], self.Facets.field_data.n1[self.Facets.facet_a_id], self.Facets.field_data.n2[self.Facets.facet_a_id]])
-                        v = np.array([self.Facets.field_data.n0[self.Facets.facet_b_id], self.Facets.field_data.n1[self.Facets.facet_b_id], self.Facets.field_data.n2[self.Facets.facet_b_id]])
+                        u = np.array([self.Facets.field_data.n0[self.Facets.facet_a_id],
+                                     self.Facets.field_data.n1[self.Facets.facet_a_id], self.Facets.field_data.n2[self.Facets.facet_a_id]])
+                        v = np.array([self.Facets.field_data.n0[self.Facets.facet_b_id],
+                                     self.Facets.field_data.n1[self.Facets.facet_b_id], self.Facets.field_data.n2[self.Facets.facet_b_id]])
 
                         self.Facets.set_rotation_matrix(
-                            u0 = self.Facets.u0 / np.linalg.norm(self.Facets.u0),
-                            v0 = self.Facets.v0 / np.linalg.norm(self.Facets.v0),
-                            w0 = self.Facets.w0 / np.linalg.norm(self.Facets.w0),
-                            u = u,
-                            v = v,
-                            )
+                            u0=self.Facets.u0 / np.linalg.norm(self.Facets.u0),
+                            v0=self.Facets.v0 / np.linalg.norm(self.Facets.v0),
+                            w0=self.Facets.w0 / np.linalg.norm(self.Facets.w0),
+                            u=u,
+                            v=v,
+                        )
 
                         self.Facets.rotate_particle()
 
-                        display(Markdown("""# Computing interplanar angles from reference"""))
+                        display(
+                            Markdown("""# Computing interplanar angles from reference"""))
                         print(f"Used reference: {self.Facets.hkl_reference}")
-                        self.Facets.fixed_reference(hkl_reference = self.Facets.hkl_reference)
+                        self.Facets.fixed_reference(
+                            hkl_reference=self.Facets.hkl_reference)
 
-                        display(Markdown("""# Strain values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_strain(view = self.Facets.view)
+                        display(
+                            Markdown("""# Strain values for each surface voxel and averaged per facet"""))
+                        self.Facets.plot_strain(view=self.Facets.view)
 
-                        display(Markdown("""# Displacement values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_displacement(view = self.Facets.view)
+                        display(Markdown(
+                            """# Displacement values for each surface voxel and averaged per facet"""))
+                        self.Facets.plot_displacement(view=self.Facets.view)
 
                         display(Markdown("""# Evolution curves"""))
                         self.Facets.evolution_curves()
@@ -4133,8 +4465,8 @@ class Interface(object):
                         display(self.Facets.field_data)
 
                         button_save_facet_data = Button(
-                            description = "Save data",
-                            layout = Layout(width='50%', height='35px'))
+                            description="Save data",
+                            layout=Layout(width='50%', height='35px'))
                         display(button_save_facet_data)
 
                         @button_save_facet_data.on_click
@@ -4143,21 +4475,28 @@ class Interface(object):
                             try:
                                 # Create subfolder
                                 try:
-                                    os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
-                                    print(f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
+                                    os.mkdir(
+                                        f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
+                                    print(
+                                        f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
                                 except FileExistsError:
-                                    print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/ exists")
+                                    print(
+                                        f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/ exists")
                                     pass
 
                                 # Save data
-                                self.Facets.save_data(f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
-                                print(f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
+                                self.Facets.save_data(
+                                    f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
+                                print(
+                                    f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
 
-                                self.Facets.to_hdf5(f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
-                                print(f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
+                                self.Facets.to_hdf5(
+                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
+                                print(
+                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
                             except AttributeError:
-                                print("Initialize the directories first to save the figures and data ...")
-
+                                print(
+                                    "Initialize the directories first to save the figures and data ...")
 
             @button_view_particle.on_click
             def action_button_view_particle(selfbutton):
@@ -4167,7 +4506,6 @@ class Interface(object):
                 # Display visualisation window of facet class
                 display(self.Facets.window)
 
-
             # Display button
             display(buttons_facets)
 
@@ -4175,9 +4513,8 @@ class Interface(object):
             self.tab_facet.children[1].disabled = False
             clear_output(True)
 
-
     def display_readme(self,
-        contents):
+                       contents):
         """Docs about different steps in data analysis workflow"""
 
         if contents == "Preprocessing":
@@ -4194,7 +4531,6 @@ class Interface(object):
                 output files saved in:   /rootdir/S1/pynxraw/ or /rootdir/S1/pynx/ depending on the
                 'use_rawdata' option
                 """))
-
 
         if contents == "Phase retrieval":
             clear_output(True)
@@ -4517,8 +4853,7 @@ class Interface(object):
 
                 zero_mask = auto
                 """
-                ))
-
+                             ))
 
         if contents == "Postprocessing":
             clear_output(True)
@@ -4538,7 +4873,6 @@ class Interface(object):
                 qy] for reciprocal space, or data[z, y, x] for real space
                 """))
 
-
         if contents == "Facet analysis":
             clear_output(True)
             display(Markdown("""
@@ -4554,12 +4888,11 @@ class Interface(object):
                 Several plotting options are attributes of this class, feel free to change them (cmap, strain_range, disp_range_avg, disp_range, strain_range_avg, comment, title_fontsize, axes_fontsize, legend_fontsize, ticks_fontsize)
                 """))
 
-
     def display_logs(self,
-        label_logs,
-        csv_file,
-        show_logs
-        ):
+                     label_logs,
+                     csv_file,
+                     show_logs
+                     ):
         """
         Loads exterior .csv file and displays it in the gui
         """
@@ -4580,55 +4913,55 @@ class Interface(object):
             self.tab_logs.children[1].disabled = False
             clear_output(True)
 
-
     def load_data(self,
-        label_plot,
-        folder,
-        file_list,
-        data_use,
-        ):
+                  label_plot,
+                  folder,
+                  file_list,
+                  data_use,
+                  ):
         """
         Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi files.
         """
 
         if data_use == "two_d_plot":
-            # Disable widgets 
-           for w in self.tab_data.children[:-2]:
-                w.disabled = True
-
-           # Plot data
-           plot.Plotter(file_list)
-
-        elif data_use == "create_support":
-            # Disable widgets 
+            # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
-                
+
+            # Plot data
+            plot.Plotter(file_list)
+
+        elif data_use == "create_support":
+            # Disable widgets
+            for w in self.tab_data.children[:-2]:
+                w.disabled = True
+
             # Initialize class
-            sup = SupportTools(path_to_data = file_list)
+            sup = SupportTools(path_to_data=file_list)
 
             # Interactive function to loadt threshold value
             window_support = interactive(sup.compute_support,
-                threshold = widgets.FloatText(
-                                value = 0.05,
-                                step = 0.001,
-                                max = 1,
-                                min = 0.001,
-                                continuous_update = False,
-                                description = 'Threshold:',
-                                readout = True,
-                                layout = Layout(width='20%'),
-                                style = {'description_width': 'initial'},
-                                disabled = False),
-                compute =  widgets.ToggleButton(
-                                value = False,
-                                description = 'Compute support ...',
-                                disabled = False,
-                                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                                icon = 'step-forward',
-                                layout = Layout(width='45%'),
-                                style = {'description_width': 'initial'})
-                )
+                                         threshold=widgets.FloatText(
+                                             value=0.05,
+                                             step=0.001,
+                                             max=1,
+                                             min=0.001,
+                                             continuous_update=False,
+                                             description='Threshold:',
+                                             readout=True,
+                                             layout=Layout(width='20%'),
+                                             style={
+                                                 'description_width': 'initial'},
+                                             disabled=False),
+                                         compute=widgets.ToggleButton(
+                                             value=False,
+                                             description='Compute support ...',
+                                             disabled=False,
+                                             button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                             icon='step-forward',
+                                             layout=Layout(width='45%'),
+                                             style={'description_width': 'initial'})
+                                         )
 
             def support_handler(change):
                 """Handles changes on the widget used for the initialization"""
@@ -4639,59 +4972,59 @@ class Interface(object):
                 if change.new:
                     window_support.children[0].disabled = True
 
-            window_support.children[1].observe(support_handler, names = "value")
+            window_support.children[1].observe(support_handler, names="value")
 
             display(window_support)
 
         elif data_use == "extract_support":
-            # Disable widgets 
+            # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
-                
+
             # Initialize class
-            sup = SupportTools(path_to_data = file_list)
+            sup = SupportTools(path_to_data=file_list)
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
 
         elif data_use == "smooth_support":
-            # Disable widgets 
+            # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
-                
+
             # Initialize class
-            sup = SupportTools(path_to_support = file_list)
+            sup = SupportTools(path_to_support=file_list)
 
             # Interactive function to loadt threshold value
             window_support = interactive(sup.gaussian_convolution,
-                sigma = widgets.FloatText(
-                                value = 0.05,
-                                step = 0.001,
-                                max = 1,
-                                min = 0.001,
-                                continuous_update = False,
-                                description = 'Sigma:',
-                                readout = True,
-                                layout = Layout(width='20%'),
-                                style = {'description_width': 'initial'}),
-                threshold = widgets.FloatText(
-                                value = 0.05,
-                                step = 0.001,
-                                max = 1,
-                                min = 0.001,
-                                continuous_update = False,
-                                description = 'Threshold:',
-                                readout = True,
-                                layout = Layout(width='20%'),
-                                style = {'description_width': 'initial'}),
-                compute =  widgets.ToggleButton(
-                                value = False,
-                                description = 'Compute support ...',
-                                button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                                icon = 'step-forward',
-                                layout = Layout(width='45%'),
-                                style = {'description_width': 'initial'})
-                )
+                                         sigma=widgets.FloatText(
+                                             value=0.05,
+                                             step=0.001,
+                                             max=1,
+                                             min=0.001,
+                                             continuous_update=False,
+                                             description='Sigma:',
+                                             readout=True,
+                                             layout=Layout(width='20%'),
+                                             style={'description_width': 'initial'}),
+                                         threshold=widgets.FloatText(
+                                             value=0.05,
+                                             step=0.001,
+                                             max=1,
+                                             min=0.001,
+                                             continuous_update=False,
+                                             description='Threshold:',
+                                             readout=True,
+                                             layout=Layout(width='20%'),
+                                             style={'description_width': 'initial'}),
+                                         compute=widgets.ToggleButton(
+                                             value=False,
+                                             description='Compute support ...',
+                                             button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                             icon='step-forward',
+                                             layout=Layout(width='45%'),
+                                             style={'description_width': 'initial'})
+                                         )
 
             def support_handler(change):
                 """Handles changes on the widget used for the initialization"""
@@ -4702,15 +5035,15 @@ class Interface(object):
                 if change.new:
                     window_support.children[0].disabled = True
 
-            window_support.children[1].observe(support_handler, names = "value")
+            window_support.children[1].observe(support_handler, names="value")
 
             display(window_support)
 
         # elif data_use == "plot_vtk":
-        #     # Disable widgets 
+        #     # Disable widgets
         #     for w in self.tab_data.children[:-2]:
         #         w.disabled = True
-                
+
         elif data_use == "three_d_plot":
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
@@ -4722,8 +5055,8 @@ class Interface(object):
                 w.disabled = False
             clear_output(True)
 
-
     # Non widgets functions
+
     def rotate_sixs_data(self):
         """
         Python script to rotate the data for vertical configuration
@@ -4740,7 +5073,7 @@ class Interface(object):
                 # if rocking_angle == "omega":
                 data_og = f.root.com.scan_data.data_02[:]
                 index = 2
-                if np.ndim(data_og)==1:
+                if np.ndim(data_og) == 1:
                     data_og = f.root.com.scan_data.data_10[:]
                     index = 10
                 # elif rocking_angle == "mu":
@@ -4763,23 +5096,25 @@ class Interface(object):
             for idx in range(data.shape[0]):
                 tmp = data[idx, :, :]
                 data[idx, :, :] = np.fliplr(tmp)
-            print("Data well rotated by 90°.")  
+            print("Data well rotated by 90°.")
 
             print("Saving example figures...", end="\n\n")
-            plt.figure(figsize = (16, 9))
-            plt.imshow(data_og[half, :, :], vmax = 10)
+            plt.figure(figsize=(16, 9))
+            plt.imshow(data_og[half, :, :], vmax=10)
             plt.xlabel('Delta')
             plt.ylabel('Gamma')
             plt.tight_layout()
-            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name + str(self.Dataset.scans) + "/data/data_before_rotation.png")
+            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
+                        str(self.Dataset.scans) + "/data/data_before_rotation.png")
             plt.close()
 
-            plt.figure(figsize = (16, 9))        
-            plt.imshow(data[half, :, :], vmax = 10)
+            plt.figure(figsize=(16, 9))
+            plt.imshow(data[half, :, :], vmax=10)
             plt.xlabel('Gamma')
             plt.ylabel('Delta')
             plt.tight_layout()
-            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name + str(self.Dataset.scans) + "/data/data_after_rotation.png")
+            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
+                        str(self.Dataset.scans) + "/data/data_after_rotation.png")
             plt.close()
 
             # Overwrite data in copied file
@@ -4793,7 +5128,6 @@ class Interface(object):
             except:
                 print("Could not overwrite data ><")
 
-
     def extract_metadata(self):
         """
         Needs Dataset to be corrected beforehand
@@ -4802,59 +5136,61 @@ class Interface(object):
 
         # Save rocking curve data
         np.savez(f"{self.Dataset.scan_folder}postprocessing/interpolated_rocking_curve.npz",
-            tilt_values = self.Dataset.tilt_values,
-            rocking_curve = self.Dataset.rocking_curve,
-            interp_tilt = self.Dataset.interp_tilt,
-            interp_curve = self.Dataset.interp_curve,
-            )
+                 tilt_values=self.Dataset.tilt_values,
+                 rocking_curve=self.Dataset.rocking_curve,
+                 interp_tilt=self.Dataset.interp_tilt,
+                 interp_curve=self.Dataset.interp_curve,
+                 )
 
         # Save in a csv file
         try:
             if self.Dataset.beamline == "SIXS_2019":
-                # Load Dataset, quite slow 
+                # Load Dataset, quite slow
                 data = rd.DataSet(self.Dataset.path_to_data)
 
-                ## Add new data
+                # Add new data
                 temp_df = pd.DataFrame([[
                     self.Dataset.scans,
                     self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_x, self.Dataset.bragg_y,
                     data.x[0], data.y[0], data.z[0], data.mu[0], data.delta[0], data.omega[0],
-                    data.gamma[0], data.gamma[0] - data.mu[0], 
-                    (data.mu[-1] - data.mu[-0]) / len(data.mu), data.integration_time[0], len(data.integration_time), 
+                    data.gamma[0], data.gamma[0] - data.mu[0],
+                    (data.mu[-1] - data.mu[-0]) /
+                    len(data.mu), data.integration_time[0], len(
+                        data.integration_time),
                     self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                    data.ssl3hg[0], data.ssl3vg[0], 
+                    data.ssl3hg[0], data.ssl3vg[0],
                     # data.ssl1hg[0], data.ssl1vg[0]
-                    ]],
-                    columns = [
+                ]],
+                    columns=[
                         "scan",
-                        "qx", "qy", "qz", "q_norm", "d_hkl", 
+                        "qx", "qy", "qz", "q_norm", "d_hkl",
                         "inplane_angle", "out_of_plane_angle",
                         "bragg_x", "bragg_y",
                         "x", "y", "z", "mu", "delta", "omega",
                         "gamma", 'gamma-mu',
-                        "step size", "integration time", "steps", 
+                        "step size", "integration time", "steps",
                         "FWHM", "COM_rocking_curve",
-                        "ssl3hg", "ssl3vg", 
-                    #     "ssl1hg", "ssl1vg", 
-                    ])
+                        "ssl3hg", "ssl3vg",
+                    #     "ssl1hg", "ssl1vg",
+                ])
             else:
-                ## Add new data
+                # Add new data
                 temp_df = pd.DataFrame([[
                     self.Dataset.scans,
                     self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_x, self.Dataset.bragg_y,
                     self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                    ]],
-                    columns = [
+                ]],
+                    columns=[
                         "scan",
-                        "qx", "qy", "qz", "q_norm", "d_hkl", 
+                        "qx", "qy", "qz", "q_norm", "d_hkl",
                         "inplane_angle", "out_of_plane_angle",
                         "bragg_x", "bragg_y",
                         "FWHM", "COM_rocking_curve",
-                    ])
+                ])
 
             # Load all the logs
             try:
@@ -4862,7 +5198,7 @@ class Interface(object):
 
                 # Replace old data linked to this scan, no problem if this row does not exist yet
                 indices = df[df['scan'] == self.Dataset.scans].index
-                df.drop(indices , inplace=True)
+                df.drop(indices, inplace=True)
 
                 result = pd.concat([df, temp_df])
 
@@ -4870,15 +5206,15 @@ class Interface(object):
                 result = temp_df
 
             # Save
-            result.to_csv(self.csv_file, index = False)
+            result.to_csv(self.csv_file, index=False)
             print(f"Saved logs in {self.csv_file}")
 
         except Exception as e:
             raise e
             # print("Could not extract metadata from Dataset ...")
 
-
     # Below are handlers
+
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization"""
 
@@ -4896,11 +5232,16 @@ class Interface(object):
             for w in self._list_widgets_preprocessing.children[:-1]:
                 w.disabled = False
 
-            self.beamline_handler(change = self._list_widgets_preprocessing.children[1].value)
-            self.energy_scan_handler(change = self._list_widgets_preprocessing.children[8].value)
-            self.bragg_peak_centering_handler(change = self._list_widgets_preprocessing.children[14].value)
-            self.reload_data_handler(change = self._list_widgets_preprocessing.children[26].value)
-            self.interpolation_handler(change = self._list_widgets_preprocessing.children[47].value)
+            self.beamline_handler(
+                change=self._list_widgets_preprocessing.children[1].value)
+            self.energy_scan_handler(
+                change=self._list_widgets_preprocessing.children[8].value)
+            self.bragg_peak_centering_handler(
+                change=self._list_widgets_preprocessing.children[14].value)
+            self.reload_data_handler(
+                change=self._list_widgets_preprocessing.children[26].value)
+            self.interpolation_handler(
+                change=self._list_widgets_preprocessing.children[47].value)
 
     def beamline_handler(self, change):
         "Handles changes on the widget used for the initialization"
@@ -4919,7 +5260,7 @@ class Interface(object):
 
             if change not in ["SIXS_2019", "ID01"]:
                 for w in self._list_widgets_preprocessing.children[2:7]:
-                    w.disabled = False   
+                    w.disabled = False
 
     def energy_scan_handler(self, change):
         "Handles changes related to energy scans"
@@ -5003,11 +5344,16 @@ class Interface(object):
                 for w in self._list_widgets_correct.children[:-1]:
                     w.disabled = True
 
-                self.beamline_handler(change = self._list_widgets_preprocessing.children[1].value)
-                self.energy_scan_handler(change = self._list_widgets_preprocessing.children[8].value)
-                self.bragg_peak_centering_handler(change = self._list_widgets_preprocessing.children[14].value)
-                self.reload_data_handler(change = self._list_widgets_preprocessing.children[26].value)
-                self.interpolation_handler(change = self._list_widgets_preprocessing.children[47].value)
+                self.beamline_handler(
+                    change=self._list_widgets_preprocessing.children[1].value)
+                self.energy_scan_handler(
+                    change=self._list_widgets_preprocessing.children[8].value)
+                self.bragg_peak_centering_handler(
+                    change=self._list_widgets_preprocessing.children[14].value)
+                self.reload_data_handler(
+                    change=self._list_widgets_preprocessing.children[26].value)
+                self.interpolation_handler(
+                    change=self._list_widgets_preprocessing.children[47].value)
 
             if change.new:
                 self._list_widgets_init.children[7].disabled = True
@@ -5018,7 +5364,8 @@ class Interface(object):
                 for w in self._list_widgets_correct.children[:-1]:
                     w.disabled = False
 
-                self.temp_handler(change = self._list_widgets_correct.children[2].value)
+                self.temp_handler(
+                    change=self._list_widgets_correct.children[2].value)
 
         except:
             if not change:
@@ -5030,11 +5377,16 @@ class Interface(object):
                 for w in self._list_widgets_correct.children[:3]:
                     w.disabled = True
 
-                self.beamline_handler(change = self._list_widgets_preprocessing.children[1].value)
-                self.energy_scan_handler(change = self._list_widgets_preprocessing.children[8].value)
-                self.bragg_peak_centering_handler(change = self._list_widgets_preprocessing.children[14].value)
-                self.reload_data_handler(change = self._list_widgets_preprocessing.children[26].value)
-                self.interpolation_handler(change = self._list_widgets_preprocessing.children[47].value)
+                self.beamline_handler(
+                    change=self._list_widgets_preprocessing.children[1].value)
+                self.energy_scan_handler(
+                    change=self._list_widgets_preprocessing.children[8].value)
+                self.bragg_peak_centering_handler(
+                    change=self._list_widgets_preprocessing.children[14].value)
+                self.reload_data_handler(
+                    change=self._list_widgets_preprocessing.children[26].value)
+                self.interpolation_handler(
+                    change=self._list_widgets_preprocessing.children[47].value)
 
             if change:
                 self._list_widgets_init.children[7].disabled = True
@@ -5045,7 +5397,8 @@ class Interface(object):
                 for w in self._list_widgets_correct.children[:-1]:
                     w.disabled = False
 
-                self.temp_handler(change = self._list_widgets_correct.children[2].value)
+                self.temp_handler(
+                    change=self._list_widgets_correct.children[2].value)
 
     def temp_handler(self, change):
         "Handles changes related to data interpolation"
@@ -5077,7 +5430,8 @@ class Interface(object):
                 for w in self._list_widgets_correct.children[:-2]:
                     w.disabled = False
 
-                self.temp_handler(change = self._list_widgets_correct.children[2].value)
+                self.temp_handler(
+                    change=self._list_widgets_correct.children[2].value)
 
         except AttributeError:
             if change:
@@ -5088,14 +5442,17 @@ class Interface(object):
                 for w in self._list_widgets_correct.children[:-2]:
                     w.disabled = False
 
-                self.temp_handler(change = self._list_widgets_correct.children[2].value)
+                self.temp_handler(
+                    change=self._list_widgets_correct.children[2].value)
 
     def folder_pynx_handler(self, change):
         """Handles changes on the widget used to load a data file"""
         try:
             list_all_npz = sorted(glob.glob(change.new + "/*.npz"))
-            list_probable_iobs_files = sorted(glob.glob(change.new + "/*_pynx_align*.npz"))
-            list_probable_mask_files = sorted(glob.glob(change.new + "/*maskpynx*.npz"))
+            list_probable_iobs_files = sorted(
+                glob.glob(change.new + "/*_pynx_align*.npz"))
+            list_probable_mask_files = sorted(
+                glob.glob(change.new + "/*maskpynx*.npz"))
 
             for f in list_probable_iobs_files:
                 try:
@@ -5114,15 +5471,21 @@ class Interface(object):
                     pass
             sorted_mask_list = list_probable_mask_files + list_all_npz + [""]
 
-            self._list_widgets_pynx.children[2].options = sorted_iobs_list # iobs list
-            self._list_widgets_pynx.children[3].options = sorted_mask_list # mask list
-            self._list_widgets_pynx.children[4].options = [""] + sorted(glob.glob(change.new + "/*.npz")) # support list
-            self._list_widgets_pynx.children[5].options = [""] + sorted(glob.glob(change.new + "/*.npz")) # obj list
+            # iobs list
+            self._list_widgets_pynx.children[2].options = sorted_iobs_list
+            # mask list
+            self._list_widgets_pynx.children[3].options = sorted_mask_list
+            self._list_widgets_pynx.children[4].options = [
+                ""] + sorted(glob.glob(change.new + "/*.npz"))  # support list
+            self._list_widgets_pynx.children[5].options = [
+                ""] + sorted(glob.glob(change.new + "/*.npz"))  # obj list
 
         except AttributeError:
             list_all_npz = sorted(glob.glob(change + "/*.npz"))
-            list_probable_iobs_files = sorted(glob.glob(change + "/*_pynx_align*.npz"))
-            list_probable_mask_files = sorted(glob.glob(change + "/*maskpynx*.npz"))
+            list_probable_iobs_files = sorted(
+                glob.glob(change + "/*_pynx_align*.npz"))
+            list_probable_mask_files = sorted(
+                glob.glob(change + "/*maskpynx*.npz"))
 
             for f in list_probable_iobs_files:
                 try:
@@ -5141,10 +5504,14 @@ class Interface(object):
                     pass
             sorted_mask_list = list_probable_mask_files + list_all_npz + [""]
 
-            self._list_widgets_pynx.children[2].options = sorted_iobs_list # iobs list
-            self._list_widgets_pynx.children[3].options = sorted_mask_list # mask list
-            self._list_widgets_pynx.children[4].options = [""] + sorted(glob.glob(change + "/*.npz")) # support list
-            self._list_widgets_pynx.children[5].options = [""] + sorted(glob.glob(change + "/*.npz")) # obj list
+            # iobs list
+            self._list_widgets_pynx.children[2].options = sorted_iobs_list
+            # mask list
+            self._list_widgets_pynx.children[3].options = sorted_mask_list
+            self._list_widgets_pynx.children[4].options = [
+                ""] + sorted(glob.glob(change + "/*.npz"))  # support list
+            self._list_widgets_pynx.children[5].options = [
+                ""] + sorted(glob.glob(change + "/*.npz"))  # obj list
 
     def pynx_psf_handler(self, change):
         "Handles changes related to the psf"
@@ -5166,8 +5533,10 @@ class Interface(object):
                 for w in self._list_widgets_pynx.children[16:20]:
                     w.disabled = True
 
-        self.pynx_peak_shape_handler(change = self._list_widgets_pynx.children[16].value)
-        self.pynx_operator_handler(change = self._list_widgets_pynx.children[21].value)
+        self.pynx_peak_shape_handler(
+            change=self._list_widgets_pynx.children[16].value)
+        self.pynx_operator_handler(
+            change=self._list_widgets_pynx.children[21].value)
 
     def pynx_peak_shape_handler(self, change):
         "Handles changes related to psf the peak shape"
@@ -5211,27 +5580,34 @@ class Interface(object):
             for w in self._list_widgets_pynx.children[:-2]:
                 w.disabled = False
 
-            self.pynx_psf_handler(change = self._list_widgets_pynx.children[15].value)
+            self.pynx_psf_handler(
+                change=self._list_widgets_pynx.children[15].value)
 
     def folder_strain_handler(self, change):
         """Handles changes on the widget used to load a data file"""
         try:
-            self._list_widgets_strain.children[-3].options = sorted(glob.glob(change.new + "/*.h5") + glob.glob(change.new + "/*.cxi") + glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz")) + [""]
+            self._list_widgets_strain.children[-3].options = sorted(glob.glob(change.new + "/*.h5") + glob.glob(
+                change.new + "/*.cxi") + glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz")) + [""]
         except:
-            self._list_widgets_strain.children[-3].options = sorted(glob.glob(change + "/*.h5") + glob.glob(change + "/*.cxi") + glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz")) + [""]
+            self._list_widgets_strain.children[-3].options = sorted(glob.glob(change + "/*.h5") + glob.glob(
+                change + "/*.cxi") + glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz")) + [""]
 
     def folder_plot_handler(self, change):
         """Handles changes on the widget used to load a data file"""
         try:
-            self.tab_data.children[2].options = sorted(glob.glob(change.new + "/*.npz") + glob.glob(change.new + "/*.cxi") + glob.glob(change.new + "/*.h5")) + [""]
+            self.tab_data.children[2].options = sorted(glob.glob(
+                change.new + "/*.npz") + glob.glob(change.new + "/*.cxi") + glob.glob(change.new + "/*.h5")) + [""]
 
         except AttributeError:
-            self.tab_data.children[2].options = sorted(glob.glob(change + "/*.npz") + glob.glob(change + "/*.cxi") + glob.glob(change + "/*.h5")) + [""]
+            self.tab_data.children[2].options = sorted(glob.glob(
+                change + "/*.npz") + glob.glob(change + "/*.cxi") + glob.glob(change + "/*.h5")) + [""]
 
     def folder_facet_handler(self, change):
         """Handles changes on the widget used to load a data file"""
         try:
-            self.tab_facet.children[2].options = sorted(glob.glob(change.new + "/*.vtk")) + [""]
+            self.tab_facet.children[2].options = sorted(
+                glob.glob(change.new + "/*.vtk")) + [""]
 
         except AttributeError:
-            self.tab_facet.children[2].options = sorted(glob.glob(change + "/*.vtk")) + [""]
+            self.tab_facet.children[2].options = sorted(
+                glob.glob(change + "/*.vtk")) + [""]
