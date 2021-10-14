@@ -1,28 +1,22 @@
-# Welcome to the BCDI part of this package
+# Welcome to the gwaihir package
 
-The goal of the module is to provide a way to process and analyse BCDI data either via jupyter notebook or the command line. The next step is to provide a GUI in jupyter notebook that could save much time during analysis while also being more user friendly.
+The goal of the module is to provide a way to process and analyse BCDI data either via jupyter notebook or the command line.
 
 It requires the python packages `bcdi` and `pynx`
 
-The idea is to allow command line use of the package for fast analysis but also to use a GUI (for now jupyter notebooks) to allow new user to understand what is happening during the process but also to allow experienced users to finally tune their parameters and to offer a non "black-box" approach to the data analysis
+The idea is to allow command line use of the package for fast analysis but also to use a GUI (for jupyter notebooks) to allow new users to understand each step during the process but also to allow experienced users to finelly tune their parameters and to offer a non "black-box" approach to the data analysis
 
 ## GUI
 The use of python objects for the GUI and for the datasets could allow one to easily share the data analysis between one another.
 
 This means that:
-* A `Dataset` object could be reopened via the GUI, 
-* The GUI should present several tabs, describing the data analysis (e.g. the parameters used during the analysis) so that one group could directly have a better understanding of the data history, these parameters would all be saved as attributes of the data object
-* Guidelines for the analysis will be provided in the GUI, e.g. in a README tab
+* A `Dataset` object can be reopened via the GUI, 
+* The GUI presents several tabs, describing the data analysis (e.g. the parameters used during the analysis) so that one group could directly have a better understanding of the data history, these parameters would all be saved as attributes of the data object
+* Guidelines for the analysis are be provided in the GUI, in a README tab
 * These ideas apply the concept of thorondor, a similar package but for XANES data analysis (still in development)
 * All the parameters related to the different beamlines will be in the code. It will only require a single widget to change the beamline, while keeping the same output architecture and output format, making it much easier to share and compare the results. Most of the code will be common to all the beamlines. Python power!
 * Current hardcoded parameters (e.g. spec file location, ...) will not require the user to open scripts but just to edit a widget in notebook,
 * One GUI for all the data, one GUI to rule them all
-
-
-### Limitations
-* Lots of coding to do, but we are a phd legion
-* GUI can be RAM extensive, should be OK on clusters and recent computers
-* Paraview, currently working on a debian package at SIXS (fred picca)
 
 
 ## Current workflow for BCDI data analysis 
@@ -48,9 +42,7 @@ We can define separate steps in the processing and analysis of BCDI data:
 There are a few scripts that are meant to directly retrieve the paraview file (.vti) from the 3D intensity collected with the detector. The steps described above are automatic until facet retrieval.
 If you want to use the scripts for BCDI at ID01 or SIXS, you need to:
 * Have cloned and installed the repository
-* Make sure that the `phdutils/bcdi/terminal_scripts` folder is in your PATH and PYTHONPATH
-* Make sure that the first line of the scripts using the bcdi environment (`#!/users/simonne/anaconda3/envs/rnice.BCDI/bin/python3` for me) is replaced by an up-to-date BCDI environment for you. Sadly you do not have the authorization to use mine =D
-* Respect the following architecture for the folders, there folder you need to create by hand:
+* Respect the following architecture for the folders, these folder you need to create by hand:
 	* ./Temperature/Condition/ParticleName/ScanNumber/...
 	* e.g.: `./350/Helium/III_B2/`
 * Make sure that the spec files, template image file, data folders, rocking angle, etc are exact in the scripts.
