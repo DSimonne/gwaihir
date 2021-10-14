@@ -78,27 +78,9 @@ Demande GPU
 
 `srun -N 1 --partition=p9gpu --gres=gpu:1 --time=01:00:00 --pty bash`
 
- BCDI | PyNX
-| ------------ | ------------- |
-| Frequently updated: `source /data/id01/inhouse/david/py38-env/bin/activate` | p9.devel (official branch) `source /sware/exp/pynx/devel.p9/bin/activate` |
-| | p9, own environment `source /data/id01/inhouse/david/py38-env/bin/activate` |
-
-### Kernels on slurm
-* python3: all but PyNX
-* py38-env : optimised for BCDI, gwaihir and PyNX
+### Environments on slurm
+* python3: your personal environemnt
+* p9_3.8_dev : optimised for BCDI, gwaihir and PyNX, development version
+* p9_3.8_stable : optimised for BCDI, gwaihir and PyNX, stable version
 * p9.pynx-devel : fonctionne pour pynx, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
 * p9.pynx-gap : ?
-
-
-# Cluster at SOLEIL
-
-## sixs3
-`ssh -X sixs3`
-
-`df -h` (pour voir les disques accessibles)
-
-`cd /nfs/ruche-sixs/sixs-soleil/com-sixs/David`
-
- BCDI | PyNX
------------- | -------------
-Installed on python3 | Installed on python3
