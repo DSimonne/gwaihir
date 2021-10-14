@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     description="Python package for BCDI data analysis",
     author="David Simonne",
-    author_email="david.simonne@synchrotron-soleil.fr",
+    author_email="david.simonne@universite-paris-saclay.fr",
     data_files=[('', ["gwaihir/data_files/pynx_run.txt",
                       "gwaihir/data_files/CompareFacetsEvolution.ipynb", 
                       "gwaihir/data_files/PhasingNotebook.ipynb", 
