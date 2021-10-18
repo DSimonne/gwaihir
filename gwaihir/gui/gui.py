@@ -66,7 +66,7 @@ except:
     print("Could not load PyNX, the phase retrieval tab will be disabled")
 
 
-class Interface(object):
+class Interface():
     """This  class is a Graphical User Interface (gui) that is meant to be used to process important amount of XAS datasets that focus on the same energy range and absoption edge.
         Initializing the procedure in a jupyter notebook:
             _ gui = gui.Interface(); One will have to write the name of the data folder in which all his datasets are saved.
@@ -1696,7 +1696,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     layout=Layout(width='90%', height="35px")),
 
-                                                folder_strain=widgets.Text(
+                                                unused_folder_strain=widgets.Text(
                                                     value=os.getcwd(),
                                                     placeholder=os.getcwd(),
                                                     description='Data folder:',
@@ -1792,7 +1792,7 @@ class Interface(object):
                                         style={'description_width': 'initial'},
                                         layout=Layout(width='90%', height="35px")),
 
-                                    folder=widgets.Text(
+                                    unused_folder=widgets.Text(
                                         value=os.getcwd(),
                                         placeholder=os.getcwd(),
                                         description='Data folder:',
@@ -3412,6 +3412,7 @@ class Interface(object):
                         try:
                             iobs = bin_data(iobs, self.Dataset.rebin)
                         except Exception as e:
+                            raise e
                             print("Could not bin data")
 
                     # fft shift
@@ -3996,7 +3997,7 @@ class Interface(object):
                    sigma,
                    alpha,
                    unused_label_strain,
-                   folder_strain,
+                   unused_folder_strain,
                    reconstruction_file,
                    run_strain,
                    ):
@@ -4925,7 +4926,7 @@ class Interface(object):
 
     def load_data(self,
                   unused_label_plot,
-                  folder,
+                  unused_folder,
                   file_list,
                   data_use,
                   ):

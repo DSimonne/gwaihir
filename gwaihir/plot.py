@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 # Use widgets to interact with files (.cxi or .npz)
 
 
-class Plotter(object):
+class Plotter():
     """
     docstring for Plotter
     """
