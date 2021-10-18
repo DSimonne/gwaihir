@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import glob
 import os
+import shlex
 import shutil
 from ast import literal_eval
 import operator as operator_lib
@@ -3373,14 +3374,20 @@ class Interface(object):
                     print(
                         "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
                     os.system(
-                        f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
+                        shlex.quote(
+                            f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true"
+                            )
+                        )
 
                 elif self.run_phase_retrieval == "local_script":
                     try:
                         print(
                             f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &", end="\n\n")
                         os.system(
-                            f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &")
+                            shlex.quote(
+                                f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &"
+                                )
+                            )
                     except KeyboardInterrupt:
                         print("Phase retrieval stopped by user ...")
 
@@ -3922,7 +3929,10 @@ class Interface(object):
             print("Running pynx-cdi-analysis.py *LLK* modes=1")
             print(f"Output in {folder}/modes_gui.h5")
             os.system(
-                f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5")
+                shlex.quote(
+                    f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5"
+                    )
+                )
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
 
