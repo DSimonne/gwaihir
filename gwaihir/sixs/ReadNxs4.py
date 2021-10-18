@@ -18,7 +18,7 @@ import time
 from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 import inspect
-import phdutils
+import gwaihir
 
 
 class emptyO(object):
@@ -67,7 +67,7 @@ class DataSet(object):
 
         except FileNotFoundError:
             try:
-                self._alias_dict_path = inspect.getfile(phdutils).split("__")[
+                self._alias_dict_path = inspect.getfile(gwaihir).split("__")[
                     0] + 'sixs/alias_dict_2021.txt'
                 self._alias_dict = pickle.load(
                     open(self._alias_dict_path, 'rb'))
