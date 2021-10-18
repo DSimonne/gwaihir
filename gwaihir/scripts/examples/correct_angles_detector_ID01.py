@@ -8,7 +8,12 @@
 #         Jerome Carnis, carnis_jerome@yahoo.fr
 
 try:
-    import hdf5plugin  # for P10, should be imported before h5py or PyTables
+import pickle
+import glob
+import os
+import ast
+import pandas as pd
+import hdf5plugin  # for P10, should be imported before h5py or PyTables
 except ModuleNotFoundError:
     pass
 import numpy as np
@@ -42,16 +47,11 @@ Remenber that you may have to change the mask, the central pixel, the rocking an
 
 """
 
-import pandas as pd
-import ast
-import os
-import glob
-import pickle
 
 # Print help
 try:
-    print ('Data dir:',  sys.argv[1])
-    print ('Scan:',  sys.argv[2])
+    print('Data dir:',  sys.argv[1])
+    print('Scan:',  sys.argv[2])
 except IndexError:
     print("""
         Arg 1: Path of target directory (before /S{scan} ... )
@@ -71,21 +71,24 @@ given_temperature = sys.argv[1].split("/")[-4]
 print("Given temp (from file name):", given_temperature)
 
 # folder of the experiment, where all scans are stored
-root_folder = os.getcwd() + "/" + sys.argv[1] 
+root_folder = os.getcwd() + "/" + sys.argv[1]
 print("Root folder:", root_folder)
 
-#Scan folder
+# Scan folder
 scan_folder = root_folder + f"S{scan}/"
 print("Scan folder:", scan_folder)
 
 # Data folder
-data_folder = scan_folder + "data/" # folder of the experiment, where all scans are stored
+# folder of the experiment, where all scans are stored
+data_folder = scan_folder + "data/"
 print("Data folder:", data_folder)
 
-sample_name = "S"  # str or list of str of sample names (string in front of the scan number in the folder name).
+# str or list of str of sample names (string in front of the scan number in the folder name).
+sample_name = "S"
 
 # Saving directory
-save_dir = scan_folder + "postprocessing/corrections/"  # images will be saved here, leave it to None otherwise (default to data directory's parent)
+# images will be saved here, leave it to None otherwise (default to data directory's parent)
+save_dir = scan_folder + "postprocessing/corrections/"
 
 # CSV file if iterating on scans
 csv_file = os.getcwd() + "/scan_data.csv"
@@ -104,7 +107,7 @@ except:
     pass
 
 # Save all the prints from the script
-stdoutOrigin=sys.stdout
+stdoutOrigin = sys.stdout
 
 with open(README_file, 'w') as outfile:
     outfile.write("```bash\n")
@@ -115,14 +118,16 @@ sys.stdout = open(README_file, "a")
 # scan = 1353
 # root_folder = "/data/id01/inhouse/data/IHR/hc4050/id01/"  # folder of the experiment, where all scans are stored
 # root_folder = "/data/id01/inhouse/data/IHR/hc4050_a/id01/"  # folder of the experiment, where all scans are stored
-# root_folder = "/data/id01/inhouse/data/IHR/hc4050_a/id01/test/BCDI_2021_07_26_165851/"  # folder of the experiment, 
+# root_folder = "/data/id01/inhouse/data/IHR/hc4050_a/id01/test/BCDI_2021_07_26_165851/"  # folder of the experiment,
 # root_folder = "/data/visitor/hc4534/id01/B8_S1_P2/BCDI_2021_09_02_145714/"  # folder of the experiment, up to spec file
-root_folder = "/data/visitor/hc4534/id01/B8_S1_P2/BCDI_2021_09_02_203654/"  # folder of the experiment, up to spec filesave_dir = None  # images will be saved here, leave it to None otherwise
+# folder of the experiment, up to spec filesave_dir = None  # images will be saved here, leave it to None otherwise
+root_folder = "/data/visitor/hc4534/id01/B8_S1_P2/BCDI_2021_09_02_203654/"
 # sample_name = "S"
 filtered_data = False  # set to True if the data is already a 3D array, False otherwise
 # Should be the same shape as in specfile
 peak_method = 'maxcom'  # Bragg peak determination: 'max', 'com' or 'maxcom'.
-normalize_flux = 'skip'  # 'monitor' to normalize the intensity by the default monitor values, 'skip' to do nothing
+# 'monitor' to normalize the intensity by the default monitor values, 'skip' to do nothing
+normalize_flux = 'skip'
 debug = False  # True to see more plots
 
 ######################################
@@ -135,7 +140,8 @@ actuators = None  # {'rocking_angle': 'actuator_1_3'}
 # (useful at CRISTAL where the location of data keeps changing)
 # e.g.  {'rocking_angle': 'actuator_1_3', 'detector': 'data_04', 'monitor': 'data_05'}
 is_series = True  # specific to series measurement at P10
-custom_scan = False  # True for a stack of images acquired without scan, e.g. with ct in a macro (no info in spec file)
+# True for a stack of images acquired without scan, e.g. with ct in a macro (no info in spec file)
+custom_scan = False
 custom_images = None  # list of image numbers for the custom_scan
 custom_monitor = None  # monitor values for normalization for the custom_scan
 custom_motors = None
@@ -146,10 +152,11 @@ custom_motors = None
 # SIXS: beta, mu, gamma, delta
 rocking_angle = "outofplane"  # "outofplane" or "inplane"
 # specfile_name = "spec/2021_07_20_085405_ni" #'analysis/alias_dict_2021.txt'# July 2021
-# specfile_name = "spec/2021_07_24_083204_test" #'analysis/alias_dict_2021.txt'# July 
-# specfile_name = "spec/BCDI_2021_07_26_165851" #'analysis/alias_dict_2021.txt'# July 
+# specfile_name = "spec/2021_07_24_083204_test" #'analysis/alias_dict_2021.txt'# July
+# specfile_name = "spec/BCDI_2021_07_26_165851" #'analysis/alias_dict_2021.txt'# July
 # specfile_name = "spec/BCDI_2021_09_02_145714" #'analysis/alias_dict_2021.txt'# september
-specfile_name = "spec/BCDI_2021_09_02_203654" #'analysis/alias_dict_2021.txt'# september
+# 'analysis/alias_dict_2021.txt'# september
+specfile_name = "spec/BCDI_2021_09_02_203654"
 # template for SIXS_2018: full path of the alias dictionnary 'alias_dict.txt', typically: root_folder + 'alias_dict.txt'
 # template for all other beamlines: ''
 
@@ -168,11 +175,13 @@ hotpixels_file = None
 # hotpixels_file = "/home/experiences/sixs/simonne/Documents/SIXS_June_2021/ruche_dir/reconstructions/analysis/mask_merlin_better_flipped.npy"
 # hotpixels_file = "/home/experiences/sixs/simonne/Documents/SIXS_June_2021/masks/mask_merlin_better.npy"
 # hotpixels_file = "/home/experiences/sixs/simonne/Documents/SIXS_Jan_2021/masks/mask_merlin.npy"  # root_folder + 'hotpixels_HS4670.npz'  # non empty file path or None
-flatfield_file = None  # root_folder + "flatfield_maxipix_8kev.npz"  # non empty file path or None
+# root_folder + "flatfield_maxipix_8kev.npz"  # non empty file path or None
+flatfield_file = None
 # template_imagefile = root_folder + 'detector/2021_07_20_085405_ni/data_mpx4_%05d.edf.gz'
 # template_imagefile = root_folder + 'detector/2021_07_24_072032_b8_s1_p2/data_mpx4_%05d.edf.gz'
 # template_imagefile = root_folder + 'mpx/data_mpx4_%05d.edf.gz'# july and september 2021
-template_imagefile = root_folder + 'mpx/data_mpx4_%05d.edf'# july and september 2021
+template_imagefile = root_folder + \
+    'mpx/data_mpx4_%05d.edf'  # july and september 2021
 # template_imagefile ="Pt_Al2O3_ascan_mu_%05d_R.nxs"
 # template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'
 # template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs'
@@ -186,10 +195,13 @@ template_imagefile = root_folder + 'mpx/data_mpx4_%05d.edf'# july and september 
 # define setup related parameters #
 ###################################
 beam_direction = (1, 0, 0)  # beam along z
-sample_offsets = (-0.0011553664, 0, 0) # tuple of offsets in degrees of the sample around (downstream, vertical up, outboard)
+# tuple of offsets in degrees of the sample around (downstream, vertical up, outboard)
+sample_offsets = (-0.0011553664, 0, 0)
 # convention: the sample offsets will be subtracted to the motor values
-directbeam_x = 159.555  # direct beam vertical position in the full unbinned detector for xrayutilities 2D detector calibration
-directbeam_y = 729.561  # direct beam horizontal position in the full unbinned detector for xrayutilities 2D detector calibration
+# direct beam vertical position in the full unbinned detector for xrayutilities 2D detector calibration
+directbeam_x = 159.555
+# direct beam horizontal position in the full unbinned detector for xrayutilities 2D detector calibration
+directbeam_y = 729.561
 direct_inplane = 0.0  # outer angle in xrayutilities
 direct_outofplane = 0.0
 sdd = 0.83  # sample to detector distance in m
@@ -198,12 +210,16 @@ energy = 12994  # in eV, offset of 6eV at ID01
 ################################################
 # parameters related to temperature estimation #
 ################################################
-get_temperature = False  # True to estimate the temperature using the reference spacing of the material. Only for Pt.
-reflection = np.array([1, 1, 1])  # measured reflection, use for estimating the temperature
+# True to estimate the temperature using the reference spacing of the material. Only for Pt.
+get_temperature = False
+# measured reflection, use for estimating the temperature
+reflection = np.array([1, 1, 1])
 # reference_spacing = None  # for calibrating the thermal expansion, if None it is fixed to Pt 3.9236/norm(reflection)
 # reference_spacing = 2.254761  # d_111 at room temperature, from scan 1353, with corrected angles, SIXS jan
-reference_spacing = 2.269545  # d_111 at room temperature, from scan 670, with corrected angles, SIXS june
-reference_temperature = None  # used to calibrate the thermal expansion, if None it is fixed to 293.15K (RT)
+# d_111 at room temperature, from scan 670, with corrected angles, SIXS june
+reference_spacing = 2.269545
+# used to calibrate the thermal expansion, if None it is fixed to 293.15K (RT)
+reference_temperature = None
 
 ##########################################################
 # end of user parameters
