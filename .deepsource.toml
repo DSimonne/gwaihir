@@ -3,7 +3,8 @@ version = 1
 exclude_patterns = [
   "gwaihir/scripts/examples/*",
   "gwaihir/scripts/*",
-  "gwaihir/sixs/*"
+  "gwaihir/sixs/*",
+  "gwaihir/facet_analysis.py"
 ]
 
 [[analyzers]]
