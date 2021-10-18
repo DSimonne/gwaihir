@@ -49,6 +49,8 @@ setuptools.setup(
         "scipy",
         "xrayutilities",
         "tables",
-        "PyQt5"
+        "PyQt5",
+#         "bcdi",
+#         "PyNX",
         ]
 )
