@@ -4413,9 +4413,9 @@ class Interface(object):
 
                     # Plot the chosen facet to help the user to pick the facets he wants to use to orient the particule
                     self.Facets.extract_facet(
-                        facet_id=self.Facets.facet_a_id, plot=True, view=self.Facets.view, output=False, save=False)
+                        facet_id=self.Facets.facet_a_id, plot=True, elev=self.Facets.elev, azim=self.Facets.azim, output=False, save=False)
                     self.Facets.extract_facet(
-                        facet_id=self.Facets.facet_b_id, plot=True, view=self.Facets.view, output=False, save=False)
+                        facet_id=self.Facets.facet_b_id, plot=True, elev=self.Facets.elev, azim=self.Facets.azim, output=False, save=False)
 
                     display(Markdown("""# Field data"""))
                     display(self.Facets.field_data)
@@ -4459,11 +4459,11 @@ class Interface(object):
 
                         display(
                             Markdown("""# Strain values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_strain(view=self.Facets.view)
+                        self.Facets.plot_strain(elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown(
                             """# Displacement values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_displacement(view=self.Facets.view)
+                        self.Facets.plot_displacement(elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown("""# Evolution curves"""))
                         self.Facets.evolution_curves()
