@@ -98,7 +98,7 @@ class Interface(object):
         # Widgets for initialization
         self._list_widgets_init = interactive(self.initialize_directories,
                                               # Define scan related parameters
-                                              label_scan=widgets.HTML(
+                                              unused_label_scan=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
                                                   style={
                                                       'description_width': 'initial'},
@@ -196,7 +196,7 @@ class Interface(object):
         # Widgets for preprocessing
         self._list_widgets_preprocessing = interactive(self.initialize_parameters,
                                                        # Define beamline related parameters
-                                                       label_beamline=widgets.HTML(
+                                                       unused_label_beamline=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters specific to the beamline",
                                                            style={
                                                                'description_width': 'initial'},
@@ -293,7 +293,7 @@ class Interface(object):
 
 
                                                        # Parameters used in masking
-                                                       label_masking=widgets.HTML(
+                                                       unused_label_masking=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in masking",
                                                            style={
                                                                'description_width': 'initial'},
@@ -328,7 +328,7 @@ class Interface(object):
 
 
                                                        # Parameters related to data cropping/padding/centering
-                                                       label_centering=widgets.HTML(
+                                                       unused_label_centering=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data cropping/padding/centering</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -404,7 +404,7 @@ class Interface(object):
 
 
                                                        # Parameters for data filtering
-                                                       label_filtering=widgets.HTML(
+                                                       unused_label_filtering=widgets.HTML(
                                                            description="""<p style='font-weight: bold;font-size:1.2em'>Parameters for data filtering</p>""",
                                                            style={
                                                                'description_width': 'initial'},
@@ -451,7 +451,7 @@ class Interface(object):
                                                            tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
                                                        # Parameters used when reloading processed data
-                                                       label_reload=widgets.HTML(
+                                                       unused_label_reload=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when reloading processed data</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -495,7 +495,7 @@ class Interface(object):
                                                            tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
                                                        # Saving options
-                                                       label_saving=widgets.HTML(
+                                                       unused_label_saving=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when saving the data</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -562,7 +562,7 @@ class Interface(object):
                                                            icon='check'),
 
                                                        # Detector related parameters
-                                                       label_detector=widgets.HTML(
+                                                       unused_label_detector=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the detector used</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -665,7 +665,7 @@ class Interface(object):
                                                            style={'description_width': 'initial'}),
 
                                                        # Define parameters below if you want to orthogonalize the data before phasing
-                                                       label_ortho=widgets.HTML(
+                                                       unused_label_ortho=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters to define the data orthogonalization</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -766,7 +766,7 @@ class Interface(object):
 
 
                                                        # Parameters for xrayutilities to orthogonalize the data before phasing
-                                                       label_xru=widgets.HTML(
+                                                       unused_label_xru=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in xrayutilities to orthogonalize the data before phasing (initialize the directories before)</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -940,7 +940,7 @@ class Interface(object):
                                                            tooltip="tilt parameter from xrayutilities 2D detector calibration"),
 
                                                        # Run preprocess
-                                                       label_preprocess=widgets.HTML(
+                                                       unused_label_preprocess=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the data processing before phasing</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -1038,7 +1038,7 @@ class Interface(object):
 
         # Widgets for angles correction
         self._list_widgets_correct = interactive(self.correct_angles,
-                                                 label_correct=widgets.HTML(
+                                                 unused_label_correct=widgets.HTML(
                                                      description="<p style='font-weight: bold;font-size:1.2em'>Find the real values for the Bragg peak angles, needs correct xru parameters.",
                                                      style={
                                                          'description_width': 'initial'},
@@ -1129,7 +1129,7 @@ class Interface(object):
 
         # Widgets for strain
         self._list_widgets_strain = interactive(self.strain_gui,
-                                                label_averaging=widgets.HTML(
+                                                unused_label_averaging=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when averaging several reconstruction",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1154,7 +1154,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     disabled=False),
 
-                                                label_FFT=widgets.HTML(
+                                                unused_label_FFT=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters relative to the FFT window and voxel sizes",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1215,7 +1215,7 @@ class Interface(object):
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                label_disp_strain=widgets.HTML(
+                                                unused_label_disp_strain=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to displacement and strain calculation",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1327,7 +1327,7 @@ class Interface(object):
                                                     layout=Layout(width='25%'),
                                                     style={'description_width': 'initial'}),
 
-                                                label_refraction=widgets.HTML(
+                                                unused_label_refraction=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the refraction correction",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1385,7 +1385,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     disabled=True),
 
-                                                label_options=widgets.HTML(
+                                                unused_label_options=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Options",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1498,7 +1498,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                 ),
 
-                                                label_data_vis=widgets.HTML(
+                                                unused_label_data_vis=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data visualization",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1606,7 +1606,7 @@ class Interface(object):
                                                     layout=Layout(width='45%'),
                                                     style={'description_width': 'initial'}),
 
-                                                label_average=widgets.HTML(
+                                                unused_label_average=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters for averaging several reconstructed objects",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1632,7 +1632,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     disabled=False),
 
-                                                label_apodize=widgets.HTML(
+                                                unused_label_apodize=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Setup for phase averaging or apodization",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1690,7 +1690,7 @@ class Interface(object):
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                label_strain=widgets.HTML(
+                                                unused_label_strain=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Path to file",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1761,7 +1761,7 @@ class Interface(object):
 
         # Widgets for logs
         self.tab_logs = interactive(self.display_logs,
-                                    label_logs=widgets.HTML(
+                                    unused_label_logs=widgets.HTML(
                                         description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui, saved as self.logs",
                                         style={'description_width': 'initial'},
                                         layout=Layout(width='90%', height="35px")),
@@ -1787,7 +1787,7 @@ class Interface(object):
 
         # Widgets for plotting
         self.tab_data = interactive(self.load_data,
-                                    label_plot=widgets.HTML(
+                                    unused_label_plot=widgets.HTML(
                                         description="<p style='font-weight: bold;font-size:1.2em'>Loads data files (.cxi or npz/npy) and displays it in the gui",
                                         style={'description_width': 'initial'},
                                         layout=Layout(width='90%', height="35px")),
@@ -1836,7 +1836,7 @@ class Interface(object):
 
         # Widgets for PyNX
         self._list_widgets_pynx = interactive(self.init_pynx,
-                                              label_data=widgets.HTML(
+                                              unused_label_data=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Data files",
                                                   style={
                                                       'description_width': 'initial'},
@@ -1908,7 +1908,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_support=widgets.HTML(
+                                              unused_label_support=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Support parameters",
                                                   style={
                                                       'description_width': 'initial'},
@@ -1966,7 +1966,7 @@ class Interface(object):
                                                   continuous_update=False,
                                                   style={'description_width': 'initial'}),
 
-                                              label_psf=widgets.HTML(
+                                              unused_label_psf=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Point spread function parameters",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2027,7 +2027,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=True),
 
-                                              label_algo=widgets.HTML(
+                                              unused_label_algo=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Iterative algorithms parameters",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2119,7 +2119,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_filtering=widgets.HTML(
+                                              unused_label_filtering=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Filtering criteria for reconstructions",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2152,7 +2152,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_options=widgets.HTML(
+                                              unused_label_options=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Options",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2241,7 +2241,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_phase_retrieval=widgets.HTML(
+                                              unused_label_phase_retrieval=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the phase retrieval</p>",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2273,7 +2273,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   icon='fast-forward'),
 
-                                              label_run_pynx_tools=widgets.HTML(
+                                              unused_label_run_pynx_tools=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Click below to use a phase retrieval tool</p>",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2342,7 +2342,7 @@ class Interface(object):
 
         # Widgets for facet analysis
         self.tab_facet = interactive(self.facet_analysis,
-                                     label_facet=widgets.HTML(
+                                     unused_label_facet=widgets.HTML(
                                          description="<p style='font-weight: bold;font-size:1.2em'>Extract facet specific data from vtk file",
                                          style={
                                              'description_width': 'initial'},
@@ -2454,7 +2454,7 @@ class Interface(object):
 
     # Widgets interactive functions
     def initialize_directories(self,
-                               label_scan,
+                               unused_label_scan,
                                sample_name,
                                scans,
                                data_directory,
@@ -2660,7 +2660,7 @@ class Interface(object):
             clear_output(True)
 
     def initialize_parameters(self,
-                              label_beamline,
+                              unused_label_beamline,
                               beamline,
                               actuators,
                               is_series,
@@ -2670,32 +2670,32 @@ class Interface(object):
                               specfile_name,
                               rocking_angle,
                               follow_bragg,
-                              label_masking,
+                              unused_label_masking,
                               flag_interact,
                               background_plot,
-                              label_centering,
+                              unused_label_centering,
                               centering,
                               fix_bragg,
                               fix_size,
                               center_fft,
                               pad_size,
                               normalize_flux,
-                              label_filtering,
+                              unused_label_filtering,
                               mask_zero_event,
                               flag_medianfilter,
                               medfilt_order,
                               binning,
-                              label_reload,
+                              unused_label_reload,
                               reload_previous,
                               reload_orthogonal,
                               preprocessing_binning,
-                              label_saving,
+                              unused_label_saving,
                               save_rawdata,
                               save_to_npz,
                               save_to_mat,
                               save_to_vti,
                               save_asint,
-                              label_detector,
+                              unused_label_detector,
                               detector,
                               roi_detector,
                               photon_threshold,
@@ -2706,7 +2706,7 @@ class Interface(object):
                               template_imagefile,
                               nb_pixel_x,
                               nb_pixel_y,
-                              label_ortho,
+                              unused_label_ortho,
                               use_rawdata,
                               interp_method,
                               fill_value_mask,
@@ -2715,7 +2715,7 @@ class Interface(object):
                               sdd,
                               energy,
                               custom_motors,
-                              label_xru,
+                              unused_label_xru,
                               align_q,
                               ref_axis_q,
                               outofplane_angle,
@@ -2730,7 +2730,7 @@ class Interface(object):
                               detrot,
                               tiltazimuth,
                               tilt,
-                              label_preprocess,
+                              unused_label_preprocess,
                               init_para
                               ):
         """
@@ -3008,7 +3008,7 @@ class Interface(object):
             clear_output(True)
 
     def correct_angles(self,
-                       label_correct,
+                       unused_label_correct,
                        csv_file,
                        temp_bool,
                        reflection,
@@ -3135,7 +3135,7 @@ class Interface(object):
             clear_output(True)
 
     def init_pynx(self,
-                  label_data,
+                  unused_label_data,
                   folder,
                   iobs,
                   mask,
@@ -3143,19 +3143,19 @@ class Interface(object):
                   obj,
                   auto_center_resize,
                   max_size,
-                  label_support,
+                  unused_label_support,
                   support_threshold,
                   support_only_shrink,
                   support_update_period,
                   support_smooth_width,
                   support_post_expand,
-                  label_psf,
+                  unused_label_psf,
                   psf,
                   psf_model,
                   fwhm,
                   eta,
                   update_psf,
-                  label_algo,
+                  unused_label_algo,
                   use_operators,
                   operator_chain,
                   nb_hio,
@@ -3163,10 +3163,10 @@ class Interface(object):
                   nb_er,
                   nb_ml,
                   nb_run,
-                  label_filtering,
+                  unused_label_filtering,
                   filter_criteria,
                   nb_run_keep,
-                  label_options,
+                  unused_label_options,
                   live_plot,
                   # zero_mask,
                   # crop_output,
@@ -3176,9 +3176,9 @@ class Interface(object):
                   rebin,
                   verbose,
                   pixel_size_detector,
-                  label_phase_retrieval,
+                  unused_label_phase_retrieval,
                   run_phase_retrieval,
-                  label_run_pynx_tools,
+                  unused_label_run_pynx_tools,
                   run_pynx_tools,
                   ):
         """
@@ -3937,17 +3937,17 @@ class Interface(object):
             print("Decomposition into modes stopped by user...")
 
     def strain_gui(self,
-                   label_averaging,
+                   unused_label_averaging,
                    sort_method,
                    correlation_threshold,
-                   label_FFT,
+                   unused_label_FFT,
                    phasing_binning,
                    original_size,
                    preprocessing_binning,
                    output_size,
                    keep_size,
                    fix_voxel,
-                   label_disp_strain,
+                   unused_label_disp_strain,
                    data_frame,
                    save_frame,
                    ref_axis_q,
@@ -3957,13 +3957,13 @@ class Interface(object):
                    phase_offset_origin,
                    offset_method,
                    centering_method,
-                   label_refraction,
+                   unused_label_refraction,
                    correct_refraction,
                    optical_path_method,
                    dispersion,
                    absorption,
                    threshold_unwrap_refraction,
-                   label_options,
+                   unused_label_options,
                    simu_flag,
                    invert_phase,
                    flip_reconstruction,
@@ -3974,7 +3974,7 @@ class Interface(object):
                    save,
                    debug,
                    roll_modes,
-                   label_data_vis,
+                   unused_label_data_vis,
                    align_axis,
                    ref_axis,
                    axis_to_align,
@@ -3985,17 +3985,17 @@ class Interface(object):
                    tick_direction,
                    tick_length,
                    tick_width,
-                   label_average,
+                   unused_label_average,
                    avg_method,
                    avg_threshold,
-                   label_apodize,
+                   unused_label_apodize,
                    apodize_flag,
                    apodize_window,
                    hwidth,
                    mu,
                    sigma,
                    alpha,
-                   label_strain,
+                   unused_label_strain,
                    folder_strain,
                    reconstruction_file,
                    run_strain,
@@ -4261,7 +4261,7 @@ class Interface(object):
             clear_output(True)
 
     def facet_analysis(self,
-                       label_facet,
+                       unused_label_facet,
                        facet_folder,
                        facet_filename,
                        load_data,
@@ -4899,7 +4899,7 @@ class Interface(object):
                 """))
 
     def display_logs(self,
-                     label_logs,
+                     unused_label_logs,
                      csv_file,
                      show_logs
                      ):
@@ -4924,7 +4924,7 @@ class Interface(object):
             clear_output(True)
 
     def load_data(self,
-                  label_plot,
+                  unused_label_plot,
                   folder,
                   file_list,
                   data_use,
