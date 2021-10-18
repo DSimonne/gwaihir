@@ -2485,7 +2485,7 @@ class Interface():
 
             # Create Dataset attribute (class from other module)
             self.Dataset = gui_iterable.Dataset(
-                scans=scans, sample_name=sample_name, 
+                scans=scans, sample_name=sample_name,
                 data_directory=data_directory, root_folder=final_directory)
 
             self.Dataset.user_comment = user_comment
