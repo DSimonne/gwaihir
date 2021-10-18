@@ -129,7 +129,6 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
             clear_output(True)
             print("Set compute to true to continue")
 
-    @staticmethod
     def plot_3d_support(array):
         """
         """
