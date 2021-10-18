@@ -2349,8 +2349,8 @@ class Interface(object):
                                          layout=Layout(width='90%', height="35px")),
 
                                      facet_folder=widgets.Text(
-                                         value=os.getcwd() + f"/postprocessing/",
-                                         placeholder=os.getcwd() + f"/postprocessing/",
+                                         value=os.getcwd() + "/postprocessing/",
+                                         placeholder=os.getcwd() + "/postprocessing/",
                                          description='Facet data (.vtk) folder:',
                                          disabled=False,
                                          continuous_update=False,
@@ -2359,7 +2359,7 @@ class Interface(object):
 
                                      facet_filename=widgets.Dropdown(
                                          options=sorted(
-                                             glob.glob(os.getcwd() + f"/postprocessing/")) + [""],
+                                             glob.glob(os.getcwd() + "/postprocessing/")) + [""],
                                          description='Vtk data',
                                          disabled=False,
                                          layout=Layout(width='90%'),
@@ -2495,9 +2495,9 @@ class Interface(object):
             print("Scan folder:", self.Dataset.scan_folder)
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
                 f"postprocessing/{self.Dataset.scans}_fa.vtk"
-            self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
 
             # Filename for SIXS, should be temporary
             try:
@@ -2538,7 +2538,7 @@ class Interface(object):
                     except FileExistsError:
                         pass
 
-            print(f"Updating directories ...")
+            print("Updating directories ...")
 
             # Scan directory
             try:
@@ -2620,19 +2620,19 @@ class Interface(object):
                 print(
                     f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
-            self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                f"postprocessing/"
+                "postprocessing/"
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
 
             # Button to save data
@@ -2987,20 +2987,20 @@ class Interface(object):
                 )
 
                 # Scan folder, refresh
-                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_pynx_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
-                self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
+                self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_strain_handler(
                     change=self._list_widgets_strain.children[-4].value)
 
                 self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                    f"postprocessing/"
+                    "postprocessing/"
                 self.folder_facet_handler(
                     change=self.tab_facet.children[1].value)
 
@@ -3041,7 +3041,7 @@ class Interface(object):
             try:
                 self.Dataset.reflection = np.array(literal_eval(reflection))
             except ValueError:
-                print(f"Wrong list syntax for refelction")
+                print("Wrong list syntax for refelction")
 
             try:
                 # Check beamline for save folder
@@ -4244,7 +4244,7 @@ class Interface(object):
                 # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
