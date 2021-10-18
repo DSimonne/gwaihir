@@ -1,8 +1,8 @@
 version = 1
 
 exclude_patterns = [
-  "scripts/examples/*",
-  "sixs/*"
+  "gwaihir/scripts/examples/*",
+  "gwaihir/sixs/*"
 ]
 
 [[analyzers]]
