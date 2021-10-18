@@ -1,6 +1,6 @@
 version = 1
 
-test_patterns = [
+exclude_patterns = [
   "scripts/examples/*",
   "sixs/*"
 ]
