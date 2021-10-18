@@ -51,7 +51,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                              "extracted_support.npz", support=support)
                     print(
                         f"Saved support in {self.saving_directory} as extracted_support.npz")
-                    self.plot_3d_support(support)
+                    self.plot_3d_support(array=support)
 
             # elif self.self.path_to_data.endswith(".npz"):
 
@@ -81,7 +81,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
 
             print(
                 f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")
-            self.plot_3d_support(conv_support)
+            self.plot_3d_support(array=conv_support)
 
         else:
             clear_output(True)
@@ -123,7 +123,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                          "computed_support.npz", support=support)
                 print(
                     f"Saved support in {self.saving_directory} as computed_support.npz")
-                self.plot_3d_support(support)
+                self.plot_3d_support(array=support)
 
         else:
             clear_output(True)
