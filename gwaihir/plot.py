@@ -42,7 +42,7 @@ class Plotter(object):
                 self.plot_data()
 
             except Exception as E:
-                raise NameError("Wrong path")
+                raise E
 
         elif self.filename.endswith(".cxi"):
             # Open the file following the .cxi conventions
