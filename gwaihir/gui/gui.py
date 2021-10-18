@@ -67,13 +67,10 @@ except:
 
 
 class Interface():
-    """This  class is a Graphical User Interface (gui) that is meant to be used to process important amount of XAS datasets that focus on the same energy range and absoption edge.
-        Initializing the procedure in a jupyter notebook:
-            _ gui = gui.Interface(); One will have to write the name of the data folder in which all his datasets are saved.
-        This class makes extensive use of the ipywidgets and is thus meant to be used with a jupyter notebook.
-        Additional informations are provided in the "ReadMe" tab of the gui.
-        The necessary Python packages are : numpy, pandas, matplotlib, glob, errno, os, shutil, ipywidgets, IPython, scipy, datetime, importlib, pickle, lmfit
-        lmfit, xlrd, corner and inspect.
+    """
+    This class is a Graphical User Interface (gui).
+    This class makes extensive use of the ipywidgets and is thus meant to be used with a jupyter notebook.
+    Additional informations are provided in the "ReadMe" tab of the gui.
     """
 
     def __init__(self):
@@ -3406,8 +3403,8 @@ class Interface():
                         try:
                             iobs = bin_data(iobs, self.Dataset.rebin)
                         except Exception as e:
-                            raise e
                             print("Could not bin data")
+                            raise e
 
                     # fft shift
                     iobs = fftshift(iobs)
