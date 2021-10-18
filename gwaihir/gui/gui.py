@@ -2472,7 +2472,6 @@ class Interface():
 
         Mandatory to run before any other step
         """
-
         if run_dir_init:
             # Save as attributes for use in future widgets
 
@@ -3184,7 +3183,6 @@ class Interface():
         """
         Get parameters from widgets and run phase retrieval
         """
-
         self.Dataset.folder = folder
         self.Dataset.iobs = iobs
         self.Dataset.mask = mask
@@ -3833,7 +3831,6 @@ class Interface():
         filter_criteria can take the values "LLK" or "standard_deviation"
         If you take filter based on both, the function will filter nb_keep/2 files by the first criteria, and the remaining files by the second criteria 
         """
-
         # Different functions depending in the criteria
         def filter_by_std(cxi_files, nb_keep):
             # Keep filtering criteria of reconstruction modules in dictionnary
@@ -4006,7 +4003,6 @@ class Interface():
         Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase. 
         Also plots images depending on the given isosurface.
         """
-
         if run_strain:
             # Disable all widgets until the end of the program, will update automatticaly after
             for w in self._list_widgets_strain.children[:-1]:
@@ -4388,7 +4384,6 @@ class Interface():
                     view,
                 ):
                     """Function to interactively visualize the two facets tht will be chosen, to also help pick two vectors"""
-
                     # Save parameters value
                     self.Facets.facet_a_id = facet_a_id
                     self.Facets.facet_b_id = facet_b_id
@@ -4527,7 +4522,6 @@ class Interface():
     @staticmethod
     def display_readme(contents):
         """Docs about different steps in data analysis workflow"""
-
         if contents == "Preprocessing":
             clear_output(True)
             display(Markdown("""
@@ -4933,7 +4927,6 @@ class Interface():
         """
         Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi files.
         """
-
         if data_use == "two_d_plot":
             # Disable widgets
             for w in self.tab_data.children[:-2]:
@@ -5076,7 +5069,6 @@ class Interface():
 
         Only for SIXS data in the vertical MED configuration
         """
-
         print("Rotating SIXS data ...")
         with tb.open_file(self.Dataset.path_to_data, "a") as f:
             # Get data
@@ -5144,7 +5136,6 @@ class Interface():
         Needs Dataset to be corrected beforehand
         Extract meaningful data and saves them in a csv file to allow comparison
         """
-
         # Save rocking curve data
         np.savez(f"{self.Dataset.scan_folder}postprocessing/interpolated_rocking_curve.npz",
                  tilt_values=self.Dataset.tilt_values,
@@ -5228,7 +5219,6 @@ class Interface():
 
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization"""
-
         if not change.new:
             for w in self._list_widgets_init.children[:7]:
                 w.disabled = False

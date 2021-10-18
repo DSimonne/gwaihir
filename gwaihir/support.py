@@ -37,7 +37,6 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
         """
         Extract support as a 3D array of 0 et 1 from a reconstruction
         """
-
         # Work on cxi files
         if compute:
             if self.path_to_data.endswith(".cxi"):
@@ -91,7 +90,6 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
         """
         Create support from data, based on maximum value of electronic density module, a threshold is applied.
         """
-
         if compute:
             with tb.open_file(self.path_to_data, "r") as f:
                 # Since .cxi files follow a specific architecture, we know where our data is
