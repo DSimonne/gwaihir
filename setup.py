@@ -23,7 +23,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     scripts=[
-        "gwaihir/scripts/compute_q.py",
         "gwaihir/scripts/run_correct_angles_detector.py",
         "gwaihir/scripts/run_movetodir.py",
         "gwaihir/scripts/run_preprocess_bcdi.py",
