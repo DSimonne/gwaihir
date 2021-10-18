@@ -69,8 +69,10 @@ except:
 class Interface():
     """
     This class is a Graphical User Interface (gui).
-    This class makes extensive use of the ipywidgets and is thus meant to be used with a jupyter notebook.
-    Additional informations are provided in the "ReadMe" tab of the gui.
+    This class makes extensive use of the ipywidgets and 
+    is thus meant to be used with a jupyter notebook.
+    Additional informations are provided in the "ReadMe"
+    tab of the gui.
     """
 
     def __init__(self):
@@ -2462,9 +2464,11 @@ class Interface():
                                reload_previous_data,
                                ):
         """
-        Function to move file from datadir to folder where it will be used by preprocess.bcdi
+        Function to move file from datadir to folder where 
+        it will be used by preprocess.bcdi
 
-        Also moves all the notebooks needed for data analysis, and a pynx_run.txt file with all the parameters for phase retrieval,
+        Also moves all the notebooks needed for data analysis, 
+        and a pynx_run.txt file with all the parameters for phase retrieval,
         initialized for this Dataset.
 
         Mandatory to run before any other step
@@ -2481,7 +2485,8 @@ class Interface():
 
             # Create Dataset attribute (class from other module)
             self.Dataset = gui_iterable.Dataset(
-                scans=scans, sample_name=sample_name, data_directory=data_directory, root_folder=final_directory)
+                scans=scans, sample_name=sample_name, 
+                data_directory=data_directory, root_folder=final_directory)
 
             self.Dataset.user_comment = user_comment
             self.Dataset.debug = debug
@@ -4416,7 +4421,6 @@ class Interface():
                     @button_fix_facets.on_click
                     def action_button_fix_facets(selfbutton):
                         "Fix facets to compute the new rotation matrix and launch the data extraction"
-
                         clear_output(True)
 
                         display(button_fix_facets)
@@ -4962,7 +4966,6 @@ class Interface():
 
             def support_handler(change):
                 """Handles changes on the widget used for the initialization"""
-
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -5025,7 +5028,6 @@ class Interface():
 
             def support_handler(change):
                 """Handles changes on the widget used for the initialization"""
-
                 if not change.new:
                     window_support.children[0].disabled = False
 
