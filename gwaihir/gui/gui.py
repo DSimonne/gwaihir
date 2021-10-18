@@ -3561,12 +3561,12 @@ class Interface():
 
                         # Create cdi object with data and mask, load the main parameters
                         try:
-                            params["specfile"] = GUI.Dataset.specfile_name
+                            params["specfile"] = self.Dataset.specfile_name
                         except AttributeError:
                             pass
-                        # params["imgcounter"] = GUI.Dataset.imgcounter
-                        # params["imgname"] = GUI.Dataset.imgname
-                        params["scan"] = GUI.Dataset.scans
+                        # params["imgcounter"] = self.Dataset.imgcounter
+                        # params["imgname"] = self.Dataset.imgname
+                        params["scan"] = self.Dataset.scans
 
                         cdi = CDI(iobs,
                                   support=support,
@@ -3588,75 +3588,75 @@ class Interface():
                             if not os.path.exists(cxi_filename):
                                 # We need to create a dictionnary with the parameters to save in the cxi file
 
-                                params["data"] = GUI.Dataset.iobs
-                                params["wavelength"] = GUI.Dataset.wavelength
-                                params["detector_distance"] = GUI.Dataset.sdd
-                                params["pixel_size_detector"] = GUI.Dataset.pixel_size_detector
-                                params["wavelength"] = GUI.Dataset.wavelength
-                                params["verbose"] = GUI.Dataset.verbose
-                                params["live_plot"] = GUI.Dataset.live_plot
-                                # params["gpu"] = GUI.Dataset.gpu
-                                params["auto_center_resize"] = GUI.Dataset.auto_center_resize
-                                # params["roi_user"] = GUI.Dataset.roi_user
-                                # params["roi_final"] = GUI.Dataset.roi_final
-                                params["nb_run"] = GUI.Dataset.nb_run
-                                params["max_size"] = GUI.Dataset.max_size
-                                # params["data2cxi"] = GUI.Dataset.data2cxi
+                                params["data"] = self.Dataset.iobs
+                                params["wavelength"] = self.Dataset.wavelength
+                                params["detector_distance"] = self.Dataset.sdd
+                                params["pixel_size_detector"] = self.Dataset.pixel_size_detector
+                                params["wavelength"] = self.Dataset.wavelength
+                                params["verbose"] = self.Dataset.verbose
+                                params["live_plot"] = self.Dataset.live_plot
+                                # params["gpu"] = self.Dataset.gpu
+                                params["auto_center_resize"] = self.Dataset.auto_center_resize
+                                # params["roi_user"] = self.Dataset.roi_user
+                                # params["roi_final"] = self.Dataset.roi_final
+                                params["nb_run"] = self.Dataset.nb_run
+                                params["max_size"] = self.Dataset.max_size
+                                # params["data2cxi"] = self.Dataset.data2cxi
                                 params["output_format"] = "cxi"
-                                params["mask"] = GUI.Dataset.mask
-                                params["support"] = GUI.Dataset.support
-                                # params["support_autocorrelation_threshold"] = GUI.Dataset.support_autocorrelation_threshold
-                                params["support_only_shrink"] = GUI.Dataset.support_only_shrink
-                                params["object"] = GUI.Dataset.obj
-                                params["support_update_period"] = GUI.Dataset.support_update_period
-                                params["support_smooth_width_begin"] = GUI.Dataset.support_smooth_width[0]
-                                params["support_smooth_width_end"] = GUI.Dataset.support_smooth_width[1]
-                                # params["support_smooth_width_relax_n"] = GUI.Dataset.support_smooth_width_relax_n
-                                # params["support_size"] = GUI.Dataset.support_size
-                                params["support_threshold"] = GUI.Dataset.support_threshold
-                                params["positivity"] = GUI.Dataset.positivity
-                                params["beta"] = GUI.Dataset.beta
+                                params["mask"] = self.Dataset.mask
+                                params["support"] = self.Dataset.support
+                                # params["support_autocorrelation_threshold"] = self.Dataset.support_autocorrelation_threshold
+                                params["support_only_shrink"] = self.Dataset.support_only_shrink
+                                params["object"] = self.Dataset.obj
+                                params["support_update_period"] = self.Dataset.support_update_period
+                                params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
+                                params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
+                                # params["support_smooth_width_relax_n"] = self.Dataset.support_smooth_width_relax_n
+                                # params["support_size"] = self.Dataset.support_size
+                                params["support_threshold"] = self.Dataset.support_threshold
+                                params["positivity"] = self.Dataset.positivity
+                                params["beta"] = self.Dataset.beta
                                 params["crop_output"] = 0
-                                params["rebin"] = GUI.Dataset.rebin
-                                # params["support_update_border_n"] = GUI.Dataset.support_update_border_n
-                                # params["support_threshold_method"] = GUI.Dataset.support_threshold_method
-                                params["support_post_expand"] = GUI.Dataset.support_post_expand
-                                params["psf"] = GUI.Dataset.psf
-                                # params["note"] = GUI.Dataset.note
+                                params["rebin"] = self.Dataset.rebin
+                                # params["support_update_border_n"] = self.Dataset.support_update_border_n
+                                # params["support_threshold_method"] = self.Dataset.support_threshold_method
+                                params["support_post_expand"] = self.Dataset.support_post_expand
+                                params["psf"] = self.Dataset.psf
+                                # params["note"] = self.Dataset.note
                                 try:
-                                    params["instrument"] = GUI.Dataset.beamline
+                                    params["instrument"] = self.Dataset.beamline
                                 except AttributeError:
                                     pass
-                                params["sample_name"] = GUI.Dataset.sample_name
-                                # params["fig_num"] = GUI.Dataset.fig_num
-                                # params["algorithm"] = GUI.Dataset.algorithm
+                                params["sample_name"] = self.Dataset.sample_name
+                                # params["fig_num"] = self.Dataset.fig_num
+                                # params["algorithm"] = self.Dataset.algorithm
                                 params["zero_mask"] = "auto"
-                                params["nb_run_keep"] = GUI.Dataset.nb_run_keep
-                                # params["save"] = GUI.Dataset.save
-                                # params["gps_inertia"] = GUI.Dataset.gps_inertia
-                                # params["gps_t"] = GUI.Dataset.gps_t
-                                # params["gps_s"] = GUI.Dataset.gps_s
-                                # params["gps_sigma_f"] = GUI.Dataset.gps_sigma_f
-                                # params["gps_sigma_o"] = GUI.Dataset.gps_sigma_o
-                                # params["iobs_saturation"] = GUI.Dataset.iobs_saturation
-                                # params["free_pixel_mask"] = GUI.Dataset.free_pixel_mask
-                                # params["support_formula"] = GUI.Dataset.support_formula
+                                params["nb_run_keep"] = self.Dataset.nb_run_keep
+                                # params["save"] = self.Dataset.save
+                                # params["gps_inertia"] = self.Dataset.gps_inertia
+                                # params["gps_t"] = self.Dataset.gps_t
+                                # params["gps_s"] = self.Dataset.gps_s
+                                # params["gps_sigma_f"] = self.Dataset.gps_sigma_f
+                                # params["gps_sigma_o"] = self.Dataset.gps_sigma_o
+                                # params["iobs_saturation"] = self.Dataset.iobs_saturation
+                                # params["free_pixel_mask"] = self.Dataset.free_pixel_mask
+                                # params["support_formula"] = self.Dataset.support_formula
                                 # params["mpi"] = "run"
-                                # params["mask_interp"] = GUI.Dataset.mask_interp
-                                # params["confidence_interval_factor_mask_min"] = GUI.Dataset.confidence_interval_factor_mask_min
-                                # params["confidence_interval_factor_mask_max"] = GUI.Dataset.confidence_interval_factor_mask_max
-                                # params["save_plot"] = GUI.Dataset.save_plot
-                                # params["support_fraction_min"] = GUI.Dataset.support_fraction_min
-                                # params["support_fraction_max"] = GUI.Dataset.support_fraction_max
-                                # params["support_threshold_auto_tune_factor"] = GUI.Dataset.support_threshold_auto_tune_factor
-                                # params["nb_run_keep_max_obj2_out"] = GUI.Dataset.nb_run_keep_max_obj2_out
-                                # params["flatfield"] = GUI.Dataset.flatfield
-                                # params["psf_filter"] = GUI.Dataset.psf_filter
-                                params["detwin"] = GUI.Dataset.detwin
-                                params["nb_raar"] = GUI.Dataset.nb_raar
-                                params["nb_hio"] = GUI.Dataset.nb_hio
-                                params["nb_er"] = GUI.Dataset.nb_er
-                                params["nb_ml"] = GUI.Dataset.nb_ml
+                                # params["mask_interp"] = self.Dataset.mask_interp
+                                # params["confidence_interval_factor_mask_min"] = self.Dataset.confidence_interval_factor_mask_min
+                                # params["confidence_interval_factor_mask_max"] = self.Dataset.confidence_interval_factor_mask_max
+                                # params["save_plot"] = self.Dataset.save_plot
+                                # params["support_fraction_min"] = self.Dataset.support_fraction_min
+                                # params["support_fraction_max"] = self.Dataset.support_fraction_max
+                                # params["support_threshold_auto_tune_factor"] = self.Dataset.support_threshold_auto_tune_factor
+                                # params["nb_run_keep_max_obj2_out"] = self.Dataset.nb_run_keep_max_obj2_out
+                                # params["flatfield"] = self.Dataset.flatfield
+                                # params["psf_filter"] = self.Dataset.psf_filter
+                                params["detwin"] = self.Dataset.detwin
+                                params["nb_raar"] = self.Dataset.nb_raar
+                                params["nb_hio"] = self.Dataset.nb_hio
+                                params["nb_er"] = self.Dataset.nb_er
+                                params["nb_ml"] = self.Dataset.nb_ml
 
                                 cdi.save_data_cxi(
                                     filename=cxi_filename,
