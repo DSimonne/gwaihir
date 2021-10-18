@@ -4523,8 +4523,8 @@ class Interface(object):
             self.tab_facet.children[1].disabled = False
             clear_output(True)
 
-    def display_readme(self,
-                       contents):
+    @staticmethod
+    def display_readme(contents):
         """Docs about different steps in data analysis workflow"""
 
         if contents == "Preprocessing":
