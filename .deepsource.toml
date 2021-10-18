@@ -1,5 +1,10 @@
 version = 1
 
+test_patterns = [
+  "scripts/examples/*",
+  "sixs/*"
+]
+
 [[analyzers]]
 name = "shell"
 enabled = true
@@ -11,7 +16,6 @@ enabled = true
   [analyzers.meta]
   runtime_version = "3.x.x"
 
-test_patterns = [
-  "scripts/examples/*",
-  "sixs/*"
-]
+[[transformers]]
+name = "autopep8"
+enabled = true
