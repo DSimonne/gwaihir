@@ -2261,7 +2261,7 @@ class Interface(object):
                                                       "Click to be able to change parameters",
                                                       "Collect parameters to run a job on slurm, will automatically apply a std deviation filter and run modes decomposition, freed the kernel",
                                                       "Run script on jupyter notebook environment, uses notebook kernel, will be performed in background also but more slowly, good if you cannot use jobs.",
-                                                      "Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
+                                                      r"Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
                                                   ],
                                                   description='Run phase retrieval ...',
                                                   disabled=False,
