@@ -3581,7 +3581,7 @@ class Interface():
 
                                 cdi.save_data_cxi(
                                     filename=cxi_filename,
-                                    process_parameters = ,
+                                    process_parameters=,
                                 )
 
                         # Change support threshold for supports update
