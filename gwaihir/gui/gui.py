@@ -3272,7 +3272,7 @@ class Interface(object):
 
         # Phase retrieval
         if self.run_phase_retrieval and not self.run_pynx_tools:
-            if self.run_phase_retrieval == "batch" or self.run_phase_retrieval == "local_script":
+            if self.run_phase_retrieval in ("batch", "local_script"):
                 self.text_file = []
                 self.Dataset.live_plot = False
 
