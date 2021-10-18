@@ -112,7 +112,7 @@ class Interface():
                                                   layout=Layout(width='45%'),
                                                   style={'description_width': 'initial'}),
 
-                                              scans=widgets.BoundedIntText(
+                                              scan=widgets.BoundedIntText(
                                                   value="01415",
                                                   description='Scan nb:',
                                                   min=0,
@@ -285,7 +285,7 @@ class Interface():
                                                            disabled=True,
                                                            continuous_update=False,
                                                            # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                                                           tooltip='Only for energy scans, set to True if the detector was also scanned to follow the Bragg peak',
+                                                           tooltip='Only for energy scan, set to True if the detector was also scanned to follow the Bragg peak',
                                                            layout=Layout(
                                                                height="50px"),
                                                            icon='check'),
@@ -2455,7 +2455,7 @@ class Interface():
     def initialize_directories(self,
                                unused_label_scan,
                                sample_name,
-                               scans,
+                               scan,
                                data_directory,
                                final_directory,
                                user_comment,
@@ -2476,26 +2476,19 @@ class Interface():
         if run_dir_init:
             # Save as attributes for use in future widgets
 
-            # Transform string of list into python list object if multiple scans
-            # if scans.startswith("["): # Should not happen in the gui
-            #     self.Dataset.scans = ast.literal_eval(scans)
-
-            # else:
-            #     self.Dataset.scans = [scans]#
-
             # Create Dataset attribute (class from other module)
             self.Dataset = gui_iterable.Dataset(
-                scans=scans, sample_name=sample_name,
+                scan=scan, sample_name=sample_name,
                 data_directory=data_directory, root_folder=final_directory)
 
             self.Dataset.user_comment = user_comment
             self.Dataset.debug = debug
 
             # Scan folder
-            self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scans}/"
+            self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scan}/"
             print("Scan folder:", self.Dataset.scan_folder)
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                f"postprocessing/{self.Dataset.scans}_fa.vtk"
+                f"postprocessing/{self.Dataset.scan}_fa.vtk"
             self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
@@ -2504,16 +2497,16 @@ class Interface():
             try:
                 try:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_directory}*mu*{self.Dataset.scans}*")[0]
+                        f"{self.Dataset.data_directory}*mu*{self.Dataset.scan}*")[0]
                     print("File path:", self.Dataset.path_to_data)
                 except IndexError:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_directory}*omega*{self.Dataset.scans}*")[0]
+                        f"{self.Dataset.data_directory}*omega*{self.Dataset.scan}*")[0]
                     print("Omega scan")
 
                 # If rotated before
                 self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
-                    "%05d" % self.Dataset.scans)[0]+"%05d.nxs"
+                    "%05d" % self.Dataset.scan)[0]+"%05d.nxs"
                 print("File template:", self.Dataset.template_imagefile, end="\n\n")
 
                 # Save file name
@@ -2525,7 +2518,7 @@ class Interface():
                 self.Dataset.path_to_data = ""
 
             # Data folder
-            # folder of the experiment, where all scans are stored
+            # folder of the experiment, where all scan are stored
             self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
 
             # Create final directory is not yet existing
@@ -2543,79 +2536,79 @@ class Interface():
 
             # Scan directory
             try:
-                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}")
+                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scan}")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans} exists")
+                print(f"{self.Dataset.root_folder}S{self.Dataset.scan} exists")
 
             # /data directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/data")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/data exists")
+                print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/data exists")
 
             # /pynxraw directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw exists")
 
             # /postprocessing directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing", end="\n\n")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing", end="\n\n")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing exists", end="\n\n")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing exists", end="\n\n")
 
             # move data file
             try:
                 shutil.copy2(self.Dataset.path_to_data,
-                             f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                             f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
                 print(
-                    f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                    f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scan}/data")
             except (FileExistsError, shutil.SameFileError):
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/data/{self.Dataset.path_to_data} exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/data/{self.Dataset.path_to_data} exists")
             except (AttributeError, FileNotFoundError):
                 pass
 
             # move pynx_run.txt file
             # try:
-            #     shutil.copy(f"{self.path_package}bcdi/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
-            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+            #     shutil.copy(f"{self.path_package}bcdi/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
+            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             # except FileExistsError:
-            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/pynx_run.txt exists")
+            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/pynx_run.txt exists")
             #     pass
 
             # Move notebooks
-            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb"):
+            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb"):
                 shutil.copy(f"{self.path_package}bcdi/data_files/PhasingNotebook.ipynb",
-                            f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                            f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
                 print(
-                    f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                    f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             else:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb exists")
 
-            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb"):
+            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb"):
                 shutil.copy(f"{self.path_package}bcdi/data_files/CompareFacetsEvolution.ipynb",
-                            f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                            f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
                 print(
-                    f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                    f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
             else:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_pynx_handler(
@@ -2909,11 +2902,11 @@ class Interface():
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
                     save_dir = self.Dataset.root_folder + \
-                        f"S{self.Dataset.scans}/pynxraw/"
+                        f"S{self.Dataset.scan}/pynxraw/"
 
                 # On lance BCDI
                 preprocess.preprocess_bcdi(
-                    scans=self.Dataset.scans,
+                    scans=self.Dataset.scan,
                     sample_name=self.Dataset.sample_name,
                     root_folder=root_folder,
                     save_dir=save_dir,
@@ -3048,7 +3041,7 @@ class Interface():
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/corrections/"
+                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/corrections/"
 
                 # Create final directory is not yet existing
                 if not os.path.isdir(save_dir):
@@ -3076,7 +3069,7 @@ class Interface():
                     reference_temperature=self.Dataset.reference_temperature,
                     high_threshold=1000000,
                     save_dir=save_dir,
-                    scan=self.Dataset.scans,
+                    scan=self.Dataset.scan,
                     root_folder=root_folder,
                     sample_name=self.Dataset.sample_name,
                     filtered_data=False,
@@ -3249,7 +3242,7 @@ class Interface():
         if self.Dataset.live_plot == 0:
             self.Dataset.live_plot = False
 
-        print("Scan n°", self.Dataset.scans)
+        print("Scan n°", self.Dataset.scan)
 
         self.Dataset.energy = self._list_widgets_preprocessing.children[53].value
         self.Dataset.wavelength = 1.2399*1e-6 / self.Dataset.energy
@@ -3580,15 +3573,15 @@ class Interface():
                             cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
                                 self.Dataset.root_folder,
                                 self.Dataset.sample_name,
-                                self.Dataset.scans,
+                                self.Dataset.scan,
                                 self.Dataset.iobs.split("/")[-1].split(".")[0]
                             )
                             if not os.path.exists(cxi_filename):
+                                # We need to create a dictionnary with the parameters to save in the cxi file
+
                                 cdi.save_data_cxi(
                                     filename=cxi_filename,
-                                    sample_name="",
-                                    experiment_id="",
-                                    instrument=""
+                                    process_parameters = ,
                                 )
 
                         # Change support threshold for supports update
@@ -3764,7 +3757,7 @@ class Interface():
 
                             cdi.save_obj_cxi("{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                                 self.Dataset.folder,
-                                self.Dataset.scans,
+                                self.Dataset.scan,
                                 i,
                                 cdi.get_llk()[0],
                                 self.Dataset.threshold_relative,
@@ -3776,7 +3769,7 @@ class Interface():
                             )
 
                             print("Saved as result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                                self.Dataset.scans,
+                                self.Dataset.scan,
                                 i,
                                 cdi.get_llk()[0],
                                 self.Dataset.threshold_relative,
@@ -4121,7 +4114,7 @@ class Interface():
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scans}/result_{self.Dataset.save_frame}/"
+                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
                     w.disabled = False
@@ -4147,7 +4140,7 @@ class Interface():
 
             try:
                 self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final = strain.strain_bcdi(
-                    scan=self.Dataset.scans,
+                    scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
                     data_dirname=self.Dataset.data_dirname,
@@ -4480,23 +4473,23 @@ class Interface():
                                 # Create subfolder
                                 try:
                                     os.mkdir(
-                                        f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
+                                        f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/facets_analysis/")
                                     print(
-                                        f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
+                                        f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/facets_analysis/")
                                 except FileExistsError:
                                     print(
-                                        f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/ exists")
+                                        f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/facets_analysis/ exists")
 
                                 # Save data
                                 self.Facets.save_data(
-                                    f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
+                                    f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
                                 print(
-                                    f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
+                                    f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
 
                                 self.Facets.to_hdf5(
-                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
+                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
                                 print(
-                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
+                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
                             except AttributeError:
                                 print(
                                     "Initialize the directories first to save the figures and data ...")
@@ -4829,7 +4822,7 @@ class Interface():
                 `specfile=/some/dir/to/specfile.spec`: path to specfile [mandatory, unless data= is used instead]
 
                 `scan=56`: scan number in specfile [mandatory].
-                         Alternatively a list or range of scans can be given:
+                         Alternatively a list or range of scan can be given:
                             scan=12,23,45 or scan="range(12,25)" (note the quotes)
 
                 `imgcounter=mpx4inr`: spec counter name for image number
@@ -5103,7 +5096,7 @@ class Interface():
             plt.ylabel('Gamma')
             plt.tight_layout()
             plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
-                        str(self.Dataset.scans) + "/data/data_before_rotation.png")
+                        str(self.Dataset.scan) + "/data/data_before_rotation.png")
             plt.close()
 
             plt.figure(figsize=(16, 9))
@@ -5112,7 +5105,7 @@ class Interface():
             plt.ylabel('Delta')
             plt.tight_layout()
             plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
-                        str(self.Dataset.scans) + "/data/data_after_rotation.png")
+                        str(self.Dataset.scan) + "/data/data_after_rotation.png")
             plt.close()
 
             # Overwrite data in copied file
@@ -5147,7 +5140,7 @@ class Interface():
 
                 # Add new data
                 temp_df = pd.DataFrame([[
-                    self.Dataset.scans,
+                    self.Dataset.scan,
                     self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_x, self.Dataset.bragg_y,
@@ -5175,7 +5168,7 @@ class Interface():
             else:
                 # Add new data
                 temp_df = pd.DataFrame([[
-                    self.Dataset.scans,
+                    self.Dataset.scan,
                     self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_x, self.Dataset.bragg_y,
@@ -5194,7 +5187,7 @@ class Interface():
                 df = pd.read_csv(self.csv_file)
 
                 # Replace old data linked to this scan, no problem if this row does not exist yet
-                indices = df[df['scan'] == self.Dataset.scans].index
+                indices = df[df['scan'] == self.Dataset.scan].index
                 df.drop(indices, inplace=True)
 
                 result = pd.concat([df, temp_df])
@@ -5259,7 +5252,7 @@ class Interface():
                     w.disabled = False
 
     def energy_scan_handler(self, change):
-        "Handles changes related to energy scans"
+        "Handles changes related to energy scan"
         try:
             if change.new == "energy":
                 self._list_widgets_preprocessing.children[9].disabled = False
