@@ -4459,11 +4459,13 @@ class Interface(object):
 
                         display(
                             Markdown("""# Strain values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_strain(elev=self.Facets.elev, azim=self.Facets.azim)
+                        self.Facets.plot_strain(
+                            elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown(
                             """# Displacement values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_displacement(elev=self.Facets.elev, azim=self.Facets.azim)
+                        self.Facets.plot_displacement(
+                            elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown("""# Evolution curves"""))
                         self.Facets.evolution_curves()
