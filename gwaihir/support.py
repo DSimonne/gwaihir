@@ -145,7 +145,8 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
             two_d_array = array[:, :, shape[2]//2]
             self.plot_2d_support(two_d_array, dim=2)
 
-    def plot_2d_support(self, two_d_array, dim):
+    @staticmethod
+    def plot_2d_support(two_d_array, dim):
         """
         """
         # Find max and min
