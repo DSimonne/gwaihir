@@ -5060,7 +5060,7 @@ class Interface(object):
             w = CDIViewer(file_list)
             display(w)
 
-        elif data_use == False:
+        elif data_use is False:
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
             clear_output(True)

@@ -19,7 +19,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
         self.path_to_data = path_to_data
         self.path_to_support = path_to_support
 
-        if saving_directory == None:
+        if saving_directory is None:
             try:
                 self.saving_directory = self.path_to_data.replace(
                     self.path_to_data.split("/")[-1], "")
