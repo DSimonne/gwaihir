@@ -2546,7 +2546,6 @@ class Interface():
                     f"Created {self.Dataset.root_folder}S{self.Dataset.scans}")
             except FileExistsError:
                 print(f"{self.Dataset.root_folder}S{self.Dataset.scans} exists")
-                pass
 
             # /data directory
             try:
@@ -2556,7 +2555,6 @@ class Interface():
                     f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/data")
             except FileExistsError:
                 print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/data exists")
-                pass
 
             # /pynxraw directory
             try:
@@ -2567,7 +2565,6 @@ class Interface():
             except FileExistsError:
                 print(
                     f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw exists")
-                pass
 
             # /postprocessing directory
             try:
@@ -2578,7 +2575,6 @@ class Interface():
             except FileExistsError:
                 print(
                     f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing exists", end="\n\n")
-                pass
 
             # move data file
             try:
@@ -3791,7 +3787,6 @@ class Interface():
                         except SupportTooLarge:
                             print(
                                 "Threshold value probably too low, support too large too continue")
-                            pass
 
                         print(
                             "\n#############################################################################################################\n")
@@ -4490,7 +4485,6 @@ class Interface():
                                 except FileExistsError:
                                     print(
                                         f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/ exists")
-                                    pass
 
                                 # Save data
                                 self.Facets.save_data(

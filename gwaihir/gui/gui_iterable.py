@@ -54,7 +54,6 @@ class Dataset():
                 pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
         except PermissionError:
             print("""Permission denied, You cannot save this file because you are not its creator. The changes are updated for this session and you can still plot figures but once you exit the program, all changes will be erased.""")
-            pass
 
     @staticmethod
     def unpickle(prompt):
