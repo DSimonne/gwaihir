@@ -36,10 +36,10 @@ class Dataset():
     THE DATASETS CLASS IS MEANT TO BE READ VIA THE gwaihir.gui CLASS !!
     """
 
-    def __init__(self, scans, sample_name, data_directory, root_folder):
+    def __init__(self, scan, sample_name, data_directory, root_folder):
         """Initialiaze the Dataset class, some metadata can be associated as well
         """
-        self.scans = scans
+        self.scan = scan
         self.sample_name = sample_name
         self.data_directory = data_directory
         self.root_folder = root_folder
@@ -65,7 +65,7 @@ class Dataset():
     def __repr__(self):
         return "Dataset {}{}.\n".format(
             self.sample_name,
-            self.scans,
+            self.scan,
         )
 
     def __str__(self):
@@ -79,11 +79,11 @@ class Dataset():
         Always overwrites for now
         """
         # Create file
-        with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scans}.h5", mode="w") as f:
+        with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scan}.h5", mode="w") as f:
 
             # Init
             f.create_dataset(
-                "ObjectName", data=f"Dataset_{self.sample_name}{self.scans}")
+                "ObjectName", data=f"Dataset_{self.sample_name}{self.scan}")
             f.create_dataset("FileTimeStamp", data=time.strftime(
                 "%Y-%m-%dT%H:%M:%S%z", time.localtime(time.time())))
 
@@ -632,7 +632,7 @@ class Dataset():
                 print("Could not save strain output")
 
         print(
-            f"Saved file as {self.scan_folder}{self.sample_name}{self.scans}.h5")
+            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.h5")
 
     def load_gwr(self):
         """
@@ -641,11 +641,11 @@ class Dataset():
         Can be written with the to_gwr() function 
         """
         # Create file
-        with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scans}.h5", mode="r") as f:
+        with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scan}.h5", mode="r") as f:
 
             # Init
             f.create_dataset(
-                "ObjectName", data=f"Dataset_{self.sample_name}{self.scans}")
+                "ObjectName", data=f"Dataset_{self.sample_name}{self.scan}")
             f.create_dataset("FileTimeStamp", data=time.strftime(
                 "%Y-%m-%dT%H:%M:%S%z", time.localtime(time.time())))
 
@@ -1196,4 +1196,4 @@ class Dataset():
                 print("Could not save strain output")
 
         print(
-            f"Saved file as {self.scan_folder}{self.sample_name}{self.scans}.h5")
+            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.h5")
