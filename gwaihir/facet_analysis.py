@@ -52,9 +52,9 @@ class Facets:
 
     def __init__(
         self,
-        filename : str,
-        pathdir : str = "./",
-        lattice : float = 3.912,
+        filename: str,
+        pathdir: str = "./",
+        lattice: float = 3.912,
     ) -> None:
         # Create other required parameters with default None value
         self.nb_facets = None
@@ -89,7 +89,8 @@ class Facets:
             container_types=str,
             min_length=1,
             name="pathdir")
-        valid.valid_item(lattice, allowed_types=float, min_excluded=0, name="lattice")
+        valid.valid_item(lattice, allowed_types=float,
+                         min_excluded=0, name="lattice")
         self.pathsave = pathdir + "facets_analysis/"
         self.path_to_data = pathdir + filename
         self.filename = filename
@@ -317,17 +318,18 @@ class Facets:
         # Update legend
         legend = []
         for e in normals.keys():
-            legend = legend + [" ".join(str("{:.2f}".format(e)) for e in normals[e])]
+            legend = legend + \
+                [" ".join(str("{:.2f}".format(e)) for e in normals[e])]
         self.field_data["legend"] = legend
 
     def set_rotation_matrix(
         self,
-        u0 : np.ndarray,
-        v0 : np.ndarray,
-        w0 : np.ndarray,
-        u : np.ndarray,
-        v : np.ndarray,
-    ) -> None :
+        u0: np.ndarray,
+        v0: np.ndarray,
+        w0: np.ndarray,
+        u: np.ndarray,
+        v: np.ndarray,
+    ) -> None:
         """
         Define the rotation matrix.
 
@@ -364,7 +366,8 @@ class Facets:
         tensor0 = np.array([self.u0, self.v0, self.w0])
         tensor1 = np.array([self.norm_u, self.norm_v, self.norm_w])
         inv_tensor1 = np.linalg.inv(tensor1)
-        self.rotation_matrix = np.dot(np.transpose(tensor0), np.transpose(inv_tensor1))
+        self.rotation_matrix = np.dot(
+            np.transpose(tensor0), np.transpose(inv_tensor1))
 
     def rotate_particle(self) -> None:
         """
@@ -404,9 +407,9 @@ class Facets:
 
     def fixed_reference(
         self,
-        hkl_reference : Tuple[float, float, float] = (1, 1, 1),
-        plot : bool = True,
-    ) -> None :
+        hkl_reference: Tuple[float, float, float] = (1, 1, 1),
+        plot: bool = True,
+    ) -> None:
         """
         Compute the interplanar angles between each normal and a fixed reference vector.
 
@@ -431,7 +434,8 @@ class Facets:
             + self.hkl_reference[1] ** 2
             + self.hkl_reference[2] ** 2
         )
-        self.ref_normal = self.hkl_reference / np.linalg.norm(self.hkl_reference)
+        self.ref_normal = self.hkl_reference / \
+            np.linalg.norm(self.hkl_reference)
 
         # Get normals, again to make sure that we have the good ones
         normals = {
@@ -446,7 +450,8 @@ class Facets:
         for e in normals.keys():
             value = np.rad2deg(
                 np.arccos(
-                    np.dot(self.ref_normal, normals[e] / np.linalg.norm(normals[e]))
+                    np.dot(self.ref_normal,
+                           normals[e] / np.linalg.norm(normals[e]))
                 )
             )
 
@@ -537,7 +542,7 @@ class Facets:
             ax.grid(which="major", alpha=0.5)
             plt.show()
 
-    def test_vector(self, vec : np.ndarray) -> None :
+    def test_vector(self, vec: np.ndarray) -> None:
         """
         Computes value of a vector passed through the rotation matrix.
 
@@ -556,13 +561,13 @@ class Facets:
 
     def extract_facet(
             self,
-            facet_id : int,
-            plot : bool = False,
-            elev : int = 0,
-            azim : int = 0,
-            output : bool = True,
-            save : bool = True
-    ) -> Union[None, dict] :
+            facet_id: int,
+            plot: bool = False,
+            elev: int = 0,
+            azim: int = 0,
+            output: bool = True,
+            save: bool = True
+    ) -> Union[None, dict]:
         """
         Extract data from one facet.
 
@@ -606,8 +611,10 @@ class Facets:
             results["x"][j] = self.vtk_data["x"][int(voxel_indices_new[j])]
             results["y"][j] = self.vtk_data["y"][int(voxel_indices_new[j])]
             results["z"][j] = self.vtk_data["z"][int(voxel_indices_new[j])]
-            results["strain"][j] = self.vtk_data["strain"][int(voxel_indices_new[j])]
-            results["disp"][j] = self.vtk_data["disp"][int(voxel_indices_new[j])]
+            results["strain"][j] = self.vtk_data["strain"][int(
+                voxel_indices_new[j])]
+            results["disp"][j] = self.vtk_data["disp"][int(
+                voxel_indices_new[j])]
         results["strain_mean"] = np.mean(results["strain"])
         results["strain_std"] = np.std(results["strain"])
         results["disp_mean"] = np.mean(results["disp"])
@@ -641,9 +648,12 @@ class Facets:
                 depthshade=True,
             )
 
-            plt.tick_params(axis="both", which="major", labelsize=self.ticks_fontsize)
-            plt.tick_params(axis="both", which="minor", labelsize=self.ticks_fontsize)
-            plt.title(f"Strain for facet n°{facet_id}", fontsize=self.title_fontsize)
+            plt.tick_params(axis="both", which="major",
+                            labelsize=self.ticks_fontsize)
+            plt.tick_params(axis="both", which="minor",
+                            labelsize=self.ticks_fontsize)
+            plt.title(f"Strain for facet n°{facet_id}",
+                      fontsize=self.title_fontsize)
             plt.tight_layout()
             if save:
                 plt.savefig(
@@ -672,11 +682,11 @@ class Facets:
 
     def view_particle(
         self,
-        facet_id_range : Tuple[int, int],
-        elev_axis : str,
-        show_edges_corners : bool,
-        elev : int = 0,
-        azim : int = 0,
+        facet_id_range: Tuple[int, int],
+        elev_axis: str,
+        show_edges_corners: bool,
+        elev: int = 0,
+        azim: int = 0,
     ) -> None:
         """
         Visualization of the nanocrystal.
@@ -719,7 +729,7 @@ class Facets:
         ax.set_ylabel("Y axis", fontsize=self.axes_fontsize)
         ax.set_zlabel("Z axis", fontsize=self.axes_fontsize)
 
-        def plot_facet_id(facet_id : int) -> None:
+        def plot_facet_id(facet_id: int) -> None:
             """
             Plots the voxels belonging to a specific facet.
 
@@ -745,9 +755,12 @@ class Facets:
             }
 
             for idx, _ in enumerate(voxel_indices_new):
-                results["x"][idx] = self.vtk_data["x"][int(voxel_indices_new[idx])]
-                results["y"][idx] = self.vtk_data["y"][int(voxel_indices_new[idx])]
-                results["z"][idx] = self.vtk_data["z"][int(voxel_indices_new[idx])]
+                results["x"][idx] = self.vtk_data["x"][int(
+                    voxel_indices_new[idx])]
+                results["y"][idx] = self.vtk_data["y"][int(
+                    voxel_indices_new[idx])]
+                results["z"][idx] = self.vtk_data["z"][int(
+                    voxel_indices_new[idx])]
                 results["facet_id"][idx] = facet_id
 
             # Plot all the voxels with the color of their facet
@@ -799,7 +812,8 @@ class Facets:
             if facet_id != 0:
                 if elev_axis == "x":
                     # Normal
-                    n = np.array([row.n1.values[0], row.n2.values[0], row.n0.values[0]])
+                    n = np.array(
+                        [row.n1.values[0], row.n2.values[0], row.n0.values[0]])
 
                     # Center of mass
                     com = np.array(
@@ -808,7 +822,8 @@ class Facets:
 
                 elif elev_axis == "y":
                     # Normal
-                    n = np.array([row.n2.values[0], row.n0.values[0], row.n1.values[0]])
+                    n = np.array(
+                        [row.n2.values[0], row.n0.values[0], row.n1.values[0]])
 
                     # Center of mass
                     com = np.array(
@@ -817,7 +832,8 @@ class Facets:
 
                 else:  # "z":
                     # Normal
-                    n = np.array([row.n0.values[0], row.n1.values[0], row.n2.values[0]])
+                    n = np.array(
+                        [row.n0.values[0], row.n1.values[0], row.n2.values[0]])
 
                     # Center of mass
                     com = np.array(
@@ -825,7 +841,8 @@ class Facets:
                     )
 
                 n_str = str(facet_id) + str(n.round(2).tolist())
-                ax.text(com[0], com[1], com[2], n_str, color="red", fontsize=20)
+                ax.text(com[0], com[1], com[2], n_str,
+                        color="red", fontsize=20)
 
         for i in range(facet_id_range[0], facet_id_range[1]):
             plot_facet_id(i)
@@ -833,19 +850,21 @@ class Facets:
         if show_edges_corners:
             plot_facet_id(0)
 
-        plt.tick_params(axis="both", which="major", labelsize=self.ticks_fontsize)
-        plt.tick_params(axis="both", which="minor", labelsize=self.ticks_fontsize)
+        plt.tick_params(axis="both", which="major",
+                        labelsize=self.ticks_fontsize)
+        plt.tick_params(axis="both", which="minor",
+                        labelsize=self.ticks_fontsize)
         ax.set_title("Particle voxels", fontsize=self.title_fontsize)
         plt.tight_layout()
         plt.show()
 
     def plot_strain(
             self,
-            figsize : Tuple[float, float] = (12, 10),
-            elev : int = 0,
-            azim : int = 0,
-            save : bool = True
-    ) -> None :
+            figsize: Tuple[float, float] = (12, 10),
+            elev: int = 0,
+            azim: int = 0,
+            save: bool = True
+    ) -> None:
         """
         Plot two views of the surface strain of the nanocrystal.
 
@@ -873,7 +892,8 @@ class Facets:
         # 3D strain
         p = None
         fig_name = (
-            "strain_3D_" + self.hkls + self.comment + "_" + str(self.strain_range)
+            "strain_3D_" + self.hkls + self.comment +
+            "_" + str(self.strain_range)
         )
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(projection="3d")
@@ -897,8 +917,10 @@ class Facets:
         fig.colorbar(p)
         ax.view_init(elev=elev, azim=azim)
         plt.title("Strain for each voxel", fontsize=self.title_fontsize)
-        ax.tick_params(axis="both", which="major", labelsize=self.ticks_fontsize)
-        ax.tick_params(axis="both", which="minor", labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="major",
+                       labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="minor",
+                       labelsize=self.ticks_fontsize)
 
         if save:
             plt.savefig(self.pathsave + fig_name + ".png", bbox_inches="tight")
@@ -940,8 +962,10 @@ class Facets:
         fig.colorbar(p)
         ax.view_init(elev=elev, azim=azim)
         plt.title("Mean strain per facet", fontsize=self.title_fontsize)
-        ax.tick_params(axis="both", which="major", labelsize=self.ticks_fontsize)
-        ax.tick_params(axis="both", which="minor", labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="major",
+                       labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="minor",
+                       labelsize=self.ticks_fontsize)
 
         if save:
             plt.savefig(self.pathsave + fig_name + ".png", bbox_inches="tight")
@@ -950,8 +974,8 @@ class Facets:
     def plot_displacement(
             self,
             figsize: Tuple[float, float] = (12, 10),
-            elev : int = 0,
-            azim : int = 0,
+            elev: int = 0,
+            azim: int = 0,
             save: bool = True
     ) -> None:
         """
@@ -980,7 +1004,8 @@ class Facets:
 
         # 3D displacement
         p = None
-        fig_name = "disp_3D_" + self.hkls + self.comment + "_" + str(self.disp_range)
+        fig_name = "disp_3D_" + self.hkls + \
+            self.comment + "_" + str(self.disp_range)
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(projection="3d")
 
@@ -1003,8 +1028,10 @@ class Facets:
         fig.colorbar(p)
         ax.view_init(elev=elev, azim=azim)
         plt.title("Displacement for each voxel", fontsize=self.title_fontsize)
-        ax.tick_params(axis="both", which="major", labelsize=self.ticks_fontsize)
-        ax.tick_params(axis="both", which="minor", labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="major",
+                       labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="minor",
+                       labelsize=self.ticks_fontsize)
 
         if save:
             plt.savefig(self.pathsave + fig_name + ".png", bbox_inches="tight")
@@ -1012,7 +1039,8 @@ class Facets:
 
         # Average disp
         fig_name = (
-            "disp_3D_avg_" + self.hkls + self.comment + "_" + str(self.disp_range_avg)
+            "disp_3D_avg_" + self.hkls + self.comment +
+            "_" + str(self.disp_range_avg)
         )
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(projection="3d")
@@ -1042,14 +1070,16 @@ class Facets:
         fig.colorbar(p)
         ax.view_init(elev=elev, azim=azim)
         plt.title("Mean displacement per facet", fontsize=self.title_fontsize)
-        ax.tick_params(axis="both", which="major", labelsize=self.ticks_fontsize)
-        ax.tick_params(axis="both", which="minor", labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="major",
+                       labelsize=self.ticks_fontsize)
+        ax.tick_params(axis="both", which="minor",
+                       labelsize=self.ticks_fontsize)
 
         if save:
             plt.savefig(self.pathsave + fig_name + ".png", bbox_inches="tight")
         plt.show()
 
-    def evolution_curves(self, ncol : int = 1) -> None:
+    def evolution_curves(self, ncol: int = 1) -> None:
         """
         Plot strain and displacement evolution for each facet.
 
@@ -1092,7 +1122,8 @@ class Facets:
             "Average displacement vs facet index", fontsize=self.title_fontsize
         )
         ax.set_xlabel("Facet index", fontsize=self.axes_fontsize)
-        ax.set_ylabel("Average retrieved displacement", fontsize=self.axes_fontsize)
+        ax.set_ylabel("Average retrieved displacement",
+                      fontsize=self.axes_fontsize)
 
         ax.legend(
             bbox_to_anchor=(1, 1),
@@ -1135,7 +1166,8 @@ class Facets:
                 label=row["legend"],
             )
 
-        ax.set_title("Average strain vs facet index", fontsize=self.title_fontsize)
+        ax.set_title("Average strain vs facet index",
+                     fontsize=self.title_fontsize)
         ax.set_xlabel("Facet index", fontsize=self.axes_fontsize)
         ax.set_ylabel("Average retrieved strain", fontsize=self.axes_fontsize)
 
@@ -1156,7 +1188,8 @@ class Facets:
         # disp, strain & size vs angle planes,
         # change line style as a fct of the planes indices
         fig_name = "disp_strain_size_vs_angle_planes_" + self.hkls + self.comment
-        fig, (ax0, ax1, ax2) = plt.subplots(3, 1, sharex="all", figsize=(10, 12))
+        fig, (ax0, ax1, ax2) = plt.subplots(
+            3, 1, sharex="all", figsize=(10, 12))
 
         plt.xticks(fontsize=self.ticks_fontsize)
         plt.yticks(fontsize=self.ticks_fontsize)
@@ -1303,11 +1336,12 @@ class Facets:
                 }
             )
 
-            self.field_data = self.field_data.append(edges_cornes_df, ignore_index=True)
+            self.field_data = self.field_data.append(
+                edges_cornes_df, ignore_index=True)
             self.field_data = self.field_data.sort_values(by="facet_id")
             self.field_data = self.field_data.reset_index(drop=True)
 
-    def save_data(self, path_to_data : str) -> None :
+    def save_data(self, path_to_data: str) -> None:
         """
         Save the field data as a csv file.
 
@@ -1319,7 +1353,7 @@ class Facets:
         # Save field data
         self.field_data.to_csv(path_to_data, index=False)
 
-    def to_hdf5(self, path_to_data : str) -> None :
+    def to_hdf5(self, path_to_data: str) -> None:
         """
         Save the facets object as an hdf5 file.
 
@@ -1347,7 +1381,8 @@ class Facets:
                 facets.create_dataset("norm_u", data=self.norm_u)
                 facets.create_dataset("norm_v", data=self.norm_v)
                 facets.create_dataset("norm_w", data=self.norm_w)
-                facets.create_dataset("rotation_matrix", data=self.rotation_matrix)
+                facets.create_dataset(
+                    "rotation_matrix", data=self.rotation_matrix)
                 facets.create_dataset("hkl_reference", data=self.hkl_reference)
                 facets.create_dataset("planar_dist", data=self.planar_dist)
                 facets.create_dataset("ref_normal", data=self.ref_normal)

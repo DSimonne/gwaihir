@@ -9,13 +9,13 @@ setuptools.setup(
     description="Python package for BCDI data analysis",
     author="David Simonne",
     author_email="david.simonne@universite-paris-saclay.fr",
-    download_url = "https://pypi.org/project/gwaihir/",
+    download_url="https://pypi.org/project/gwaihir/",
     data_files=[('', ["gwaihir/data_files/pynx_run.txt",
-                      "gwaihir/data_files/CompareFacetsEvolution.ipynb", 
-                      "gwaihir/data_files/PhasingNotebook.ipynb", 
+                      "gwaihir/data_files/CompareFacetsEvolution.ipynb",
+                      "gwaihir/data_files/PhasingNotebook.ipynb",
                       "licence.txt",
                       "gwaihir/sixs/alias_dict_2021.txt"
-                     ])],
+                      ])],
     url="https://github.com/DSimonne/gwaihir/tree/master",
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -34,11 +34,11 @@ setuptools.setup(
         "gwaihir/scripts/job.slurm",
         "gwaihir/scripts/run_slurm_job.sh",
     ],
-    keywords =["BCDI", "ipywidgets", "PyNX"],
+    keywords=["BCDI", "ipywidgets", "PyNX"],
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-	include_package_data=True,
+    include_package_data=True,
     python_requires='>=3.6',
     install_requires=[
         "numpy",
@@ -50,7 +50,7 @@ setuptools.setup(
         "xrayutilities",
         "tables",
         "PyQt5",
-#         "bcdi",
-#         "PyNX",
-        ]
+        #         "bcdi",
+        #         "PyNX",
+    ]
 )
