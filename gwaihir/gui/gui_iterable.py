@@ -22,7 +22,6 @@ try:
     from IPython.display import display, Markdown, Latex, clear_output
 
     from datetime import datetime
-    import pickle
 
     import tables as tb
 
@@ -43,24 +42,6 @@ class Dataset():
         self.sample_name = sample_name
         self.data_directory = data_directory
         self.root_folder = root_folder
-
-        # self.pickle()
-
-    def pickle(self):
-        """Use the pickle module to save the classes
-        """
-        try:
-            with open(f"{self.saving_directory}/"+self.name.split("~")[0]+".pickle", 'wb') as f:
-                pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
-        except PermissionError:
-            print("""Permission denied, You cannot save this file because you are not its creator. The changes are updated for this session and you can still plot figures but once you exit the program, all changes will be erased.""")
-
-    @staticmethod
-    def unpickle(prompt):
-        """Use the pickle module to load the classes
-        """
-        with open(f"{prompt}", 'rb') as f:
-            return pickle.load(f)
 
     def __repr__(self):
         return "Dataset {}{}.\n".format(
