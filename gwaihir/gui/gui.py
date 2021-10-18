@@ -57,7 +57,7 @@ from bcdi.utils.utilities import bin_data
 try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
-    from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport, InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, 
+    from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport, InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge,
     from pynx.cdi.widgets import CDIViewer
     from pynx.utils.math import smaller_primes
     pynx_import = True
@@ -4459,11 +4459,13 @@ class Interface(object):
 
                         display(
                             Markdown("""# Strain values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_strain(elev=self.Facets.elev, azim=self.Facets.azim)
+                        self.Facets.plot_strain(
+                            elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown(
                             """# Displacement values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_displacement(elev=self.Facets.elev, azim=self.Facets.azim)
+                        self.Facets.plot_displacement(
+                            elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown("""# Evolution curves"""))
                         self.Facets.evolution_curves()
