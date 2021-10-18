@@ -39,7 +39,6 @@ class Dataset():
     def __init__(self, scans, sample_name, data_directory, root_folder):
         """Initialiaze the Dataset class, some metadata can be associated as well
         """
-
         self.scans = scans
         self.sample_name = sample_name
         self.data_directory = data_directory
@@ -61,7 +60,6 @@ class Dataset():
     def unpickle(prompt):
         """Use the pickle module to load the classes
         """
-
         with open(f"{prompt}", 'rb') as f:
             return pickle.load(f)
 
@@ -81,7 +79,6 @@ class Dataset():
         Can be reloaded with the load_gwr() function 
         Always overwrites for now
         """
-
         # Create file
         with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scans}.h5", mode="w") as f:
 
@@ -644,7 +641,6 @@ class Dataset():
         Alias for hdf5 file,
         Can be written with the to_gwr() function 
         """
-
         # Create file
         with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scans}.h5", mode="r") as f:
 
