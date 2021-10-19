@@ -2611,17 +2611,22 @@ class Interface():
                 print(
                     f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
+
+            # PyNX folder, refresh values
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
+            # Plot folder, refresh
             self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
+            # Strain folder, refresh
             self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
+            # Facet folder, refresh
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
                 "postprocessing/"
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
@@ -2641,11 +2646,14 @@ class Interface():
                 clear_output(True)
                 display(button_save_as_cxi)
                 print("Saving data, takes some time ...")
+                print("Using diffraction data and mask selected in the PyNX tab...")
 
                 # Reciprocal space data
                 try:
                     self.init_cdi_operator()
+
                     # Real space data
+                    print("Using reconstruction file selected in the strain analysis tab ...")
                     try:
                         self.Dataset.to_cxi(
                             cxi_filename=self.cxi_filename, reconstruction_filename=self.Dataset.reconstruction_file)
@@ -2653,15 +2661,20 @@ class Interface():
                         self.Dataset.to_cxi(
                             cxi_filename=self.cxi_filename, reconstruction_filename=False)
 
+                except NameError:
+                    # Could not load cdi object
+                    print("Could not save reciprocal space data, needs PyNX package")
                 except AttributeError:
+                    # No diffraction data selected
                     print(
-                        "You need to select the diffraction data file in the PyNX tab.")
+                        "You need to select the diffraction data file in the `PyNX` tab.")
 
+                # Facets
                 try:
                     self.Facets.to_hdf5(
                         f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
-                except Exception as e:
-                    raise e
+                except AttributeError:
+                        print("Could not save facets' data, run the analysis in the `Facets` tab first...")
 
         elif reload_previous_data:
             # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
@@ -2926,7 +2939,7 @@ class Interface():
                         f"S{self.Dataset.scan}/pynxraw/"
 
                 # On lance BCDI
-                preprocess.preprocess_bcdi(
+                data_file, mask_file = preprocess.preprocess_bcdi(
                     scans=self.Dataset.scan,
                     sample_name=self.Dataset.sample_name,
                     root_folder=root_folder,
@@ -2997,23 +3010,21 @@ class Interface():
                     GUI=True,
                 )
 
-                # Scan folder, refresh
+                # PyNX folder, refresh
                 self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_pynx_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
+                # Plot folder, refresh
                 self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
-                self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
-                self.folder_strain_handler(
-                    change=self._list_widgets_strain.children[-4].value)
-
-                self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                    "postprocessing/"
-                self.folder_facet_handler(
-                    change=self.tab_facet.children[1].value)
+                # Save output files paths
+                self._list_widgets_pynx.children[2].value = data_file
+                self._list_widgets_pynx.children[3].value = mask_file
+                print("Output diffraction data:",self.Dataset.iobs)
+                print("Output mask:",self.Dataset.mask)
 
         if not init_para:
             clear_output(True)
@@ -5177,72 +5188,81 @@ class Interface():
     def rotate_sixs_data(self):
         """
         Python script to rotate the data for vertical configuration
-                Arg 1: Path of target directory (before /S{scan} ... )
-                Arg 2: Scan(s) number, list or single value
-
         Only for SIXS data in the vertical MED configuration
         """
-        print("Rotating SIXS data ...")
-        with tb.open_file(self.Dataset.path_to_data, "a") as f:
-            # Get data
+        # Check if already rotated
+        with h5py.File(self.Dataset.path_to_data, "a") as f:
             try:
-                # if rocking_angle == "omega":
-                data_og = f.root.com.scan_data.data_02[:]
-                index = 2
-                if np.ndim(data_og) == 1:
-                    data_og = f.root.com.scan_data.data_10[:]
-                    index = 10
-                # elif rocking_angle == "mu":
-                #     data_og = f.root.com.scan_data.merlin_image[:]
-                print("Calling merlin the enchanter in SBS...")
-                self.Dataset.scan_type = "SBS"
-            except:
+                f.create_dataset("rotation", data=True)
+                data_already_rotated = False
+            except ValueError:
+                data_already_rotated = f['rotation'][...]
+                
+        if not data_already_rotated:
+            print("Rotating SIXS data ...")
+            with tb.open_file(self.Dataset.path_to_data, "a") as f:
+                # Get data
                 try:
-                    data_og = f.root.com.scan_data.self_image[:]
-                    print("Calling merlin the enchanter in FLY...")
-                    self.Dataset.scan_type = "FLY"
+                    # if rocking_angle == "omega":
+                    data_og = f.root.com.scan_data.data_02[:]
+                    index = 2
+                    if np.ndim(data_og) == 1:
+                        data_og = f.root.com.scan_data.data_10[:]
+                        index = 10
+                    # elif rocking_angle == "mu":
+                    #     data_og = f.root.com.scan_data.merlin_image[:]
+                    print("Calling merlin the enchanter in SBS...")
+                    self.Dataset.scan_type = "SBS"
                 except:
-                    print("This data does not result from Merlin :/")
+                    try:
+                        data_og = f.root.com.scan_data.self_image[:]
+                        print("Calling merlin the enchanter in FLY...")
+                        self.Dataset.scan_type = "FLY"
+                    except:
+                        print("This data does not result from Merlin :/")
 
-            # Just an index for plotting schemes
-            half = int(data_og.shape[0]/2)
+                # Just an index for plotting schemes
+                half = int(data_og.shape[0]/2)
 
-            # Rotate data
-            data = np.transpose(data_og, axes=(0, 2, 1))
-            for idx in range(data.shape[0]):
-                tmp = data[idx, :, :]
-                data[idx, :, :] = np.fliplr(tmp)
-            print("Data well rotated by 90°.")
+                # Rotate data
+                data = np.transpose(data_og, axes=(0, 2, 1))
+                for idx in range(data.shape[0]):
+                    tmp = data[idx, :, :]
+                    data[idx, :, :] = np.fliplr(tmp)
+                print("Data well rotated by 90°.")
 
-            print("Saving example figures...", end="\n\n")
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data_og[half, :, :], vmax=10)
-            plt.xlabel('Delta')
-            plt.ylabel('Gamma')
-            plt.tight_layout()
-            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
-                        str(self.Dataset.scan) + "/data/data_before_rotation.png")
-            plt.close()
+                print("Saving example figures...", end="\n\n")
+                plt.figure(figsize=(16, 9))
+                plt.imshow(data_og[half, :, :], vmax=10)
+                plt.xlabel('Delta')
+                plt.ylabel('Gamma')
+                plt.tight_layout()
+                plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
+                            str(self.Dataset.scan) + "/data/data_before_rotation.png")
+                plt.close()
 
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data[half, :, :], vmax=10)
-            plt.xlabel('Gamma')
-            plt.ylabel('Delta')
-            plt.tight_layout()
-            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
-                        str(self.Dataset.scan) + "/data/data_after_rotation.png")
-            plt.close()
+                plt.figure(figsize=(16, 9))
+                plt.imshow(data[half, :, :], vmax=10)
+                plt.xlabel('Gamma')
+                plt.ylabel('Delta')
+                plt.tight_layout()
+                plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
+                            str(self.Dataset.scan) + "/data/data_after_rotation.png")
+                plt.close()
 
-            # Overwrite data in copied file
-            try:
-                if self.Dataset.scan_type == "SBS" and index == 2:
-                    f.root.com.scan_data.data_02[:] = data
-                elif self.Dataset.scan_type == "SBS" and index == 10:
-                    f.root.com.scan_data.data_10[:] = data
-                elif self.Dataset.scan_type == "FLY":
-                    f.root.com.scan_data.test_image[:] = data
-            except:
-                print("Could not overwrite data ><")
+                # Overwrite data in copied file
+                try:
+                    if self.Dataset.scan_type == "SBS" and index == 2:
+                        f.root.com.scan_data.data_02[:] = data
+                    elif self.Dataset.scan_type == "SBS" and index == 10:
+                        f.root.com.scan_data.data_10[:] = data
+                    elif self.Dataset.scan_type == "FLY":
+                        f.root.com.scan_data.test_image[:] = data
+                except:
+                    print("Could not overwrite data ><")
+
+        else:
+            print("Data already rotated ...")
 
     def extract_metadata(self):
         """

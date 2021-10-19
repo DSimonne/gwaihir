@@ -1423,8 +1423,6 @@ class Facets:
                 facets.create_dataset("planar_dist", data="")
                 facets.create_dataset("ref_normal", data=np.zeros(3))
 
-        f["entry_1"]["data_4"].attrs['signal'] = "rotation_matrix"
-
         # Save field data
         try:
             self.field_data.to_hdf(

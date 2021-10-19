@@ -1387,6 +1387,9 @@ def preprocess_bcdi(
     plt.show()
 
     ############################################################## ADDED SCRIPT ################################################################
+    if GUI:
+        return (f"{detector.savedir}S{scan_nb}_pynx{comment}.npz", f"{detector.savedir}S{scan_nb}_maskpynx{comment}.npz")
+
     if not GUI:
         # Modify file for phase retrieval
         print("Saving in pynx run ...")
@@ -1400,3 +1403,4 @@ def preprocess_bcdi(
             with open(f"{save_dir}pynx_run.txt", "w") as v:
                 new_file_contents = "".join(text_file)
                 v.write(new_file_contents)
+        return (None, None)
