@@ -16,6 +16,7 @@ try:
 
     import glob
     import os
+    import shutil
 
     import ipywidgets as widgets
     from ipywidgets import interact, Button, Layout, interactive, fixed
@@ -52,24 +53,136 @@ class Dataset():
     def __str__(self):
         return repr(self)
 
-    def to_gwr(self):
+    def to_cxi(self, cxi_filename, reconstruction_filename = False):
         """
         Save all the parameters used in the data analysis with a specific architecture
         Alias for hdf5 file,
-        Can be reloaded with the load_gwr() function 
+        Can be reloaded with the load_cxi() function 
         Always overwrites for now
         """
-        # Create file
-        with h5py.File(f"{self.scan_folder}{self.sample_name}{self.scan}.h5", mode="w") as f:
+        final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.h5"
+        # if not os.path.exists(f"{self.scan_folder}{self.sample_name}{self.scan}.h5"):
+        shutil.copy(cxi_filename,
+                    final_data_path,
+                    )
 
-            # Init
-            f.create_dataset(
-                "ObjectName", data=f"Dataset_{self.sample_name}{self.scan}")
-            f.create_dataset("FileTimeStamp", data=time.strftime(
-                "%Y-%m-%dT%H:%M:%S%z", time.localtime(time.time())))
+        if reconstruction_filename:
+            try:
+                with h5py.File(reconstruction_filename, "a") as reconstruction_file:
+                    with h5py.File(final_data_path, "r") as final_file:
+                        # Real space data is already here        
 
+                        # Reciprocal space data
+
+                        ## Copy image_1 from reconstruction to entry_1.image_2
+                        try:
+                            reconstruction_file.copy(
+                                '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+                        except RuntimeError:
+                            del final_file["entry_1"]["image_2"]
+                            reconstruction_file.copy(
+                                '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+
+                        # Update params if reconstruction file results from mode decomposition
+                        if fn.endswith(".h5"):
+                            final_file["entry_1"]["image_2"].create_dataset("data_space", data="real")
+                            final_file["entry_1"]["image_2"].create_dataset("data_type", data="electron density")
+
+                        # Update entry_1.image_2.support softlink
+                        if fn.endswith(".cxi"):
+                            del final_file["entry_1"]["image_2"]["support"]
+                            final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
+                                "/entry_1/image_2/mask")
+
+                        ## Create entry_1.data_2 and create softlink to entry_1.image_2.data
+                        try:
+                            group = final_file["entry_1"].create_group("data_2")
+                            group["data"] = h5py.SoftLink(
+                                "/entry_1/image_2/data")
+                        except ValueError:
+                            group = final_file["entry_1"]["data_2"]
+                            del final_file["entry_1"]["data_2"]["data"]
+                            group["data"] = h5py.SoftLink(
+                                "/entry_1/image_2/data")
+                        # Assign correct type to entry_1.data_2
+                        final_file["entry_1"]["data_2"].attrs['NX_class'] = 'NXdata'
+                        final_file["entry_1"]["data_2"].attrs['signal'] = 'data'
+
+                        # Rename entry_1.image_2.process_1 to entry_1.image_2.process_2
+                        try:
+                            final_file["entry_1"]["image_2"]["process_1"].move(
+                                "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
+                        except ValueError:
+                            del final_file["entry_1"]["image_2"]["process_2"]
+                            final_file["entry_1"]["image_2"]["process_1"].move(
+                                "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
+                        # Assign correct type to entry_1.image_2.process_2
+                        final_file["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
+
+
+                        ## Move pynx configuration
+                        try:
+                            conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
+                            if fn.endswith(".h5"):
+                                final_file.create_group("entry_1/image_2/process_2/configuration/")
+                            for k in conf.keys():
+                                final_file.move(
+                                    f"entry_1/data_1/process_1/configuration/{k}",
+                                    f"entry_1/image_2/process_2/configuration/{k}"
+                                )
+
+                            del final_file["entry_1"]["data_1"]["process_1"]
+                        except KeyError:
+                            # Already moved or does not exist
+                            pass
+                        final_file.move("entry_1/program_name", "entry_1/image_2/process_2/program_name")
+
+                        # Delete entry_1.instrument_1 if exists
+                        try:
+                            del final_file["entry_1"]["image_2"]["instrument_1"]
+                        except:
+                            pass
+
+                        # Also copy mode data to entry_1.image_2.modes_percentage
+                        if fn.endswith(".h5"):
+                            try:
+                                reconstruction_file.copy(
+                                    '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
+                            except RuntimeError:
+                                del final_file["entry_1"]["image_2"]["modes_percentage"]
+                                reconstruction_file.copy(
+                                    '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
+
+            except OSError:
+                # No reconstruction file yet
+                print("Could not save diffraction data, does the .cxi file exist?")
+        
+        # Add GUI data
+        with h5py.File(final_data_path, "a") as f:
             # Parameters
-            parameters = f.create_group("parameters")
+            try:
+                data_3 = f.create_group("entry_1/data_3/")
+                f["entry_1"]["data_3"].attrs['NX_class'] = 'NXdata'
+
+            except ValueError:
+                del f["entry_1"]["data_3"]
+                data_3 = f.create_group("entry_1/data_3/")
+                f["entry_1"]["data_3"].attrs['NX_class'] = 'NXdata'
+
+            try:
+                image_3 = f.create_group("entry_1/image_3")
+                f["entry_1"]["image_3"].attrs['NX_class'] = 'NXdata'
+
+            except ValueError:
+                del f["entry_1"]["image_3"]
+                image_3 = f.create_group("entry_1/image_3")
+                f["entry_1"]["image_3"].attrs['NX_class'] = 'NXdata'
+
+            parameters = f.create_group("entry_1/image_3/process_3/")
+            parameters.attrs['NX_class'] = 'NXprocess'
+
+            parameters.create_dataset(
+                "ObjectName", data=f"Dataset_{self.sample_name}{self.scan}")
 
             # Preprocessing
             preprocessing = parameters.create_group("preprocessing")
@@ -446,55 +559,51 @@ class Dataset():
             except AttributeError:
                 print("Could not save phase averaging apodization parameters")
 
-            # Real space
-            real_space = data.create_group("real_space")
-
-            # Save raw electronic density
-            try:
-                with h5py.File(self.reconstruction_file, "r") as fi:
-                    real_space.create_dataset(
-                        "raw_electronic_density_file", data=self.reconstruction_file)
-                    real_space.create_dataset("raw_electronic_density",
-                                              data=fi["entry_1"]["image_1"]["data"][:],
-                                              chunks=True,
-                                              shuffle=True,
-                                              compression="gzip")
-
-            except:
-                print("Could not save electronic density")
-
             # Save strain output
             try:
-                real_space.create_dataset("voxel_size", data=self.voxel_size)
-                real_space.create_dataset(
+                image_3.create_dataset("voxel_size", data=self.voxel_size)
+                image_3.create_dataset(
                     "strain_analysis_output_file", data=self.strain_output_file)
 
                 with h5py.File(self.strain_output_file, "r") as fi:
-                    real_space.create_dataset("amplitude",
-                                              data=fi["output"]["amp"][:],
-                                              chunks=True,
-                                              shuffle=True,
-                                              compression="gzip")
+                    image_3.create_dataset("amplitude",
+                                           data=fi["output"]["amp"][:],
+                                           chunks=True,
+                                           shuffle=True,
+                                           compression="gzip")
 
-                    real_space.create_dataset("phase",
-                                              data=fi["output"]["phase"][:],
-                                              chunks=True,
-                                              shuffle=True,
-                                              compression="gzip")
+                    image_3.create_dataset("phase",
+                                           data=fi["output"]["phase"][:],
+                                           chunks=True,
+                                           shuffle=True,
+                                           compression="gzip")
 
-                    real_space.create_dataset("bulk",
-                                              data=fi["output"]["bulk"][:],
-                                              chunks=True,
-                                              shuffle=True,
-                                              compression="gzip")
+                    image_3.create_dataset("bulk",
+                                           data=fi["output"]["bulk"][:],
+                                           chunks=True,
+                                           shuffle=True,
+                                           compression="gzip")
 
-                    real_space.create_dataset("strain",
-                                              data=fi["output"]["strain"][:],
-                                              chunks=True,
-                                              shuffle=True,
-                                              compression="gzip")
+                    image_3.create_dataset("strain",
+                                           data=fi["output"]["strain"][:],
+                                           chunks=True,
+                                           shuffle=True,
+                                           compression="gzip")
+                    
+                image_3.attrs['signal'] = 'phase'
+
             except AttributeError:
                 print("Could not save strain output")
 
+            # Create data_3 link
+            try:
+                f["entry_1"]["image_3"]["phase"]
+                data_3["data"] = h5py.SoftLink(
+                    "/entry_1/image_3/phase")
+                data_3.attrs['signal'] = 'data'
+
+            except KeyError:
+                pass
+
         print(
-            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.h5")
+            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.cxi")

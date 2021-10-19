@@ -2627,21 +2627,38 @@ class Interface():
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
 
             # Button to save data
-            button_save_as_gwr = Button(
+            button_save_as_cxi = Button(
                 description="Save work as .cxi file",
                 continuous_update=False,
                 button_style='',  # 'success', 'info', 'warning', 'danger' or ''
                 layout=Layout(width='40%'),
                 style={'description_width': 'initial'},
                 icon='fast-forward')
-            display(button_save_as_gwr)
+            display(button_save_as_cxi)
 
-            @button_save_as_gwr.on_click
-            def action_button_save_as_gwr(selfbutton):
+            @button_save_as_cxi.on_click
+            def action_button_save_as_cxi(selfbutton):
                 clear_output(True)
-                display(button_save_as_gwr)
+                display(button_save_as_cxi)
                 print("Saving data, takes some time ...")
-                self.Dataset.to_gwr()
+
+                # Reciprocal space data
+                try:
+                    self.init_cdi_operator()
+                    # Real space data
+                    try:
+                        self.Dataset.to_cxi(cxi_filename = self.cxi_filename, reconstruction_filename = self.Dataset.reconstruction_file)
+                    except AttributeError:
+                        self.Dataset.to_cxi(cxi_filename = self.cxi_filename, reconstruction_filename = False)
+
+                except AttributeError:
+                    print("You need to select the diffraction data file in the PyNX tab.")
+
+                try:
+                    self.Facets.to_hdf5(
+                        f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
+                except Exception as e:
+                    raise e
 
         elif reload_previous_data:
             # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
@@ -3223,23 +3240,6 @@ class Interface():
             self.Dataset.support_post_expand)
         self.Dataset.rebin = literal_eval(self.Dataset.rebin)
 
-        # "" strings should be None
-        if self.Dataset.iobs == "":
-            self.Dataset.iobs = None
-            iobs = None
-
-        if self.Dataset.mask == "":
-            self.Dataset.mask = None
-            mask = None
-
-        if self.Dataset.support == "":
-            self.Dataset.support = None
-            support = None
-
-        if self.Dataset.obj == "":
-            self.Dataset.obj = None
-            obj = None
-
         if self.Dataset.live_plot == 0:
             self.Dataset.live_plot = False
 
@@ -3269,14 +3269,15 @@ class Interface():
                 # Load files
                 self.text_file.append("# Parameters\n")
                 for file, parameter in [(self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
-                    if file:
+                    if file is not "":
                         self.text_file.append(f"{parameter} = \"{file}\"\n")
 
-                if support:
+                if support is not "":
                     self.text_file += [
                         f"support = \"{self.Dataset.support}\"\n",
                         '\n']
                 # else no support, just don't write it
+
 
                 # Other support parameters
                 self.text_file += [
@@ -3384,170 +3385,10 @@ class Interface():
             elif self.run_phase_retrieval == "operators":
                 # Extract data
                 print("Log likelihood is updated every 50 iterations.")
-
                 self.Dataset.calc_llk = 50  # for now
 
-                if self.Dataset.iobs:
-                    if self.Dataset.iobs.endswith(".npy"):
-                        iobs = np.load(self.Dataset.iobs)
-                        print("CXI input: loading data")
-                    elif self.Dataset.iobs.endswith(".npz"):
-                        try:
-                            iobs = np.load(self.Dataset.iobs)["data"]
-                            print("CXI input: loading data")
-                        except:
-                            print("Could not load 'data' array from npz file")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            iobs = bin_data(iobs, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-                            raise e
-
-                    # fft shift
-                    iobs = fftshift(iobs)
-
-                if self.Dataset.mask:
-                    if self.Dataset.mask.endswith(".npy"):
-                        mask = np.load(self.Dataset.mask).astype(np.int8)
-                        nb = mask.sum()
-                        print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                            nb, nb * 100 / mask.size))
-                    elif self.Dataset.mask.endswith(".npz"):
-                        try:
-                            mask = np.load(self.Dataset.mask)[
-                                "mask"].astype(np.int8)
-                            nb = mask.sum()
-                            print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                                nb, nb * 100 / mask.size))
-                        except:
-                            print("Could not load 'mask' array from npz file")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            mask = bin_data(mask, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    mask = fftshift(mask)
-
-                if self.Dataset.support:
-                    if self.Dataset.support.endswith(".npy"):
-                        support = np.load(self.Dataset.support)
-                        print("CXI input: loading support")
-                    elif self.Dataset.support.endswith(".npz"):
-                        try:
-                            support = np.load(self.Dataset.support)["data"]
-                            print("CXI input: loading support")
-                        except:
-                            # print("Could not load 'data' array from npz file")
-                            try:
-                                support = np.load(self.Dataset.support)[
-                                    "support"]
-                                print("CXI input: loading support")
-                            except:
-                                # print("Could not load 'support' array from npz file")
-                                try:
-                                    support = np.load(
-                                        self.Dataset.support)["obj"]
-                                    print("CXI input: loading support")
-                                except:
-                                    print("Could not load support")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            support = bin_data(support, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    support = fftshift(support)
-
-                if self.Dataset.obj:
-                    if self.Dataset.obj.endswith(".npy"):
-                        obj = np.load(self.Dataset.obj)
-                        print("CXI input: loading object")
-                    elif self.Dataset.obj.endswith(".npz"):
-                        try:
-                            obj = np.load(self.Dataset.obj)["data"]
-                            print("CXI input: loading object")
-                        except:
-                            print("Could not load 'data' array from npz file")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            obj = bin_data(obj, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    obj = fftshift(obj)
-
-                # Center and crop data
-                if self.Dataset.auto_center_resize:
-                    if iobs.ndim == 3:
-                        nz0, ny0, nx0 = iobs.shape
-
-                        # Find center of mass
-                        z0, y0, x0 = center_of_mass(iobs)
-                        print("Center of mass at:", z0, y0, x0)
-                        iz0, iy0, ix0 = int(round(z0)), int(
-                            round(y0)), int(round(x0))
-
-                        # Max symmetrical box around center of mass
-                        nx = 2 * min(ix0, nx0 - ix0)
-                        ny = 2 * min(iy0, ny0 - iy0)
-                        nz = 2 * min(iz0, nz0 - iz0)
-
-                        if self.Dataset.max_size is not None:
-                            nx = min(nx, self.Dataset.max_size)
-                            ny = min(ny, self.Dataset.max_size)
-                            nz = min(nz, self.Dataset.max_size)
-
-                        # Crop data to fulfill FFT size requirements
-                        nz1, ny1, nx1 = smaller_primes(
-                            (nz, ny, nx), maxprime=7, required_dividers=(2,))
-
-                        print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
-                              (nz0, ny0, nx0, nz1, ny1, nx1))
-                        iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
-                                    ix0 - nx1 // 2:ix0 + nx1 // 2]
-                        if mask is not None:
-                            mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
-                                        ix0 - nx1 // 2:ix0 + nx1 // 2]
-                            print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
-                                  (nz0, ny0, nx0, nz1, ny1, nx1))
-
-                    else:
-                        ny0, nx0 = iobs.shape
-
-                        # Find center of mass
-                        y0, x0 = center_of_mass(iobs)
-                        iy0, ix0 = int(round(y0)), int(round(x0))
-                        print("Center of mass (rounded) at:", iy0, ix0)
-
-                        # Max symmetrical box around center of mass
-                        nx = 2 * min(ix0, nx0 - ix0)
-                        ny = 2 * min(iy0, ny0 - iy0)
-                        if self.Dataset.max_size is not None:
-                            nx = min(nx, self.Dataset.max_size)
-                            ny = min(ny, self.Dataset.max_size)
-                            nz = min(nz, self.Dataset.max_size)
-
-                        # Crop data to fulfill FFT size requirements
-                        ny1, nx1 = smaller_primes(
-                            (ny, nx), maxprime=7, required_dividers=(2,))
-
-                        print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
-                              (ny0, nx0, ny1, nx1))
-                        iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
-                                    2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-
-                        if mask is not None:
-                            mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
-                                        2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+                # Initialise the cdi operator
+                cdi = self.init_cdi_operator()
 
                 print("\n#############################################################################################################\n")
 
@@ -3558,111 +3399,6 @@ class Interface():
                         if i > 4:
                             print("\nStopping liveplot to go faster\n")
                             self.Dataset.live_plot = False
-
-                        # Create cdi object with data and mask, load the main parameters
-                        try:
-                            self.params = params
-                            self.params["specfile"] = self.Dataset.specfile_name
-                        except AttributeError:
-                            pass
-                        # self.params["imgcounter"] = self.Dataset.imgcounter
-                        # self.params["imgname"] = self.Dataset.imgname
-                        self.params["scan"] = self.Dataset.scan
-
-                        cdi = CDI(iobs,
-                                  support=support,
-                                  obj=obj,
-                                  mask=mask,
-                                  wavelength=self.Dataset.wavelength,
-                                  pixel_size_detector=self.Dataset.pixel_size_detector,
-                                  detector_distance=self.Dataset.sdd,
-                                  )
-
-                        # Save diffraction pattern
-                        if i == 0:
-                            cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
-                                self.Dataset.root_folder,
-                                self.Dataset.sample_name,
-                                self.Dataset.scan,
-                                self.Dataset.iobs.split("/")[-1].split(".")[0]
-                            )
-                            if not os.path.exists(cxi_filename):
-                                # We need to create a dictionnary with the parameters to save in the cxi file
-
-                                self.params["data"] = self.Dataset.iobs
-                                self.params["wavelength"] = self.Dataset.wavelength
-                                self.params["detector_distance"] = self.Dataset.sdd
-                                self.params["pixel_size_detector"] = self.Dataset.pixel_size_detector
-                                self.params["wavelength"] = self.Dataset.wavelength
-                                self.params["verbose"] = self.Dataset.verbose
-                                self.params["live_plot"] = self.Dataset.live_plot
-                                # self.params["gpu"] = self.Dataset.gpu
-                                self.params["auto_center_resize"] = self.Dataset.auto_center_resize
-                                # self.params["roi_user"] = self.Dataset.roi_user
-                                # self.params["roi_final"] = self.Dataset.roi_final
-                                self.params["nb_run"] = self.Dataset.nb_run
-                                self.params["max_size"] = self.Dataset.max_size
-                                # self.params["data2cxi"] = self.Dataset.data2cxi
-                                self.params["output_format"] = "cxi"
-                                self.params["mask"] = self.Dataset.mask
-                                self.params["support"] = self.Dataset.support
-                                # self.params["support_autocorrelation_threshold"] = self.Dataset.support_autocorrelation_threshold
-                                self.params["support_only_shrink"] = self.Dataset.support_only_shrink
-                                self.params["object"] = self.Dataset.obj
-                                self.params["support_update_period"] = self.Dataset.support_update_period
-                                self.params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
-                                self.params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
-                                # self.params["support_smooth_width_relax_n"] = self.Dataset.support_smooth_width_relax_n
-                                # self.params["support_size"] = self.Dataset.support_size
-                                self.params["support_threshold"] = self.Dataset.support_threshold
-                                self.params["positivity"] = self.Dataset.positivity
-                                self.params["beta"] = self.Dataset.beta
-                                self.params["crop_output"] = 0
-                                self.params["rebin"] = self.Dataset.rebin
-                                # self.params["support_update_border_n"] = self.Dataset.support_update_border_n
-                                # self.params["support_threshold_method"] = self.Dataset.support_threshold_method
-                                self.params["support_post_expand"] = self.Dataset.support_post_expand
-                                self.params["psf"] = self.Dataset.psf
-                                # self.params["note"] = self.Dataset.note
-                                try:
-                                    self.params["instrument"] = self.Dataset.beamline
-                                except AttributeError:
-                                    self.params["instrument"] = None
-                                self.params["sample_name"] = self.Dataset.sample_name
-                                # self.params["fig_num"] = self.Dataset.fig_num
-                                # self.params["algorithm"] = self.Dataset.algorithm
-                                self.params["zero_mask"] = "auto"
-                                self.params["nb_run_keep"] = self.Dataset.nb_run_keep
-                                # self.params["save"] = self.Dataset.save
-                                # self.params["gps_inertia"] = self.Dataset.gps_inertia
-                                # self.params["gps_t"] = self.Dataset.gps_t
-                                # self.params["gps_s"] = self.Dataset.gps_s
-                                # self.params["gps_sigma_f"] = self.Dataset.gps_sigma_f
-                                # self.params["gps_sigma_o"] = self.Dataset.gps_sigma_o
-                                # self.params["iobs_saturation"] = self.Dataset.iobs_saturation
-                                # self.params["free_pixel_mask"] = self.Dataset.free_pixel_mask
-                                # self.params["support_formula"] = self.Dataset.support_formula
-                                # self.params["mpi"] = "run"
-                                # self.params["mask_interp"] = self.Dataset.mask_interp
-                                # self.params["confidence_interval_factor_mask_min"] = self.Dataset.confidence_interval_factor_mask_min
-                                # self.params["confidence_interval_factor_mask_max"] = self.Dataset.confidence_interval_factor_mask_max
-                                # self.params["save_plot"] = self.Dataset.save_plot
-                                # self.params["support_fraction_min"] = self.Dataset.support_fraction_min
-                                # self.params["support_fraction_max"] = self.Dataset.support_fraction_max
-                                # self.params["support_threshold_auto_tune_factor"] = self.Dataset.support_threshold_auto_tune_factor
-                                # self.params["nb_run_keep_max_obj2_out"] = self.Dataset.nb_run_keep_max_obj2_out
-                                # self.params["flatfield"] = self.Dataset.flatfield
-                                # self.params["psf_filter"] = self.Dataset.psf_filter
-                                self.params["detwin"] = self.Dataset.detwin
-                                self.params["nb_raar"] = self.Dataset.nb_raar
-                                self.params["nb_hio"] = self.Dataset.nb_hio
-                                self.params["nb_er"] = self.Dataset.nb_er
-                                self.params["nb_ml"] = self.Dataset.nb_ml
-
-                                cdi.save_data_cxi(
-                                    filename=cxi_filename,
-                                    process_parameters=self.params,
-                                )
 
                         # Change support threshold for supports update
                         if isinstance(self.Dataset.support_threshold, float):
@@ -3841,9 +3577,9 @@ class Interface():
                                 i,
                                 cdi.get_llk()[0],
                                 self.Dataset.threshold_relative,
-                                iobs.shape[0],
-                                iobs.shape[1],
-                                iobs.shape[2],
+                                cdi.iobs.shape[0],
+                                cdi.iobs.shape[1],
+                                cdi.iobs.shape[2],
                                 sup_init,
                             )
                             )
@@ -3853,9 +3589,9 @@ class Interface():
                                 i,
                                 cdi.get_llk()[0],
                                 self.Dataset.threshold_relative,
-                                iobs.shape[0],
-                                iobs.shape[1],
-                                iobs.shape[2],
+                                cdi.iobs.shape[0],
+                                cdi.iobs.shape[1],
+                                cdi.iobs.shape[2],
                                 sup_init,
                             )
                             )
@@ -4003,6 +3739,299 @@ class Interface():
             )
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
+
+    def save_as_cxi(self, cdi_operator, path_to_cxi):
+        """
+        We need to create a dictionnary with the parameters to save in the cxi file
+        """
+        self.params = params
+        self.params["data"] = self.Dataset.iobs
+        self.params["wavelength"] = self.Dataset.wavelength
+        self.params["detector_distance"] = self.Dataset.sdd
+        self.params["pixel_size_detector"] = self.Dataset.pixel_size_detector
+        self.params["wavelength"] = self.Dataset.wavelength
+        self.params["verbose"] = self.Dataset.verbose
+        self.params["live_plot"] = self.Dataset.live_plot
+        # self.params["gpu"] = self.Dataset.gpu
+        self.params["auto_center_resize"] = self.Dataset.auto_center_resize
+        # self.params["roi_user"] = self.Dataset.roi_user
+        # self.params["roi_final"] = self.Dataset.roi_final
+        self.params["nb_run"] = self.Dataset.nb_run
+        self.params["max_size"] = self.Dataset.max_size
+        # self.params["data2cxi"] = self.Dataset.data2cxi
+        self.params["output_format"] = "cxi"
+        self.params["mask"] = self.Dataset.mask
+        self.params["support"] = self.Dataset.support
+        # self.params["support_autocorrelation_threshold"] = self.Dataset.support_autocorrelation_threshold
+        self.params["support_only_shrink"] = self.Dataset.support_only_shrink
+        self.params["object"] = self.Dataset.obj
+        self.params["support_update_period"] = self.Dataset.support_update_period
+        self.params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
+        self.params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
+        # self.params["support_smooth_width_relax_n"] = self.Dataset.support_smooth_width_relax_n
+        # self.params["support_size"] = self.Dataset.support_size
+        self.params["support_threshold"] = self.Dataset.support_threshold
+        self.params["positivity"] = self.Dataset.positivity
+        self.params["beta"] = self.Dataset.beta
+        self.params["crop_output"] = 0
+        self.params["rebin"] = self.Dataset.rebin
+        # self.params["support_update_border_n"] = self.Dataset.support_update_border_n
+        # self.params["support_threshold_method"] = self.Dataset.support_threshold_method
+        self.params["support_post_expand"] = self.Dataset.support_post_expand
+        self.params["psf"] = self.Dataset.psf
+        # self.params["note"] = self.Dataset.note
+        try:
+            self.params["instrument"] = self.Dataset.beamline
+        except AttributeError:
+            self.params["instrument"] = None
+        self.params["sample_name"] = self.Dataset.sample_name
+        # self.params["fig_num"] = self.Dataset.fig_num
+        # self.params["algorithm"] = self.Dataset.algorithm
+        self.params["zero_mask"] = "auto"
+        self.params["nb_run_keep"] = self.Dataset.nb_run_keep
+        # self.params["save"] = self.Dataset.save
+        # self.params["gps_inertia"] = self.Dataset.gps_inertia
+        # self.params["gps_t"] = self.Dataset.gps_t
+        # self.params["gps_s"] = self.Dataset.gps_s
+        # self.params["gps_sigma_f"] = self.Dataset.gps_sigma_f
+        # self.params["gps_sigma_o"] = self.Dataset.gps_sigma_o
+        # self.params["iobs_saturation"] = self.Dataset.iobs_saturation
+        # self.params["free_pixel_mask"] = self.Dataset.free_pixel_mask
+        # self.params["support_formula"] = self.Dataset.support_formula
+        # self.params["mpi"] = "run"
+        # self.params["mask_interp"] = self.Dataset.mask_interp
+        # self.params["confidence_interval_factor_mask_min"] = self.Dataset.confidence_interval_factor_mask_min
+        # self.params["confidence_interval_factor_mask_max"] = self.Dataset.confidence_interval_factor_mask_max
+        # self.params["save_plot"] = self.Dataset.save_plot
+        # self.params["support_fraction_min"] = self.Dataset.support_fraction_min
+        # self.params["support_fraction_max"] = self.Dataset.support_fraction_max
+        # self.params["support_threshold_auto_tune_factor"] = self.Dataset.support_threshold_auto_tune_factor
+        # self.params["nb_run_keep_max_obj2_out"] = self.Dataset.nb_run_keep_max_obj2_out
+        # self.params["flatfield"] = self.Dataset.flatfield
+        # self.params["psf_filter"] = self.Dataset.psf_filter
+        self.params["detwin"] = self.Dataset.detwin
+        self.params["nb_raar"] = self.Dataset.nb_raar
+        self.params["nb_hio"] = self.Dataset.nb_hio
+        self.params["nb_er"] = self.Dataset.nb_er
+        self.params["nb_ml"] = self.Dataset.nb_ml
+        try:
+            self.params = params
+            self.params["specfile"] = self.Dataset.specfile_name
+        except AttributeError:
+            pass
+        # self.params["imgcounter"] = self.Dataset.imgcounter
+        # self.params["imgname"] = self.Dataset.imgname
+        self.params["scan"] = self.Dataset.scan
+
+        cdi_operator.save_data_cxi(
+            filename=path_to_cxi,
+            process_parameters=self.params,
+        )
+
+    def init_cdi_operator(self, save_as_cxi=True):
+        """
+        Initialize the cdi poerator by processing the possible inputs, iobs, mask, support and obj
+        Will also crop the data if needed
+        """
+        if self.Dataset.iobs not in ("", None):
+            if self.Dataset.iobs.endswith(".npy"):
+                iobs = np.load(self.Dataset.iobs)
+                print("CXI input: loading data")
+            elif self.Dataset.iobs.endswith(".npz"):
+                try:
+                    iobs = np.load(self.Dataset.iobs)["data"]
+                    print("CXI input: loading data")
+                except:
+                    print("Could not load 'data' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    iobs = bin_data(iobs, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+                    raise e
+
+            # fft shift
+            iobs = fftshift(iobs)
+
+        else:
+            self.Dataset.iobs = None
+            iobs = None
+
+        if self.Dataset.mask not in ("", None):
+            if self.Dataset.mask.endswith(".npy"):
+                mask = np.load(self.Dataset.mask).astype(np.int8)
+                nb = mask.sum()
+                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                    nb, nb * 100 / mask.size))
+            elif self.Dataset.mask.endswith(".npz"):
+                try:
+                    mask = np.load(self.Dataset.mask)[
+                        "mask"].astype(np.int8)
+                    nb = mask.sum()
+                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                        nb, nb * 100 / mask.size))
+                except:
+                    print("Could not load 'mask' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    mask = bin_data(mask, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            mask = fftshift(mask)
+
+        else:
+            self.Dataset.mask = None
+            mask = None
+
+        if self.Dataset.support not in ("", None):
+            if self.Dataset.support.endswith(".npy"):
+                support = np.load(self.Dataset.support)
+                print("CXI input: loading support")
+            elif self.Dataset.support.endswith(".npz"):
+                try:
+                    support = np.load(self.Dataset.support)["data"]
+                    print("CXI input: loading support")
+                except:
+                    # print("Could not load 'data' array from npz file")
+                    try:
+                        support = np.load(self.Dataset.support)[
+                            "support"]
+                        print("CXI input: loading support")
+                    except:
+                        # print("Could not load 'support' array from npz file")
+                        try:
+                            support = np.load(
+                                self.Dataset.support)["obj"]
+                            print("CXI input: loading support")
+                        except:
+                            print("Could not load support")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    support = bin_data(support, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            support = fftshift(support)
+
+        else:
+            self.Dataset.support = None
+            support = None
+
+        if self.Dataset.obj not in ("", None):
+            if self.Dataset.obj.endswith(".npy"):
+                obj = np.load(self.Dataset.obj)
+                print("CXI input: loading object")
+            elif self.Dataset.obj.endswith(".npz"):
+                try:
+                    obj = np.load(self.Dataset.obj)["data"]
+                    print("CXI input: loading object")
+                except:
+                    print("Could not load 'data' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    obj = bin_data(obj, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            obj = fftshift(obj)
+
+        else:
+            self.Dataset.obj = None
+            obj = None
+
+        # Center and crop data
+        if self.Dataset.auto_center_resize:
+            if iobs.ndim == 3:
+                nz0, ny0, nx0 = iobs.shape
+
+                # Find center of mass
+                z0, y0, x0 = center_of_mass(iobs)
+                print("Center of mass at:", z0, y0, x0)
+                iz0, iy0, ix0 = int(round(z0)), int(
+                    round(y0)), int(round(x0))
+
+                # Max symmetrical box around center of mass
+                nx = 2 * min(ix0, nx0 - ix0)
+                ny = 2 * min(iy0, ny0 - iy0)
+                nz = 2 * min(iz0, nz0 - iz0)
+
+                if self.Dataset.max_size is not None:
+                    nx = min(nx, self.Dataset.max_size)
+                    ny = min(ny, self.Dataset.max_size)
+                    nz = min(nz, self.Dataset.max_size)
+
+                # Crop data to fulfill FFT size requirements
+                nz1, ny1, nx1 = smaller_primes(
+                    (nz, ny, nx), maxprime=7, required_dividers=(2,))
+
+                print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
+                      (nz0, ny0, nx0, nz1, ny1, nx1))
+                iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
+                            ix0 - nx1 // 2:ix0 + nx1 // 2]
+                if mask is not None:
+                    mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
+                                ix0 - nx1 // 2:ix0 + nx1 // 2]
+                    print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
+                          (nz0, ny0, nx0, nz1, ny1, nx1))
+
+            else:
+                ny0, nx0 = iobs.shape
+
+                # Find center of mass
+                y0, x0 = center_of_mass(iobs)
+                iy0, ix0 = int(round(y0)), int(round(x0))
+                print("Center of mass (rounded) at:", iy0, ix0)
+
+                # Max symmetrical box around center of mass
+                nx = 2 * min(ix0, nx0 - ix0)
+                ny = 2 * min(iy0, ny0 - iy0)
+                if self.Dataset.max_size is not None:
+                    nx = min(nx, self.Dataset.max_size)
+                    ny = min(ny, self.Dataset.max_size)
+                    nz = min(nz, self.Dataset.max_size)
+
+                # Crop data to fulfill FFT size requirements
+                ny1, nx1 = smaller_primes(
+                    (ny, nx), maxprime=7, required_dividers=(2,))
+
+                print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
+                      (ny0, nx0, ny1, nx1))
+                iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
+                            2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+                if mask is not None:
+                    mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
+                                2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+        # Create cdi object with data and mask, load the main parameters
+        cdi = CDI(iobs,
+                  support=support,
+                  obj=obj,
+                  mask=mask,
+                  wavelength=self.Dataset.wavelength,
+                  pixel_size_detector=self.Dataset.pixel_size_detector,
+                  detector_distance=self.Dataset.sdd,
+                  )
+
+        if save_as_cxi:
+            # Save diffraction pattern
+            self.cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
+                self.Dataset.root_folder,
+                self.Dataset.sample_name,
+                self.Dataset.scan,
+                self.Dataset.iobs.split("/")[-1].split(".")[0]
+            )
+            self.save_as_cxi(cdi_operator = cdi, path_to_cxi = self.cxi_filename)
+
+        return cdi
 
     def strain_gui(self,
                    unused_label_averaging,
@@ -4435,10 +4464,22 @@ class Interface():
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
-                    view=widgets.Text(
-                        value="[90, 0]",
-                        placeholder="[90, 0]",
-                        description='Elevation and azimuth of the axes in degrees:',
+                    elev=widgets.BoundedIntText(
+                        value=90,
+                        placeholder=90,
+                        min = 0,
+                        max = 360,
+                        description='Elevation of the axes in degrees:',
+                        disabled=False,
+                        continuous_update=False,
+                        layout=Layout(width='70%'),
+                        style={'description_width': 'initial'},),
+                    azim=widgets.BoundedIntText(
+                        value=0,
+                        placeholder=0,
+                        min = 0,
+                        max = 360,
+                        description='Azimuth of the axes in degrees:',
                         disabled=False,
                         continuous_update=False,
                         layout=Layout(width='70%'),
@@ -4451,7 +4492,8 @@ class Interface():
                     v0,
                     w0,
                     hkl_reference,
-                    view,
+                    elev,
+                    azim,
                 ):
                     """Function to interactively visualize the two facets tht will be chosen, to also help pick two vectors"""
                     # Save parameters value
@@ -4461,11 +4503,12 @@ class Interface():
                     self.Facets.v0 = v0
                     self.Facets.w0 = w0
                     self.Facets.hkl_reference = hkl_reference
-                    self.Facets.view = view
+                    self.Facets.elev = elev
+                    self.Facets.azim = azim
 
                     # Extract list from strings
                     list_parameters = ["u0", "v0",
-                                       "w0", "hkl_reference", "view"]
+                                       "w0", "hkl_reference"]
                     try:
                         for p in list_parameters:
                             if getattr(self.Facets, p) == "":
