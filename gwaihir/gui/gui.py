@@ -2647,12 +2647,15 @@ class Interface():
                     self.init_cdi_operator()
                     # Real space data
                     try:
-                        self.Dataset.to_cxi(cxi_filename = self.cxi_filename, reconstruction_filename = self.Dataset.reconstruction_file)
+                        self.Dataset.to_cxi(
+                            cxi_filename=self.cxi_filename, reconstruction_filename=self.Dataset.reconstruction_file)
                     except AttributeError:
-                        self.Dataset.to_cxi(cxi_filename = self.cxi_filename, reconstruction_filename = False)
+                        self.Dataset.to_cxi(
+                            cxi_filename=self.cxi_filename, reconstruction_filename=False)
 
                 except AttributeError:
-                    print("You need to select the diffraction data file in the PyNX tab.")
+                    print(
+                        "You need to select the diffraction data file in the PyNX tab.")
 
                 try:
                     self.Facets.to_hdf5(
@@ -3277,7 +3280,6 @@ class Interface():
                         f"support = \"{self.Dataset.support}\"\n",
                         '\n']
                 # else no support, just don't write it
-
 
                 # Other support parameters
                 self.text_file += [
@@ -4029,7 +4031,7 @@ class Interface():
                 self.Dataset.scan,
                 self.Dataset.iobs.split("/")[-1].split(".")[0]
             )
-            self.save_as_cxi(cdi_operator = cdi, path_to_cxi = self.cxi_filename)
+            self.save_as_cxi(cdi_operator=cdi, path_to_cxi=self.cxi_filename)
 
         return cdi
 
@@ -4467,8 +4469,8 @@ class Interface():
                     elev=widgets.BoundedIntText(
                         value=90,
                         placeholder=90,
-                        min = 0,
-                        max = 360,
+                        min=0,
+                        max=360,
                         description='Elevation of the axes in degrees:',
                         disabled=False,
                         continuous_update=False,
@@ -4477,8 +4479,8 @@ class Interface():
                     azim=widgets.BoundedIntText(
                         value=0,
                         placeholder=0,
-                        min = 0,
-                        max = 360,
+                        min=0,
+                        max=360,
                         description='Azimuth of the axes in degrees:',
                         disabled=False,
                         continuous_update=False,

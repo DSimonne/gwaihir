@@ -53,7 +53,7 @@ class Dataset():
     def __str__(self):
         return repr(self)
 
-    def to_cxi(self, cxi_filename, reconstruction_filename = False):
+    def to_cxi(self, cxi_filename, reconstruction_filename=False):
         """
         Save all the parameters used in the data analysis with a specific architecture
         Alias for hdf5 file,
@@ -70,11 +70,11 @@ class Dataset():
             try:
                 with h5py.File(reconstruction_filename, "a") as reconstruction_file:
                     with h5py.File(final_data_path, "r") as final_file:
-                        # Real space data is already here        
+                        # Real space data is already here
 
                         # Reciprocal space data
 
-                        ## Copy image_1 from reconstruction to entry_1.image_2
+                        # Copy image_1 from reconstruction to entry_1.image_2
                         try:
                             reconstruction_file.copy(
                                 '/entry_1/image_1/', final_file["entry_1"], name="image_2")
@@ -85,8 +85,10 @@ class Dataset():
 
                         # Update params if reconstruction file results from mode decomposition
                         if fn.endswith(".h5"):
-                            final_file["entry_1"]["image_2"].create_dataset("data_space", data="real")
-                            final_file["entry_1"]["image_2"].create_dataset("data_type", data="electron density")
+                            final_file["entry_1"]["image_2"].create_dataset(
+                                "data_space", data="real")
+                            final_file["entry_1"]["image_2"].create_dataset(
+                                "data_type", data="electron density")
 
                         # Update entry_1.image_2.support softlink
                         if fn.endswith(".cxi"):
@@ -94,9 +96,10 @@ class Dataset():
                             final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
                                 "/entry_1/image_2/mask")
 
-                        ## Create entry_1.data_2 and create softlink to entry_1.image_2.data
+                        # Create entry_1.data_2 and create softlink to entry_1.image_2.data
                         try:
-                            group = final_file["entry_1"].create_group("data_2")
+                            group = final_file["entry_1"].create_group(
+                                "data_2")
                             group["data"] = h5py.SoftLink(
                                 "/entry_1/image_2/data")
                         except ValueError:
@@ -119,12 +122,12 @@ class Dataset():
                         # Assign correct type to entry_1.image_2.process_2
                         final_file["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
 
-
-                        ## Move pynx configuration
+                        # Move pynx configuration
                         try:
                             conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
                             if fn.endswith(".h5"):
-                                final_file.create_group("entry_1/image_2/process_2/configuration/")
+                                final_file.create_group(
+                                    "entry_1/image_2/process_2/configuration/")
                             for k in conf.keys():
                                 final_file.move(
                                     f"entry_1/data_1/process_1/configuration/{k}",
@@ -135,7 +138,8 @@ class Dataset():
                         except KeyError:
                             # Already moved or does not exist
                             pass
-                        final_file.move("entry_1/program_name", "entry_1/image_2/process_2/program_name")
+                        final_file.move("entry_1/program_name",
+                                        "entry_1/image_2/process_2/program_name")
 
                         # Delete entry_1.instrument_1 if exists
                         try:
@@ -156,7 +160,7 @@ class Dataset():
             except OSError:
                 # No reconstruction file yet
                 print("Could not save diffraction data, does the .cxi file exist?")
-        
+
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
             # Parameters
@@ -589,7 +593,7 @@ class Dataset():
                                            chunks=True,
                                            shuffle=True,
                                            compression="gzip")
-                    
+
                 image_3.attrs['signal'] = 'phase'
 
             except AttributeError:
