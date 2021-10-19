@@ -2594,7 +2594,7 @@ class Interface(object):
 
             # move pynx_run.txt file
             # try:
-            #     shutil.copy(f"{self.path_package}bcdi/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+            #     shutil.copy(f"{self.path_package}pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
             #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
             # except FileExistsError:
             #     print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/pynx_run.txt exists")
@@ -2602,7 +2602,7 @@ class Interface(object):
 
             # Move notebooks
             if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb"):
-                shutil.copy(f"{self.path_package}bcdi/data_files/PhasingNotebook.ipynb",
+                shutil.copy(f"{self.path_package}data_files/PhasingNotebook.ipynb",
                             f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
                 print(
                     f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
@@ -2611,7 +2611,7 @@ class Interface(object):
                     f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb exists")
 
             if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb"):
-                shutil.copy(f"{self.path_package}bcdi/data_files/CompareFacetsEvolution.ipynb",
+                shutil.copy(f"{self.path_package}data_files/CompareFacetsEvolution.ipynb",
                             f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
                 print(
                     f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
