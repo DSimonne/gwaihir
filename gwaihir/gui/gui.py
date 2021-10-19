@@ -2594,7 +2594,7 @@ class Interface():
 
             # Move notebooks
             if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb"):
-                shutil.copy(f"{self.path_package}bcdi/data_files/PhasingNotebook.ipynb",
+                shutil.copy(f"{self.path_package}/data_files/PhasingNotebook.ipynb",
                             f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
                 print(
                     f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
@@ -2603,7 +2603,7 @@ class Interface():
                     f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb exists")
 
             if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb"):
-                shutil.copy(f"{self.path_package}bcdi/data_files/CompareFacetsEvolution.ipynb",
+                shutil.copy(f"{self.path_package}/data_files/CompareFacetsEvolution.ipynb",
                             f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
                 print(
                     f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
