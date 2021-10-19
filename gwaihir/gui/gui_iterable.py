@@ -68,8 +68,8 @@ class Dataset():
 
         if reconstruction_filename:
             try:
-                with h5py.File(reconstruction_filename, "a") as reconstruction_file:
-                    with h5py.File(final_data_path, "r") as final_file:
+                with h5py.File(reconstruction_filename, "r") as reconstruction_file:
+                    with h5py.File(final_data_path, "a") as final_file:
                         # Real space data is already here
 
                         # Reciprocal space data
@@ -84,14 +84,14 @@ class Dataset():
                                 '/entry_1/image_1/', final_file["entry_1"], name="image_2")
 
                         # Update params if reconstruction file results from mode decomposition
-                        if fn.endswith(".h5"):
+                        if reconstruction_filename.endswith(".h5"):
                             final_file["entry_1"]["image_2"].create_dataset(
                                 "data_space", data="real")
                             final_file["entry_1"]["image_2"].create_dataset(
                                 "data_type", data="electron density")
 
                         # Update entry_1.image_2.support softlink
-                        if fn.endswith(".cxi"):
+                        if reconstruction_filename.endswith(".cxi"):
                             del final_file["entry_1"]["image_2"]["support"]
                             final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
                                 "/entry_1/image_2/mask")
@@ -125,7 +125,7 @@ class Dataset():
                         # Move pynx configuration
                         try:
                             conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
-                            if fn.endswith(".h5"):
+                            if reconstruction_filename.endswith(".h5"):
                                 final_file.create_group(
                                     "entry_1/image_2/process_2/configuration/")
                             for k in conf.keys():
@@ -148,7 +148,7 @@ class Dataset():
                             pass
 
                         # Also copy mode data to entry_1.image_2.modes_percentage
-                        if fn.endswith(".h5"):
+                        if reconstruction_filename.endswith(".h5"):
                             try:
                                 reconstruction_file.copy(
                                     '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
@@ -332,8 +332,10 @@ class Dataset():
                     "sample_offsets", data=self.sample_offsets)
                 linearized_transformation_matrix.create_dataset(
                     "sdd", data=self.sdd)
+                linearized_transformation_matrix["sdd"].attrs['units'] = 'm'
                 linearized_transformation_matrix.create_dataset(
                     "energy", data=self.energy)
+                linearized_transformation_matrix["energy"].attrs['units'] = 'keV'
                 linearized_transformation_matrix.create_dataset(
                     "custom_motors", data=str(self.custom_motors))
             except AttributeError:
@@ -347,8 +349,10 @@ class Dataset():
                     "ref_axis_q", data=self.ref_axis_q)
                 xrayutilities.create_dataset(
                     "outofplane_angle", data=self.outofplane_angle)
+                xrayutilities["outofplane_angle"].attrs['units'] = 'degrees'
                 xrayutilities.create_dataset(
                     "inplane_angle", data=self.inplane_angle)
+                xrayutilities["inplane_angle"].attrs['units'] = 'degrees'
                 xrayutilities.create_dataset(
                     "sample_inplane", data=self.sample_inplane)
                 xrayutilities.create_dataset(
@@ -378,6 +382,8 @@ class Dataset():
                     "reference_spacing", data=self.reference_spacing)
                 temperature_estimation.create_dataset(
                     "reference_temperature", data=self.reference_temperature)
+                temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
+
             except AttributeError:
                 print("Could not save temperature_estimation parameters")
 

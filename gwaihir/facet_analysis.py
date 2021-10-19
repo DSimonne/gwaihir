@@ -1367,8 +1367,8 @@ class Facets:
         # Save attributes
         with h5py.File(path_to_data, mode="a") as f:
             try:
-                facets = f.create_group("entry_1/data_4/")
-                f["entry_1"]["data_4"].attrs['NX_class'] = 'NXdata'
+                facets = f.create_group("entry_1/process_4/")
+                f["entry_1"]["process_4"].attrs['NX_class'] = 'NXprocess'
 
                 facets.create_dataset("path_to_data", data=self.path_to_data)
                 facets.create_dataset("nb_facets", data=self.nb_facets)
@@ -1386,27 +1386,29 @@ class Facets:
                     "rotation_matrix", data=self.rotation_matrix)
                 facets.create_dataset("hkl_reference", data=self.hkl_reference)
                 facets.create_dataset("planar_dist", data=self.planar_dist)
+                facets["planar_dist"].attrs['units'] = 'Angstrom'
                 facets.create_dataset("ref_normal", data=self.ref_normal)
 
             except ValueError:
                 print("Data already exists, overwriting ...")
 
-                f["/entry_1/data_4/path_to_data"][...] = self.path_to_data
-                f["/entry_1/data_4/nb_facets"][...] = self.nb_facets
-                f["/entry_1/data_4/comment"][...] = self.comment
-                f["/entry_1/data_4/lattice"][...] = self.lattice
-                f["/entry_1/data_4/u0"][...] = self.u0
-                f["/entry_1/data_4/v0"][...] = self.v0
-                f["/entry_1/data_4/w0"][...] = self.w0
-                f["/entry_1/data_4/u"][...] = self.u
-                f["/entry_1/data_4/v"][...] = self.v
-                f["/entry_1/data_4/norm_u"][...] = self.norm_u
-                f["/entry_1/data_4/norm_v"][...] = self.norm_v
-                f["/entry_1/data_4/norm_w"][...] = self.norm_w
-                f["/entry_1/data_4/rotation_matrix"][...] = self.rotation_matrix
-                f["/entry_1/data_4/hkl_reference"][...] = self.hkl_reference
-                f["/entry_1/data_4/planar_dist"][...] = self.planar_dist
-                f["/entry_1/data_4/ref_normal"][...] = self.ref_normal
+                f["/entry_1/process_4/path_to_data"][...] = self.path_to_data
+                f["/entry_1/process_4/nb_facets"][...] = self.nb_facets
+                f["/entry_1/process_4/comment"][...] = self.comment
+                f["/entry_1/process_4/lattice"][...] = self.lattice
+                f["/entry_1/process_4/u0"][...] = self.u0
+                f["/entry_1/process_4/v0"][...] = self.v0
+                f["/entry_1/process_4/w0"][...] = self.w0
+                f["/entry_1/process_4/u"][...] = self.u
+                f["/entry_1/process_4/v"][...] = self.v
+                f["/entry_1/process_4/norm_u"][...] = self.norm_u
+                f["/entry_1/process_4/norm_v"][...] = self.norm_v
+                f["/entry_1/process_4/norm_w"][...] = self.norm_w
+                f["/entry_1/process_4/rotation_matrix"][...] = self.rotation_matrix
+                f["/entry_1/process_4/hkl_reference"][...] = self.hkl_reference
+                f["/entry_1/process_4/planar_dist"][...] = self.planar_dist
+                f["/entry_1/process_4/planar_dist"].attrs['units'] = 'Angstrom'
+                f["/entry_1/process_4/ref_normal"][...] = self.ref_normal
 
             except AttributeError:
                 print("Particle not rotated, some attributes could not be saved ...")
@@ -1427,7 +1429,7 @@ class Facets:
         try:
             self.field_data.to_hdf(
                 path_to_data,
-                key="entry_1/data_4/tables/field_data",
+                key="entry_1/process_4/tables/field_data",
                 mode="a",
                 append=True,
                 format="table",
@@ -1447,7 +1449,7 @@ class Facets:
             )
             df.to_hdf(
                 path_to_data,
-                key="entry_1/data_4/tables/theoretical_angles",
+                key="entry_1/process_4/tables/theoretical_angles",
                 mode="a",
                 append=True,
                 format="table",
