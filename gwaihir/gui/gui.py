@@ -2611,7 +2611,6 @@ class Interface():
                 print(
                     f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
-
             # PyNX folder, refresh values
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_pynx_handler(
@@ -2653,7 +2652,8 @@ class Interface():
                     self.init_cdi_operator()
 
                     # Real space data
-                    print("Using reconstruction file selected in the strain analysis tab ...")
+                    print(
+                        "Using reconstruction file selected in the strain analysis tab ...")
                     try:
                         self.Dataset.to_cxi(
                             cxi_filename=self.cxi_filename, reconstruction_filename=self.Dataset.reconstruction_file)
@@ -2674,7 +2674,8 @@ class Interface():
                     self.Facets.to_hdf5(
                         f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
                 except AttributeError:
-                        print("Could not save facets' data, run the analysis in the `Facets` tab first...")
+                    print(
+                        "Could not save facets' data, run the analysis in the `Facets` tab first...")
 
         elif reload_previous_data:
             # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
@@ -3023,8 +3024,8 @@ class Interface():
                 # Save output files paths
                 self._list_widgets_pynx.children[2].value = data_file
                 self._list_widgets_pynx.children[3].value = mask_file
-                print("Output diffraction data:",self.Dataset.iobs)
-                print("Output mask:",self.Dataset.mask)
+                print("Output diffraction data:", self.Dataset.iobs)
+                print("Output mask:", self.Dataset.mask)
 
         if not init_para:
             clear_output(True)
@@ -5197,7 +5198,7 @@ class Interface():
                 data_already_rotated = False
             except ValueError:
                 data_already_rotated = f['rotation'][...]
-                
+
         if not data_already_rotated:
             print("Rotating SIXS data ...")
             with tb.open_file(self.Dataset.path_to_data, "a") as f:
