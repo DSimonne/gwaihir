@@ -18,7 +18,7 @@ import time
 from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 import inspect
-import phdutils
+import gwaihir
 
 
 class emptyO(object):
@@ -67,7 +67,7 @@ class DataSet(object):
 
         except FileNotFoundError:
             try:
-                self._alias_dict_path = inspect.getfile(phdutils).split("__")[
+                self._alias_dict_path = inspect.getfile(gwaihir).split("__")[
                     0] + 'sixs/alias_dict_2021.txt'
                 self._alias_dict = pickle.load(
                     open(self._alias_dict_path, 'rb'))
@@ -424,7 +424,6 @@ class DataSet(object):
             mask[:, 80:560:80] = True
             self.mask0_xpad70 = mask
             self.attlist.append('mask0_xpad70')
-        return
 
     def roi_sum(self, stack, roi):
         '''given a stack of images it returns the integals over the ROI  
@@ -491,7 +490,6 @@ class DataSet(object):
 
             setattr(self, ROIname, roiC)
             self.attlist.append(ROIname)
-        return
 
     def plotRoi(self, motor, roi, color='-og', detname=None, Label=None, mask='No'):
         '''It integrates the desired roi and plot it
@@ -592,7 +590,6 @@ class DataSet(object):
                         if self.verbose != 'NO':
                             print('issues with ', el, ' publisher')
                 #                            calcROI(self, stack,roiextent, maskname,attcoef, filters, acqTime, ROIname)
-        return
 
     def roishow(self, roiname, imageN=1):
         '''Image number is the image position in the stack series and roiname is the name contained in the 

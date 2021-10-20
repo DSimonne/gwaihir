@@ -1,5 +1,13 @@
 version = 1
 
+exclude_patterns = [
+  "gwaihir/scripts/examples/*",
+  "gwaihir/scripts/*",
+  "gwaihir/runner/*",
+  "gwaihir/sixs/*",
+  "gwaihir/facet_analysis.py"
+]
+
 [[analyzers]]
 name = "shell"
 enabled = true
@@ -10,3 +18,7 @@ enabled = true
 
   [analyzers.meta]
   runtime_version = "3.x.x"
+
+[[transformers]]
+name = "autopep8"
+enabled = true

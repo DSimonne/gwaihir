@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import glob
 import os
+import shlex
 import shutil
 from ast import literal_eval
 import operator as operator_lib
@@ -56,7 +57,8 @@ from bcdi.utils.utilities import bin_data
 try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
-    from pynx.cdi import *
+    from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport, InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
+    from pynx.cdi.runner.id01 import params
     from pynx.cdi.widgets import CDIViewer
     from pynx.utils.math import smaller_primes
     pynx_import = True
@@ -65,14 +67,13 @@ except:
     print("Could not load PyNX, the phase retrieval tab will be disabled")
 
 
-class Interface(object):
-    """This  class is a Graphical User Interface (gui) that is meant to be used to process important amount of XAS datasets that focus on the same energy range and absoption edge.
-        Initializing the procedure in a jupyter notebook:
-            _ gui = gui.Interface(); One will have to write the name of the data folder in which all his datasets are saved.
-        This class makes extensive use of the ipywidgets and is thus meant to be used with a jupyter notebook.
-        Additional informations are provided in the "ReadMe" tab of the gui.
-        The necessary Python packages are : numpy, pandas, matplotlib, glob, errno, os, shutil, ipywidgets, IPython, scipy, datetime, importlib, pickle, lmfit
-        lmfit, xlrd, corner and inspect.
+class Interface():
+    """
+    This class is a Graphical User Interface (gui).
+    This class makes extensive use of the ipywidgets and 
+    is thus meant to be used with a jupyter notebook.
+    Additional informations are provided in the "ReadMe"
+    tab of the gui.
     """
 
     def __init__(self):
@@ -97,7 +98,7 @@ class Interface(object):
         # Widgets for initialization
         self._list_widgets_init = interactive(self.initialize_directories,
                                               # Define scan related parameters
-                                              label_scan=widgets.HTML(
+                                              unused_label_scan=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
                                                   style={
                                                       'description_width': 'initial'},
@@ -112,7 +113,7 @@ class Interface(object):
                                                   layout=Layout(width='45%'),
                                                   style={'description_width': 'initial'}),
 
-                                              scans=widgets.BoundedIntText(
+                                              scan=widgets.BoundedIntText(
                                                   value="01415",
                                                   description='Scan nb:',
                                                   min=0,
@@ -169,7 +170,7 @@ class Interface(object):
 
                                               reload_previous_data=widgets.ToggleButton(
                                                   value=False,
-                                                  description='Reload previous data (.gwr) from target directory ...',
+                                                  description='Reload previous data (.cxi) from target directory ...',
                                                   disabled=False,
                                                   button_style='',  # 'success', 'info', 'warning', 'danger' or ''
                                                   icon='step-forward',
@@ -195,7 +196,7 @@ class Interface(object):
         # Widgets for preprocessing
         self._list_widgets_preprocessing = interactive(self.initialize_parameters,
                                                        # Define beamline related parameters
-                                                       label_beamline=widgets.HTML(
+                                                       unused_label_beamline=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters specific to the beamline",
                                                            style={
                                                                'description_width': 'initial'},
@@ -285,14 +286,14 @@ class Interface(object):
                                                            disabled=True,
                                                            continuous_update=False,
                                                            # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                                                           tooltip='Only for energy scans, set to True if the detector was also scanned to follow the Bragg peak',
+                                                           tooltip='Only for energy scan, set to True if the detector was also scanned to follow the Bragg peak',
                                                            layout=Layout(
                                                                height="50px"),
                                                            icon='check'),
 
 
                                                        # Parameters used in masking
-                                                       label_masking=widgets.HTML(
+                                                       unused_label_masking=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in masking",
                                                            style={
                                                                'description_width': 'initial'},
@@ -327,7 +328,7 @@ class Interface(object):
 
 
                                                        # Parameters related to data cropping/padding/centering
-                                                       label_centering=widgets.HTML(
+                                                       unused_label_centering=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data cropping/padding/centering</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -403,7 +404,7 @@ class Interface(object):
 
 
                                                        # Parameters for data filtering
-                                                       label_filtering=widgets.HTML(
+                                                       unused_label_filtering=widgets.HTML(
                                                            description="""<p style='font-weight: bold;font-size:1.2em'>Parameters for data filtering</p>""",
                                                            style={
                                                                'description_width': 'initial'},
@@ -450,7 +451,7 @@ class Interface(object):
                                                            tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
                                                        # Parameters used when reloading processed data
-                                                       label_reload=widgets.HTML(
+                                                       unused_label_reload=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when reloading processed data</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -494,7 +495,7 @@ class Interface(object):
                                                            tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
                                                        # Saving options
-                                                       label_saving=widgets.HTML(
+                                                       unused_label_saving=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when saving the data</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -561,7 +562,7 @@ class Interface(object):
                                                            icon='check'),
 
                                                        # Detector related parameters
-                                                       label_detector=widgets.HTML(
+                                                       unused_label_detector=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the detector used</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -664,7 +665,7 @@ class Interface(object):
                                                            style={'description_width': 'initial'}),
 
                                                        # Define parameters below if you want to orthogonalize the data before phasing
-                                                       label_ortho=widgets.HTML(
+                                                       unused_label_ortho=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters to define the data orthogonalization</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -765,7 +766,7 @@ class Interface(object):
 
 
                                                        # Parameters for xrayutilities to orthogonalize the data before phasing
-                                                       label_xru=widgets.HTML(
+                                                       unused_label_xru=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in xrayutilities to orthogonalize the data before phasing (initialize the directories before)</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -939,7 +940,7 @@ class Interface(object):
                                                            tooltip="tilt parameter from xrayutilities 2D detector calibration"),
 
                                                        # Run preprocess
-                                                       label_preprocess=widgets.HTML(
+                                                       unused_label_preprocess=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the data processing before phasing</p>",
                                                            style={
                                                                'description_width': 'initial'},
@@ -1037,7 +1038,7 @@ class Interface(object):
 
         # Widgets for angles correction
         self._list_widgets_correct = interactive(self.correct_angles,
-                                                 label_correct=widgets.HTML(
+                                                 unused_label_correct=widgets.HTML(
                                                      description="<p style='font-weight: bold;font-size:1.2em'>Find the real values for the Bragg peak angles, needs correct xru parameters.",
                                                      style={
                                                          'description_width': 'initial'},
@@ -1128,7 +1129,7 @@ class Interface(object):
 
         # Widgets for strain
         self._list_widgets_strain = interactive(self.strain_gui,
-                                                label_averaging=widgets.HTML(
+                                                unused_label_averaging=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when averaging several reconstruction",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1153,7 +1154,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     disabled=False),
 
-                                                label_FFT=widgets.HTML(
+                                                unused_label_FFT=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters relative to the FFT window and voxel sizes",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1214,7 +1215,7 @@ class Interface(object):
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                label_disp_strain=widgets.HTML(
+                                                unused_label_disp_strain=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to displacement and strain calculation",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1326,7 +1327,7 @@ class Interface(object):
                                                     layout=Layout(width='25%'),
                                                     style={'description_width': 'initial'}),
 
-                                                label_refraction=widgets.HTML(
+                                                unused_label_refraction=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the refraction correction",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1384,7 +1385,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     disabled=True),
 
-                                                label_options=widgets.HTML(
+                                                unused_label_options=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Options",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1497,7 +1498,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                 ),
 
-                                                label_data_vis=widgets.HTML(
+                                                unused_label_data_vis=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data visualization",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1605,7 +1606,7 @@ class Interface(object):
                                                     layout=Layout(width='45%'),
                                                     style={'description_width': 'initial'}),
 
-                                                label_average=widgets.HTML(
+                                                unused_label_average=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters for averaging several reconstructed objects",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1631,7 +1632,7 @@ class Interface(object):
                                                         'description_width': 'initial'},
                                                     disabled=False),
 
-                                                label_apodize=widgets.HTML(
+                                                unused_label_apodize=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Setup for phase averaging or apodization",
                                                     style={
                                                         'description_width': 'initial'},
@@ -1689,13 +1690,13 @@ class Interface(object):
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                label_strain=widgets.HTML(
+                                                unused_label_strain=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Path to file",
                                                     style={
                                                         'description_width': 'initial'},
                                                     layout=Layout(width='90%', height="35px")),
 
-                                                folder_strain=widgets.Text(
+                                                unused_folder_strain=widgets.Text(
                                                     value=os.getcwd(),
                                                     placeholder=os.getcwd(),
                                                     description='Data folder:',
@@ -1760,7 +1761,7 @@ class Interface(object):
 
         # Widgets for logs
         self.tab_logs = interactive(self.display_logs,
-                                    label_logs=widgets.HTML(
+                                    unused_label_logs=widgets.HTML(
                                         description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui, saved as self.logs",
                                         style={'description_width': 'initial'},
                                         layout=Layout(width='90%', height="35px")),
@@ -1786,12 +1787,12 @@ class Interface(object):
 
         # Widgets for plotting
         self.tab_data = interactive(self.load_data,
-                                    label_plot=widgets.HTML(
+                                    unused_label_plot=widgets.HTML(
                                         description="<p style='font-weight: bold;font-size:1.2em'>Loads data files (.cxi or npz/npy) and displays it in the gui",
                                         style={'description_width': 'initial'},
                                         layout=Layout(width='90%', height="35px")),
 
-                                    folder=widgets.Text(
+                                    unused_folder=widgets.Text(
                                         value=os.getcwd(),
                                         placeholder=os.getcwd(),
                                         description='Data folder:',
@@ -1835,7 +1836,7 @@ class Interface(object):
 
         # Widgets for PyNX
         self._list_widgets_pynx = interactive(self.init_pynx,
-                                              label_data=widgets.HTML(
+                                              unused_label_data=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Data files",
                                                   style={
                                                       'description_width': 'initial'},
@@ -1907,7 +1908,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_support=widgets.HTML(
+                                              unused_label_support=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Support parameters",
                                                   style={
                                                       'description_width': 'initial'},
@@ -1965,7 +1966,7 @@ class Interface(object):
                                                   continuous_update=False,
                                                   style={'description_width': 'initial'}),
 
-                                              label_psf=widgets.HTML(
+                                              unused_label_psf=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Point spread function parameters",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2026,7 +2027,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=True),
 
-                                              label_algo=widgets.HTML(
+                                              unused_label_algo=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Iterative algorithms parameters",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2118,7 +2119,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_filtering=widgets.HTML(
+                                              unused_label_filtering=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Filtering criteria for reconstructions",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2151,7 +2152,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_options=widgets.HTML(
+                                              unused_label_options=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Options",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2240,7 +2241,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   disabled=False),
 
-                                              label_phase_retrieval=widgets.HTML(
+                                              unused_label_phase_retrieval=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the phase retrieval</p>",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2260,7 +2261,7 @@ class Interface(object):
                                                       "Click to be able to change parameters",
                                                       "Collect parameters to run a job on slurm, will automatically apply a std deviation filter and run modes decomposition, freed the kernel",
                                                       "Run script on jupyter notebook environment, uses notebook kernel, will be performed in background also but more slowly, good if you cannot use jobs.",
-                                                      "Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
+                                                      r"Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
                                                   ],
                                                   description='Run phase retrieval ...',
                                                   disabled=False,
@@ -2272,7 +2273,7 @@ class Interface(object):
                                                       'description_width': 'initial'},
                                                   icon='fast-forward'),
 
-                                              label_run_pynx_tools=widgets.HTML(
+                                              unused_label_run_pynx_tools=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Click below to use a phase retrieval tool</p>",
                                                   style={
                                                       'description_width': 'initial'},
@@ -2341,15 +2342,15 @@ class Interface(object):
 
         # Widgets for facet analysis
         self.tab_facet = interactive(self.facet_analysis,
-                                     label_facet=widgets.HTML(
+                                     unused_label_facet=widgets.HTML(
                                          description="<p style='font-weight: bold;font-size:1.2em'>Extract facet specific data from vtk file",
                                          style={
                                              'description_width': 'initial'},
                                          layout=Layout(width='90%', height="35px")),
 
                                      facet_folder=widgets.Text(
-                                         value=os.getcwd() + f"/postprocessing/",
-                                         placeholder=os.getcwd() + f"/postprocessing/",
+                                         value=os.getcwd() + "/postprocessing/",
+                                         placeholder=os.getcwd() + "/postprocessing/",
                                          description='Facet data (.vtk) folder:',
                                          disabled=False,
                                          continuous_update=False,
@@ -2358,7 +2359,7 @@ class Interface(object):
 
                                      facet_filename=widgets.Dropdown(
                                          options=sorted(
-                                             glob.glob(os.getcwd() + f"/postprocessing/")) + [""],
+                                             glob.glob(os.getcwd() + "/postprocessing/")) + [""],
                                          description='Vtk data',
                                          disabled=False,
                                          layout=Layout(width='90%'),
@@ -2453,9 +2454,9 @@ class Interface(object):
 
     # Widgets interactive functions
     def initialize_directories(self,
-                               label_scan,
+                               unused_label_scan,
                                sample_name,
-                               scans,
+                               scan,
                                data_directory,
                                final_directory,
                                user_comment,
@@ -2464,54 +2465,49 @@ class Interface(object):
                                reload_previous_data,
                                ):
         """
-        Function to move file from datadir to folder where it will be used by preprocess.bcdi
+        Function to move file from datadir to folder where 
+        it will be used by preprocess.bcdi
 
-        Also moves all the notebooks needed for data analysis, and a pynx_run.txt file with all the parameters for phase retrieval,
+        Also moves all the notebooks needed for data analysis, 
+        and a pynx_run.txt file with all the parameters for phase retrieval,
         initialized for this Dataset.
 
         Mandatory to run before any other step
         """
-
         if run_dir_init:
             # Save as attributes for use in future widgets
 
-            # Transform string of list into python list object if multiple scans
-            # if scans.startswith("["): # Should not happen in the gui
-            #     self.Dataset.scans = ast.literal_eval(scans)
-
-            # else:
-            #     self.Dataset.scans = [scans]#
-
             # Create Dataset attribute (class from other module)
             self.Dataset = gui_iterable.Dataset(
-                scans=scans, sample_name=sample_name, data_directory=data_directory, root_folder=final_directory)
+                scan=scan, sample_name=sample_name,
+                data_directory=data_directory, root_folder=final_directory)
 
             self.Dataset.user_comment = user_comment
             self.Dataset.debug = debug
 
             # Scan folder
-            self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scans}/"
+            self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scan}/"
             print("Scan folder:", self.Dataset.scan_folder)
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                f"postprocessing/{self.Dataset.scans}_fa.vtk"
-            self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                f"postprocessing/{self.Dataset.scan}_fa.vtk"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
 
             # Filename for SIXS, should be temporary
             try:
                 try:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_directory}*mu*{self.Dataset.scans}*")[0]
+                        f"{self.Dataset.data_directory}*mu*{self.Dataset.scan}*")[0]
                     print("File path:", self.Dataset.path_to_data)
                 except IndexError:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_directory}*omega*{self.Dataset.scans}*")[0]
+                        f"{self.Dataset.data_directory}*omega*{self.Dataset.scan}*")[0]
                     print("Omega scan")
 
                 # If rotated before
                 self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
-                    "%05d" % self.Dataset.scans)[0]+"%05d.nxs"
+                    "%05d" % self.Dataset.scan)[0]+"%05d.nxs"
                 print("File template:", self.Dataset.template_imagefile, end="\n\n")
 
                 # Save file name
@@ -2523,7 +2519,7 @@ class Interface(object):
                 self.Dataset.path_to_data = ""
 
             # Data folder
-            # folder of the experiment, where all scans are stored
+            # folder of the experiment, where all scan are stored
             self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
 
             # Create final directory is not yet existing
@@ -2537,129 +2533,159 @@ class Interface(object):
                     except FileExistsError:
                         pass
 
-            print(f"Updating directories ...")
+            print("Updating directories ...")
 
             # Scan directory
             try:
-                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scans}")
+                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scan}")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans} exists")
-                pass
+                print(f"{self.Dataset.root_folder}S{self.Dataset.scan} exists")
 
             # /data directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/data")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/data exists")
-                pass
+                print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/data exists")
 
             # /pynxraw directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw exists")
-                pass
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw exists")
 
             # /postprocessing directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing", end="\n\n")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing", end="\n\n")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing exists", end="\n\n")
-                pass
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing exists", end="\n\n")
 
             # move data file
             try:
                 shutil.copy2(self.Dataset.path_to_data,
-                             f"{self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                             f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
                 print(
-                    f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scans}/data")
+                    f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scan}/data")
             except (FileExistsError, shutil.SameFileError):
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/data/{self.Dataset.path_to_data} exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/data/{self.Dataset.path_to_data} exists")
             except (AttributeError, FileNotFoundError):
                 pass
 
             # move pynx_run.txt file
             # try:
-            #     shutil.copy(f"{self.path_package}pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
-            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+            #     shutil.copy(f"{self.path_package}bcdi/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
+            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             # except FileExistsError:
-            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/pynx_run.txt exists")
+            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/pynx_run.txt exists")
             #     pass
 
             # Move notebooks
-            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb"):
-                shutil.copy(f"{self.path_package}data_files/PhasingNotebook.ipynb",
-                            f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb"):
+                shutil.copy(f"{self.path_package}/data_files/PhasingNotebook.ipynb",
+                            f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
                 print(
-                    f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw")
+                    f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             else:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/pynxraw/PhasingNotebook.ipynb exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb exists")
 
-            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb"):
-                shutil.copy(f"{self.path_package}data_files/CompareFacetsEvolution.ipynb",
-                            f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb"):
+                shutil.copy(f"{self.path_package}/data_files/CompareFacetsEvolution.ipynb",
+                            f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
                 print(
-                    f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing")
+                    f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
             else:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/CompareFacetsEvolution.ipynb exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+            # PyNX folder, refresh values
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
-            self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+            # Plot folder, refresh
+            self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
+            # Strain folder, refresh
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
+            # Facet folder, refresh
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                f"postprocessing/"
+                "postprocessing/"
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
 
             # Button to save data
-            button_save_as_gwr = Button(
-                description="Save work as .gwr file",
+            button_save_as_cxi = Button(
+                description="Save work as .cxi file",
                 continuous_update=False,
                 button_style='',  # 'success', 'info', 'warning', 'danger' or ''
                 layout=Layout(width='40%'),
                 style={'description_width': 'initial'},
                 icon='fast-forward')
-            display(button_save_as_gwr)
+            display(button_save_as_cxi)
 
-            @button_save_as_gwr.on_click
-            def action_button_save_as_gwr(selfbutton):
+            @button_save_as_cxi.on_click
+            def action_button_save_as_cxi(selfbutton):
                 clear_output(True)
-                display(button_save_as_gwr)
+                display(button_save_as_cxi)
                 print("Saving data, takes some time ...")
-                self.Dataset.to_gwr()
+                print("Using diffraction data and mask selected in the PyNX tab...")
+
+                # Reciprocal space data
+                try:
+                    self.init_cdi_operator()
+
+                    # Real space data
+                    print(
+                        "Using reconstruction file selected in the strain analysis tab ...")
+                    try:
+                        self.Dataset.to_cxi(
+                            cxi_filename=self.cxi_filename, reconstruction_filename=self.Dataset.reconstruction_file)
+                    except AttributeError:
+                        self.Dataset.to_cxi(
+                            cxi_filename=self.cxi_filename, reconstruction_filename=False)
+
+                except NameError:
+                    # Could not load cdi object
+                    print("Could not save reciprocal space data, needs PyNX package")
+                except AttributeError:
+                    # No diffraction data selected
+                    print(
+                        "You need to select the diffraction data file in the `PyNX` tab.")
+
+                # Facets
+                try:
+                    self.Facets.to_hdf5(
+                        f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
+                except AttributeError:
+                    print(
+                        "Could not save facets' data, run the analysis in the `Facets` tab first...")
 
         elif reload_previous_data:
-            # Reload previous data that was saved as .gwr file, initialize all related widgets values, authorize all functions
+            # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
             print("plop")
 
         elif not run_dir_init and not reload_previous_data:
             clear_output(True)
 
     def initialize_parameters(self,
-                              label_beamline,
+                              unused_label_beamline,
                               beamline,
                               actuators,
                               is_series,
@@ -2669,32 +2695,32 @@ class Interface(object):
                               specfile_name,
                               rocking_angle,
                               follow_bragg,
-                              label_masking,
+                              unused_label_masking,
                               flag_interact,
                               background_plot,
-                              label_centering,
+                              unused_label_centering,
                               centering,
                               fix_bragg,
                               fix_size,
                               center_fft,
                               pad_size,
                               normalize_flux,
-                              label_filtering,
+                              unused_label_filtering,
                               mask_zero_event,
                               flag_medianfilter,
                               medfilt_order,
                               binning,
-                              label_reload,
+                              unused_label_reload,
                               reload_previous,
                               reload_orthogonal,
                               preprocessing_binning,
-                              label_saving,
+                              unused_label_saving,
                               save_rawdata,
                               save_to_npz,
                               save_to_mat,
                               save_to_vti,
                               save_asint,
-                              label_detector,
+                              unused_label_detector,
                               detector,
                               roi_detector,
                               photon_threshold,
@@ -2705,7 +2731,7 @@ class Interface(object):
                               template_imagefile,
                               nb_pixel_x,
                               nb_pixel_y,
-                              label_ortho,
+                              unused_label_ortho,
                               use_rawdata,
                               interp_method,
                               fill_value_mask,
@@ -2714,7 +2740,7 @@ class Interface(object):
                               sdd,
                               energy,
                               custom_motors,
-                              label_xru,
+                              unused_label_xru,
                               align_q,
                               ref_axis_q,
                               outofplane_angle,
@@ -2729,7 +2755,7 @@ class Interface(object):
                               detrot,
                               tiltazimuth,
                               tilt,
-                              label_preprocess,
+                              unused_label_preprocess,
                               init_para
                               ):
         """
@@ -2911,11 +2937,11 @@ class Interface(object):
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
                     save_dir = self.Dataset.root_folder + \
-                        f"S{self.Dataset.scans}/pynxraw/"
+                        f"S{self.Dataset.scan}/pynxraw/"
 
                 # On lance BCDI
-                preprocess.preprocess_bcdi(
-                    scans=self.Dataset.scans,
+                data_file, mask_file = preprocess.preprocess_bcdi(
+                    scans=self.Dataset.scan,
                     sample_name=self.Dataset.sample_name,
                     root_folder=root_folder,
                     save_dir=save_dir,
@@ -2985,29 +3011,27 @@ class Interface(object):
                     GUI=True,
                 )
 
-                # Scan folder, refresh
-                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                # PyNX folder, refresh
+                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_pynx_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                # Plot folder, refresh
+                self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
-                self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + f"pynxraw/"
-                self.folder_strain_handler(
-                    change=self._list_widgets_strain.children[-4].value)
-
-                self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                    f"postprocessing/"
-                self.folder_facet_handler(
-                    change=self.tab_facet.children[1].value)
+                # Save output files paths
+                self._list_widgets_pynx.children[2].value = data_file
+                self._list_widgets_pynx.children[3].value = mask_file
+                print("Output diffraction data:", self.Dataset.iobs)
+                print("Output mask:", self.Dataset.mask)
 
         if not init_para:
             clear_output(True)
 
     def correct_angles(self,
-                       label_correct,
+                       unused_label_correct,
                        csv_file,
                        temp_bool,
                        reflection,
@@ -3040,7 +3064,7 @@ class Interface(object):
             try:
                 self.Dataset.reflection = np.array(literal_eval(reflection))
             except ValueError:
-                print(f"Wrong list syntax for refelction")
+                print("Wrong list syntax for refelction")
 
             try:
                 # Check beamline for save folder
@@ -3050,7 +3074,7 @@ class Interface(object):
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/corrections/"
+                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/corrections/"
 
                 # Create final directory is not yet existing
                 if not os.path.isdir(save_dir):
@@ -3078,7 +3102,7 @@ class Interface(object):
                     reference_temperature=self.Dataset.reference_temperature,
                     high_threshold=1000000,
                     save_dir=save_dir,
-                    scan=self.Dataset.scans,
+                    scan=self.Dataset.scan,
                     root_folder=root_folder,
                     sample_name=self.Dataset.sample_name,
                     filtered_data=False,
@@ -3134,7 +3158,7 @@ class Interface(object):
             clear_output(True)
 
     def init_pynx(self,
-                  label_data,
+                  unused_label_data,
                   folder,
                   iobs,
                   mask,
@@ -3142,19 +3166,19 @@ class Interface(object):
                   obj,
                   auto_center_resize,
                   max_size,
-                  label_support,
+                  unused_label_support,
                   support_threshold,
                   support_only_shrink,
                   support_update_period,
                   support_smooth_width,
                   support_post_expand,
-                  label_psf,
+                  unused_label_psf,
                   psf,
                   psf_model,
                   fwhm,
                   eta,
                   update_psf,
-                  label_algo,
+                  unused_label_algo,
                   use_operators,
                   operator_chain,
                   nb_hio,
@@ -3162,10 +3186,10 @@ class Interface(object):
                   nb_er,
                   nb_ml,
                   nb_run,
-                  label_filtering,
+                  unused_label_filtering,
                   filter_criteria,
                   nb_run_keep,
-                  label_options,
+                  unused_label_options,
                   live_plot,
                   # zero_mask,
                   # crop_output,
@@ -3175,15 +3199,14 @@ class Interface(object):
                   rebin,
                   verbose,
                   pixel_size_detector,
-                  label_phase_retrieval,
+                  unused_label_phase_retrieval,
                   run_phase_retrieval,
-                  label_run_pynx_tools,
+                  unused_label_run_pynx_tools,
                   run_pynx_tools,
                   ):
         """
         Get parameters from widgets and run phase retrieval
         """
-
         self.Dataset.folder = folder
         self.Dataset.iobs = iobs
         self.Dataset.mask = mask
@@ -3232,27 +3255,10 @@ class Interface(object):
             self.Dataset.support_post_expand)
         self.Dataset.rebin = literal_eval(self.Dataset.rebin)
 
-        # "" strings should be None
-        if self.Dataset.iobs == "":
-            self.Dataset.iobs = None
-            iobs = None
-
-        if self.Dataset.mask == "":
-            self.Dataset.mask = None
-            mask = None
-
-        if self.Dataset.support == "":
-            self.Dataset.support = None
-            support = None
-
-        if self.Dataset.obj == "":
-            self.Dataset.obj = None
-            obj = None
-
         if self.Dataset.live_plot == 0:
             self.Dataset.live_plot = False
 
-        print("Scan n°", self.Dataset.scans)
+        print("Scan n°", self.Dataset.scan)
 
         self.Dataset.energy = self._list_widgets_preprocessing.children[53].value
         self.Dataset.wavelength = 1.2399*1e-6 / self.Dataset.energy
@@ -3271,17 +3277,17 @@ class Interface(object):
 
         # Phase retrieval
         if self.run_phase_retrieval and not self.run_pynx_tools:
-            if self.run_phase_retrieval == "batch" or self.run_phase_retrieval == "local_script":
+            if self.run_phase_retrieval in ("batch", "local_script"):
                 self.text_file = []
                 self.Dataset.live_plot = False
 
                 # Load files
                 self.text_file.append("# Parameters\n")
                 for file, parameter in [(self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
-                    if file:
+                    if file is not "":
                         self.text_file.append(f"{parameter} = \"{file}\"\n")
 
-                if support:
+                if support is not "":
                     self.text_file += [
                         f"support = \"{self.Dataset.support}\"\n",
                         '\n']
@@ -3373,183 +3379,30 @@ class Interface(object):
                     print(
                         "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
                     os.system(
-                        f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
+                        shlex.quote(
+                            f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true"
+                        )
+                    )
 
                 elif self.run_phase_retrieval == "local_script":
                     try:
                         print(
                             f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &", end="\n\n")
                         os.system(
-                            f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &")
+                            shlex.quote(
+                                f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &"
+                            )
+                        )
                     except KeyboardInterrupt:
                         print("Phase retrieval stopped by user ...")
 
             elif self.run_phase_retrieval == "operators":
                 # Extract data
                 print("Log likelihood is updated every 50 iterations.")
-
                 self.Dataset.calc_llk = 50  # for now
 
-                if self.Dataset.iobs:
-                    if self.Dataset.iobs.endswith(".npy"):
-                        iobs = np.load(self.Dataset.iobs)
-                        print("CXI input: loading data")
-                    elif self.Dataset.iobs.endswith(".npz"):
-                        try:
-                            iobs = np.load(self.Dataset.iobs)["data"]
-                            print("CXI input: loading data")
-                        except:
-                            print("Could not load 'data' array from npz file")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            iobs = bin_data(iobs, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    iobs = fftshift(iobs)
-
-                if self.Dataset.mask:
-                    if self.Dataset.mask.endswith(".npy"):
-                        mask = np.load(self.Dataset.mask).astype(np.int8)
-                        nb = mask.sum()
-                        print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                            nb, nb * 100 / mask.size))
-                    elif self.Dataset.mask.endswith(".npz"):
-                        try:
-                            mask = np.load(self.Dataset.mask)[
-                                "mask"].astype(np.int8)
-                            nb = mask.sum()
-                            print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                                nb, nb * 100 / mask.size))
-                        except:
-                            print("Could not load 'mask' array from npz file")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            mask = bin_data(mask, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    mask = fftshift(mask)
-
-                if self.Dataset.support:
-                    if self.Dataset.support.endswith(".npy"):
-                        support = np.load(self.Dataset.support)
-                        print("CXI input: loading support")
-                    elif self.Dataset.support.endswith(".npz"):
-                        try:
-                            support = np.load(self.Dataset.support)["data"]
-                            print("CXI input: loading support")
-                        except:
-                            # print("Could not load 'data' array from npz file")
-                            try:
-                                support = np.load(self.Dataset.support)[
-                                    "support"]
-                                print("CXI input: loading support")
-                            except:
-                                # print("Could not load 'support' array from npz file")
-                                try:
-                                    support = np.load(
-                                        self.Dataset.support)["obj"]
-                                    print("CXI input: loading support")
-                                except:
-                                    print("Could not load support")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            support = bin_data(support, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    support = fftshift(support)
-
-                if self.Dataset.obj:
-                    if self.Dataset.obj.endswith(".npy"):
-                        obj = np.load(self.Dataset.obj)
-                        print("CXI input: loading object")
-                    elif self.Dataset.obj.endswith(".npz"):
-                        try:
-                            obj = np.load(self.Dataset.obj)["data"]
-                            print("CXI input: loading object")
-                        except:
-                            print("Could not load 'data' array from npz file")
-
-                    if self.Dataset.rebin != (1, 1, 1):
-                        try:
-                            obj = bin_data(obj, self.Dataset.rebin)
-                        except Exception as e:
-                            print("Could not bin data")
-
-                    # fft shift
-                    obj = fftshift(obj)
-
-                # Center and crop data
-                if self.Dataset.auto_center_resize:
-                    if iobs.ndim == 3:
-                        nz0, ny0, nx0 = iobs.shape
-
-                        # Find center of mass
-                        z0, y0, x0 = center_of_mass(iobs)
-                        print("Center of mass at:", z0, y0, x0)
-                        iz0, iy0, ix0 = int(round(z0)), int(
-                            round(y0)), int(round(x0))
-
-                        # Max symmetrical box around center of mass
-                        nx = 2 * min(ix0, nx0 - ix0)
-                        ny = 2 * min(iy0, ny0 - iy0)
-                        nz = 2 * min(iz0, nz0 - iz0)
-
-                        if self.Dataset.max_size is not None:
-                            nx = min(nx, self.Dataset.max_size)
-                            ny = min(ny, self.Dataset.max_size)
-                            nz = min(nz, self.Dataset.max_size)
-
-                        # Crop data to fulfill FFT size requirements
-                        nz1, ny1, nx1 = smaller_primes(
-                            (nz, ny, nx), maxprime=7, required_dividers=(2,))
-
-                        print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
-                              (nz0, ny0, nx0, nz1, ny1, nx1))
-                        iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
-                                    ix0 - nx1 // 2:ix0 + nx1 // 2]
-                        if mask is not None:
-                            mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
-                                        ix0 - nx1 // 2:ix0 + nx1 // 2]
-                            print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
-                                  (nz0, ny0, nx0, nz1, ny1, nx1))
-
-                    else:
-                        ny0, nx0 = iobs.shape
-
-                        # Find center of mass
-                        y0, x0 = center_of_mass(iobs)
-                        iy0, ix0 = int(round(y0)), int(round(x0))
-                        print("Center of mass (rounded) at:", iy0, ix0)
-
-                        # Max symmetrical box around center of mass
-                        nx = 2 * min(ix0, nx0 - ix0)
-                        ny = 2 * min(iy0, ny0 - iy0)
-                        if self.Dataset.max_size is not None:
-                            nx = min(nx, self.Dataset.max_size)
-                            ny = min(ny, self.Dataset.max_size)
-                            nz = min(nz, self.Dataset.max_size)
-
-                        # Crop data to fulfill FFT size requirements
-                        ny1, nx1 = smaller_primes(
-                            (ny, nx), maxprime=7, required_dividers=(2,))
-
-                        print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
-                              (ny0, nx0, ny1, nx1))
-                        iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
-                                    2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-
-                        if mask is not None:
-                            mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
-                                        2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+                # Initialise the cdi operator
+                cdi = self.init_cdi_operator()
 
                 print("\n#############################################################################################################\n")
 
@@ -3560,32 +3413,6 @@ class Interface(object):
                         if i > 4:
                             print("\nStopping liveplot to go faster\n")
                             self.Dataset.live_plot = False
-
-                        # Create cdi object with data and mask, load the main parameters
-                        cdi = CDI(iobs,
-                                  support=support,
-                                  obj=obj,
-                                  mask=mask,
-                                  wavelength=self.Dataset.wavelength,
-                                  pixel_size_detector=self.Dataset.pixel_size_detector,
-                                  detector_distance=self.Dataset.sdd,
-                                  )
-
-                        # Save diffraction pattern
-                        if i == 0:
-                            cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
-                                self.Dataset.root_folder,
-                                self.Dataset.sample_name,
-                                self.Dataset.scans,
-                                self.Dataset.iobs.split("/")[-1].split(".")[0]
-                            )
-                            if not os.path.exists(cxi_filename):
-                                cdi.save_data_cxi(
-                                    filename=cxi_filename,
-                                    sample_name="",
-                                    experiment_id="",
-                                    instrument=""
-                                )
 
                         # Change support threshold for supports update
                         if isinstance(self.Dataset.support_threshold, float):
@@ -3760,32 +3587,31 @@ class Interface(object):
 
                             cdi.save_obj_cxi("{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                                 self.Dataset.folder,
-                                self.Dataset.scans,
+                                self.Dataset.scan,
                                 i,
                                 cdi.get_llk()[0],
                                 self.Dataset.threshold_relative,
-                                iobs.shape[0],
-                                iobs.shape[1],
-                                iobs.shape[2],
+                                cdi.iobs.shape[0],
+                                cdi.iobs.shape[1],
+                                cdi.iobs.shape[2],
                                 sup_init,
                             )
                             )
 
                             print("Saved as result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                                self.Dataset.scans,
+                                self.Dataset.scan,
                                 i,
                                 cdi.get_llk()[0],
                                 self.Dataset.threshold_relative,
-                                iobs.shape[0],
-                                iobs.shape[1],
-                                iobs.shape[2],
+                                cdi.iobs.shape[0],
+                                cdi.iobs.shape[1],
+                                cdi.iobs.shape[2],
                                 sup_init,
                             )
                             )
                         except SupportTooLarge:
                             print(
                                 "Threshold value probably too low, support too large too continue")
-                            pass
 
                         print(
                             "\n#############################################################################################################\n")
@@ -3825,7 +3651,6 @@ class Interface(object):
         filter_criteria can take the values "LLK" or "standard_deviation"
         If you take filter based on both, the function will filter nb_keep/2 files by the first criteria, and the remaining files by the second criteria 
         """
-
         # Different functions depending in the criteria
         def filter_by_std(cxi_files, nb_keep):
             # Keep filtering criteria of reconstruction modules in dictionnary
@@ -3922,22 +3747,318 @@ class Interface(object):
             print("Running pynx-cdi-analysis.py *LLK* modes=1")
             print(f"Output in {folder}/modes_gui.h5")
             os.system(
-                f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5")
+                shlex.quote(
+                    f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5"
+                )
+            )
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
 
+    def save_as_cxi(self, cdi_operator, path_to_cxi):
+        """
+        We need to create a dictionnary with the parameters to save in the cxi file
+        """
+        self.params = params
+        self.params["data"] = self.Dataset.iobs
+        self.params["wavelength"] = self.Dataset.wavelength
+        self.params["detector_distance"] = self.Dataset.sdd
+        self.params["pixel_size_detector"] = self.Dataset.pixel_size_detector
+        self.params["wavelength"] = self.Dataset.wavelength
+        self.params["verbose"] = self.Dataset.verbose
+        self.params["live_plot"] = self.Dataset.live_plot
+        # self.params["gpu"] = self.Dataset.gpu
+        self.params["auto_center_resize"] = self.Dataset.auto_center_resize
+        # self.params["roi_user"] = self.Dataset.roi_user
+        # self.params["roi_final"] = self.Dataset.roi_final
+        self.params["nb_run"] = self.Dataset.nb_run
+        self.params["max_size"] = self.Dataset.max_size
+        # self.params["data2cxi"] = self.Dataset.data2cxi
+        self.params["output_format"] = "cxi"
+        self.params["mask"] = self.Dataset.mask
+        self.params["support"] = self.Dataset.support
+        # self.params["support_autocorrelation_threshold"] = self.Dataset.support_autocorrelation_threshold
+        self.params["support_only_shrink"] = self.Dataset.support_only_shrink
+        self.params["object"] = self.Dataset.obj
+        self.params["support_update_period"] = self.Dataset.support_update_period
+        self.params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
+        self.params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
+        # self.params["support_smooth_width_relax_n"] = self.Dataset.support_smooth_width_relax_n
+        # self.params["support_size"] = self.Dataset.support_size
+        self.params["support_threshold"] = self.Dataset.support_threshold
+        self.params["positivity"] = self.Dataset.positivity
+        self.params["beta"] = self.Dataset.beta
+        self.params["crop_output"] = 0
+        self.params["rebin"] = self.Dataset.rebin
+        # self.params["support_update_border_n"] = self.Dataset.support_update_border_n
+        # self.params["support_threshold_method"] = self.Dataset.support_threshold_method
+        self.params["support_post_expand"] = self.Dataset.support_post_expand
+        self.params["psf"] = self.Dataset.psf
+        # self.params["note"] = self.Dataset.note
+        try:
+            self.params["instrument"] = self.Dataset.beamline
+        except AttributeError:
+            self.params["instrument"] = None
+        self.params["sample_name"] = self.Dataset.sample_name
+        # self.params["fig_num"] = self.Dataset.fig_num
+        # self.params["algorithm"] = self.Dataset.algorithm
+        self.params["zero_mask"] = "auto"
+        self.params["nb_run_keep"] = self.Dataset.nb_run_keep
+        # self.params["save"] = self.Dataset.save
+        # self.params["gps_inertia"] = self.Dataset.gps_inertia
+        # self.params["gps_t"] = self.Dataset.gps_t
+        # self.params["gps_s"] = self.Dataset.gps_s
+        # self.params["gps_sigma_f"] = self.Dataset.gps_sigma_f
+        # self.params["gps_sigma_o"] = self.Dataset.gps_sigma_o
+        # self.params["iobs_saturation"] = self.Dataset.iobs_saturation
+        # self.params["free_pixel_mask"] = self.Dataset.free_pixel_mask
+        # self.params["support_formula"] = self.Dataset.support_formula
+        # self.params["mpi"] = "run"
+        # self.params["mask_interp"] = self.Dataset.mask_interp
+        # self.params["confidence_interval_factor_mask_min"] = self.Dataset.confidence_interval_factor_mask_min
+        # self.params["confidence_interval_factor_mask_max"] = self.Dataset.confidence_interval_factor_mask_max
+        # self.params["save_plot"] = self.Dataset.save_plot
+        # self.params["support_fraction_min"] = self.Dataset.support_fraction_min
+        # self.params["support_fraction_max"] = self.Dataset.support_fraction_max
+        # self.params["support_threshold_auto_tune_factor"] = self.Dataset.support_threshold_auto_tune_factor
+        # self.params["nb_run_keep_max_obj2_out"] = self.Dataset.nb_run_keep_max_obj2_out
+        # self.params["flatfield"] = self.Dataset.flatfield
+        # self.params["psf_filter"] = self.Dataset.psf_filter
+        self.params["detwin"] = self.Dataset.detwin
+        self.params["nb_raar"] = self.Dataset.nb_raar
+        self.params["nb_hio"] = self.Dataset.nb_hio
+        self.params["nb_er"] = self.Dataset.nb_er
+        self.params["nb_ml"] = self.Dataset.nb_ml
+        try:
+            self.params = params
+            self.params["specfile"] = self.Dataset.specfile_name
+        except AttributeError:
+            pass
+        # self.params["imgcounter"] = self.Dataset.imgcounter
+        # self.params["imgname"] = self.Dataset.imgname
+        self.params["scan"] = self.Dataset.scan
+
+        cdi_operator.save_data_cxi(
+            filename=path_to_cxi,
+            process_parameters=self.params,
+        )
+
+    def init_cdi_operator(self, save_as_cxi=True):
+        """
+        Initialize the cdi poerator by processing the possible inputs, iobs, mask, support and obj
+        Will also crop the data if needed
+        """
+        if self.Dataset.iobs not in ("", None):
+            if self.Dataset.iobs.endswith(".npy"):
+                iobs = np.load(self.Dataset.iobs)
+                print("CXI input: loading data")
+            elif self.Dataset.iobs.endswith(".npz"):
+                try:
+                    iobs = np.load(self.Dataset.iobs)["data"]
+                    print("CXI input: loading data")
+                except:
+                    print("Could not load 'data' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    iobs = bin_data(iobs, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+                    raise e
+
+            # fft shift
+            iobs = fftshift(iobs)
+
+        else:
+            self.Dataset.iobs = None
+            iobs = None
+
+        if self.Dataset.mask not in ("", None):
+            if self.Dataset.mask.endswith(".npy"):
+                mask = np.load(self.Dataset.mask).astype(np.int8)
+                nb = mask.sum()
+                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                    nb, nb * 100 / mask.size))
+            elif self.Dataset.mask.endswith(".npz"):
+                try:
+                    mask = np.load(self.Dataset.mask)[
+                        "mask"].astype(np.int8)
+                    nb = mask.sum()
+                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                        nb, nb * 100 / mask.size))
+                except:
+                    print("Could not load 'mask' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    mask = bin_data(mask, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            mask = fftshift(mask)
+
+        else:
+            self.Dataset.mask = None
+            mask = None
+
+        if self.Dataset.support not in ("", None):
+            if self.Dataset.support.endswith(".npy"):
+                support = np.load(self.Dataset.support)
+                print("CXI input: loading support")
+            elif self.Dataset.support.endswith(".npz"):
+                try:
+                    support = np.load(self.Dataset.support)["data"]
+                    print("CXI input: loading support")
+                except:
+                    # print("Could not load 'data' array from npz file")
+                    try:
+                        support = np.load(self.Dataset.support)[
+                            "support"]
+                        print("CXI input: loading support")
+                    except:
+                        # print("Could not load 'support' array from npz file")
+                        try:
+                            support = np.load(
+                                self.Dataset.support)["obj"]
+                            print("CXI input: loading support")
+                        except:
+                            print("Could not load support")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    support = bin_data(support, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            support = fftshift(support)
+
+        else:
+            self.Dataset.support = None
+            support = None
+
+        if self.Dataset.obj not in ("", None):
+            if self.Dataset.obj.endswith(".npy"):
+                obj = np.load(self.Dataset.obj)
+                print("CXI input: loading object")
+            elif self.Dataset.obj.endswith(".npz"):
+                try:
+                    obj = np.load(self.Dataset.obj)["data"]
+                    print("CXI input: loading object")
+                except:
+                    print("Could not load 'data' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    obj = bin_data(obj, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            obj = fftshift(obj)
+
+        else:
+            self.Dataset.obj = None
+            obj = None
+
+        # Center and crop data
+        if self.Dataset.auto_center_resize:
+            if iobs.ndim == 3:
+                nz0, ny0, nx0 = iobs.shape
+
+                # Find center of mass
+                z0, y0, x0 = center_of_mass(iobs)
+                print("Center of mass at:", z0, y0, x0)
+                iz0, iy0, ix0 = int(round(z0)), int(
+                    round(y0)), int(round(x0))
+
+                # Max symmetrical box around center of mass
+                nx = 2 * min(ix0, nx0 - ix0)
+                ny = 2 * min(iy0, ny0 - iy0)
+                nz = 2 * min(iz0, nz0 - iz0)
+
+                if self.Dataset.max_size is not None:
+                    nx = min(nx, self.Dataset.max_size)
+                    ny = min(ny, self.Dataset.max_size)
+                    nz = min(nz, self.Dataset.max_size)
+
+                # Crop data to fulfill FFT size requirements
+                nz1, ny1, nx1 = smaller_primes(
+                    (nz, ny, nx), maxprime=7, required_dividers=(2,))
+
+                print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
+                      (nz0, ny0, nx0, nz1, ny1, nx1))
+                iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
+                            ix0 - nx1 // 2:ix0 + nx1 // 2]
+                if mask is not None:
+                    mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
+                                ix0 - nx1 // 2:ix0 + nx1 // 2]
+                    print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
+                          (nz0, ny0, nx0, nz1, ny1, nx1))
+
+            else:
+                ny0, nx0 = iobs.shape
+
+                # Find center of mass
+                y0, x0 = center_of_mass(iobs)
+                iy0, ix0 = int(round(y0)), int(round(x0))
+                print("Center of mass (rounded) at:", iy0, ix0)
+
+                # Max symmetrical box around center of mass
+                nx = 2 * min(ix0, nx0 - ix0)
+                ny = 2 * min(iy0, ny0 - iy0)
+                if self.Dataset.max_size is not None:
+                    nx = min(nx, self.Dataset.max_size)
+                    ny = min(ny, self.Dataset.max_size)
+                    nz = min(nz, self.Dataset.max_size)
+
+                # Crop data to fulfill FFT size requirements
+                ny1, nx1 = smaller_primes(
+                    (ny, nx), maxprime=7, required_dividers=(2,))
+
+                print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
+                      (ny0, nx0, ny1, nx1))
+                iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
+                            2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+                if mask is not None:
+                    mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
+                                2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+        # Create cdi object with data and mask, load the main parameters
+        cdi = CDI(iobs,
+                  support=support,
+                  obj=obj,
+                  mask=mask,
+                  wavelength=self.Dataset.wavelength,
+                  pixel_size_detector=self.Dataset.pixel_size_detector,
+                  detector_distance=self.Dataset.sdd,
+                  )
+
+        if save_as_cxi:
+            # Save diffraction pattern
+            self.cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
+                self.Dataset.root_folder,
+                self.Dataset.sample_name,
+                self.Dataset.scan,
+                self.Dataset.iobs.split("/")[-1].split(".")[0]
+            )
+            self.save_as_cxi(cdi_operator=cdi, path_to_cxi=self.cxi_filename)
+
+        return cdi
+
     def strain_gui(self,
-                   label_averaging,
+                   unused_label_averaging,
                    sort_method,
                    correlation_threshold,
-                   label_FFT,
+                   unused_label_FFT,
                    phasing_binning,
                    original_size,
                    preprocessing_binning,
                    output_size,
                    keep_size,
                    fix_voxel,
-                   label_disp_strain,
+                   unused_label_disp_strain,
                    data_frame,
                    save_frame,
                    ref_axis_q,
@@ -3947,13 +4068,13 @@ class Interface(object):
                    phase_offset_origin,
                    offset_method,
                    centering_method,
-                   label_refraction,
+                   unused_label_refraction,
                    correct_refraction,
                    optical_path_method,
                    dispersion,
                    absorption,
                    threshold_unwrap_refraction,
-                   label_options,
+                   unused_label_options,
                    simu_flag,
                    invert_phase,
                    flip_reconstruction,
@@ -3964,7 +4085,7 @@ class Interface(object):
                    save,
                    debug,
                    roll_modes,
-                   label_data_vis,
+                   unused_label_data_vis,
                    align_axis,
                    ref_axis,
                    axis_to_align,
@@ -3975,18 +4096,18 @@ class Interface(object):
                    tick_direction,
                    tick_length,
                    tick_width,
-                   label_average,
+                   unused_label_average,
                    avg_method,
                    avg_threshold,
-                   label_apodize,
+                   unused_label_apodize,
                    apodize_flag,
                    apodize_window,
                    hwidth,
                    mu,
                    sigma,
                    alpha,
-                   label_strain,
-                   folder_strain,
+                   unused_label_strain,
+                   unused_folder_strain,
                    reconstruction_file,
                    run_strain,
                    ):
@@ -3995,7 +4116,6 @@ class Interface(object):
         Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase. 
         Also plots images depending on the given isosurface.
         """
-
         if run_strain:
             # Disable all widgets until the end of the program, will update automatticaly after
             for w in self._list_widgets_strain.children[:-1]:
@@ -4117,7 +4237,7 @@ class Interface(object):
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scans}/result_{self.Dataset.save_frame}/"
+                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
                     w.disabled = False
@@ -4143,7 +4263,7 @@ class Interface(object):
 
             try:
                 self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final = strain.strain_bcdi(
-                    scan=self.Dataset.scans,
+                    scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
                     data_dirname=self.Dataset.data_dirname,
@@ -4234,7 +4354,7 @@ class Interface(object):
                 # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + f"pynxraw/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
@@ -4251,7 +4371,7 @@ class Interface(object):
             clear_output(True)
 
     def facet_analysis(self,
-                       label_facet,
+                       unused_label_facet,
                        facet_folder,
                        facet_filename,
                        load_data,
@@ -4358,10 +4478,22 @@ class Interface(object):
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
-                    view=widgets.Text(
-                        value="[90, 0]",
-                        placeholder="[90, 0]",
-                        description='Elevation and azimuth of the axes in degrees:',
+                    elev=widgets.BoundedIntText(
+                        value=90,
+                        placeholder=90,
+                        min=0,
+                        max=360,
+                        description='Elevation of the axes in degrees:',
+                        disabled=False,
+                        continuous_update=False,
+                        layout=Layout(width='70%'),
+                        style={'description_width': 'initial'},),
+                    azim=widgets.BoundedIntText(
+                        value=0,
+                        placeholder=0,
+                        min=0,
+                        max=360,
+                        description='Azimuth of the axes in degrees:',
                         disabled=False,
                         continuous_update=False,
                         layout=Layout(width='70%'),
@@ -4374,10 +4506,10 @@ class Interface(object):
                     v0,
                     w0,
                     hkl_reference,
-                    view,
+                    elev,
+                    azim,
                 ):
                     """Function to interactively visualize the two facets tht will be chosen, to also help pick two vectors"""
-
                     # Save parameters value
                     self.Facets.facet_a_id = facet_a_id
                     self.Facets.facet_b_id = facet_b_id
@@ -4385,11 +4517,12 @@ class Interface(object):
                     self.Facets.v0 = v0
                     self.Facets.w0 = w0
                     self.Facets.hkl_reference = hkl_reference
-                    self.Facets.view = view
+                    self.Facets.elev = elev
+                    self.Facets.azim = azim
 
                     # Extract list from strings
                     list_parameters = ["u0", "v0",
-                                       "w0", "hkl_reference", "view"]
+                                       "w0", "hkl_reference"]
                     try:
                         for p in list_parameters:
                             if getattr(self.Facets, p) == "":
@@ -4403,9 +4536,9 @@ class Interface(object):
 
                     # Plot the chosen facet to help the user to pick the facets he wants to use to orient the particule
                     self.Facets.extract_facet(
-                        facet_id=self.Facets.facet_a_id, plot=True, view=self.Facets.view, output=False, save=False)
+                        facet_id=self.Facets.facet_a_id, plot=True, elev=self.Facets.elev, azim=self.Facets.azim, output=False, save=False)
                     self.Facets.extract_facet(
-                        facet_id=self.Facets.facet_b_id, plot=True, view=self.Facets.view, output=False, save=False)
+                        facet_id=self.Facets.facet_b_id, plot=True, elev=self.Facets.elev, azim=self.Facets.azim, output=False, save=False)
 
                     display(Markdown("""# Field data"""))
                     display(self.Facets.field_data)
@@ -4418,7 +4551,6 @@ class Interface(object):
                     @button_fix_facets.on_click
                     def action_button_fix_facets(selfbutton):
                         "Fix facets to compute the new rotation matrix and launch the data extraction"
-
                         clear_output(True)
 
                         display(button_fix_facets)
@@ -4449,11 +4581,13 @@ class Interface(object):
 
                         display(
                             Markdown("""# Strain values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_strain(view=self.Facets.view)
+                        self.Facets.plot_strain(
+                            elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown(
                             """# Displacement values for each surface voxel and averaged per facet"""))
-                        self.Facets.plot_displacement(view=self.Facets.view)
+                        self.Facets.plot_displacement(
+                            elev=self.Facets.elev, azim=self.Facets.azim)
 
                         display(Markdown("""# Evolution curves"""))
                         self.Facets.evolution_curves()
@@ -4476,24 +4610,23 @@ class Interface(object):
                                 # Create subfolder
                                 try:
                                     os.mkdir(
-                                        f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
+                                        f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/facets_analysis/")
                                     print(
-                                        f"Created {self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/")
+                                        f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/facets_analysis/")
                                 except FileExistsError:
                                     print(
-                                        f"{self.Dataset.root_folder}S{self.Dataset.scans}/postprocessing/facets_analysis/ exists")
-                                    pass
+                                        f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/facets_analysis/ exists")
 
                                 # Save data
                                 self.Facets.save_data(
-                                    f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
+                                    f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
                                 print(
-                                    f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scans}/postprocessing/facets_analysis/field_data_{self.Dataset.scans}.csv")
+                                    f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
 
                                 self.Facets.to_hdf5(
-                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
+                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
                                 print(
-                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scans}.h5")
+                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
                             except AttributeError:
                                 print(
                                     "Initialize the directories first to save the figures and data ...")
@@ -4513,10 +4646,9 @@ class Interface(object):
             self.tab_facet.children[1].disabled = False
             clear_output(True)
 
-    def display_readme(self,
-                       contents):
+    @staticmethod
+    def display_readme(contents):
         """Docs about different steps in data analysis workflow"""
-
         if contents == "Preprocessing":
             clear_output(True)
             display(Markdown("""
@@ -4827,7 +4959,7 @@ class Interface(object):
                 `specfile=/some/dir/to/specfile.spec`: path to specfile [mandatory, unless data= is used instead]
 
                 `scan=56`: scan number in specfile [mandatory].
-                         Alternatively a list or range of scans can be given:
+                         Alternatively a list or range of scan can be given:
                             scan=12,23,45 or scan="range(12,25)" (note the quotes)
 
                 `imgcounter=mpx4inr`: spec counter name for image number
@@ -4889,7 +5021,7 @@ class Interface(object):
                 """))
 
     def display_logs(self,
-                     label_logs,
+                     unused_label_logs,
                      csv_file,
                      show_logs
                      ):
@@ -4914,15 +5046,14 @@ class Interface(object):
             clear_output(True)
 
     def load_data(self,
-                  label_plot,
-                  folder,
+                  unused_label_plot,
+                  unused_folder,
                   file_list,
                   data_use,
                   ):
         """
         Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi files.
         """
-
         if data_use == "two_d_plot":
             # Disable widgets
             for w in self.tab_data.children[:-2]:
@@ -4965,7 +5096,6 @@ class Interface(object):
 
             def support_handler(change):
                 """Handles changes on the widget used for the initialization"""
-
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -5028,7 +5158,6 @@ class Interface(object):
 
             def support_handler(change):
                 """Handles changes on the widget used for the initialization"""
-
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -5050,7 +5179,7 @@ class Interface(object):
             w = CDIViewer(file_list)
             display(w)
 
-        elif data_use == False:
+        elif data_use is False:
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
             clear_output(True)
@@ -5060,80 +5189,87 @@ class Interface(object):
     def rotate_sixs_data(self):
         """
         Python script to rotate the data for vertical configuration
-                Arg 1: Path of target directory (before /S{scan} ... )
-                Arg 2: Scan(s) number, list or single value
-
         Only for SIXS data in the vertical MED configuration
         """
-
-        print("Rotating SIXS data ...")
-        with tb.open_file(self.Dataset.path_to_data, "a") as f:
-            # Get data
+        # Check if already rotated
+        with h5py.File(self.Dataset.path_to_data, "a") as f:
             try:
-                # if rocking_angle == "omega":
-                data_og = f.root.com.scan_data.data_02[:]
-                index = 2
-                if np.ndim(data_og) == 1:
-                    data_og = f.root.com.scan_data.data_10[:]
-                    index = 10
-                # elif rocking_angle == "mu":
-                #     data_og = f.root.com.scan_data.merlin_image[:]
-                print("Calling merlin the enchanter in SBS...")
-                self.Dataset.scan_type = "SBS"
-            except:
+                f.create_dataset("rotation", data=True)
+                data_already_rotated = False
+            except ValueError:
+                data_already_rotated = f['rotation'][...]
+
+        if not data_already_rotated:
+            print("Rotating SIXS data ...")
+            with tb.open_file(self.Dataset.path_to_data, "a") as f:
+                # Get data
                 try:
-                    data_og = f.root.com.scan_data.self_image[:]
-                    print("Calling merlin the enchanter in FLY...")
-                    self.Dataset.scan_type = "FLY"
+                    # if rocking_angle == "omega":
+                    data_og = f.root.com.scan_data.data_02[:]
+                    index = 2
+                    if np.ndim(data_og) == 1:
+                        data_og = f.root.com.scan_data.data_10[:]
+                        index = 10
+                    # elif rocking_angle == "mu":
+                    #     data_og = f.root.com.scan_data.merlin_image[:]
+                    print("Calling merlin the enchanter in SBS...")
+                    self.Dataset.scan_type = "SBS"
                 except:
-                    print("This data does not result from Merlin :/")
+                    try:
+                        data_og = f.root.com.scan_data.self_image[:]
+                        print("Calling merlin the enchanter in FLY...")
+                        self.Dataset.scan_type = "FLY"
+                    except:
+                        print("This data does not result from Merlin :/")
 
-            # Just an index for plotting schemes
-            half = int(data_og.shape[0]/2)
+                # Just an index for plotting schemes
+                half = int(data_og.shape[0]/2)
 
-            # Rotate data
-            data = np.transpose(data_og, axes=(0, 2, 1))
-            for idx in range(data.shape[0]):
-                tmp = data[idx, :, :]
-                data[idx, :, :] = np.fliplr(tmp)
-            print("Data well rotated by 90°.")
+                # Rotate data
+                data = np.transpose(data_og, axes=(0, 2, 1))
+                for idx in range(data.shape[0]):
+                    tmp = data[idx, :, :]
+                    data[idx, :, :] = np.fliplr(tmp)
+                print("Data well rotated by 90°.")
 
-            print("Saving example figures...", end="\n\n")
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data_og[half, :, :], vmax=10)
-            plt.xlabel('Delta')
-            plt.ylabel('Gamma')
-            plt.tight_layout()
-            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
-                        str(self.Dataset.scans) + "/data/data_before_rotation.png")
-            plt.close()
+                print("Saving example figures...", end="\n\n")
+                plt.figure(figsize=(16, 9))
+                plt.imshow(data_og[half, :, :], vmax=10)
+                plt.xlabel('Delta')
+                plt.ylabel('Gamma')
+                plt.tight_layout()
+                plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
+                            str(self.Dataset.scan) + "/data/data_before_rotation.png")
+                plt.close()
 
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data[half, :, :], vmax=10)
-            plt.xlabel('Gamma')
-            plt.ylabel('Delta')
-            plt.tight_layout()
-            plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
-                        str(self.Dataset.scans) + "/data/data_after_rotation.png")
-            plt.close()
+                plt.figure(figsize=(16, 9))
+                plt.imshow(data[half, :, :], vmax=10)
+                plt.xlabel('Gamma')
+                plt.ylabel('Delta')
+                plt.tight_layout()
+                plt.savefig(self.Dataset.root_folder + self.Dataset.sample_name +
+                            str(self.Dataset.scan) + "/data/data_after_rotation.png")
+                plt.close()
 
-            # Overwrite data in copied file
-            try:
-                if self.Dataset.scan_type == "SBS" and index == 2:
-                    f.root.com.scan_data.data_02[:] = data
-                elif self.Dataset.scan_type == "SBS" and index == 10:
-                    f.root.com.scan_data.data_10[:] = data
-                elif self.Dataset.scan_type == "FLY":
-                    f.root.com.scan_data.test_image[:] = data
-            except:
-                print("Could not overwrite data ><")
+                # Overwrite data in copied file
+                try:
+                    if self.Dataset.scan_type == "SBS" and index == 2:
+                        f.root.com.scan_data.data_02[:] = data
+                    elif self.Dataset.scan_type == "SBS" and index == 10:
+                        f.root.com.scan_data.data_10[:] = data
+                    elif self.Dataset.scan_type == "FLY":
+                        f.root.com.scan_data.test_image[:] = data
+                except:
+                    print("Could not overwrite data ><")
+
+        else:
+            print("Data already rotated ...")
 
     def extract_metadata(self):
         """
         Needs Dataset to be corrected beforehand
         Extract meaningful data and saves them in a csv file to allow comparison
         """
-
         # Save rocking curve data
         np.savez(f"{self.Dataset.scan_folder}postprocessing/interpolated_rocking_curve.npz",
                  tilt_values=self.Dataset.tilt_values,
@@ -5150,7 +5286,7 @@ class Interface(object):
 
                 # Add new data
                 temp_df = pd.DataFrame([[
-                    self.Dataset.scans,
+                    self.Dataset.scan,
                     self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_x, self.Dataset.bragg_y,
@@ -5178,7 +5314,7 @@ class Interface(object):
             else:
                 # Add new data
                 temp_df = pd.DataFrame([[
-                    self.Dataset.scans,
+                    self.Dataset.scan,
                     self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_x, self.Dataset.bragg_y,
@@ -5197,7 +5333,7 @@ class Interface(object):
                 df = pd.read_csv(self.csv_file)
 
                 # Replace old data linked to this scan, no problem if this row does not exist yet
-                indices = df[df['scan'] == self.Dataset.scans].index
+                indices = df[df['scan'] == self.Dataset.scan].index
                 df.drop(indices, inplace=True)
 
                 result = pd.concat([df, temp_df])
@@ -5217,7 +5353,6 @@ class Interface(object):
 
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization"""
-
         if not change.new:
             for w in self._list_widgets_init.children[:7]:
                 w.disabled = False
@@ -5263,7 +5398,7 @@ class Interface(object):
                     w.disabled = False
 
     def energy_scan_handler(self, change):
-        "Handles changes related to energy scans"
+        "Handles changes related to energy scan"
         try:
             if change.new == "energy":
                 self._list_widgets_preprocessing.children[9].disabled = False

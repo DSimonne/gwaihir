@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore")
 # Use widgets to interact with files (.cxi or .npz)
 
 
-class Plotter(object):
+class Plotter():
     """
     docstring for Plotter
     """
@@ -42,7 +42,7 @@ class Plotter(object):
                 self.plot_data()
 
             except Exception as E:
-                raise NameError("Wrong path")
+                raise E
 
         elif self.filename.endswith(".cxi"):
             # Open the file following the .cxi conventions

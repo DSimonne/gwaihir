@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 
-class SupportTools(object):
+class SupportTools():
     """
 Class that regroups the methods used to create/extract/optimize support in BCDI
 """
@@ -19,7 +19,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
         self.path_to_data = path_to_data
         self.path_to_support = path_to_support
 
-        if saving_directory == None:
+        if saving_directory is None:
             try:
                 self.saving_directory = self.path_to_data.replace(
                     self.path_to_data.split("/")[-1], "")
@@ -37,7 +37,6 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
         """
         Extract support as a 3D array of 0 et 1 from a reconstruction
         """
-
         # Work on cxi files
         if compute:
             if self.path_to_data.endswith(".cxi"):
@@ -51,7 +50,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                              "extracted_support.npz", support=support)
                     print(
                         f"Saved support in {self.saving_directory} as extracted_support.npz")
-                    self.plot_3d_support(support)
+                    self.plot_3d_support(array=support)
 
             # elif self.self.path_to_data.endswith(".npz"):
 
@@ -81,7 +80,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
 
             print(
                 f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")
-            self.plot_3d_support(conv_support)
+            self.plot_3d_support(array=conv_support)
 
         else:
             clear_output(True)
@@ -91,7 +90,6 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
         """
         Create support from data, based on maximum value of electronic density module, a threshold is applied.
         """
-
         if compute:
             with tb.open_file(self.path_to_data, "r") as f:
                 # Since .cxi files follow a specific architecture, we know where our data is
@@ -123,7 +121,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                          "computed_support.npz", support=support)
                 print(
                     f"Saved support in {self.saving_directory} as computed_support.npz")
-                self.plot_3d_support(support)
+                self.plot_3d_support(array=support)
 
         else:
             clear_output(True)
@@ -144,7 +142,8 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
             two_d_array = array[:, :, shape[2]//2]
             self.plot_2d_support(two_d_array, dim=2)
 
-    def plot_2d_support(self, two_d_array, dim):
+    @staticmethod
+    def plot_2d_support(two_d_array, dim):
         """
         """
         # Find max and min

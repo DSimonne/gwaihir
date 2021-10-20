@@ -17,7 +17,7 @@ except:
 cxi_files = glob.glob("*LLK*.cxi")
 
 if cxi_files == []:
-    print(f"No *LLK*.cxi files cwd.")
+    print("No *LLK*.cxi files cwd.")
 
 else:
     std = {}
