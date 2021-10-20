@@ -1388,6 +1388,7 @@ class Facets:
                 facets.create_dataset("planar_dist", data=self.planar_dist)
                 facets["planar_dist"].attrs['units'] = 'Angstrom'
                 facets.create_dataset("ref_normal", data=self.ref_normal)
+                print("Saved Facets class attributes")
 
             except ValueError:
                 print("Data already exists, overwriting ...")
@@ -1409,6 +1410,7 @@ class Facets:
                 f["/entry_1/process_4/planar_dist"][...] = self.planar_dist
                 f["/entry_1/process_4/planar_dist"].attrs['units'] = 'Angstrom'
                 f["/entry_1/process_4/ref_normal"][...] = self.ref_normal
+                print("Saved Facets class attributes")
 
             except AttributeError:
                 print("Particle not rotated, some attributes could not be saved ...")
@@ -1435,6 +1437,7 @@ class Facets:
                 format="table",
                 data_columns=True,
             )
+            print("Saved field data")
 
         except Exception as e:
             raise e
@@ -1455,6 +1458,7 @@ class Facets:
                 format="table",
                 data_columns=True,
             )
+            print("Saved theoretical angles")
         except AttributeError:
             print("Facets has no attribute theoretical_angles yet")
         except Exception as e:

@@ -60,13 +60,14 @@ class Dataset():
         Can be reloaded with the load_cxi() function 
         Always overwrites for now
         """
-        final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.h5"
-        # if not os.path.exists(f"{self.scan_folder}{self.sample_name}{self.scan}.h5"):
+        final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
+        # if not os.path.exists(f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"):
         shutil.copy(cxi_filename,
                     final_data_path,
                     )
 
         if reconstruction_filename:
+            print("\nSaving phase retrieval output ...")
             try:
                 with h5py.File(reconstruction_filename, "r") as reconstruction_file:
                     with h5py.File(final_data_path, "a") as final_file:
@@ -190,6 +191,8 @@ class Dataset():
 
             # Preprocessing
             preprocessing = parameters.create_group("preprocessing")
+            print("\n#############################################################################################################\n")
+            print("Saving parameters used in preprocessing ...")
 
             # Masking
             masking = preprocessing.create_group("masking")
@@ -313,8 +316,62 @@ class Dataset():
             except (TypeError, AttributeError):
                 pass
 
+            # Temperature estimation
+            temperature_estimation = parameters.create_group(
+                "temperature_estimation")
+            try:
+                temperature_estimation.create_dataset(
+                    "reflection", data=self.reflection)
+                temperature_estimation.create_dataset(
+                    "reference_spacing", data=self.reference_spacing)
+                temperature_estimation.create_dataset(
+                    "reference_temperature", data=self.reference_temperature)
+                temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
+
+            except AttributeError:
+                print("Could not save temperature_estimation parameters")
+
+            try:
+                temperature_estimation.create_dataset(
+                    "estimated_temperature", data=self.temperature)
+            except AttributeError:
+                print("No estimated temperature")
+
+            # Angles correction
+            angles_corrections = parameters.create_group("angles_corrections")
+            try:
+                angles_corrections.create_dataset(
+                    "tilt_values", data=self.tilt_values)
+                angles_corrections.create_dataset(
+                    "rocking_curve", data=self.rocking_curve)
+                angles_corrections.create_dataset(
+                    "interp_tilt", data=self.interp_tilt)
+                angles_corrections.create_dataset(
+                    "interp_curve", data=self.interp_curve)
+                angles_corrections.create_dataset(
+                    "COM_rocking_curve", data=self.COM_rocking_curve)
+                angles_corrections.create_dataset(
+                    "detector_data_COM", data=self.detector_data_COM)
+                angles_corrections.create_dataset(
+                    "interp_fwhm", data=self.interp_fwhm)
+                angles_corrections.create_dataset("bragg_x", data=self.bragg_x)
+                angles_corrections.create_dataset("bragg_y", data=self.bragg_y)
+                angles_corrections.create_dataset("q", data=self.q)
+                angles_corrections.create_dataset("qnorm", data=self.qnorm)
+                angles_corrections.create_dataset(
+                    "dist_plane", data=self.dist_plane)
+                angles_corrections.create_dataset(
+                    "bragg_inplane", data=self.bragg_inplane)
+                angles_corrections.create_dataset(
+                    "bragg_outofplane", data=self.bragg_outofplane)
+            except AttributeError:
+                print("Could not save angles_corrections parameters")
+
+
             # Orthogonalisation
-            orthogonalisation = preprocessing.create_group("orthogonalisation")
+            print("\n#############################################################################################################\n")
+            print("Saving orthogonalisation parameters ...")
+            orthogonalisation = parameters.create_group("orthogonalisation")
 
             # Linearized transformation matrix
             linearized_transformation_matrix = orthogonalisation.create_group(
@@ -372,59 +429,18 @@ class Dataset():
             except AttributeError:
                 print("Could not save xrayutilities parameters")
 
-            # Temperature estimation
-            temperature_estimation = parameters.create_group(
-                "temperature_estimation")
+            # Tranformation matrix
             try:
-                temperature_estimation.create_dataset(
-                    "reflection", data=self.reflection)
-                temperature_estimation.create_dataset(
-                    "reference_spacing", data=self.reference_spacing)
-                temperature_estimation.create_dataset(
-                    "reference_temperature", data=self.reference_temperature)
-                temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
-
+                orthogonalisation.create_dataset(
+                    "transfer_matrix", data=self.transfer_matrix)
             except AttributeError:
-                print("Could not save temperature_estimation parameters")
+                print("Could not save transfer_matrix")
 
-            try:
-                temperature_estimation.create_dataset(
-                    "estimated_temperature", data=self.temperature)
-            except AttributeError:
-                print("No estimated temperature")
-
-            # Angles correction
-            angles_corrections = parameters.create_group("angles_corrections")
-            try:
-                angles_corrections.create_dataset(
-                    "tilt_values", data=self.tilt_values)
-                angles_corrections.create_dataset(
-                    "rocking_curve", data=self.rocking_curve)
-                angles_corrections.create_dataset(
-                    "interp_tilt", data=self.interp_tilt)
-                angles_corrections.create_dataset(
-                    "interp_curve", data=self.interp_curve)
-                angles_corrections.create_dataset(
-                    "COM_rocking_curve", data=self.COM_rocking_curve)
-                angles_corrections.create_dataset(
-                    "detector_data_COM", data=self.detector_data_COM)
-                angles_corrections.create_dataset(
-                    "interp_fwhm", data=self.interp_fwhm)
-                angles_corrections.create_dataset("bragg_x", data=self.bragg_x)
-                angles_corrections.create_dataset("bragg_y", data=self.bragg_y)
-                angles_corrections.create_dataset("q", data=self.q)
-                angles_corrections.create_dataset("qnorm", data=self.qnorm)
-                angles_corrections.create_dataset(
-                    "dist_plane", data=self.dist_plane)
-                angles_corrections.create_dataset(
-                    "bragg_inplane", data=self.bragg_inplane)
-                angles_corrections.create_dataset(
-                    "bragg_outofplane", data=self.bragg_outofplane)
-            except AttributeError:
-                print("Could not save angles_corrections parameters")
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
+            print("\n#############################################################################################################\n")
+            print("Saving parameters used in postprocessing ...")
 
             # Averaging reconstructions
             averaging_reconstructions = postprocessing.create_group(

@@ -41,7 +41,7 @@ import tables as tb
 from gwaihir import facet_analysis
 from gwaihir import plot
 from gwaihir.sixs import ReadNxs4 as rd
-from gwaihir.runner import preprocess, correct_angles, strain
+from gwaihir.runner import preprocess, correct_angles, strain, transfer_matrix
 from gwaihir.gui import gui_iterable
 from gwaihir.support import SupportTools
 
@@ -2644,38 +2644,49 @@ class Interface():
             def action_button_save_as_cxi(selfbutton):
                 clear_output(True)
                 display(button_save_as_cxi)
+                print("\n#############################################################################################################\n")
                 print("Saving data, takes some time ...")
-                print("Using diffraction data and mask selected in the PyNX tab...")
 
                 # Reciprocal space data
                 try:
+                    print("\n#############################################################################################################\n")
+                    print("Saving diffraction data and mask selected in the PyNX tab...")
                     self.init_cdi_operator()
 
                     # Real space data
-                    print(
-                        "Using reconstruction file selected in the strain analysis tab ...")
                     try:
+                        print("\n#############################################################################################################\n")
+                        print("\nSaving parameters used in the GUI...")
+                        print(
+                            "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
                         self.Dataset.to_cxi(
                             cxi_filename=self.cxi_filename, reconstruction_filename=self.Dataset.reconstruction_file)
+
                     except AttributeError:
                         self.Dataset.to_cxi(
                             cxi_filename=self.cxi_filename, reconstruction_filename=False)
 
-                except NameError:
-                    # Could not load cdi object
-                    print("Could not save reciprocal space data, needs PyNX package")
-                except AttributeError:
+                # except NameError:
+                #     # Could not load cdi object
+                #     print("Could not save reciprocal space data, needs PyNX package")
+                except Exception as e:
                     # No diffraction data selected
-                    print(
-                        "You need to select the diffraction data file in the `PyNX` tab.")
+                    # print(
+                    #     "You need to select the diffraction data file in the `PyNX` tab.")
+                    raise e
 
                 # Facets
                 try:
+                    print("\n#############################################################################################################\n")
+                    print("Saving Facets class data")
                     self.Facets.to_hdf5(
-                        f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
+                        f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
                 except AttributeError:
                     print(
                         "Could not save facets' data, run the analysis in the `Facets` tab first...")
+                
+                print("\n#############################################################################################################\n")
+
 
         elif reload_previous_data:
             # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
@@ -3843,7 +3854,8 @@ class Interface():
         # self.params["imgcounter"] = self.Dataset.imgcounter
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
-
+        
+        print("\nSaving phase retrieval parameters selected in the PyNX tab...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
             process_parameters=self.params,
@@ -4269,6 +4281,7 @@ class Interface():
                         pass
 
             try:
+                # Run strain.py script
                 self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final = strain.strain_bcdi(
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
@@ -4352,6 +4365,39 @@ class Interface():
                     GUI=True,
                 )
 
+                # Temporary fix, recompute the transformation matrix
+                print("\nSaving transformation matrix ...")
+                self.Dataset.transfer_matrix = transfer_matrix.compute_transformation_matrix(
+                    scan=self.Dataset.scan,
+                    original_size=self.Dataset.original_size,
+                    phasing_binning=self.Dataset.phasing_binning,
+                    comment=self.Dataset.user_comment,
+                    reconstruction_file=self.Dataset.reconstruction_file,
+                    keep_size=self.Dataset.keep_size,
+                    detector=self.Dataset.detector,
+                    template_imagefile=self.Dataset.template_imagefile,
+                    preprocessing_binning=self.Dataset.preprocessing_binning,
+                    tilt_angle=self.Dataset.tilt_angle,
+                    beamline=self.Dataset.beamline,
+                    pixel_size=self.Dataset.pixel_size,
+                    energy=self.Dataset.energy,
+                    outofplane_angle=self.Dataset.outofplane_angle,
+                    inplane_angle=self.Dataset.inplane_angle,
+                    rocking_angle=self.Dataset.rocking_angle,
+                    sdd=self.Dataset.sdd,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    actuators=self.Dataset.actuators,
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_motors=self.Dataset.custom_motors,
+                    fix_voxel=self.Dataset.fix_voxel,
+                    ref_axis_q=self.Dataset.ref_axis_q,
+                    sample_name=self.Dataset.sample_name,
+                    root_folder=self.Dataset.root_folder,
+                    save_dir=save_dir,
+                    specfile_name=self.Dataset.specfile_name,
+                    centering_method=self.Dataset.centering_method
+                )
+                print("End of script")
             except AttributeError:
                 print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
             except KeyboardInterrupt:
@@ -4631,9 +4677,9 @@ class Interface():
                                     f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
 
                                 self.Facets.to_hdf5(
-                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
+                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
                                 print(
-                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.h5")
+                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
                             except AttributeError:
                                 print(
                                     "Initialize the directories first to save the figures and data ...")
@@ -5728,11 +5774,11 @@ class Interface():
     def folder_strain_handler(self, change):
         """Handles changes on the widget used to load a data file"""
         try:
-            self._list_widgets_strain.children[-3].options = sorted(glob.glob(change.new + "/*.h5") + glob.glob(
-                change.new + "/*.cxi") + glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz")) + [""]
+            self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change.new + "/*.h5")) + sorted(glob.glob(
+                change.new + "/*.cxi")) + sorted(glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz"))
         except:
-            self._list_widgets_strain.children[-3].options = sorted(glob.glob(change + "/*.h5") + glob.glob(
-                change + "/*.cxi") + glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz")) + [""]
+            self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change + "/*.h5")) + sorted(glob.glob(
+                change + "/*.cxi")) + sorted(glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz"))
 
     def folder_plot_handler(self, change):
         """Handles changes on the widget used to load a data file"""
