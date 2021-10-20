@@ -83,7 +83,6 @@ if [[ $modes = true ]]; then
     echo "################################################################################################################"
     echo "Running modes decomposition ..."
     echo "/data/id01/inhouse/david/py38-stable/bin/pynx-cdi-analysis.py *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md"
-    # mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/py38-stable/bin/pynx-cdi-analysis.py *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md
     /data/id01/inhouse/david/py38-stable/bin/pynx-cdi-analysis.py *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md
     echo "################################################################################################################"
     echo

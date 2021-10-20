@@ -4,8 +4,6 @@ Contact : david.simonne@universite-paris-saclay.fr
 
 You can install gwaihir via the setup.py script, so that you can use via a package after in python, see below
 
-The bcdi subfolder gives some guidelines into how to process BCDI data
-
 Gwaihir is also avaible on pypi.org, each new version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
 On the contrary, if you follow the github changes on the dev branchm you will have the latest version
 

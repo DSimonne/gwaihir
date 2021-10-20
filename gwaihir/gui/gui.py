@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import glob
 import os
-import shlex
+from shlex import quote
 import shutil
 from ast import literal_eval
 import operator as operator_lib
@@ -2586,7 +2586,7 @@ class Interface():
 
             # move pynx_run.txt file
             # try:
-            #     shutil.copy(f"{self.path_package}bcdi/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
+            #     shutil.copy(f"{self.path_package}/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
             # except FileExistsError:
             #     print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/pynx_run.txt exists")
@@ -3144,6 +3144,7 @@ class Interface():
                 self._list_widgets_preprocessing.children[59].value = self.Dataset.bragg_inplane
                 self.Dataset.tilt_angle = np.round(
                     np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
+                print("Corrected angles values saved in setup tab.")
 
             # except ValueError:
             #     print("Inplane or outofplane ?")
@@ -3379,9 +3380,12 @@ class Interface():
                     print(
                         "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
                     os.system(
-                        shlex.quote(
-                            f"{self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true"
-                        )
+                        "{}/run_slurm_job.sh --reconstruct gui --username {} --path {}pynxraw --filtering {} --modes true".format(
+                            quote(self.path_scripts),
+                            quote(self.user_name),
+                            quote(self.Dataset.scan_folder),
+                            quote(str(nb_keep_std)),
+                            )
                     )
 
                 elif self.run_phase_retrieval == "local_script":
@@ -3389,9 +3393,10 @@ class Interface():
                         print(
                             f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &", end="\n\n")
                         os.system(
-                            shlex.quote(
-                                f"cd {self.Dataset.scan_folder}pynxraw; {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &"
-                            )
+                            "cd {}pynxraw; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
+                                quote(self.Dataset.scan_folder),
+                                quote(self.path_scripts),
+                                )
                         )
                     except KeyboardInterrupt:
                         print("Phase retrieval stopped by user ...")
@@ -3747,9 +3752,11 @@ class Interface():
             print("Running pynx-cdi-analysis.py *LLK* modes=1")
             print(f"Output in {folder}/modes_gui.h5")
             os.system(
-                shlex.quote(
-                    f"{self.path_scripts}/pynx-cdi-analysis.py {folder}/*LLK* modes=1 modes_output={folder}/modes_gui.h5"
-                )
+                "{s}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+                    quote(self.path_script),
+                    quote(folder),
+                    quote(folder),
+                    )
             )
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
