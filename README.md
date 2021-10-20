@@ -49,11 +49,14 @@ Please use the commit from the data: Wednesday, August 18, 17:36:37, 2021 +0200,
 * `cd /Packages`
 * `git clone https://github.com/carnisj/bcdi.git`
 * `cd bcdi`
+
+For now it is mandatory to use the version 0.1.5 of bcdi
+
+To do so create a new branch based on the v0.1.5 version:
+* `git checkout tags/v0.1.5 -b gui_stable_tag`
 * `source_p9`
 * `pip install .`
 * cite `DOI: 10.5281/zenodo.3257616`
-
-For now it is mandatory to use the version 0.1.5 of bcdi
 
 ## Install facet-analyser (Debian 11 only)
 * Send a thank you email to Fred Picca =D
