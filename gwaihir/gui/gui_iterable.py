@@ -367,7 +367,6 @@ class Dataset():
             except AttributeError:
                 print("Could not save angles_corrections parameters")
 
-
             # Orthogonalisation
             print("\n#############################################################################################################\n")
             print("Saving orthogonalisation parameters ...")
@@ -435,7 +434,6 @@ class Dataset():
                     "transfer_matrix", data=self.transfer_matrix)
             except AttributeError:
                 print("Could not save transfer_matrix")
-
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
