@@ -2649,13 +2649,16 @@ class Interface():
 
                 # Reciprocal space data
                 try:
-                    print("\n#############################################################################################################\n")
-                    print("Saving diffraction data and mask selected in the PyNX tab...")
+                    print(
+                        "\n#############################################################################################################\n")
+                    print(
+                        "Saving diffraction data and mask selected in the PyNX tab...")
                     self.init_cdi_operator()
 
                     # Real space data
                     try:
-                        print("\n#############################################################################################################\n")
+                        print(
+                            "\n#############################################################################################################\n")
                         print("\nSaving parameters used in the GUI...")
                         print(
                             "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
@@ -2677,16 +2680,16 @@ class Interface():
 
                 # Facets
                 try:
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
                     print("Saving Facets class data")
                     self.Facets.to_hdf5(
                         f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
                 except AttributeError:
                     print(
                         "Could not save facets' data, run the analysis in the `Facets` tab first...")
-                
-                print("\n#############################################################################################################\n")
 
+                print("\n#############################################################################################################\n")
 
         elif reload_previous_data:
             # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
@@ -3396,7 +3399,7 @@ class Interface():
                             quote(self.user_name),
                             quote(self.Dataset.scan_folder),
                             quote(str(nb_keep_std)),
-                            )
+                        )
                     )
 
                 elif self.run_phase_retrieval == "local_script":
@@ -3407,7 +3410,7 @@ class Interface():
                             "cd {}pynxraw; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
                                 quote(self.Dataset.scan_folder),
                                 quote(self.path_scripts),
-                                )
+                            )
                         )
                     except KeyboardInterrupt:
                         print("Phase retrieval stopped by user ...")
@@ -3767,7 +3770,7 @@ class Interface():
                     quote(self.path_script),
                     quote(folder),
                     quote(folder),
-                    )
+                )
             )
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
@@ -3854,7 +3857,7 @@ class Interface():
         # self.params["imgcounter"] = self.Dataset.imgcounter
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
-        
+
         print("\nSaving phase retrieval parameters selected in the PyNX tab...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
