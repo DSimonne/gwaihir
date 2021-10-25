@@ -3763,7 +3763,7 @@ class Interface():
             print("Running pynx-cdi-analysis.py *LLK* modes=1")
             print(f"Output in {folder}/modes_gui.h5")
             os.system(
-                "{s}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+                "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
                     quote(self.path_script),
                     quote(folder),
                     quote(folder),
