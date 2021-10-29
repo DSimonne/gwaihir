@@ -1762,7 +1762,7 @@ class Interface():
         # Widgets for logs
         self.tab_logs = interactive(self.display_logs,
                                     unused_label_logs=widgets.HTML(
-                                        description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui, saved as self.logs",
+                                        description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui",
                                         style={'description_width': 'initial'},
                                         layout=Layout(width='90%', height="35px")),
 
@@ -1775,13 +1775,23 @@ class Interface():
                                         layout=Layout(width='90%'),
                                         style={'description_width': 'initial'}),
 
-                                    show_logs=widgets.ToggleButton(
+                                    show_logs=widgets.ToggleButtons(
+                                        options=[
+                                            ("Clear output", False),
+                                            ('Load .csv file', "load_csv"),
+                                            ("Load facets data ", "load_field_data"),
+                                        ],
                                         value=False,
-                                        description='Show logs',
+                                        # tooltips=[
+                                        #     "Clear the output and unload data from gui, saves RAM",
+                                        #     "Load external csv file in the GUI",
+                                        #     "Load field data"
+                                        # ],
+                                        description='Load dataframe',
                                         disabled=False,
                                         button_style='',  # 'success', 'info', 'warning', 'danger' or ''
                                         icon='fast-forward',
-                                        layout=Layout(width='40%'),
+                                        layout=Layout(width='90%'),
                                         style={'description_width': 'initial'}),
                                     )
 
@@ -1812,18 +1822,23 @@ class Interface():
                                     data_use=widgets.ToggleButtons(
                                         options=[
                                             ("Clear output", False),
-                                            ('2D plotting', "two_d_plot"),
+                                            ('2D plot', "2D"),
+                                            ("Plot slices", "slices"),
+                                            ("3D plot", "3D"),
                                             ("Create support", "create_support"),
                                             ("Extract support", "extract_support"),
                                             ("Smooth support", "smooth_support"),
-                                            ("3D plotting", "three_d_plot")
                                         ],
                                         value=False,
                                         description='Load data',
                                         tooltips=[
                                             "Clear the output and unload data from gui, saves RAM",
-                                            "Load data and present plotting options",
-                                            "Load data and present support creation options"
+                                            "Load data and plot data slice interactively",
+                                            "Load data and plot data slices for each dimension in its middle",
+                                            "Load data and plot 3D data interactively",
+                                            "Load data and allow for the creation of a support interactively",
+                                            "Load data and allow for the creation of a support automatically",
+                                            "Load support and smooth its boundaries",
                                         ],
                                         disabled=False,
                                         button_style='',  # 'success', 'info', 'warning', 'danger' or ''
@@ -3299,10 +3314,10 @@ class Interface():
                 # Load files
                 self.text_file.append("# Parameters\n")
                 for file, parameter in [(self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
-                    if file is not "":
+                    if file != "":
                         self.text_file.append(f"{parameter} = \"{file}\"\n")
 
-                if support is not "":
+                if support != "":
                     self.text_file += [
                         f"support = \"{self.Dataset.support}\"\n",
                         '\n']
@@ -5086,17 +5101,43 @@ class Interface():
         """
         self.csv_file = csv_file
 
-        if show_logs:
+        if show_logs in ("load_csv", "load_field_data"):
             self.tab_logs.children[1].disabled = True
-            self.logs = pd.read_csv(self.csv_file)
-            display(self.logs)
-            print("\n################################################################################################################\n")
-            print("For a more detailed analysis, please proceed as follows")
-            print("import pandas as pd")
-            print(f"df = pd.read_csv({self.csv_file})\n")
-            print("You can then work on the `df` dataframe as you please.")
-            print("\n################################################################################################################\n")
+            try:
+                if show_logs == "load_csv":
+                    logs = pd.read_csv(self.csv_file)
+                    print("\n################################################################################################################\n")
+                    print("For a more detailed analysis, please proceed as follows")
+                    print("import pandas as pd")
+                    print(f"df = pd.read_csv({self.csv_file})\n")
+                    print("You can then work on the `df` dataframe as you please.")
+                    print("\n################################################################################################################\n")
 
+                elif show_logs == "load_field_data":
+                    logs = self.Facets.field_data.copy()
+
+                @interact(
+                    cols=widgets.SelectMultiple(
+                        options=list(logs.columns),
+                        value=list(logs.columns)[:],
+                        rows=10,
+                        disabled=False,
+                        style={'description_width': 'initial'},
+                        layout=Layout(
+                            #         display = "flex",
+                            #         flex_flow = 'column',
+                            width='90%'),
+                        description='Select multiple columns with Ctrl + click:',
+                    )
+                )
+                def pick_columns(
+                        cols):
+                    display(logs[list(cols)])
+
+            except FileNotFoundError:
+                print("Wrong path")
+            except AttributeError:
+                print("You need to run the facet analysis in the dedicated tab first")
         else:
             self.tab_logs.children[1].disabled = False
             clear_output(True)
@@ -5110,13 +5151,13 @@ class Interface():
         """
         Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi files.
         """
-        if data_use == "two_d_plot":
+        if data_use in ["2D", "3D", "slices"]:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Plot data
-            plot.Plotter(file_list)
+            plot.Plotter(file_list, plot=data_use, log="interact")
 
         elif data_use == "create_support":
             # Disable widgets
@@ -5229,12 +5270,6 @@ class Interface():
         #     for w in self.tab_data.children[:-2]:
         #         w.disabled = True
 
-        elif data_use == "three_d_plot":
-            for w in self.tab_data.children[:-2]:
-                w.disabled = True
-            w = CDIViewer(file_list)
-            display(w)
-
         elif data_use is False:
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
@@ -5252,7 +5287,7 @@ class Interface():
             try:
                 f.create_dataset("rotation", data=True)
                 data_already_rotated = False
-            except ValueError:
+            except (ValueError,RuntimeError):
                 data_already_rotated = f['rotation'][...]
 
         if not data_already_rotated:

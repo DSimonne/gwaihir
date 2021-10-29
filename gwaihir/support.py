@@ -8,6 +8,7 @@ from IPython.display import display, Markdown, Latex, clear_output
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
+import gwaihir.plot
 
 class SupportTools():
     """
@@ -50,7 +51,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                              "extracted_support.npz", support=support)
                     print(
                         f"Saved support in {self.saving_directory} as extracted_support.npz")
-                    self.plot_3d_support(array=support)
+                    plot.plot_3d_slices(support, log=False)
 
             # elif self.self.path_to_data.endswith(".npz"):
 
@@ -80,7 +81,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
 
             print(
                 f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")
-            self.plot_3d_support(array=conv_support)
+            plot.plot_3d_slices(conv_support, log=False)
 
         else:
             clear_output(True)
@@ -121,55 +122,8 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                          "computed_support.npz", support=support)
                 print(
                     f"Saved support in {self.saving_directory} as computed_support.npz")
-                self.plot_3d_support(array=support)
+                plot.plot_3d_slices(support, log=False)
 
         else:
             clear_output(True)
             print("Set compute to true to continue")
-
-    def plot_3d_support(self, array):
-        """
-        """
-        shape = array.shape
-
-        if array.ndim == 3:
-            two_d_array = array[shape[0]//2, :, :]
-            self.plot_2d_support(two_d_array, dim=0)
-
-            two_d_array = array[:, shape[1]//2, :]
-            self.plot_2d_support(two_d_array, dim=1)
-
-            two_d_array = array[:, :, shape[2]//2]
-            self.plot_2d_support(two_d_array, dim=2)
-
-    @staticmethod
-    def plot_2d_support(two_d_array, dim):
-        """
-        """
-        # Find max and min
-        dmax = two_d_array.max()
-        dmin = two_d_array.min()
-
-        fig, ax = plt.subplots(figsize=(5, 5))
-        img = ax.imshow(two_d_array,
-                        origin='lower',
-                        cmap='YlGnBu_r',
-                        extent=(0, 2, 0, 2),
-                        vmin=dmin,
-                        vmax=dmax)
-
-        # Create axis for colorbar
-        cbar_ax = make_axes_locatable(ax).append_axes(
-            position='right', size='5%', pad=0.1)
-
-        # Create colorbar
-        cbar = fig.colorbar(mappable=img, cax=cbar_ax)
-
-        # Edit colorbar ticks and labels
-        ticks = [dmin + n * (dmax-dmin)/10 for n in range(0, 11)]
-        tickslabel = [f"{t}" for t in ticks]
-
-        cbar.set_ticks(ticks)
-        cbar.set_ticklabels(tickslabel)
-        ax.set_title(f"Middle slice on dimension {dim}")
-        plt.show()

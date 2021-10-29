@@ -475,7 +475,6 @@ class Facets:
             [-1, -1, 0],
             [1, -1, 1],
             [-1, 1, -1],
-            [2, 1, 0],
             [1, 1, 3],
             [1, -1, 3],
             [1, -1, -3],
@@ -496,6 +495,8 @@ class Facets:
             self.theoretical_angles[str(n)] = np.rad2deg(
                 np.arccos(np.dot(self.ref_normal, n / np.linalg.norm(n)))
             )
+        self.theoretical_angles[str([1, 1 ,1])] = 0
+        self.theoretical_angles[str([-1, -1, -1])] = 180
 
         # Make a plot
         if plot is True:
@@ -517,8 +518,8 @@ class Facets:
                     color = "#beaed4"
                 elif [abs(x) for x in norm] == [1, 0, 0]:
                     color = "#fdc086"
-                elif [abs(x) for x in norm] == [2, 1, 0]:
-                    color = "#f0027f"
+                # elif [abs(x) for x in norm] == [2, 1, 0]:
+                #     color = "#f0027f"
                 elif [abs(x) for x in norm] == [1, 1, 3]:
                     color = "#386cb0"
                 elif [abs(x) for x in norm] == [1, 1, 5]:
@@ -1412,7 +1413,7 @@ class Facets:
                 f["/entry_1/process_4/ref_normal"][...] = self.ref_normal
                 print("Saved Facets class attributes")
 
-            except AttributeError:
+            except (AttributeError,TypeError):
                 print("Particle not rotated, some attributes could not be saved ...")
                 facets.create_dataset("u0", data=np.zeros(3))
                 facets.create_dataset("v0", data=np.zeros(3))
