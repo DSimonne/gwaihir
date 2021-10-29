@@ -10,6 +10,7 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 import gwaihir.plot
 
+
 class SupportTools():
     """
 Class that regroups the methods used to create/extract/optimize support in BCDI
