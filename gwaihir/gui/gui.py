@@ -1779,7 +1779,8 @@ class Interface():
                                         options=[
                                             ("Clear output", False),
                                             ('Load .csv file', "load_csv"),
-                                            ("Load facets data ", "load_field_data"),
+                                            ("Load facets data ",
+                                             "load_field_data"),
                                         ],
                                         value=False,
                                         # tooltips=[
@@ -5106,12 +5107,14 @@ class Interface():
             try:
                 if show_logs == "load_csv":
                     logs = pd.read_csv(self.csv_file)
-                    print("\n################################################################################################################\n")
+                    print(
+                        "\n################################################################################################################\n")
                     print("For a more detailed analysis, please proceed as follows")
                     print("import pandas as pd")
                     print(f"df = pd.read_csv({self.csv_file})\n")
                     print("You can then work on the `df` dataframe as you please.")
-                    print("\n################################################################################################################\n")
+                    print(
+                        "\n################################################################################################################\n")
 
                 elif show_logs == "load_field_data":
                     logs = self.Facets.field_data.copy()
@@ -5287,7 +5290,7 @@ class Interface():
             try:
                 f.create_dataset("rotation", data=True)
                 data_already_rotated = False
-            except (ValueError,RuntimeError):
+            except (ValueError, RuntimeError):
                 data_already_rotated = f['rotation'][...]
 
         if not data_already_rotated:
