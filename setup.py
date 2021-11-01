@@ -45,10 +45,12 @@ setuptools.setup(
         "matplotlib",
         "ipywidgets",
         "ipython",
+        "ipyvolume",
         "scipy",
         "xrayutilities",
         "tables",
         "PyQt5",
+        "h5py",
         #         "bcdi",
         #         "PyNX",
     ]

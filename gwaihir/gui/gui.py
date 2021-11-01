@@ -1,5 +1,3 @@
-import gwaihir
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,49 +9,35 @@ import shutil
 from ast import literal_eval
 import operator as operator_lib
 import getpass
-
-# import lmfit
-# from lmfit import minimize, Parameters, Parameter
-# from lmfit.models import LinearModel, ConstantModel, QuadraticModel, PolynomialModel, StepModel
-# from lmfit.models import GaussianModel, LorentzianModel, SplitLorentzianModel, VoigtModel, PseudoVoigtModel
-# from lmfit.models import MoffatModel, Pearson7Model, StudentsTModel, BreitWignerModel, LognormalModel, ExponentialGaussianModel, SkewedGaussianModel, SkewedVoigtModel, DonaichModel
-# import corner
-# import numdifftools
-# from scipy.stats import chisquare
-
-import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import display, Markdown, Latex, clear_output
-
-# from scipy import interpolate
-# from scipy import optimize, signal
-# from scipy import sparse
-
 from datetime import datetime
 import pickle
 import inspect
 import time
-# import warnings
-
 import tables as tb
 
+# Widgets
+import ipywidgets as widgets
+from ipywidgets import interact, Button, Layout, interactive, fixed
+from IPython.display import display, Markdown, Latex, clear_output
+
+
 # gwaihir package
-from gwaihir import facet_analysis
+import gwaihir
 from gwaihir import plot
 from gwaihir.sixs import ReadNxs4 as rd
-from gwaihir.runner import preprocess, correct_angles, strain, transfer_matrix
+# from gwaihir.runner import preprocess, correct_angles, strain, transfer_matrix
 from gwaihir.gui import gui_iterable
 from gwaihir.support import SupportTools
+
+# bcdi package
+from bcdi.utils.utilities import bin_data
+from bcdi.postprocessing import facet_analysis
 
 # PyNX package
 import h5py
 from numpy.fft import fftshift
 from scipy.ndimage.measurements import center_of_mass
 from scipy.ndimage import gaussian_filter
-
-# bcdi package
-from bcdi.utils.utilities import bin_data
-
 try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
@@ -62,7 +46,7 @@ try:
     from pynx.cdi.widgets import CDIViewer
     from pynx.utils.math import smaller_primes
     pynx_import = True
-except:
+except ModuleNotFoundError:
     pynx_import = False
     print("Could not load PyNX, the phase retrieval tab will be disabled")
 
@@ -84,6 +68,8 @@ class Interface():
         self.work_dir = os.getcwd()
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0]+"/bin"
+        # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
+        self.matplotlib_backend = "Agg"
 
         # Get user name
         try:
@@ -141,7 +127,7 @@ class Interface():
                                                   layout=Layout(width='90%'),
                                                   style={'description_width': 'initial'}),
 
-                                              user_comment=widgets.Text(
+                                              comment=widgets.Text(
                                                   value="",
                                                   description='Comment',
                                                   disabled=False,
@@ -420,17 +406,17 @@ class Interface():
                                                            tooltip='Mask pixels where the sum along the rocking curve is zero - may be dead pixels',
                                                            icon='check'),
 
-                                                       flag_medianfilter=widgets.Dropdown(
+                                                       median_filter=widgets.Dropdown(
                                                            options=[
                                                                'skip', 'median', 'interp_isolated', 'mask_isolated'],
                                                            value="skip",
                                                            description='Flag median filter',
                                                            continuous_update=False,
                                                            disabled=True,
-                                                           tooltip="set to 'median' for applying med2filter [3,3], set to 'interp_isolated' to interpolate isolated empty pixels based on 'medfilt_order' parameter, set to 'mask_isolated' it will mask isolated empty pixels, set to 'skip' will skip filtering",
+                                                           tooltip="set to 'median' for applying med2filter [3,3], set to 'interp_isolated' to interpolate isolated empty pixels based on 'median_filter_order' parameter, set to 'mask_isolated' it will mask isolated empty pixels, set to 'skip' will skip filtering",
                                                            style={'description_width': 'initial'}),
 
-                                                       medfilt_order=widgets.IntText(
+                                                       median_filter_order=widgets.IntText(
                                                            value=7,
                                                            description='Med filter order:',
                                                            disabled=True,
@@ -438,7 +424,7 @@ class Interface():
                                                            tooltip="for custom median filter, number of pixels with intensity surrounding the empty pixel",
                                                            style={'description_width': 'initial'}),
 
-                                                       binning=widgets.Text(
+                                                       phasing_binning=widgets.Text(
                                                            value="(1, 1, 1)",
                                                            placeholder="(1, 1, 1)",
                                                            description='Binning for phasing',
@@ -627,7 +613,7 @@ class Interface():
                                                            style={'description_width': 'initial'}),
 
                                                        hotpixels_file=widgets.Text(
-                                                           value=f"{self.work_dir}/SIXS_June_2021/reconstructions/analysis/mask_merlin_better_flipped.npy",
+                                                           value="",
                                                            placeholder=f"{self.work_dir}/mask_merlin.npz",
                                                            description='Hotpixels file',
                                                            disabled=True,
@@ -681,7 +667,7 @@ class Interface():
                                                            tooltip='False for using data gridded in laboratory frame/ True for using data in detector frame',
                                                            icon='check'),
 
-                                                       interp_method=widgets.Dropdown(
+                                                       interpolation_method=widgets.Dropdown(
                                                            options=[
                                                                'linearization', 'xrayutilities'],
                                                            value="linearization",
@@ -782,7 +768,7 @@ class Interface():
                                                            layout=Layout(
                                                                width='20%'),
                                                            # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                                                           tooltip="""used only when interp_method is 'linearization', if True it rotates the crystal to align q along one axis of the array""",
+                                                           tooltip="""used only when interpolation_method is 'linearization', if True it rotates the crystal to align q along one axis of the array""",
                                                            icon='check'),
 
                                                        ref_axis_q=widgets.Dropdown(
@@ -927,10 +913,10 @@ class Interface():
                                                                'description_width': 'initial'},
                                                            tooltip="tiltazimuth parameter from xrayutilities 2D detector calibration"),
 
-                                                       tilt=widgets.FloatText(
+                                                       tilt_detector=widgets.FloatText(
                                                            value=0,
                                                            step=0.01,
-                                                           description='Tilt',
+                                                           description='Tilt detector',
                                                            disabled=True,
                                                            continuous_update=False,
                                                            layout=Layout(
@@ -1319,8 +1305,8 @@ class Interface():
 
                                                 centering_method=widgets.Dropdown(
                                                     options=[
-                                                        "COM", "max", "max_COM"],
-                                                    value="max_COM",
+                                                        "COM", "max", "max_com"],
+                                                    value="max_com",
                                                     description='Centering method:',
                                                     continuous_update=False,
                                                     disabled=False,
@@ -1391,7 +1377,7 @@ class Interface():
                                                         'description_width': 'initial'},
                                                     layout=Layout(width='90%', height="35px")),
 
-                                                simu_flag=widgets.Checkbox(
+                                                simulation=widgets.Checkbox(
                                                     value=False,
                                                     description='Simulated data',
                                                     disabled=False,
@@ -1612,7 +1598,7 @@ class Interface():
                                                         'description_width': 'initial'},
                                                     layout=Layout(width='90%', height="35px")),
 
-                                                avg_method=widgets.Dropdown(
+                                                averaging_space=widgets.Dropdown(
                                                     options=[
                                                         "reciprocal_space", "real_space"],
                                                     value="reciprocal_space",
@@ -1621,7 +1607,7 @@ class Interface():
                                                     disabled=False,
                                                     style={'description_width': 'initial'}),
 
-                                                avg_threshold=widgets.FloatText(
+                                                threshold_avg=widgets.FloatText(
                                                     value=0.90,
                                                     step=0.01,
                                                     continuous_update=False,
@@ -1638,7 +1624,7 @@ class Interface():
                                                         'description_width': 'initial'},
                                                     layout=Layout(width='90%', height="35px")),
 
-                                                apodize_flag=widgets.Checkbox(
+                                                apodize=widgets.Checkbox(
                                                     value=True,
                                                     description='Multiply diffraction pattern by filtering window',
                                                     disabled=False,
@@ -1648,7 +1634,7 @@ class Interface():
                                                         'description_width': 'initial'}
                                                 ),
 
-                                                apodize_window=widgets.Dropdown(
+                                                apodization_window=widgets.Dropdown(
                                                     options=[
                                                         "normal", "tukey", "blackman"],
                                                     value="blackman",
@@ -1657,7 +1643,7 @@ class Interface():
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                hwidth=widgets.BoundedIntText(
+                                                half_width_avg_phase=widgets.BoundedIntText(
                                                     value=1,
                                                     continuous_update=False,
                                                     description='Width of apodizing window:',
@@ -1666,7 +1652,7 @@ class Interface():
                                                         'description_width': 'initial'},
                                                     disabled=False),
 
-                                                mu=widgets.Text(
+                                                apodization_mu=widgets.Text(
                                                     value="[0.0, 0.0, 0.0]",
                                                     placeholder="[0.0, 0.0, 0.0]",
                                                     description='Mu of gaussian window',
@@ -1674,7 +1660,7 @@ class Interface():
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                sigma=widgets.Text(
+                                                apodization_sigma=widgets.Text(
                                                     value="[0.30, 0.30, 0.30]",
                                                     placeholder="[0.30, 0.30, 0.30]",
                                                     description='Sigma of gaussian window',
@@ -1682,7 +1668,7 @@ class Interface():
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
 
-                                                alpha=widgets.Text(
+                                                apodization_alpha=widgets.Text(
                                                     value="[1.0, 1.0, 1.0]",
                                                     placeholder="[1.0, 1.0, 1.0]",
                                                     description='Alpha of gaussian window',
@@ -2475,7 +2461,7 @@ class Interface():
                                scan,
                                data_directory,
                                final_directory,
-                               user_comment,
+                               comment,
                                debug,
                                run_dir_init,
                                reload_previous_data,
@@ -2498,7 +2484,7 @@ class Interface():
                 scan=scan, sample_name=sample_name,
                 data_directory=data_directory, root_folder=final_directory)
 
-            self.Dataset.user_comment = user_comment
+            self.Dataset.comment = comment
             self.Dataset.debug = debug
 
             # Scan folder
@@ -2506,9 +2492,9 @@ class Interface():
             print("Scan folder:", self.Dataset.scan_folder)
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
                 f"postprocessing/{self.Dataset.scan}_fa.vtk"
-            self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "preprocessing/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "preprocessing/"
 
             # Filename for SIXS, should be temporary
             try:
@@ -2568,15 +2554,15 @@ class Interface():
             except FileExistsError:
                 print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/data exists")
 
-            # /pynxraw directory
+            # /preprocessing directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
+                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw exists")
+                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing exists")
 
             # /postprocessing directory
             try:
@@ -2602,42 +2588,42 @@ class Interface():
 
             # move pynx_run.txt file
             # try:
-            #     shutil.copy(f"{self.path_package}/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
-            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
+            #     shutil.copy(f"{self.path_package}/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
+            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
             # except FileExistsError:
-            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/pynx_run.txt exists")
+            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing/pynx_run.txt exists")
             #     pass
 
             # Move notebooks
-            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb"):
-                shutil.copy(f"{self.path_package}/data_files/PhasingNotebook.ipynb",
-                            f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
-                print(
-                    f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw")
-            else:
-                print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/pynxraw/PhasingNotebook.ipynb exists")
+            # if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing/PhasingNotebook.ipynb"):
+            #     shutil.copy(f"{self.path_package}/data_files/PhasingNotebook.ipynb",
+            #                 f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
+            #     print(
+            #         f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
+            # else:
+            #     print(
+            #         f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing/PhasingNotebook.ipynb exists")
 
-            if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb"):
-                shutil.copy(f"{self.path_package}/data_files/CompareFacetsEvolution.ipynb",
-                            f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
-                print(
-                    f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
-            else:
-                print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
+            # if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb"):
+            #     shutil.copy(f"{self.path_package}/data_files/CompareFacetsEvolution.ipynb",
+            #                 f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
+            #     print(
+            #         f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
+            # else:
+            #     print(
+            #         f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
             # PyNX folder, refresh values
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "preprocessing/"
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
             # Plot folder, refresh
-            self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
             # Strain folder, refresh
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "pynxraw/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "preprocessing/"
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
@@ -2737,9 +2723,9 @@ class Interface():
                               normalize_flux,
                               unused_label_filtering,
                               mask_zero_event,
-                              flag_medianfilter,
-                              medfilt_order,
-                              binning,
+                              median_filter,
+                              median_filter_order,
+                              phasing_binning,
                               unused_label_reload,
                               reload_previous,
                               reload_orthogonal,
@@ -2763,7 +2749,7 @@ class Interface():
                               nb_pixel_y,
                               unused_label_ortho,
                               use_rawdata,
-                              interp_method,
+                              interpolation_method,
                               fill_value_mask,
                               beam_direction,
                               sample_offsets,
@@ -2784,7 +2770,7 @@ class Interface():
                               direct_outofplane,
                               detrot,
                               tiltazimuth,
-                              tilt,
+                              tilt_detector,
                               unused_label_preprocess,
                               init_para
                               ):
@@ -2805,7 +2791,7 @@ class Interface():
                 w.disabled = True
 
             # Save parameter values as attributes
-            self.Dataset.binning = binning
+            self.Dataset.phasing_binning = phasing_binning
             self.Dataset.flag_interact = flag_interact
             self.Dataset.background_plot = str(background_plot)
             if centering == "manual":  # will be overridden
@@ -2818,8 +2804,8 @@ class Interface():
             self.Dataset.pad_size = pad_size
             self.Dataset.normalize_flux = normalize_flux
             self.Dataset.mask_zero_event = mask_zero_event
-            self.Dataset.flag_medianfilter = flag_medianfilter
-            self.Dataset.medfilt_order = medfilt_order
+            self.Dataset.median_filter = median_filter
+            self.Dataset.median_filter_order = median_filter_order
             self.Dataset.reload_previous = reload_previous
             self.Dataset.reload_orthogonal = reload_orthogonal
             self.Dataset.preprocessing_binning = preprocessing_binning
@@ -2832,7 +2818,7 @@ class Interface():
             self.Dataset.actuators = actuators
             self.Dataset.is_series = is_series
             self.Dataset.custom_scan = custom_scan
-            self.Dataset.custom_images = custom_images
+            self.Dataset.custom_images = [custom_images]
             self.Dataset.custom_monitor = custom_monitor
             self.Dataset.rocking_angle = rocking_angle
             self.Dataset.follow_bragg = follow_bragg
@@ -2848,7 +2834,7 @@ class Interface():
             self.Dataset.nb_pixel_x = nb_pixel_x
             self.Dataset.nb_pixel_y = nb_pixel_y
             self.Dataset.use_rawdata = not use_rawdata
-            self.Dataset.interp_method = interp_method
+            self.Dataset.interpolation_method = interpolation_method
             self.Dataset.fill_value_mask = fill_value_mask
             self.Dataset.beam_direction = beam_direction
             self.Dataset.sample_offsets = sample_offsets
@@ -2868,14 +2854,21 @@ class Interface():
             self.Dataset.direct_outofplane = direct_outofplane
             self.Dataset.detrot = detrot
             self.Dataset.tiltazimuth = tiltazimuth
-            self.Dataset.tilt = tilt
-            self.Dataset.data_dirname = None
+            self.Dataset.tilt_detector = tilt_detector
+
+            # Parameters to add to GUI
+            self.Dataset.bin_during_loading = True
+            self.Dataset.frames_pattern = None
+
+            # Temporary fix TODO
+            self.Dataset.custom_images = None
+            self.Dataset.custom_monitor = None
 
             # Extract dict, list and tuple from strings
             list_parameters = ["fix_bragg",
                                "fix_size", "pad_size", "roi_detector"]
 
-            tuple_parameters = ["binning", "preprocessing_binning", "beam_direction",
+            tuple_parameters = ["phasing_binning", "preprocessing_binning", "beam_direction",
                                 "sample_offsets", "sample_inplane", "sample_outofplane"]
 
             dict_parameters = ["actuators", "custom_motors"]
@@ -2917,9 +2910,6 @@ class Interface():
                 print(f"Wrong dict syntax for {p}")
 
             # Empty parameters are set to None (bcdi syntax)
-            if self.Dataset.data_dirname == "":
-                self.Dataset.data_dirname = None
-
             if self.Dataset.background_file == "":
                 self.Dataset.background_file = None
 
@@ -2967,69 +2957,81 @@ class Interface():
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
                     save_dir = self.Dataset.root_folder + \
-                        f"S{self.Dataset.scan}/pynxraw/"
+                        f"S{self.Dataset.scan}/preprocessing/"
 
-                # On lance BCDI
-                data_file, mask_file = preprocess.preprocess_bcdi(
+                # Create config file
+                self.create_yaml_file(
+                    fname = f"{self.Dataset.scan_folder}preprocessing/config_preprocessing.yml",
                     scans=self.Dataset.scan,
+                    root_folder=self.Dataset.root_folder,
+                    save_dir=f"{self.Dataset.scan_folder}preprocessing/",
+                    data_dir=self.Dataset.data_directory,
                     sample_name=self.Dataset.sample_name,
-                    root_folder=root_folder,
-                    save_dir=save_dir,
-                    data_dirname=self.Dataset.data_dirname,
-                    user_comment=self.Dataset.user_comment,
+                    comment=self.Dataset.comment,
                     debug=self.Dataset.debug,
-                    binning=self.Dataset.binning,
+                    # parameters used in masking 
                     flag_interact=self.Dataset.flag_interact,
                     background_plot=self.Dataset.background_plot,
-                    centering=self.Dataset.centering,
+                    # parameters related to data cropping/padding/centering
+                    centering_method=self.Dataset.centering,
                     fix_bragg=self.Dataset.fix_bragg,
                     fix_size=self.Dataset.fix_size,
                     center_fft=self.Dataset.center_fft,
                     pad_size=self.Dataset.pad_size,
-                    normalize_flux=self.Dataset.normalize_flux,
+                    # parameters for data filtering
                     mask_zero_event=self.Dataset.mask_zero_event,
-                    flag_medianfilter=self.Dataset.flag_medianfilter,
-                    medfilt_order=self.Dataset.medfilt_order,
+                    median_filter=self.Dataset.median_filter,
+                    median_filter_order=self.Dataset.median_filter_order,
+                    # parameters used when reloading processed data
                     reload_previous=self.Dataset.reload_previous,
                     reload_orthogonal=self.Dataset.reload_orthogonal,
                     preprocessing_binning=self.Dataset.preprocessing_binning,
+                    # saving options
                     save_rawdata=self.Dataset.save_rawdata,
                     save_to_npz=self.Dataset.save_to_npz,
                     save_to_mat=self.Dataset.save_to_mat,
                     save_to_vti=self.Dataset.save_to_vti,
-                    save_asint=self.Dataset.save_asint,
+                    save_as_int=self.Dataset.save_asint,
+                    # define beamline related parameters
                     beamline=self.Dataset.beamline,
                     actuators=self.Dataset.actuators,
                     is_series=self.Dataset.is_series,
+                    rocking_angle=self.Dataset.rocking_angle,
+                    specfile_name=self.Dataset.specfile_name,
+                    # parameters for custom scans
                     custom_scan=self.Dataset.custom_scan,
                     custom_images=self.Dataset.custom_images,
                     custom_monitor=self.Dataset.custom_monitor,
-                    rocking_angle=self.Dataset.rocking_angle,
-                    follow_bragg=self.Dataset.follow_bragg,
-                    specfile_name=self.Dataset.specfile_name,
+                    # detector related parameters
                     detector=self.Dataset.detector,
+                    phasing_binning=self.Dataset.phasing_binning,
                     linearity_func=self.Dataset.linearity_func,
                     roi_detector=self.Dataset.roi_detector,
+                    normalize_flux=self.Dataset.normalize_flux,
                     photon_threshold=self.Dataset.photon_threshold,
                     photon_filter=self.Dataset.photon_filter,
+                    bin_during_loading=self.Dataset.bin_during_loading,
+                    frames_pattern=self.Dataset.frames_pattern,
                     background_file=self.Dataset.background_file,
                     hotpixels_file=self.Dataset.hotpixels_file,
                     flatfield_file=self.Dataset.flatfield_file,
                     template_imagefile=self.Dataset.template_imagefile,
-                    nb_pixel_x=self.Dataset.nb_pixel_x,
-                    nb_pixel_y=self.Dataset.nb_pixel_y,
+                    # define parameters below if you want to orthogonalize the data before phasing
                     use_rawdata=self.Dataset.use_rawdata,
-                    interp_method=self.Dataset.interp_method,
+                    interpolation_method=self.Dataset.interpolation_method,
                     fill_value_mask=self.Dataset.fill_value_mask,
                     beam_direction=self.Dataset.beam_direction,
                     sample_offsets=self.Dataset.sample_offsets,
                     sdd=self.Dataset.sdd,
                     energy=self.Dataset.energy,
                     custom_motors=self.Dataset.custom_motors,
+                    # parameters when orthogonalizing the data before
+                    # phasing  using the linearized transformation matrix
                     align_q=self.Dataset.align_q,
                     ref_axis_q=self.Dataset.ref_axis_q,
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
+                    # parameters when orthogonalizing the data before phasing  using xrayutilities
                     sample_inplane=self.Dataset.sample_inplane,
                     sample_outofplane=self.Dataset.sample_outofplane,
                     offset_inplane=self.Dataset.offset_inplane,
@@ -3037,25 +3039,28 @@ class Interface():
                     cch2=self.Dataset.cch2,
                     detrot=self.Dataset.detrot,
                     tiltazimuth=self.Dataset.tiltazimuth,
-                    tilt=self.Dataset.tilt,
-                    GUI=True,
+                    tilt_detector=self.Dataset.tilt_detector,
+                    backend=self.matplotlib_backend,
                 )
 
+                # On lance bcdi_preprocess
+                print("#######################################################################")
+                print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
+                print(f"Config file: {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
+                print("#######################################################################")
+
+                os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
+                    --config {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
+
                 # PyNX folder, refresh
-                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "preprocessing/"
                 self.folder_pynx_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
                 # Plot folder, refresh
-                self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
-
-                # Save output files paths
-                self._list_widgets_pynx.children[2].value = data_file
-                self._list_widgets_pynx.children[3].value = mask_file
-                print("Output diffraction data:", self.Dataset.iobs)
-                print("Output mask:", self.Dataset.mask)
 
         if not init_para:
             clear_output(True)
@@ -3120,61 +3125,61 @@ class Interface():
                     "Make sure you initialize the parameters by running the data preprocessing...")
                 return
 
-            try:
+            # try:
                 # On lance la correction
-                metadata = correct_angles.correct_angles_detector(
-                    filename=self.Dataset.path_to_data,
-                    direct_inplane=self.Dataset.direct_inplane,
-                    direct_outofplane=self.Dataset.direct_outofplane,
-                    get_temperature=self.Dataset.temp_bool,
-                    reflection=self.Dataset.reflection,
-                    reference_spacing=self.Dataset.reference_spacing,
-                    reference_temperature=self.Dataset.reference_temperature,
-                    high_threshold=1000000,
-                    save_dir=save_dir,
-                    scan=self.Dataset.scan,
-                    root_folder=root_folder,
-                    sample_name=self.Dataset.sample_name,
-                    filtered_data=False,
-                    peak_method=self.Dataset.centering,
-                    normalize_flux=self.Dataset.normalize_flux,
-                    debug=self.Dataset.debug,
-                    beamline=self.Dataset.beamline,
-                    actuators=self.Dataset.actuators,
-                    is_series=self.Dataset.is_series,
-                    custom_scan=self.Dataset.custom_scan,
-                    custom_images=self.Dataset.custom_images,
-                    custom_monitor=self.Dataset.custom_monitor,
-                    custom_motors=self.Dataset.custom_motors,
-                    rocking_angle=self.Dataset.rocking_angle,
-                    specfile_name=self.Dataset.specfile_name,
-                    detector=self.Dataset.detector,
-                    roi_detector=self.Dataset.roi_detector,
-                    hotpixels_file=self.Dataset.hotpixels_file,
-                    flatfield_file=self.Dataset.flatfield_file,
-                    template_imagefile=self.Dataset.template_imagefile,
-                    beam_direction=self.Dataset.beam_direction,
-                    sample_offsets=self.Dataset.sample_offsets,
-                    directbeam_x=self.Dataset.cch1,
-                    directbeam_y=self.Dataset.cch2,
-                    sdd=self.Dataset.sdd,
-                    energy=self.Dataset.energy,
-                    GUI=True
-                )
+                # metadata = correct_angles.correct_angles_detector(
+                #     filename=self.Dataset.path_to_data,
+                #     direct_inplane=self.Dataset.direct_inplane,
+                #     direct_outofplane=self.Dataset.direct_outofplane,
+                #     get_temperature=self.Dataset.temp_bool,
+                #     reflection=self.Dataset.reflection,
+                #     reference_spacing=self.Dataset.reference_spacing,
+                #     reference_temperature=self.Dataset.reference_temperature,
+                #     high_threshold=1000000,
+                #     save_dir=save_dir,
+                #     scan=self.Dataset.scan,
+                #     root_folder=root_folder,
+                #     sample_name=self.Dataset.sample_name,
+                #     filtered_data=False,
+                #     peak_method=self.Dataset.centering,
+                #     normalize_flux=self.Dataset.normalize_flux,
+                #     debug=self.Dataset.debug,
+                #     beamline=self.Dataset.beamline,
+                #     actuators=self.Dataset.actuators,
+                #     is_series=self.Dataset.is_series,
+                #     custom_scan=self.Dataset.custom_scan,
+                #     custom_images=self.Dataset.custom_images,
+                #     custom_monitor=self.Dataset.custom_monitor,
+                #     custom_motors=self.Dataset.custom_motors,
+                #     rocking_angle=self.Dataset.rocking_angle,
+                #     specfile_name=self.Dataset.specfile_name,
+                #     detector=self.Dataset.detector,
+                #     roi_detector=self.Dataset.roi_detector,
+                #     hotpixels_file=self.Dataset.hotpixels_file,
+                #     flatfield_file=self.Dataset.flatfield_file,
+                #     template_imagefile=self.Dataset.template_imagefile,
+                #     beam_direction=self.Dataset.beam_direction,
+                #     sample_offsets=self.Dataset.sample_offsets,
+                #     directbeam_x=self.Dataset.cch1,
+                #     directbeam_y=self.Dataset.cch2,
+                #     sdd=self.Dataset.sdd,
+                #     energy=self.Dataset.energy,
+                #     GUI=True
+                # )
 
                 # Save metadata
-                for keys, values in metadata.items():
-                    setattr(self.Dataset, keys, values)
+                # for keys, values in metadata.items():
+                #     setattr(self.Dataset, keys, values)
 
-                self.extract_metadata()
+                # self.extract_metadata()
 
-                # Save corrected angles in the widgets
-                print("Saving corrected angles values...")
-                self._list_widgets_preprocessing.children[58].value = self.Dataset.bragg_outofplane
-                self._list_widgets_preprocessing.children[59].value = self.Dataset.bragg_inplane
-                self.Dataset.tilt_angle = np.round(
-                    np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
-                print("Corrected angles values saved in setup tab.")
+                # # Save corrected angles in the widgets
+                # print("Saving corrected angles values...")
+                # self._list_widgets_preprocessing.children[58].value = self.Dataset.bragg_outofplane
+                # self._list_widgets_preprocessing.children[59].value = self.Dataset.bragg_inplane
+                # self.Dataset.tilt_angle = np.round(
+                #     np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
+                # print("Corrected angles values saved in setup tab.")
 
             # except ValueError:
             #     print("Inplane or outofplane ?")
@@ -3182,8 +3187,8 @@ class Interface():
             # except TypeError:
             #     print("Make sure you initialize the parameters by running the data preprocessing...")
 
-            except Exception as e:
-                raise e
+            # except Exception as e:
+            #     raise e
 
         if not angles_bool:
             clear_output(True)
@@ -3303,8 +3308,8 @@ class Interface():
 
         # PyNX arguments text files
         self.Dataset.pynx_parameter_gui_file = self.Dataset.scan_folder + \
-            '/pynxraw/pynx_run_gui.txt'
-        self.Dataset.pynx_parameter_cli_file = self.Dataset.scan_folder + '/pynxraw/pynx_run.txt'
+            '/preprocessing/pynx_run_gui.txt'
+        self.Dataset.pynx_parameter_cli_file = self.Dataset.scan_folder + '/preprocessing/pynx_run.txt'
 
         # Phase retrieval
         if self.run_phase_retrieval and not self.run_pynx_tools:
@@ -3406,11 +3411,11 @@ class Interface():
                     Runs modes directly and saves all data in an "all" subdir, filter based on LLK
                     """
                     print(
-                        f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}pynxraw --filtering {nb_keep_std} --modes true")
+                        f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}preprocessing --filtering {nb_keep_std} --modes true")
                     print(
                         "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
                     os.system(
-                        "{}/run_slurm_job.sh --reconstruct gui --username {} --path {}pynxraw --filtering {} --modes true".format(
+                        "{}/run_slurm_job.sh --reconstruct gui --username {} --path {}preprocessing --filtering {} --modes true".format(
                             quote(self.path_scripts),
                             quote(self.user_name),
                             quote(self.Dataset.scan_folder),
@@ -3423,7 +3428,7 @@ class Interface():
                         print(
                             f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &", end="\n\n")
                         os.system(
-                            "cd {}pynxraw; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
+                            "cd {}preprocessing; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
                                 quote(self.Dataset.scan_folder),
                                 quote(self.path_scripts),
                             )
@@ -4075,7 +4080,7 @@ class Interface():
 
         if save_as_cxi:
             # Save diffraction pattern
-            self.cxi_filename = "{}{}{}/pynxraw/{}.cxi".format(
+            self.cxi_filename = "{}{}{}/preprocessing/{}.cxi".format(
                 self.Dataset.root_folder,
                 self.Dataset.sample_name,
                 self.Dataset.scan,
@@ -4113,7 +4118,7 @@ class Interface():
                    absorption,
                    threshold_unwrap_refraction,
                    unused_label_options,
-                   simu_flag,
+                   simulation,
                    invert_phase,
                    flip_reconstruction,
                    phase_ramp_removal,
@@ -4135,15 +4140,15 @@ class Interface():
                    tick_length,
                    tick_width,
                    unused_label_average,
-                   avg_method,
-                   avg_threshold,
+                   averaging_space,
+                   threshold_avg,
                    unused_label_apodize,
-                   apodize_flag,
-                   apodize_window,
-                   hwidth,
-                   mu,
-                   sigma,
-                   alpha,
+                   apodize,
+                   apodization_window,
+                   half_width_avg_phase,
+                   apodization_mu,
+                   apodization_sigma,
+                   apodization_alpha,
                    unused_label_strain,
                    unused_folder_strain,
                    reconstruction_file,
@@ -4193,7 +4198,7 @@ class Interface():
             self.Dataset.absorption = absorption
             self.Dataset.threshold_unwrap_refraction = threshold_unwrap_refraction
             # options #
-            self.Dataset.simu_flag = simu_flag
+            self.Dataset.simulation = simulation
             self.Dataset.invert_phase = invert_phase
             self.Dataset.flip_reconstruction = flip_reconstruction
             self.Dataset.phase_ramp_removal = phase_ramp_removal
@@ -4215,20 +4220,20 @@ class Interface():
             self.Dataset.tick_length = tick_length
             self.Dataset.tick_width = tick_width
             # parameters for averaging several reconstructed objects #
-            self.Dataset.avg_method = avg_method
-            self.Dataset.avg_threshold = avg_threshold
+            self.Dataset.averaging_space = averaging_space
+            self.Dataset.threshold_avg = threshold_avg
             # setup for phase averaging or apodization
-            self.Dataset.hwidth = hwidth
-            self.Dataset.apodize_flag = apodize_flag
-            self.Dataset.apodize_window = apodize_window
-            self.Dataset.mu = mu
-            self.Dataset.sigma = sigma
-            self.Dataset.alpha = alpha
+            self.Dataset.half_width_avg_phase = half_width_avg_phase
+            self.Dataset.apodize = apodize
+            self.Dataset.apodization_window = apodization_window
+            self.Dataset.apodization_mu = apodization_mu
+            self.Dataset.apodization_sigma = apodization_sigma
+            self.Dataset.apodization_alpha = apodization_alpha
             self.Dataset.reconstruction_file = reconstruction_file
 
             # Extract dict, list and tuple from strings
             list_parameters = ["original_size", "output_size",
-                               "axis_to_align", "mu", "sigma", "alpha"]
+                               "axis_to_align", "apodization_mu", "apodization_sigma", "apodization_alpha"]
 
             tuple_parameters = [
                 "phasing_binning", "preprocessing_binning", "phase_offset_origin", "roll_modes"]
@@ -4275,7 +4280,7 @@ class Interface():
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_directory
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/result_{self.Dataset.save_frame}/"
+                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
                     w.disabled = False
@@ -4301,30 +4306,35 @@ class Interface():
 
             try:
                 # Run strain.py script
-                self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final = strain.strain_bcdi(
+                # self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final
+                self.create_yaml_file(
+                    fname = f"{self.Dataset.scan_folder}postprocessing/config_postprocessing.yml",
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
-                    data_dirname=self.Dataset.data_dirname,
+                    data_dir=self.Dataset.data_directory,
                     sample_name=self.Dataset.sample_name,
-                    comment=self.Dataset.user_comment,
+                    comment=self.Dataset.comment,
+                    # parameters used when averaging several reconstruction #
                     sort_method=self.Dataset.sort_method,
                     correlation_threshold=self.Dataset.correlation_threshold,
+                    # parameters related to centering #
+                    roll_modes=self.Dataset.roll_modes,
+                    centering_method=self.Dataset.centering_method,
+                    # parameters relative to the FFT window and voxel sizes #
                     original_size=self.Dataset.original_size,
                     phasing_binning=self.Dataset.phasing_binning,
                     preprocessing_binning=self.Dataset.preprocessing_binning,
                     output_size=self.Dataset.output_size,
                     keep_size=self.Dataset.keep_size,
                     fix_voxel=self.Dataset.fix_voxel,
+                    # parameters related to the strain calculation #
                     data_frame=self.Dataset.data_frame,
                     ref_axis_q=self.Dataset.ref_axis_q,
                     save_frame=self.Dataset.save_frame,
                     isosurface_strain=self.Dataset.isosurface_strain,
                     strain_method=self.Dataset.strain_method,
-                    phase_offset=self.Dataset.phase_offset,
-                    phase_offset_origin=self.Dataset.phase_offset_origin,
-                    offset_method=self.Dataset.offset_method,
-                    centering_method=self.Dataset.centering_method,
+                    # define beamline related parameters #
                     beamline=self.Dataset.beamline,
                     actuators=self.Dataset.actuators,
                     rocking_angle=self.Dataset.rocking_angle,
@@ -4336,28 +4346,30 @@ class Interface():
                     tilt_angle=self.Dataset.tilt_angle,
                     sample_offsets=self.Dataset.sample_offsets,
                     specfile_name=self.Dataset.specfile_name,
+                    # setup for custom scans #
                     custom_scan=self.Dataset.custom_scan,
                     custom_motors=self.Dataset.custom_motors,
+                    # detector related parameters #
                     detector=self.Dataset.detector,
-                    nb_pixel_x=self.Dataset.nb_pixel_x,
-                    nb_pixel_y=self.Dataset.nb_pixel_y,
                     pixel_size=self.Dataset.pixel_size,
                     template_imagefile=self.Dataset.template_imagefile,
+                    # parameters related to the refraction correction #
                     correct_refraction=self.Dataset.correct_refraction,
                     optical_path_method=self.Dataset.optical_path_method,
                     dispersion=self.Dataset.dispersion,
                     absorption=self.Dataset.absorption,
                     threshold_unwrap_refraction=self.Dataset.threshold_unwrap_refraction,
-                    simu_flag=self.Dataset.simu_flag,
+                    # parameters related to the phase #
+                    simulation=self.Dataset.simulation,
                     invert_phase=self.Dataset.invert_phase,
                     flip_reconstruction=self.Dataset.flip_reconstruction,
                     phase_ramp_removal=self.Dataset.phase_ramp_removal,
                     threshold_gradient=self.Dataset.threshold_gradient,
-                    save_raw=self.Dataset.save_raw,
-                    save_support=self.Dataset.save_support,
-                    save=self.Dataset.save,
+                    phase_offset=self.Dataset.phase_offset,
+                    phase_offset_origin=self.Dataset.phase_offset_origin,
+                    offset_method=self.Dataset.offset_method,
+                    # parameters related to data visualization #
                     debug=self.Dataset.debug,
-                    roll_modes=self.Dataset.roll_modes,
                     align_axis=self.Dataset.align_axis,
                     ref_axis=self.Dataset.ref_axis,
                     axis_to_align=self.Dataset.axis_to_align,
@@ -4368,57 +4380,73 @@ class Interface():
                     tick_direction=self.Dataset.tick_direction,
                     tick_length=self.Dataset.tick_length,
                     tick_width=self.Dataset.tick_width,
+                    # parameters for temperature estimation #
                     get_temperature=self.Dataset.temp_bool,
                     reflection=self.Dataset.reflection,
                     reference_spacing=self.Dataset.reference_spacing,
                     reference_temperature=self.Dataset.reference_temperature,
-                    avg_method=self.Dataset.avg_method,
-                    avg_threshold=self.Dataset.avg_threshold,
-                    hwidth=self.Dataset.hwidth,
-                    apodize_flag=self.Dataset.apodize_flag,
-                    apodize_window=self.Dataset.apodize_window,
-                    mu=self.Dataset.mu,
-                    sigma=self.Dataset.sigma,
-                    alpha=self.Dataset.alpha,
+                    # parameters for averaging several reconstructed objects #
+                    averaging_space=self.Dataset.averaging_space,
+                    threshold_avg=self.Dataset.threshold_avg,
+                    # parameters for phase averaging or apodization #
+                    half_width_avg_phase=self.Dataset.half_width_avg_phase,
+                    apodize=self.Dataset.apodize,
+                    apodization_window=self.Dataset.apodization_window,
+                    apodization_mu=self.Dataset.apodization_mu,
+                    apodization_sigma=self.Dataset.apodization_sigma,
+                    apodization_alpha=self.Dataset.apodization_alpha,
                     reconstruction_file=self.Dataset.reconstruction_file,
-                    GUI=True,
+                    # parameters related to saving #
+                    save_rawdata=self.Dataset.save_rawdata,
+                    save_support=self.Dataset.save_support,
+                    save=self.Dataset.save,
+                    backend=self.matplotlib_backend,
                 )
+                # On lance bcdi_preprocess
+                print("#######################################################################")
+                print(f"Running: {self.path_scripts}/bcdi_strain.py")
+                print(f"Config file: {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
+                print("#######################################################################")
+
+                os.system(f"{self.path_scripts}/bcdi_strain.py \
+                    --config {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
+
 
                 # Temporary fix, recompute the transformation matrix
-                print("\nSaving transformation matrix ...")
-                self.Dataset.transfer_matrix = transfer_matrix.compute_transformation_matrix(
-                    scan=self.Dataset.scan,
-                    original_size=self.Dataset.original_size,
-                    phasing_binning=self.Dataset.phasing_binning,
-                    comment=self.Dataset.user_comment,
-                    reconstruction_file=self.Dataset.reconstruction_file,
-                    keep_size=self.Dataset.keep_size,
-                    detector=self.Dataset.detector,
-                    template_imagefile=self.Dataset.template_imagefile,
-                    preprocessing_binning=self.Dataset.preprocessing_binning,
-                    tilt_angle=self.Dataset.tilt_angle,
-                    beamline=self.Dataset.beamline,
-                    pixel_size=self.Dataset.pixel_size,
-                    energy=self.Dataset.energy,
-                    outofplane_angle=self.Dataset.outofplane_angle,
-                    inplane_angle=self.Dataset.inplane_angle,
-                    rocking_angle=self.Dataset.rocking_angle,
-                    sdd=self.Dataset.sdd,
-                    sample_offsets=self.Dataset.sample_offsets,
-                    actuators=self.Dataset.actuators,
-                    custom_scan=self.Dataset.custom_scan,
-                    custom_motors=self.Dataset.custom_motors,
-                    fix_voxel=self.Dataset.fix_voxel,
-                    ref_axis_q=self.Dataset.ref_axis_q,
-                    sample_name=self.Dataset.sample_name,
-                    root_folder=self.Dataset.root_folder,
-                    save_dir=save_dir,
-                    specfile_name=self.Dataset.specfile_name,
-                    centering_method=self.Dataset.centering_method
-                )
+                # print("\nSaving transformation matrix ...")
+                # self.Dataset.transfer_matrix = transfer_matrix.compute_transformation_matrix(
+                #     scan=self.Dataset.scan,
+                #     original_size=self.Dataset.original_size,
+                #     phasing_binning=self.Dataset.phasing_binning,
+                #     comment=self.Dataset.comment,
+                #     reconstruction_file=self.Dataset.reconstruction_file,
+                #     keep_size=self.Dataset.keep_size,
+                #     detector=self.Dataset.detector,
+                #     template_imagefile=self.Dataset.template_imagefile,
+                #     preprocessing_binning=self.Dataset.preprocessing_binning,
+                #     tilt_angle=self.Dataset.tilt_angle,
+                #     beamline=self.Dataset.beamline,
+                #     pixel_size=self.Dataset.pixel_size,
+                #     energy=self.Dataset.energy,
+                #     outofplane_angle=self.Dataset.outofplane_angle,
+                #     inplane_angle=self.Dataset.inplane_angle,
+                #     rocking_angle=self.Dataset.rocking_angle,
+                #     sdd=self.Dataset.sdd,
+                #     sample_offsets=self.Dataset.sample_offsets,
+                #     actuators=self.Dataset.actuators,
+                #     custom_scan=self.Dataset.custom_scan,
+                #     custom_motors=self.Dataset.custom_motors,
+                #     fix_voxel=self.Dataset.fix_voxel,
+                #     ref_axis_q=self.Dataset.ref_axis_q,
+                #     sample_name=self.Dataset.sample_name,
+                #     root_folder=self.Dataset.root_folder,
+                #     save_dir=save_dir,
+                #     specfile_name=self.Dataset.specfile_name,
+                #     centering_method=self.Dataset.centering_method
+                # )
                 print("End of script")
-            except AttributeError:
-                print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
+            # except AttributeError:
+            #     print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
@@ -4426,7 +4454,7 @@ class Interface():
                 # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + "pynxraw/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
@@ -4719,6 +4747,47 @@ class Interface():
             clear_output(True)
 
     @staticmethod
+    def create_yaml_file(
+        fname,
+        **kwargs
+    ):
+        config_file = []
+        
+        for k, v in kwargs.items():
+            if isinstance(v, str):
+                config_file.append(f"{k}: \"{v}\"")
+            elif isinstance(v, tuple):
+                if v:
+                    config_file.append(f"{k}: {list(v)}")
+                else:
+                    config_file.append(f"{k}: None")
+            elif isinstance(v, np.ndarray):
+                config_file.append(f"{k}: {list(v)}")
+            elif isinstance(v, list):
+                if v:
+                    config_file.append(f"{k}: {v}")
+                else:
+                    config_file.append(f"{k}: None")
+            else:
+                config_file.append(f"{k}: {v}")
+
+        file = os.path.basename(fname)
+        directory = fname.strip(file)
+        # Create directory
+        if not os.path.isdir(directory):
+            full_path = ""
+            for d in directory.split("/"):
+                full_path += d + "/"
+                try:
+                    os.mkdir(full_path)
+                except FileExistsError:
+                    pass
+
+        with open(fname, "w") as v:
+            for line in config_file:
+                v.write(line+"\n")
+
+    @staticmethod
     def display_readme(contents):
         """Docs about different steps in data analysis workflow"""
         if contents == "Preprocessing":
@@ -4732,7 +4801,7 @@ class Interface():
                 File structure should be (e.g. scan 1):
                 specfile, hotpixels file and flatfield file in:    /rootdir/
                 data in:                                           /rootdir/S1/data/
-                output files saved in:   /rootdir/S1/pynxraw/ or /rootdir/S1/pynx/ depending on the
+                output files saved in:   /rootdir/S1/preprocessing/ or /rootdir/S1/pynx/ depending on the
                 'use_rawdata' option
                 """))
 

@@ -1,4 +1,7 @@
-from pynx.utils.plot_utils import complex2rgbalin
+try:
+    from pynx.utils.plot_utils import complex2rgbalin
+except ModuleNotFoundError:
+    pass
 from IPython.core.display import display, HTML
 from tornado.ioloop import PeriodicCallback
 from skimage.measure import marching_cubes
