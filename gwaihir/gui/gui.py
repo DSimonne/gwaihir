@@ -317,7 +317,7 @@ class Interface():
                                                                'description_width': 'initial'},
                                                            layout=Layout(width='90%', height="35px")),
 
-                                                       centering=widgets.Dropdown(
+                                                       centering_method=widgets.Dropdown(
                                                            options=[
                                                                "max", "com", "manual"],
                                                            value="max",
@@ -940,8 +940,6 @@ class Interface():
                                                        )
         self._list_widgets_preprocessing.children[1].observe(
             self.beamline_handler, names="value")
-        self._list_widgets_preprocessing.children[8].observe(
-            self.energy_scan_handler, names="value")
         self._list_widgets_preprocessing.children[13].observe(
             self.bragg_peak_centering_handler, names="value")
         self._list_widgets_preprocessing.children[25].observe(
@@ -982,16 +980,6 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[29:34]),
         ])
 
-        # Group all preprocess tabs into a single one, besides detector and setup parameter
-        self.tab_preprocess = widgets.VBox([
-            self.tab_beamline,
-            self.tab_reduction,
-            self.tab_save_load,
-            self._list_widgets_preprocessing.children[-3],
-            self._list_widgets_preprocessing.children[-2],
-            self._list_widgets_preprocessing.children[-1]
-        ])
-
         # Parameters related to the detector used
         self.tab_detector = widgets.VBox([
             self._list_widgets_preprocessing.children[34],
@@ -1019,6 +1007,16 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[58:61]),
             widgets.HBox(self._list_widgets_preprocessing.children[61:65]),
             widgets.HBox(self._list_widgets_preprocessing.children[65:68]),
+        ])
+
+        # Group all preprocess tabs into a single one, besides detector and setup parameter
+        self.tab_preprocess = widgets.VBox([
+            self.tab_beamline,
+            self.tab_reduction,
+            self.tab_save_load,
+            self._list_widgets_preprocessing.children[-3],
+            self._list_widgets_preprocessing.children[-2],
+            self._list_widgets_preprocessing.children[-1]
         ])
 
         # Widgets for angles correction
@@ -1111,6 +1109,526 @@ class Interface():
             self._list_widgets_correct.children[6],
             self._list_widgets_correct.children[-1],
         ])
+
+        # Widgets for PyNX
+        self._list_widgets_pynx = interactive(self.initialize_phase_retrieval,
+                                              unused_label_data=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Data files",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              folder=widgets.Text(
+                                                  value=os.getcwd(),
+                                                  placeholder=os.getcwd(),
+                                                  description='Data folder:',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              iobs=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  description='Dataset',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              mask=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  description='Mask',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              support=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  value="",
+                                                  description='Support',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              obj=widgets.Dropdown(
+                                                  options=sorted(
+                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
+                                                  value="",
+                                                  description='Object',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              auto_center_resize=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Auto center and resize',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(height="50px"),
+                                                  icon='check'),
+
+                                              max_size=widgets.BoundedIntText(
+                                                  value=256,
+                                                  step=1,
+                                                  min=0,
+                                                  max=1000,
+                                                  layout=Layout(
+                                                      height="50px", width="40%"),
+                                                  continuous_update=False,
+                                                  description='Maximum array size for cropping:',
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              unused_label_support=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Support parameters",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              support_threshold=widgets.Text(
+                                                  value="(0.23, 0.30)",
+                                                  placeholder="(0.23, 0.30)",
+                                                  description='Support threshold',
+                                                  disabled=False,
+                                                  layout=Layout(
+                                                      height="50px", width="40%"),
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
+
+                                              support_only_shrink=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Support only shrink',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(
+                                                      height="50px", width="15%"),
+                                                  icon='check'),
+
+                                              support_update_period=widgets.BoundedIntText(
+                                                  value=20,
+                                                  step=5,
+                                                  layout=Layout(
+                                                      height="50px", width="25%"),
+                                                  continuous_update=False,
+                                                  description='Support update period:',
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              support_smooth_width=widgets.Text(
+                                                  value="(2, 1, 600)",
+                                                  placeholder="(2, 1, 600)",
+                                                  description='Support smooth width',
+                                                  disabled=False,
+                                                  layout=Layout(
+                                                      height="50px", width="35%"),
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
+
+                                              support_post_expand=widgets.Text(
+                                                  value="(1, -2, 1)",
+                                                  placeholder="(1, -2, 1)",
+                                                  description='Support post expand',
+                                                  disabled=False,
+                                                  layout=Layout(
+                                                      height="50px", width="35%"),
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
+
+                                              unused_label_psf=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Point spread function parameters",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              psf=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Use point spread function:',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  layout=Layout(height="50px"),
+                                                  icon='check'),
+
+                                              psf_model=widgets.Dropdown(
+                                                  options=[
+                                                      "gaussian", "lorentzian", "pseudo-voigt"],
+                                                  value="gaussian",
+                                                  description='PSF peak shape',
+                                                  continuous_update=False,
+                                                  disabled=True,
+                                                  style={'description_width': 'initial'}),
+
+                                              fwhm=widgets.FloatText(
+                                                  value=1,
+                                                  step=0.01,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description="FWHM:",
+                                                  layout=Layout(
+                                                      width='15%', height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=True),
+
+                                              eta=widgets.FloatText(
+                                                  value=0.05,
+                                                  step=0.01,
+                                                  max=1,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description='Eta:',
+                                                  layout=Layout(
+                                                      width='15%', height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=True),
+
+                                              update_psf=widgets.BoundedIntText(
+                                                  value=20,
+                                                  step=5,
+                                                  continuous_update=False,
+                                                  description='Update PSF every:',
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=True),
+
+                                              unused_label_algo=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Iterative algorithms parameters",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              nb_raar=widgets.BoundedIntText(
+                                                  value=1000,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of RAAR:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_hio=widgets.BoundedIntText(
+                                                  value=400,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of HIO:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_er=widgets.BoundedIntText(
+                                                  value=300,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of ER:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_ml=widgets.BoundedIntText(
+                                                  value=0,
+                                                  min=0,
+                                                  max=9999,
+                                                  step=10,
+                                                  continuous_update=False,
+                                                  description='Nb of ML:',
+                                                  layout=Layout(
+                                                      height="35px", width="20%"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              nb_run=widgets.BoundedIntText(
+                                                  value=30,
+                                                  continuous_update=False,
+                                                  description='Number of run:',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              unused_label_filtering=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Filtering criteria for reconstructions",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              filter_criteria=widgets.Dropdown(
+                                                  options=[
+                                                      ("No filtering",
+                                                       "no_filtering"),
+                                                      ("Standard deviation",
+                                                       "standard_deviation"),
+                                                      ("Log-likelihood (LLK)", "LLK"),
+                                                      ("LLK > Standard deviation",
+                                                       "LLK_standard_deviation"),
+                                                      # ("Standard deviation > LLK", "standard_deviation_LLK"),
+                                                  ],
+                                                  value="LLK_standard_deviation",
+                                                  description='Filtering criteria',
+                                                  disabled=False,
+                                                  layout=Layout(width='90%'),
+                                                  style={'description_width': 'initial'}),
+
+                                              nb_run_keep=widgets.BoundedIntText(
+                                                  value=10,
+                                                  continuous_update=False,
+                                                  description='Number of run to keep:',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              unused_label_options=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Options",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              live_plot=widgets.BoundedIntText(
+                                                  value=200,
+                                                  step=10,
+                                                  max=500,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description='Plot every:',
+                                                  readout=True,
+                                                  layout=Layout(
+                                                      height="50px", width="20%"),
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              positivity=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Force positivity',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(
+                                                      height="50px", width="20%"),
+                                                  icon='check'),
+
+                                              beta=widgets.FloatText(
+                                                  value=0.9,
+                                                  step=0.01,
+                                                  max=1,
+                                                  min=0,
+                                                  continuous_update=False,
+                                                  description='Beta parameter for RAAR and HIO:',
+                                                  layout=Layout(
+                                                      width='35%', height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              detwin=widgets.Checkbox(
+                                                  value=False,
+                                                  description='Detwinning',
+                                                  continuous_update=False,
+                                                  disabled=False,
+                                                  indent=False,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(
+                                                      height="50px", width="15%"),
+                                                  icon='check'),
+
+                                              rebin=widgets.Text(
+                                                  value="(1, 1, 1)",
+                                                  placeholder="(1, 1, 1)",
+                                                  description='Rebin',
+                                                  layout=Layout(height="50px"),
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  style={'description_width': 'initial'}),
+
+                                              verbose=widgets.BoundedIntText(
+                                                  value=100,
+                                                  min=10,
+                                                  max=300,
+                                                  continuous_update=False,
+                                                  description='Verbose:',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              pixel_size_detector=widgets.BoundedIntText(
+                                                  value=55,
+                                                  continuous_update=False,
+                                                  description='Pixel size of detector (um):',
+                                                  layout=Layout(height="50px"),
+                                                  readout=True,
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  disabled=False),
+
+                                              unused_label_phase_retrieval=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the phase retrieval</p>",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              run_phase_retrieval=widgets.ToggleButtons(
+                                                  options=[
+                                                      ('No phase retrieval', False),
+                                                      ('Run batch job', "batch"),
+                                                      ("Run script locally",
+                                                       "local_script"),
+                                                      ("Use operators",
+                                                       "operators"),
+                                                  ],
+                                                  value=False,
+                                                  tooltips=[
+                                                      "Click to be able to change parameters",
+                                                      "Collect parameters to run a job on slurm, will automatically apply a std deviation filter and run modes decomposition, freed the kernel",
+                                                      "Run script on jupyter notebook environment, uses notebook kernel, will be performed in background also but more slowly, good if you cannot use jobs.",
+                                                      r"Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
+                                                  ],
+                                                  description='Run phase retrieval ...',
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                  layout=Layout(
+                                                      width='100%', height="50px"),
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  icon='fast-forward'),
+
+                                              unused_label_run_pynx_tools=widgets.HTML(
+                                                  description="<p style='font-weight: bold;font-size:1.2em'>Click below to use a phase retrieval tool</p>",
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  layout=Layout(width='90%', height="35px")),
+
+                                              run_pynx_tools=widgets.ToggleButtons(
+                                                  options=[
+                                                      ('No tool running', False),
+                                                      ("Modes decomposition",
+                                                       "modes"),
+                                                      ("Filter reconstructions",
+                                                       "filter")
+                                                  ],
+                                                  value=False,
+                                                  tooltips=[
+                                                      "Click to be able to change parameters",
+                                                      "Run modes decomposition in data folder, selects *LLK*.cxi files",
+                                                      "Filter reconstructions"
+                                                  ],
+                                                  description="Choose analysis:",
+                                                  disabled=False,
+                                                  continuous_update=False,
+                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                  layout=Layout(
+                                                      width='100%', height="50px"),
+                                                  style={
+                                                      'description_width': 'initial'},
+                                                  icon='fast-forward')
+                                              )
+        self._list_widgets_pynx.children[1].observe(
+            self.folder_pynx_handler, names="value")
+        self._list_widgets_pynx.children[15].observe(
+            self.pynx_psf_handler, names="value")
+        self._list_widgets_pynx.children[16].observe(
+            self.pynx_peak_shape_handler, names="value")
+        self._list_widgets_pynx.children[-4].observe(
+            self.run_pynx_handler, names="value")
+        self._list_widgets_pynx.children[-2].observe(
+            self.run_pynx_handler, names="value")
+        self.tab_pynx = widgets.VBox([
+            widgets.VBox(self._list_widgets_pynx.children[:6]),
+            widgets.HBox(self._list_widgets_pynx.children[6:8]),
+            self._list_widgets_pynx.children[8],
+            widgets.HBox(self._list_widgets_pynx.children[9:11]),
+            widgets.HBox(self._list_widgets_pynx.children[11:14]),
+            self._list_widgets_pynx.children[14],
+            widgets.HBox(self._list_widgets_pynx.children[15:19]),
+            self._list_widgets_pynx.children[19],
+            self._list_widgets_pynx.children[20],
+            widgets.HBox(self._list_widgets_pynx.children[21:25]),
+            self._list_widgets_pynx.children[25],
+            self._list_widgets_pynx.children[29],
+            widgets.HBox(self._list_widgets_pynx.children[30:34]),
+            widgets.HBox(self._list_widgets_pynx.children[34:37]),
+            self._list_widgets_pynx.children[26],
+            widgets.HBox(self._list_widgets_pynx.children[27:29]),
+            self._list_widgets_pynx.children[-5],
+            self._list_widgets_pynx.children[-4],
+            self._list_widgets_pynx.children[-3],
+            self._list_widgets_pynx.children[-2],
+            self._list_widgets_pynx.children[-1],
+        ])
+
+        # Widgets for logs
+        self.tab_logs = interactive(self.display_logs,
+                                    unused_label_logs=widgets.HTML(
+                                        description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui",
+                                        style={'description_width': 'initial'},
+                                        layout=Layout(width='90%', height="35px")),
+
+                                    csv_file=widgets.Text(
+                                        value=os.getcwd() + "/metadata.csv",
+                                        placeholder="Path to csv file",
+                                        description='Csv file',
+                                        disabled=False,
+                                        continuous_update=False,
+                                        layout=Layout(width='90%'),
+                                        style={'description_width': 'initial'}),
+
+                                    show_logs=widgets.ToggleButtons(
+                                        options=[
+                                            ("Clear output", False),
+                                            ('Load .csv file', "load_csv"),
+                                            ("Load facets data ",
+                                             "load_field_data"),
+                                        ],
+                                        value=False,
+                                        # tooltips=[
+                                        #     "Clear the output and unload data from gui, saves RAM",
+                                        #     "Load external csv file in the GUI",
+                                        #     "Load field data"
+                                        # ],
+                                        description='Load dataframe',
+                                        disabled=False,
+                                        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                        icon='fast-forward',
+                                        layout=Layout(width='90%'),
+                                        style={'description_width': 'initial'}),
+                                    )
 
         # Widgets for strain
         self._list_widgets_strain = interactive(self.initialize_postprocessing,
@@ -1746,43 +2264,6 @@ class Interface():
             self._list_widgets_strain.children[-1],
         ])
 
-        # Widgets for logs
-        self.tab_logs = interactive(self.display_logs,
-                                    unused_label_logs=widgets.HTML(
-                                        description="<p style='font-weight: bold;font-size:1.2em'>Loads csv file and displays it in the gui",
-                                        style={'description_width': 'initial'},
-                                        layout=Layout(width='90%', height="35px")),
-
-                                    csv_file=widgets.Text(
-                                        value=os.getcwd() + "/metadata.csv",
-                                        placeholder="Path to csv file",
-                                        description='Csv file',
-                                        disabled=False,
-                                        continuous_update=False,
-                                        layout=Layout(width='90%'),
-                                        style={'description_width': 'initial'}),
-
-                                    show_logs=widgets.ToggleButtons(
-                                        options=[
-                                            ("Clear output", False),
-                                            ('Load .csv file', "load_csv"),
-                                            ("Load facets data ",
-                                             "load_field_data"),
-                                        ],
-                                        value=False,
-                                        # tooltips=[
-                                        #     "Clear the output and unload data from gui, saves RAM",
-                                        #     "Load external csv file in the GUI",
-                                        #     "Load field data"
-                                        # ],
-                                        description='Load dataframe',
-                                        disabled=False,
-                                        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                                        icon='fast-forward',
-                                        layout=Layout(width='90%'),
-                                        style={'description_width': 'initial'}),
-                                    )
-
         # Widgets for plotting
         self.tab_data = interactive(self.load_data,
                                     unused_label_plot=widgets.HTML(
@@ -1836,489 +2317,6 @@ class Interface():
                                     )
         self.tab_data.children[1].observe(
             self.folder_plot_handler, names="value")
-
-        # Widgets for PyNX
-        self._list_widgets_pynx = interactive(self.initialize_phase_retrieval,
-                                              unused_label_data=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Data files",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              folder=widgets.Text(
-                                                  value=os.getcwd(),
-                                                  placeholder=os.getcwd(),
-                                                  description='Data folder:',
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
-
-                                              iobs=widgets.Dropdown(
-                                                  options=sorted(
-                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
-                                                  description='Dataset',
-                                                  disabled=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
-
-                                              mask=widgets.Dropdown(
-                                                  options=sorted(
-                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
-                                                  description='Mask',
-                                                  disabled=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
-
-                                              support=widgets.Dropdown(
-                                                  options=sorted(
-                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
-                                                  value="",
-                                                  description='Support',
-                                                  disabled=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
-
-                                              obj=widgets.Dropdown(
-                                                  options=sorted(
-                                                      glob.glob(os.getcwd() + "*.npz")) + [""],
-                                                  value="",
-                                                  description='Object',
-                                                  disabled=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
-
-                                              auto_center_resize=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Auto center and resize',
-                                                  continuous_update=False,
-                                                  disabled=False,
-                                                  indent=False,
-                                                  layout=Layout(height="50px"),
-                                                  icon='check'),
-
-                                              max_size=widgets.BoundedIntText(
-                                                  value=256,
-                                                  step=1,
-                                                  min=0,
-                                                  max=1000,
-                                                  layout=Layout(
-                                                      height="50px", width="40%"),
-                                                  continuous_update=False,
-                                                  description='Maximum array size for cropping:',
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              unused_label_support=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Support parameters",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              support_threshold=widgets.Text(
-                                                  value="(0.23, 0.30)",
-                                                  placeholder="(0.23, 0.30)",
-                                                  description='Support threshold',
-                                                  disabled=False,
-                                                  layout=Layout(
-                                                      height="50px", width="40%"),
-                                                  continuous_update=False,
-                                                  style={'description_width': 'initial'}),
-
-                                              support_only_shrink=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Support only shrink',
-                                                  continuous_update=False,
-                                                  disabled=False,
-                                                  indent=False,
-                                                  layout=Layout(
-                                                      height="50px", width="15%"),
-                                                  icon='check'),
-
-                                              support_update_period=widgets.BoundedIntText(
-                                                  value=20,
-                                                  step=5,
-                                                  layout=Layout(
-                                                      height="50px", width="25%"),
-                                                  continuous_update=False,
-                                                  description='Support update period:',
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              support_smooth_width=widgets.Text(
-                                                  value="(2, 1, 600)",
-                                                  placeholder="(2, 1, 600)",
-                                                  description='Support smooth width',
-                                                  disabled=False,
-                                                  layout=Layout(
-                                                      height="50px", width="35%"),
-                                                  continuous_update=False,
-                                                  style={'description_width': 'initial'}),
-
-                                              support_post_expand=widgets.Text(
-                                                  value="(1, -2, 1)",
-                                                  placeholder="(1, -2, 1)",
-                                                  description='Support post expand',
-                                                  disabled=False,
-                                                  layout=Layout(
-                                                      height="50px", width="35%"),
-                                                  continuous_update=False,
-                                                  style={'description_width': 'initial'}),
-
-                                              unused_label_psf=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Point spread function parameters",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              psf=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Use point spread function:',
-                                                  continuous_update=False,
-                                                  disabled=False,
-                                                  indent=False,
-                                                  layout=Layout(height="50px"),
-                                                  icon='check'),
-
-                                              psf_model=widgets.Dropdown(
-                                                  options=[
-                                                      "gaussian", "lorentzian", "pseudo-voigt"],
-                                                  value="gaussian",
-                                                  description='PSF peak shape',
-                                                  continuous_update=False,
-                                                  disabled=True,
-                                                  style={'description_width': 'initial'}),
-
-                                              fwhm=widgets.FloatText(
-                                                  value=1,
-                                                  step=0.01,
-                                                  min=0,
-                                                  continuous_update=False,
-                                                  description="FWHM:",
-                                                  layout=Layout(
-                                                      width='15%', height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=True),
-
-                                              eta=widgets.FloatText(
-                                                  value=0.05,
-                                                  step=0.01,
-                                                  max=1,
-                                                  min=0,
-                                                  continuous_update=False,
-                                                  description='Eta:',
-                                                  layout=Layout(
-                                                      width='15%', height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=True),
-
-                                              update_psf=widgets.BoundedIntText(
-                                                  value=20,
-                                                  step=5,
-                                                  continuous_update=False,
-                                                  description='Update PSF every:',
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=True),
-
-                                              unused_label_algo=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Iterative algorithms parameters",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              nb_raar=widgets.BoundedIntText(
-                                                  value=1000,
-                                                  min=0,
-                                                  max=9999,
-                                                  step=10,
-                                                  continuous_update=False,
-                                                  description='Nb of RAAR:',
-                                                  layout=Layout(
-                                                      height="35px", width="20%"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              nb_hio=widgets.BoundedIntText(
-                                                  value=400,
-                                                  min=0,
-                                                  max=9999,
-                                                  step=10,
-                                                  continuous_update=False,
-                                                  description='Nb of HIO:',
-                                                  layout=Layout(
-                                                      height="35px", width="20%"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              nb_er=widgets.BoundedIntText(
-                                                  value=300,
-                                                  min=0,
-                                                  max=9999,
-                                                  step=10,
-                                                  continuous_update=False,
-                                                  description='Nb of ER:',
-                                                  layout=Layout(
-                                                      height="35px", width="20%"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              nb_ml=widgets.BoundedIntText(
-                                                  value=0,
-                                                  min=0,
-                                                  max=9999,
-                                                  step=10,
-                                                  continuous_update=False,
-                                                  description='Nb of ML:',
-                                                  layout=Layout(
-                                                      height="35px", width="20%"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              nb_run=widgets.BoundedIntText(
-                                                  value=30,
-                                                  continuous_update=False,
-                                                  description='Number of run:',
-                                                  layout=Layout(height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              unused_label_filtering=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Filtering criteria for reconstructions",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              filter_criteria=widgets.Dropdown(
-                                                  options=[
-                                                      ("No filtering",
-                                                       "no_filtering"),
-                                                      ("Standard deviation",
-                                                       "standard_deviation"),
-                                                      ("Log-likelihood (LLK)", "LLK"),
-                                                      ("LLK > Standard deviation",
-                                                       "LLK_standard_deviation"),
-                                                      # ("Standard deviation > LLK", "standard_deviation_LLK"),
-                                                  ],
-                                                  value="LLK_standard_deviation",
-                                                  description='Filtering criteria',
-                                                  disabled=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
-
-                                              nb_run_keep=widgets.BoundedIntText(
-                                                  value=10,
-                                                  continuous_update=False,
-                                                  description='Number of run to keep:',
-                                                  layout=Layout(height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              unused_label_options=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Options",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              live_plot=widgets.BoundedIntText(
-                                                  value=200,
-                                                  step=10,
-                                                  max=500,
-                                                  min=0,
-                                                  continuous_update=False,
-                                                  description='Plot every:',
-                                                  readout=True,
-                                                  layout=Layout(
-                                                      height="50px", width="20%"),
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              positivity=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Force positivity',
-                                                  continuous_update=False,
-                                                  disabled=False,
-                                                  indent=False,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(
-                                                      height="50px", width="20%"),
-                                                  icon='check'),
-
-                                              beta=widgets.FloatText(
-                                                  value=0.9,
-                                                  step=0.01,
-                                                  max=1,
-                                                  min=0,
-                                                  continuous_update=False,
-                                                  description='Beta parameter for RAAR and HIO:',
-                                                  layout=Layout(
-                                                      width='35%', height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              detwin=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Detwinning',
-                                                  continuous_update=False,
-                                                  disabled=False,
-                                                  indent=False,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(
-                                                      height="50px", width="15%"),
-                                                  icon='check'),
-
-                                              rebin=widgets.Text(
-                                                  value="(1, 1, 1)",
-                                                  placeholder="(1, 1, 1)",
-                                                  description='Rebin',
-                                                  layout=Layout(height="50px"),
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  style={'description_width': 'initial'}),
-
-                                              verbose=widgets.BoundedIntText(
-                                                  value=100,
-                                                  min=10,
-                                                  max=300,
-                                                  continuous_update=False,
-                                                  description='Verbose:',
-                                                  layout=Layout(height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              pixel_size_detector=widgets.BoundedIntText(
-                                                  value=55,
-                                                  continuous_update=False,
-                                                  description='Pixel size of detector (um):',
-                                                  layout=Layout(height="50px"),
-                                                  readout=True,
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  disabled=False),
-
-                                              unused_label_phase_retrieval=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Click below to run the phase retrieval</p>",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              run_phase_retrieval=widgets.ToggleButtons(
-                                                  options=[
-                                                      ('No phase retrieval', False),
-                                                      ('Run batch job', "batch"),
-                                                      ("Run script locally",
-                                                       "local_script"),
-                                                      ("Use operators",
-                                                       "operators"),
-                                                  ],
-                                                  value=False,
-                                                  tooltips=[
-                                                      "Click to be able to change parameters",
-                                                      "Collect parameters to run a job on slurm, will automatically apply a std deviation filter and run modes decomposition, freed the kernel",
-                                                      "Run script on jupyter notebook environment, uses notebook kernel, will be performed in background also but more slowly, good if you cannot use jobs.",
-                                                      r"Use operators on local environment, if using PSF, it is activated after 50\% of RAAR cycles"
-                                                  ],
-                                                  description='Run phase retrieval ...',
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                                                  layout=Layout(
-                                                      width='100%', height="50px"),
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  icon='fast-forward'),
-
-                                              unused_label_run_pynx_tools=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Click below to use a phase retrieval tool</p>",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
-
-                                              run_pynx_tools=widgets.ToggleButtons(
-                                                  options=[
-                                                      ('No tool running', False),
-                                                      ("Modes decomposition",
-                                                       "modes"),
-                                                      ("Filter reconstructions",
-                                                       "filter")
-                                                  ],
-                                                  value=False,
-                                                  tooltips=[
-                                                      "Click to be able to change parameters",
-                                                      "Run modes decomposition in data folder, selects *LLK*.cxi files",
-                                                      "Filter reconstructions"
-                                                  ],
-                                                  description="Choose analysis:",
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                                                  layout=Layout(
-                                                      width='100%', height="50px"),
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  icon='fast-forward')
-                                              )
-        self._list_widgets_pynx.children[1].observe(
-            self.folder_pynx_handler, names="value")
-        self._list_widgets_pynx.children[15].observe(
-            self.pynx_psf_handler, names="value")
-        self._list_widgets_pynx.children[16].observe(
-            self.pynx_peak_shape_handler, names="value")
-        self._list_widgets_pynx.children[-4].observe(
-            self.run_pynx_handler, names="value")
-        self._list_widgets_pynx.children[-2].observe(
-            self.run_pynx_handler, names="value")
-        self.tab_pynx = widgets.VBox([
-            widgets.VBox(self._list_widgets_pynx.children[:6]),
-            widgets.HBox(self._list_widgets_pynx.children[6:8]),
-            self._list_widgets_pynx.children[8],
-            widgets.HBox(self._list_widgets_pynx.children[9:11]),
-            widgets.HBox(self._list_widgets_pynx.children[11:14]),
-            self._list_widgets_pynx.children[14],
-            widgets.HBox(self._list_widgets_pynx.children[15:19]),
-            self._list_widgets_pynx.children[19],
-            self._list_widgets_pynx.children[20],
-            widgets.HBox(self._list_widgets_pynx.children[21:25]),
-            self._list_widgets_pynx.children[25],
-            self._list_widgets_pynx.children[29],
-            widgets.HBox(self._list_widgets_pynx.children[30:34]),
-            widgets.HBox(self._list_widgets_pynx.children[34:37]),
-            self._list_widgets_pynx.children[26],
-            widgets.HBox(self._list_widgets_pynx.children[27:29]),
-            self._list_widgets_pynx.children[-5],
-            self._list_widgets_pynx.children[-4],
-            self._list_widgets_pynx.children[-3],
-            self._list_widgets_pynx.children[-2],
-            self._list_widgets_pynx.children[-1],
-        ])
 
         # Widgets for facet analysis
         self.tab_facet = interactive(self.facet_analysis,
@@ -6666,8 +6664,6 @@ class Interface():
 
             self.beamline_handler(
                 change=self._list_widgets_preprocessing.children[1].value)
-            self.energy_scan_handler(
-                change=self._list_widgets_preprocessing.children[8].value)
             self.bragg_peak_centering_handler(
                 change=self._list_widgets_preprocessing.children[13].value)
             self.reload_data_handler(
@@ -6764,8 +6760,6 @@ class Interface():
 
                 self.beamline_handler(
                     change=self._list_widgets_preprocessing.children[1].value)
-                self.energy_scan_handler(
-                    change=self._list_widgets_preprocessing.children[8].value)
                 self.bragg_peak_centering_handler(
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
@@ -6797,8 +6791,6 @@ class Interface():
 
                 self.beamline_handler(
                     change=self._list_widgets_preprocessing.children[1].value)
-                self.energy_scan_handler(
-                    change=self._list_widgets_preprocessing.children[8].value)
                 self.bragg_peak_centering_handler(
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
