@@ -228,9 +228,9 @@ class Interface():
                                                            tooltip='set it to True for a stack of images acquired without scan, e.g. with ct in a macro, or when there is no spec/log file available',
                                                            icon='check'),
 
-                                                       custom_images=widgets.IntText(
+                                                       custom_images=widgets.Text(
                                                            # np.arange(11353, 11453, 1)  # list of image numbers for the custom_scan
-                                                           value=0,
+                                                           value="[]",
                                                            description='Custom images',
                                                            continuous_update=False,
                                                            disabled=True,
@@ -2927,7 +2927,7 @@ class Interface():
                 print(f"Wrong dict syntax for {p}")
 
             # Set None if we are not using custom scans
-            if not self.custom_scan:
+            if not self.Dataset.custom_scan:
                 self.Dataset.custom_images = None
                 self.Dataset.custom_monitor = None
 
