@@ -14,6 +14,9 @@ setuptools.setup(
                       "gwaihir/data_files/CompareFacetsEvolution.ipynb",
                       "gwaihir/data_files/PhasingNotebook.ipynb",
                       "licence.txt",
+                      "gwaihir/scripts/examples/config_postprocessing_sixs.yml"
+                      "gwaihir/scripts/examples/config_preprocessing_sixs.yml"
+                      "gwaihir/scripts/examples/workflow_sixs.sh"
                       ])],
     url="https://github.com/DSimonne/gwaihir/tree/master",
     classifiers=[
@@ -22,15 +25,12 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     scripts=[
+        "gwaihir/scripts/job_esrf.slurm",
         "gwaihir/scripts/run_correct_angles_detector.py",
         "gwaihir/scripts/run_movetodir.py",
-        "gwaihir/scripts/run_preprocess_bcdi.py",
         "gwaihir/scripts/run_rotate.py",
-        "gwaihir/scripts/run_slice_cxi.py",
-        "gwaihir/scripts/run_std_filter.py",
-        "gwaihir/scripts/run_strain.py",
-        "gwaihir/scripts/job.slurm",
         "gwaihir/scripts/run_slurm_job.sh",
+        "gwaihir/scripts/run_std_filter.py",
     ],
     keywords=["BCDI", "ipywidgets", "PyNX"],
     long_description=long_description,
