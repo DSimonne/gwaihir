@@ -14,7 +14,6 @@ setuptools.setup(
                       "gwaihir/data_files/CompareFacetsEvolution.ipynb",
                       "gwaihir/data_files/PhasingNotebook.ipynb",
                       "licence.txt",
-                      "gwaihir/sixs/alias_dict_2021.txt"
                       ])],
     url="https://github.com/DSimonne/gwaihir/tree/master",
     classifiers=[
