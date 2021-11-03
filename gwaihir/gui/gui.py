@@ -101,77 +101,83 @@ class Interface():
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(self.initialize_directories,
-                                              # Define scan related parameters
-                                              unused_label_scan=widgets.HTML(
-                                                  description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
-                                                  style={
-                                                      'description_width': 'initial'},
-                                                  layout=Layout(width='90%', height="35px")),
+                                                  # Define scan related parameters
+                                                  unused_label_scan=widgets.HTML(
+                                                      description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
+                                                      style={
+                                                          'description_width': 'initial'},
+                                                      layout=Layout(width='90%', height="35px")),
 
-                                              sample_name=widgets.Text(
-                                                  value="S",
-                                                  placeholder="",
-                                                  description='Sample Name',
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  layout=Layout(width='45%'),
-                                                  style={'description_width': 'initial'}),
+                                                  sample_name=widgets.Text(
+                                                      value="S",
+                                                      placeholder="",
+                                                      description='Sample Name',
+                                                      disabled=False,
+                                                      continuous_update=False,
+                                                      layout=Layout(
+                                                          width='45%'),
+                                                      style={'description_width': 'initial'}),
 
-                                              scan=widgets.BoundedIntText(
-                                                  value="01415",
-                                                  description='Scan nb:',
-                                                  min=0,
-                                                  max=9999999,
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  layout=Layout(width='45%'),
-                                                  style={'description_width': 'initial'}),
+                                                  scan=widgets.BoundedIntText(
+                                                      value="01415",
+                                                      description='Scan nb:',
+                                                      min=0,
+                                                      max=9999999,
+                                                      disabled=False,
+                                                      continuous_update=False,
+                                                      layout=Layout(
+                                                          width='45%'),
+                                                      style={'description_width': 'initial'}),
 
-                                              data_dir=widgets.Text(
-                                                  value=os.getcwd() + "/data_dir/",
-                                                  placeholder="Path to data directory",
-                                                  description='Data directory',
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
+                                                  data_dir=widgets.Text(
+                                                      value=os.getcwd() + "/data_dir/",
+                                                      placeholder="Path to data directory",
+                                                      description='Data directory',
+                                                      disabled=False,
+                                                      continuous_update=False,
+                                                      layout=Layout(
+                                                          width='90%'),
+                                                      style={'description_width': 'initial'}),
 
-                                              root_folder=widgets.Text(
-                                                  value=os.getcwd() + "/TestGui/",
-                                                  placeholder="Path to target directory (parent to all scan directories)",
-                                                  description='Target directory',
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  layout=Layout(width='90%'),
-                                                  style={'description_width': 'initial'}),
+                                                  root_folder=widgets.Text(
+                                                      value=os.getcwd() + "/TestGui/",
+                                                      placeholder="Path to target directory (parent to all scan directories)",
+                                                      description='Target directory',
+                                                      disabled=False,
+                                                      continuous_update=False,
+                                                      layout=Layout(
+                                                          width='90%'),
+                                                      style={'description_width': 'initial'}),
 
-                                              comment=widgets.Text(
-                                                  value="",
-                                                  description='Comment',
-                                                  disabled=False,
-                                                  continuous_update=False,
-                                                  layout=Layout(width='90%'),
-                                                  placeholder="Comment regarding Dataset...",
-                                                  style={'description_width': 'initial'}),
+                                                  comment=widgets.Text(
+                                                      value="",
+                                                      description='Comment',
+                                                      disabled=False,
+                                                      continuous_update=False,
+                                                      layout=Layout(
+                                                          width='90%'),
+                                                      placeholder="Comment regarding Dataset...",
+                                                      style={'description_width': 'initial'}),
 
-                                              debug=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Debug',
-                                                  disabled=False,
-                                                  tooltip='True to interact with plots, False to close it automatically',
-                                                  indent=False,
-                                                  continuous_update=False,
-                                                  style={'description_width': 'initial'}),
+                                                  debug=widgets.Checkbox(
+                                                      value=False,
+                                                      description='Debug',
+                                                      disabled=False,
+                                                      tooltip='True to interact with plots, False to close it automatically',
+                                                      indent=False,
+                                                      continuous_update=False,
+                                                      style={'description_width': 'initial'}),
 
-                                              run_dir_init=widgets.ToggleButton(
-                                                  value=False,
-                                                  description='Initialize directories ...',
-                                                  disabled=False,
-                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                                                  icon='step-forward',
-                                                  layout=Layout(width='45%'),
-                                                  style={'description_width': 'initial'}),
-                                              )
+                                                  run_dir_init=widgets.ToggleButton(
+                                                      value=False,
+                                                      description='Initialize directories ...',
+                                                      disabled=False,
+                                                      button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                                                      icon='step-forward',
+                                                      layout=Layout(
+                                                          width='45%'),
+                                                      style={'description_width': 'initial'}),
+                                                  )
         self._list_widgets_init_dir.children[7].observe(
             self.init_handler, names="value")
 
@@ -2430,8 +2436,8 @@ class Interface():
         # Display the final window
         display(self.window)
 
-    
     ######################################## Widgets interactive functions ########################################
+
     def initialize_directories(
         self,
         unused_label_scan,
@@ -2579,7 +2585,6 @@ class Interface():
             except (AttributeError, FileNotFoundError):
                 pass
 
-
             # PyNX folder, refresh values
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
                 "preprocessing/"
@@ -2620,7 +2625,8 @@ class Interface():
                 style={'description_width': 'initial'},
                 icon='step-forward')
 
-            buttons_init = widgets.HBox([button_save_as_cxi, button_reload_previous_data])
+            buttons_init = widgets.HBox(
+                [button_save_as_cxi, button_reload_previous_data])
             display(buttons_init)
 
             @button_save_as_cxi.on_click
@@ -2647,7 +2653,7 @@ class Interface():
                         print(
                             "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
                         self.Dataset.to_cxi(
-                            cxi_filename=self.cxi_filename, 
+                            cxi_filename=self.cxi_filename,
                             reconstruction_filename=self.Dataset.reconstruction_file)
 
                     except AttributeError:
@@ -2676,7 +2682,6 @@ class Interface():
 
                 print("\n#############################################################################################################\n")
 
-
             @button_reload_previous_data.on_click
             def action_button_save_as_cxi(selfbutton):
                 "Create button to reload Dataset object from .cxi file"
@@ -2691,8 +2696,8 @@ class Interface():
         elif not run_dir_init:
             clear_output(True)
 
-
     ################################################ Preprocessing ################################################
+
     def initialize_preprocessing(
         self,
         unused_label_beamline,
@@ -2758,8 +2763,8 @@ class Interface():
         offset_inplane,
         cch1,
         cch2,
-        direct_inplane, # correction
-        direct_outofplane, # correction
+        direct_inplane,  # correction
+        direct_outofplane,  # correction
         detrot,
         tiltazimuth,
         tilt_detector,
@@ -3276,7 +3281,6 @@ class Interface():
         if not init_para:
             clear_output(True)
 
-
     def correct_angles(
         self,
         unused_label_correct,
@@ -3423,8 +3427,8 @@ class Interface():
         if not angles_bool:
             clear_output(True)
 
-
     ############################################### Phase retrieval ###############################################
+
     def initialize_cdi_operator(self, save_as_cxi=True):
         """
         Initialize the cdi operator by processing the possible inputs:
@@ -3636,7 +3640,6 @@ class Interface():
 
         return cdi
 
-
     def initialize_phase_retrieval(
         self,
         unused_label_data,
@@ -3687,7 +3690,7 @@ class Interface():
         Get parameters values from widgets and run phase retrieval
         Possible to run phase retrieval via the CLI (with ot without MPI)
         Or directly in python using the operators.
-        
+
         :param folder: folder in which the raw data files are, and where the output will be saved
         :param iobs: 2D/3D observed diffraction data (intensity).
           Assumed to be corrected and following Poisson statistics, will be converted to float32.
@@ -3779,8 +3782,8 @@ class Interface():
         self.Dataset.fwhm = fwhm
         self.Dataset.eta = eta
         self.Dataset.update_psf = update_psf
-        self.Dataset.use_operators = use_operators # todo delete
-        self.Dataset.operator_chain = operator_chain # todo delete
+        self.Dataset.use_operators = use_operators  # todo delete
+        self.Dataset.operator_chain = operator_chain  # todo delete
         self.Dataset.nb_raar = nb_raar
         self.Dataset.nb_hio = nb_hio
         self.Dataset.nb_er = nb_er
@@ -3789,7 +3792,7 @@ class Interface():
         self.Dataset.filter_criteria = filter_criteria
         self.Dataset.nb_run_keep = nb_run_keep
         self.Dataset.live_plot = live_plot
-        # To do 
+        # To do
         # self.Dataset.zero_mask = zero_mask
         # self.Dataset.crop_output = crop_output
         self.Dataset.positivity = positivity
@@ -4199,7 +4202,6 @@ class Interface():
         if not self.run_phase_retrieval and not self.run_pynx_tools:
             clear_output(True)
 
-
     @staticmethod
     def filter_reconstructions(
         folder,
@@ -4322,7 +4324,6 @@ class Interface():
         except KeyboardInterrupt:
             print("cxi files filtering stopped by user ...")
 
-
     def run_modes_decomposition(
         self,
         folder,
@@ -4351,10 +4352,9 @@ class Interface():
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
 
-
     def save_as_cxi(
-        self, 
-        cdi_operator, 
+        self,
+        cdi_operator,
         path_to_cxi
     ):
         """
@@ -4465,8 +4465,8 @@ class Interface():
             process_parameters=self.params,
         )
 
-
     ############################################### Postprocessing ################################################
+
     def initialize_postprocessing(
         self,
         unused_label_averaging,
@@ -5027,7 +5027,6 @@ class Interface():
 
             clear_output(True)
 
-
     def facet_analysis(
         self,
         unused_label_facet,
@@ -5342,7 +5341,6 @@ class Interface():
         with open(fname, "w") as v:
             for line in config_file:
                 v.write(line+"\n")
-
 
     @staticmethod
     def display_readme(contents):
@@ -6282,7 +6280,6 @@ class Interface():
                  (only cubic lattices are supported).
                      """))
 
-
     def display_logs(
         self,
         unused_label_logs,
@@ -6342,7 +6339,6 @@ class Interface():
         else:
             self.tab_logs.children[1].disabled = False
             clear_output(True)
-
 
     def load_data(
         self,
@@ -6693,7 +6689,6 @@ class Interface():
             if change not in ["SIXS_2019", "ID01"]:
                 for w in self._list_widgets_preprocessing.children[2:7]:
                     w.disabled = False
-
 
     def bragg_peak_centering_handler(self, change):
         "Handles changes related to the centering of the Bragg peak"
