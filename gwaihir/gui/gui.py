@@ -23,10 +23,8 @@ from IPython.display import display, Markdown, Latex, clear_output
 
 # gwaihir package
 import gwaihir
-from gwaihir import plot
-# from gwaihir.runner import preprocess, correct_angles, strain, transfer_matrix
+from gwaihir import plot, support
 from gwaihir.gui import gui_iterable
-from gwaihir.support import SupportTools
 
 # bcdi package
 from bcdi.utils.utilities import bin_data
@@ -4827,14 +4825,265 @@ class Interface():
             display(Markdown("""
                 Prepare experimental data for Bragg CDI phasing: crop/pad, center, mask, normalize and
                 filter the data.
+
                 Beamlines currently supported: ESRF ID01, SOLEIL CRISTAL, SOLEIL SIXS, PETRAIII P10 and
                 APS 34ID-C.
-                Output: data and mask as numpy .npz or Matlab .mat 3D arrays for phasing
-                File structure should be (e.g. scan 1):
+
+                The directory structure expected by default is (e.g. scan 1):
                 specfile, hotpixels file and flatfield file in:    /rootdir/
                 data in:                                           /rootdir/S1/data/
-                output files saved in:   /rootdir/S1/preprocessing/ or /rootdir/S1/pynx/ depending on the
-                'use_rawdata' option
+
+                output files saved in:   /rootdir/S1/pynxraw/ or /rootdir/S1/pynx/ depending on the
+                'use_rawdata' option.
+
+                If you directory structure is different, you can use the parameter data_dir to indicate
+                where the data is.
+
+                Usage:
+
+                 - command line:
+                   `python path_to/bcdi_preprocess_BCDI.py --config_file path_to/config.yml`
+                 - directly from a code editor:
+                   update the constant CONFIG_FILE at the top of the file
+
+                    Parameters related to path names:
+
+                    :param scans: e.g. 11
+                     scan number or list of scan numbers
+                    :param root_folder: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/"
+                     folder of the experiment, where all scans are stored
+                    :param save_dir: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/test/"
+                     images will be saved here, leave it to None otherwise
+                    :param data_dir: e.g. None
+                     use this to override the beamline default search path for the data
+                    :param sample_name: e.g. "S"
+                     str or list of str of sample names (string in front of the scan number in the
+                     folder name). If only one name is indicated, it will be repeated to match the
+                     number of scans.
+                    :param comment: string use in filenames when saving
+                    :param debug: e.g. False
+                     True to see plots
+
+
+                    Parameters used in the interactive masking GUI:
+
+                    :param flag_interact: e.g. True
+                     True to interact with plots, False to close it automatically
+                    :param background_plot: e.g. "0.5"
+                     background color for the GUI in level of grey in [0,1], 0 being dark. For visual
+                     comfort during interactive masking.
+                    :param backend: e.g. "Qt5Agg"
+                     Backend used in script, change to "Agg" to make sure the figures are saved, not
+                     compaticle with interactive masking. Other possibilities are
+                     'module://matplotlib_inline.backend_inline'
+                     default value is "Qt5Agg"
+
+                    Parameters related to data cropping/padding/centering #
+
+                    :param centering_method: e.g. "max"
+                     Bragg peak determination: 'max' or 'com', 'max' is better usually. It will be
+                     overridden by 'fix_bragg' if not empty
+                    :param fix_bragg: e.g. [121, 321, 256]
+                     Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector.
+                     It is useful if hotpixels or intense aliens. Leave None otherwise.
+                    :param fix_size: e.g. [0, 256, 10, 240, 50, 350]
+                     crop the array to that predefined size considering the full detector.
+                     [zstart, zstop, ystart, ystop, xstart, xstop], ROI will be defaulted to [] if
+                     fix_size is provided. Leave None otherwise
+                    :param center_fft: e.g. "skip"
+                     how to crop/pad/center the data, available options: 'crop_sym_ZYX','crop_asym_ZYX',
+                     'pad_asym_Z_crop_sym_YX', 'pad_sym_Z_crop_asym_YX', 'pad_sym_Z', 'pad_asym_Z',
+                     'pad_sym_ZYX','pad_asym_ZYX' or 'skip'
+                    :param pad_size: e.g. [256, 512, 512]
+                     Use this to pad the array. Used in 'pad_sym_Z_crop_sym_YX', 'pad_sym_Z' and
+                     'pad_sym_ZYX'. Leave None otherwise.
+
+                    Parameters for data filtering
+
+                    :param mask_zero_event: e.g. False
+                    mask pixels where the sum along the rocking curve is zero may be dead pixels
+                    :param median_filter: e.g. "skip"
+                     which filter to apply, available filters:
+
+                     - 'median': to apply a med2filter [3,3]
+                     - 'interp_isolated': to interpolate isolated empty pixels based on 'medfilt_order'
+                       parameter
+                     - 'mask_isolated': mask isolated empty pixels
+                     - 'skip': skip filtering
+
+                    :param median_filter_order: e.g. 7
+                     minimum number of non-zero neighboring pixels to apply filtering
+
+                    Parameters used when reloading processed data
+
+                    :param reload_previous: e.g. False
+                     True to resume a previous masking (load data and mask)
+                    :param reload_orthogonal: e.g. False
+                     True if the reloaded data is already intepolated in an orthonormal frame
+                    :param preprocessing_binning: e.g. [1, 1, 1]
+                     binning factors in each dimension of the binned data to be reloaded
+
+                    Options for saving:
+
+                    :param save_rawdata: e.g. False
+                     True to save also the raw data when use_rawdata is False
+                    :param save_to_npz: e.g. True
+                     True to save the processed data in npz format
+                    :param save_to_mat: e.g. False
+                     True to save also in .mat format
+                    :param save_to_vti: e.g. False
+                     True to save the orthogonalized diffraction pattern to VTK file
+                    :param save_as_int: e.g. False
+                     True to save the result as an array of integers (save space)
+
+                    Parameters for the beamline:
+
+                    :param beamline: e.g. "ID01"
+                     name of the beamline, used for data loading and normalization by monitor
+                    :param actuators: e.g. {'rocking_angle': 'actuator_1_1'}
+                     optional dictionary that can be used to define the entries corresponding to
+                     actuators in data files (useful at CRISTAL where the location of data keeps
+                     changing, or to declare a non-standard monitor)
+                    :param is_series: e.g. True
+                     specific to series measurement at P10
+                    :param rocking_angle: e.g. "outofplane"
+                     "outofplane" for a sample rotation around x outboard, "inplane" for a sample
+                     rotation around y vertical up, "energy"
+                    :param specfile_name: e.g. "l5.spec"
+                     beamline-dependent parameter, use the following template:
+
+                     - template for ID01 and 34ID: name of the spec file if it is at the default
+                      location (in root_folder) or full path to the spec file
+                     - template for SIXS: full path of the alias dictionnary or None to use the one in
+                      the package folder
+                     - for P10, either None (if you are using the same directory structure as the
+                      beamline) or the full path to the .fio file
+                     - template for all other beamlines: None
+
+                    Parameters for custom scans:
+
+                    :param custom_scan: e.g. False
+                     True for a stack of images acquired without scan, e.g. with ct in a
+                     macro, or when there is no spec/log file available
+                    :param custom_images: list of image numbers for the custom_scan, None otherwise
+                    :param custom_monitor: list of monitor values for normalization for the custom_scan,
+                     None otherwise
+
+                    Parameters for the detector:
+
+                    :param detector: e.g. "Maxipix"
+                     name of the detector
+                    :param phasing_binning: e.g. [1, 2, 2]
+                     binning to apply to the data (stacking dimension, detector vertical axis, detector
+                     horizontal axis)
+                    :param linearity_func: name of the linearity correction for the detector, leave None
+                     otherwise.
+                    :param x_bragg: e.g. 1577
+                     horizontal pixel number of the Bragg peak, used for the definition of roi_detector
+                     (see below). Leave None otherwise.
+                    :param y_bragg: e.g. 833
+                     vertical pixel number of the Bragg peak, used for the definition of roi_detector
+                     (see below). Leave None otherwise.
+                    :param roi_detector: e.g.[0, 250, 10, 210]
+                     region of interest of the detector to load. If "x_bragg" or "y_bragg" are not None,
+                     it will consider that the current values in roi_detector define a window around the
+                     Bragg peak position and the final output will be:
+                     [y_bragg - roi_detector[0], y_bragg + roi_detector[1],
+                     x_bragg - roi_detector[2], x_bragg + roi_detector[3]]. Leave None to use the full
+                     detector. Use with center_fft='skip' if you want this exact size for the output.
+                    :param normalize_flux: e.g. "monitor"
+                     'monitor' to normalize the intensity by the default monitor values,
+                     'skip' to do nothing
+                    :param photon_threshold: e.g. 0
+                     voxels with a smaller intensity will be set to 0.
+                    :param photon_filter: e.g. "loading"
+                     'loading' or 'postprocessing', when the photon threshold should be applied.
+                     If 'loading', it is applied before binning; if 'postprocessing', it is applied at
+                     the end of the script before saving
+                    :param bin_during_loading: e.g. False
+                     True to bin during loading, faster
+                    :param frames_pattern:  list of int, of length data.shape[0].
+                     If frames_pattern is 0 at index, the frame at data[index] will be skipped, if 1
+                     the frame will be added to the stack. Use this if you need to remove some frames
+                     and you know it in advance.
+                    :param background_file: non-empty file path or None
+                    :param hotpixels_file: non-empty file path or None
+                    :param flatfield_file: non-empty file path or None
+                    :param template_imagefile: e.g. "data_mpx4_%05d.edf.gz"
+                     use one of the following template:
+
+                     - template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'
+                     - template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs'
+                     - template for SIXS_2019: 'spare_ascan_mu_%05d.nxs'
+                     - template for Cristal: 'S%d.nxs'
+                     - template for P10: '_master.h5'
+                     - template for NANOMAX: '%06d.h5'
+                     - template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'
+
+                    Parameters below if you want to orthogonalize the data before phasing:
+
+                    :param use_rawdata: e.g. True
+                     False for using data gridded in laboratory frame, True for using data in detector
+                     frame
+                    :param interpolation_method: e.g. "xrayutilities"
+                     'xrayutilities' or 'linearization'
+                    :param fill_value_mask: e.g. 0
+                     0 (not masked) or 1 (masked). It will define how the pixels outside of the data
+                     range are processed during the interpolation. Because of the large number of masked
+                     pixels, phase retrieval converges better if the pixels are not masked (0 intensity
+                     imposed). The data is by default set to 0 outside of the defined range.
+                    :param beam_direction: e.g. [1, 0, 0]
+                     beam direction in the laboratory frame (downstream, vertical up, outboard)
+                    :param sample_offsets: e.g. None
+                     tuple of offsets in degrees of the sample for each sample circle (outer first).
+                     convention: the sample offsets will be subtracted to the motor values. Leave None
+                     if there is no offset.
+                    :param sdd: e.g. 0.50678
+                     in m, sample to detector distance in m
+                    :param energy: e.g. 9000
+                     X-ray energy in eV, it can be a number or a list in case of energy scans.
+                    :param custom_motors: e.g. {"mu": 0, "phi": -15.98, "chi": 90, "theta": 0,
+                     "delta": -0.5685, "gamma": 33.3147}
+                     use this to declare motor positions if there is not log file, None otherwise
+
+                    Parameters when orthogonalizing the data before phasing  using the linearized
+                    transformation matrix:
+
+                    :param align_q: e.g. True
+                     if True it rotates the crystal to align q, along one axis of the array. It is used
+                     only when interp_method is 'linearization'
+                    :param ref_axis_q: e.g. "y"  # q will be aligned along that axis
+                    :param outofplane_angle: e.g. 42.6093
+                     detector angle in deg (rotation around x outboard, typically delta), corrected for
+                     the direct beam position. Leave None to use the uncorrected position.
+                    :param inplane_angle: e.g. -0.5783
+                     detector angle in deg(rotation around y vertical up, typically gamma), corrected
+                     for the direct beam position. Leave None to use the uncorrected position.
+
+                    Parameters when orthogonalizing the data before phasing  using xrayutilities.
+                    xrayutilities uses the xyz crystal frame (for zero incident angle x is downstream,
+                    y outboard, and z vertical up):
+
+                    :param sample_inplane: e.g. [1, 0, 0]
+                     sample inplane reference direction along the beam at 0 angles in xrayutilities
+                     frame
+                    :param sample_outofplane: e.g. [0, 0, 1]
+                     surface normal of the sample at 0 angles in xrayutilities frame
+                    :param offset_inplane: e.g. 0
+                     outer detector angle offset as determined by xrayutilities area detector
+                     initialization
+                    :param cch1: e.g. 208
+                     direct beam vertical position in the full unbinned detector for xrayutilities 2D
+                     detector calibration
+                    :param cch2: e.g. 154
+                     direct beam horizontal position in the full unbinned detector for xrayutilities 2D
+                     detector calibration
+                    :param detrot: e.g. 0
+                     detrot parameter from xrayutilities 2D detector calibration
+                    :param tiltazimuth: e.g. 360
+                     tiltazimuth parameter from xrayutilities 2D detector calibration
+                    :param tilt_detector: e.g. 0
+                     tilt parameter from xrayutilities 2D detector calibration
                 """))
 
         if contents == "Phase retrieval":
@@ -5166,32 +5415,339 @@ class Interface():
                 Interpolate the output of the phase retrieval into an orthonormal frame,
                 and calculate the strain component along the direction of the experimental diffusion
                 vector q.
+
                 Input: complex amplitude array, output from a phase retrieval program.
                 Output: data in an orthonormal frame (laboratory or crystal frame), amp_disp_strain
                 array.The disp array should be divided by q to get the displacement (disp = -1*phase
                 here).
+
                 Laboratory frame: z downstream, y vertical, x outboard (CXI convention)
                 Crystal reciprocal frame: qx downstream, qz vertical, qy outboard
                 Detector convention: when out_of_plane angle=0   Y=-y , when in_plane angle=0   X=x
+
                 In arrays, when plotting the first parameter is the row (vertical axis), and the
                 second the column (horizontal axis). Therefore the data structure is data[qx, qz,
                 qy] for reciprocal space, or data[z, y, x] for real space
+
+                Usage:
+
+                 - from the command line:
+                   `python path_to/bcdi_strain.py --config_file path_to/config.yml`
+                 - directly from a code editor:
+                   update the constant CONFIG_FILE at the top of the file
+
+                    Parameters related to path names:
+
+                    :param scan: e.g. 11
+                     scan number
+                    :param root_folder: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/"
+                     folder of the experiment, where all scans are stored
+                    :param save_dir: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/test/"
+                     images will be saved here, leave it to None otherwise
+                    :param data_dir: e.g. None
+                     use this to override the beamline default search path for the data
+                    :param sample_name: e.g. "S"
+                     str or list of str of sample names (string in front of the scan number in the
+                     folder name). If only one name is indicated, it will be repeated to match the
+                     number of scans.
+                    :param comment: string use in filenames when saving
+                    :param debug: e.g. False
+                     True to see plots
+                    :param reconstruction_file: e.g. "modes.h5"
+                     path to a reconstruction file, to avoid opening a pop-up window
+
+                    Parameters used in the interactive masking GUI:
+
+                    :param backend: e.g. "Qt5Agg"
+                     Backend used in script, change to "Agg" to make sure the figures are saved, not
+                     compaticle with interactive masking. Other possibilities are
+                     'module://matplotlib_inline.backend_inline'
+                     default value is "Qt5Agg"
+
+                    Parameters used when averaging several reconstruction:
+
+                    :param sort_method: e.g. "variance/mean"
+                     'mean_amplitude' or 'variance' or 'variance/mean' or 'volume', metric for averaging
+                    :param correlation_threshold: e.g. 0.90
+                     minimum correlation between two arrays to average them
+
+                    Parameters related to centering:
+
+                    :param centering_method: e.g. "max_com"
+                    'com' (center of mass), 'max', 'max_com' (max then com), 'do_nothing'
+                    :param roll_modes: e.g. [0, 0, 0]
+                    correct a roll of few pixels after the decomposition into modes in PyNX
+                    axis=(0, 1, 2)
+
+                    Prameters relative to the FFT window and voxel sizes:
+
+                    :param original_size: e.g. [150, 256, 500]
+                     size of the FFT array before binning. It will be modified to take into account
+                     binning during phasing automatically. Leave it to None if the shape did not change.
+                    :param phasing_binning: e.g. [1, 1, 1]
+                     binning factor applied during phase retrieval
+                    :param preprocessing_binning: e.g. [1, 2, 2]
+                     binning factors in each dimension used in preprocessing (not phase retrieval)
+                    :param output_size: e.g. [100, 100, 100]
+                     (z, y, x) Fix the size of the output array, leave None to use the object size
+                    :param keep_size: e.g. False
+                     True to keep the initial array size for orthogonalization (slower), it will be
+                     cropped otherwise
+                    :param fix_voxel: e.g. 10
+                     voxel size in nm for the interpolation during the geometrical transformation.
+                     If a single value is provided, the voxel size will be identical in all 3
+                     directions. Set it to None to use the default voxel size (calculated from q values,
+                     it will be different in each dimension).
+
+                    Parameters related to the strain calculation:
+
+                    :param data_frame: e.g. "detector"
+                     in which frame is defined the input data, available options:
+
+                     - 'crystal' if the data was interpolated into the crystal frame using
+                       xrayutilities or (transformation matrix + align_q=True)
+                     - 'laboratory' if the data was interpolated into the laboratory frame using
+                       the transformation matrix (align_q: False)
+                     - 'detector' if the data is still in the detector frame
+
+                    :param ref_axis_q: e.g. "y"
+                     axis along which q will be aligned (data_frame= 'detector' or 'laboratory') or is
+                     already aligned (data_frame='crystal')
+                    :param save_frame: e.g. "laboratory"
+                     in which frame should be saved the data, available options:
+
+                     - 'crystal' to save the data with q aligned along ref_axis_q
+                     - 'laboratory' to save the data in the laboratory frame (experimental geometry)
+                     - 'lab_flat_sample' to save the data in the laboratory frame, with all sample
+                       angles rotated back to 0. The rotations for 'laboratory' and 'lab_flat_sample'
+                       are realized after the strain calculation (which is always done in the crystal
+                       frame along ref_axis_q)
+
+                    :param isosurface_strain: e.g. 0.2
+                     threshold use for removing the outer layer (the strain is undefined at the exact
+                     surface voxel)
+                    :param strain_method: e.g. "default"
+                     how to calculate the strain, available options:
+
+                     - 'default': use the single value calculated from the gradient of the phase
+                     - 'defect': it will offset the phase in a loop and keep the smallest magnitude
+                       value for the strain. See: F. Hofmann et al. PhysRevMaterials 4, 013801 (2020)
+
+                    Parameters for the beamline:
+
+                    :param beamline: e.g. "ID01"
+                     name of the beamline, used for data loading and normalization by monitor
+                    :param actuators: e.g. {'rocking_angle': 'actuator_1_1'}
+                     optional dictionary that can be used to define the entries corresponding to
+                     actuators in data files (useful at CRISTAL where the location of data keeps
+                     changing, or to declare a non-standard monitor)
+                    :param is_series: e.g. True
+                     specific to series measurement at P10
+                    :param custom_scan: e.g. False
+                     True for a stack of images acquired without scan, e.g. with ct in a
+                     macro, or when there is no spec/log file available
+                    :param custom_images: list of image numbers for the custom_scan, None otherwise
+                    :param custom_monitor: list of monitor values for normalization for the custom_scan,
+                     None otherwise
+                    :param rocking_angle: e.g. "outofplane"
+                     "outofplane" for a sample rotation around x outboard, "inplane" for a sample
+                     rotation around y vertical up
+                    :param sdd: e.g. 0.50678
+                     in m, sample to detector distance in m
+                    :param energy: e.g. 9000
+                     X-ray energy in eV
+                    :param beam_direction: e.g. [1, 0, 0]
+                     beam direction in the laboratory frame (downstream, vertical up, outboard)
+                    :param sample_offsets: e.g. None
+                     tuple of offsets in degrees of the sample for each sample circle (outer first).
+                     convention: the sample offsets will be subtracted to the motor values. Leave None
+                     if there is no offset.
+                    :param tilt_angle: e.g. 0.00537
+                     angular step size in degrees for the rocking angle
+                    :param outofplane_angle: e.g. 42.6093
+                     detector angle in deg (rotation around x outboard, typically delta), corrected for
+                     the direct beam position. Leave None to use the uncorrected position.
+                    :param inplane_angle: e.g. -0.5783
+                     detector angle in deg(rotation around y vertical up, typically gamma), corrected
+                     for the direct beam position. Leave None to use the uncorrected position.
+                    :param specfile_name: e.g. "l5.spec"
+                     beamline-dependent parameter, use the following template:
+
+                     - template for ID01 and 34ID: name of the spec file if it is at the default
+                      location (in root_folder) or full path to the spec file
+                     - template for SIXS: full path of the alias dictionnary or None to use the one in
+                      the package folder
+                     - for P10, either None (if you are using the same directory structure as the
+                      beamline) or the full path to the .fio file
+                     - template for all other beamlines: None
+
+                    Parameters for custom scans:
+
+                    :param custom_scan: e.g. False
+                     True for a stack of images acquired without scan, e.g. with ct in a
+                     macro, or when there is no spec/log file available
+                    :param custom_motors: e.g. {"delta": 5.5, "gamma": 42.2, "theta": 1.1, "phi": 0}
+                     dictionary providing the goniometer positions of the beamline
+
+                    Parameters for the detector:
+
+                    :param detector: e.g. "Maxipix"
+                     name of the detector
+                    :param pixel_size: e.g. 100e-6
+                     use this to declare the pixel size of the "Dummy" detector if different from 55e-6
+                    :param template_imagefile: e.g. "data_mpx4_%05d.edf.gz"
+                     use one of the following template:
+
+                     - template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'
+                     - template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs'
+                     - template for SIXS_2019: 'spare_ascan_mu_%05d.nxs'
+                     - template for Cristal: 'S%d.nxs'
+                     - template for P10: '_master.h5'
+                     - template for NANOMAX: '%06d.h5'
+                     - template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'
+
+                    Parameters related to the refraction correction:
+
+                    :param correct_refraction: e.g. True
+                     True for correcting the phase shift due to refraction
+                    :param optical_path_method: e.g. "threshold"
+                     'threshold' or 'defect', if 'threshold' it uses isosurface_strain to define the
+                     support  for the optical path calculation, if 'defect' (holes) it tries to remove
+                     only outer layers even if the amplitude is lower than isosurface_strain inside
+                     the crystal
+                    :param dispersion: e.g. 5.0328e-05
+                     delta value used for refraction correction, for Pt:  3.0761E-05 @ 10300eV,
+                     5.0328E-05 @ 8170eV, 3.2880E-05 @ 9994eV, 4.1184E-05 @ 8994eV, 5.2647E-05 @ 7994eV,
+                     4.6353E-05 @ 8500eV / Ge 1.4718E-05 @ 8keV
+                    :param absorption: e.g. 4.1969e-06
+                     beta value, for Pt:  2.0982E-06 @ 10300eV, 4.8341E-06 @ 8170eV,
+                     2.3486E-06 @ 9994eV, 3.4298E-06 @ 8994eV, 5.2245E-06 @ 7994eV, 4.1969E-06 @ 8500eV
+                    :param threshold_unwrap_refraction: e.g. 0.05
+                     threshold used to calculate the optical path. The threshold for refraction
+                     correction should be low, to correct for an object larger than the real one,
+                     otherwise it messes up the phase
+
+                    Parameters related to the phase:
+
+                    :param simulation: e.g. False
+                     True if it is a simulation, the parameter invert_phase will be set to 0 (see below)
+                    :param invert_phase: e.g. True
+                    True for the displacement to have the right sign (FFT convention), it is False only
+                    for simulations
+                    :param flip_reconstruction: e.g. True
+                     True if you want to get the conjugate object
+                    :param phase_ramp_removal: e.g. "gradient"
+                     'gradient' or 'upsampling', 'gradient' is much faster
+                    :param threshold_gradient: e.g. 1.0
+                     upper threshold of the gradient of the phase, use for ramp removal
+                    :param phase_offset: e.g. 0
+                     manual offset to add to the phase, should be 0 in most cases
+                    :param phase_offset_origin: e.g. [12, 32, 65]
+                     the phase at this voxel will be set to phase_offset, leave None to use the default
+                     position computed using offset_method (see below)
+                    :param offset_method: e.g. "mean"
+                     'com' (center of mass) or 'mean', method for determining the phase offset origin
+
+                    Parameters related to data visualization:
+
+                    :param debug: e.g. False
+                     True to show all plots for debugging
+                    :param align_axis: e.g. False
+                     True to rotate the crystal to align axis_to_align along ref_axis for visualization.
+                     This is done after the calculation of the strain and has no effect on it.
+                    :param ref_axis: e.g. "y"
+                     it will align axis_to_align to that axis if align_axis is True
+                    :param axis_to_align: e.g. [-0.01166, 0.9573, -0.2887]
+                     axis to align with ref_axis in the order x y z (axis 2, axis 1, axis 0)
+                    :param strain_range: e.g. 0.001
+                     range of the colorbar for strain plots
+                    :param phase_range: e.g. 0.4
+                     range of the colorbar for phase plots
+                    :param grey_background: e.g. True
+                     True to set the background to grey in phase and strain plots
+                    :param tick_spacing: e.g. 50
+                     spacing between axis ticks in plots, in nm
+                    :param tick_direction: e.g. "inout"
+                     direction of the ticks in plots: 'out', 'in', 'inout'
+                    :param tick_length: e.g. 3
+                     length of the ticks in plots
+                    :param tick_width: e.g. 1
+                     width of the ticks in plots
+
+                    Parameters for temperature estimation:
+
+                    :param get_temperature: e.g. False
+                     True to estimate the temperature, only available for platinum at the moment
+                    :param reflection: e.g. [1, 1, 1]
+                    measured reflection, use for estimating the temperature from the lattice parameter
+                    :param reference_spacing: 3.9236
+                     for calibrating the thermal expansion, if None it is fixed to the one of Platinum
+                     3.9236/norm(reflection)
+                    :param reference_temperature: 325
+                     temperature in Kelvins used to calibrate the thermal expansion, if None it is fixed
+                     to 293.15K (room temperature)
+
+
+                    Parameters for averaging several reconstructed objects:
+
+                    :param averaging_space: e.g. "reciprocal_space"
+                     in which space to average, 'direct_space' or 'reciprocal_space'
+                    :param threshold_avg: e.g. 0.90
+                     minimum correlation between arrays for averaging
+
+                    Parameters for phase averaging or apodization:
+
+                    :param half_width_avg_phase: e.g. 0
+                     (width-1)/2 of the averaging window for the phase, 0 means no phase averaging
+                    :param apodize: e.g. False
+                     True to multiply the diffraction pattern by a filtering window
+                    :param apodization_window: e.g. "blackman"
+                     filtering window, multivariate 'normal' or 'tukey' or 'blackman'
+                    :param apodization_mu: e.g. [0.0, 0.0, 0.0]
+                     mu of the gaussian window
+                    :param apodization_sigma: e.g. [0.30, 0.30, 0.30]
+                     sigma of the gaussian window
+                    :param apodization_alpha: e.g. [1.0, 1.0, 1.0]
+                     shape parameter of the tukey window
+
+                    Parameters related to saving:
+
+                    :param save_rawdata: e.g. False
+                     True to save the amp-phase.vti before orthogonalization
+                    :param save_support: e.g. False
+                     True to save the non-orthogonal support for later phase retrieval
+                    :param save: e.g. True
+                     True to save amp.npz, phase.npz, strain.npz and vtk files
                 """))
 
         if contents == "Facet analysis":
             clear_output(True)
             display(Markdown("""
                 Import and stores data output of facet analyzer plugin for further analysis.
-                Extract strain and displacements at facets, and retrieves the correct facet normals based on a user input.
-                Needs a vtk file extracted from the FacetAnalyser plugin of ParaView (see gwaihir repository for further info)
-                acknowledgements: mrichard@esrf.fr & maxime.dupraz@esrf.fr
-                original tutorial: http://forrestbao.blogspot.com/2011/12/reading-vtk-files-in-python-via-python.html
 
-                vtk file should have been saved in in Sxxxx/postprocessing
-                Analysis output in Sxxxx/postprocessing/facet_analysis
+                Extract the strain component and the displacement on the facets, and retrieves the
+                correct facet normals based on a user input (geometric transformation into the
+                crystal frame). It requries as input a VTK file extracted from the FacetAnalyser
+                plugin from ParaView. See: https://doi.org/10.1016/j.ultramic.2012.07.024
 
-                Several plotting options are attributes of this class, feel free to change them (cmap, strain_range, disp_range_avg, disp_range, strain_range_avg, comment, title_fontsize, axes_fontsize, legend_fontsize, ticks_fontsize)
-                """))
+                Original tutorial on how to open vtk files:
+                http://forrestbao.blogspot.com/2011/12/reading-vtk-files-in-python-via-python.html
+
+                Expected directory structure:
+                 - vtk file should have been saved in in Sxxxx/postprocessing
+                 - the analysis output will be saved in Sxxxx/postprocessing/facet_analysis
+
+                Several plotting options are attributes of this class, feel free to change them
+                (cmap, strain_range, disp_range_avg, disp_range, strain_range_avg, comment,
+                title_fontsize, axes_fontsize, legend_fontsize, ticks_fontsize)
+
+                :param filename: str, name of the VTK file
+                :param pathdir: str, path to the VTK file
+                :param savedir: str, path where to save results. If None, they will be saved in
+                 pathdir/facets_analysis
+                :param lattice: float, atomic spacing of the material in angstroms
+                 (only cubic lattices are supported).
+                     """))
 
     def display_logs(self,
                      unused_label_logs,
@@ -5269,7 +5825,7 @@ class Interface():
                 w.disabled = True
 
             # Initialize class
-            sup = SupportTools(path_to_data=file_list)
+            sup = support.SupportTools(path_to_data=file_list)
 
             # Interactive function to loadt threshold value
             window_support = interactive(sup.compute_support,
@@ -5313,7 +5869,7 @@ class Interface():
                 w.disabled = True
 
             # Initialize class
-            sup = SupportTools(path_to_data=file_list)
+            sup = support.SupportTools(path_to_data=file_list)
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
@@ -5324,7 +5880,7 @@ class Interface():
                 w.disabled = True
 
             # Initialize class
-            sup = SupportTools(path_to_support=file_list)
+            sup = support.SupportTools(path_to_support=file_list)
 
             # Interactive function to loadt threshold value
             window_support = interactive(sup.gaussian_convolution,
