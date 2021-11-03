@@ -14,9 +14,9 @@ setuptools.setup(
                       "gwaihir/data_files/CompareFacetsEvolution.ipynb",
                       "gwaihir/data_files/PhasingNotebook.ipynb",
                       "licence.txt",
-                      "gwaihir/scripts/examples/config_postprocessing_sixs.yml"
-                      "gwaihir/scripts/examples/config_preprocessing_sixs.yml"
-                      "gwaihir/scripts/examples/workflow_sixs.sh"
+                      "gwaihir/scripts/examples/config_postprocessing_sixs.yml",
+                      "gwaihir/scripts/examples/config_preprocessing_sixs.yml",
+                      "gwaihir/scripts/examples/workflow_sixs.sh",
                       ])],
     url="https://github.com/DSimonne/gwaihir/tree/master",
     classifiers=[

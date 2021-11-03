@@ -230,7 +230,7 @@ class Interface():
 
                                                        custom_images=widgets.IntText(
                                                            # np.arange(11353, 11453, 1)  # list of image numbers for the custom_scan
-                                                           value=3,
+                                                           value=0,
                                                            description='Custom images',
                                                            continuous_update=False,
                                                            disabled=True,
@@ -238,7 +238,7 @@ class Interface():
 
                                                        custom_monitor=widgets.IntText(
                                                            # np.ones(51),  # monitor values for normalization for the custom_scan
-                                                           value=51,
+                                                           value=0,
                                                            description='Custom monitor',
                                                            continuous_update=False,
                                                            disabled=True,
@@ -2824,7 +2824,7 @@ class Interface():
             self.Dataset.actuators = actuators
             self.Dataset.is_series = is_series
             self.Dataset.custom_scan = custom_scan
-            self.Dataset.custom_images = [custom_images]
+            self.Dataset.custom_images = custom_images
             self.Dataset.custom_monitor = custom_monitor
             self.Dataset.rocking_angle = rocking_angle
             self.Dataset.follow_bragg = follow_bragg
@@ -2866,12 +2866,8 @@ class Interface():
             self.Dataset.bin_during_loading = True
             self.Dataset.frames_pattern = None
 
-            # Temporary fix TODO
-            self.Dataset.custom_images = None
-            self.Dataset.custom_monitor = None
-
             # Extract dict, list and tuple from strings
-            list_parameters = ["fix_bragg",
+            list_parameters = ["fix_bragg", "custom_images",
                                "fix_size", "pad_size", "roi_detector"]
 
             tuple_parameters = ["phasing_binning", "preprocessing_binning", "beam_direction",
@@ -2914,6 +2910,11 @@ class Interface():
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 print(f"Wrong dict syntax for {p}")
+
+            # Set None if we are not using custom scans
+            if not self.custom_scan:
+                self.Dataset.custom_images = None
+                self.Dataset.custom_monitor = None
 
             # Empty parameters are set to None (bcdi syntax)
             if self.Dataset.background_file == "":

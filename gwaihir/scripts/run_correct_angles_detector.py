@@ -11,7 +11,7 @@ from gwaihir.runner import correct_angles
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from gwaihir.sixs import ReadNxs4 as rd
+from bcdi.preprocessing import ReadNxs3 as rd
 import ast
 import sys
 import os
