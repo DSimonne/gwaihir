@@ -10,7 +10,7 @@ On the contrary, if you follow the github changes on the dev branchm you will ha
 # Installing different packages
 
 First, I advise you to create a Packages directory to keep these.
-Secondly, I advise you to create a virtual environment to jelp with debogging, and so that once everything works, you don't update a package by mistake. To do so please follow the following steps:
+Secondly, I advise you to create a virtual environment to help with debogging, and so that once everything works, you don't update a package by mistake. To do so please follow the following steps:
 
 ## Create a virtual environment
 
@@ -86,3 +86,16 @@ Demande GPU
 * p9_3.8_stable : optimised for BCDI, gwaihir and PyNX, stable version
 * p9.pynx-devel : fonctionne pour pynx, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
 * p9.pynx-gap : ?
+
+You are not allowed to modify these environments but you should link a kernel 
+if you wish them in jupyter.
+
+To do so:
+* `source_p9`
+* `ipython kernel install --name "p9_gwaihir --user`
+
+# Clusters at SOLEIL
+
+## GRADES
+
+## SixS3

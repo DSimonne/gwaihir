@@ -59,7 +59,27 @@ class Interface():
     """
 
     def __init__(self):
-        """All the widgets for the gui are defined here. 
+        """
+        All the widgets for the GUI are defined here.
+        They are regrouped in a few tabs that design the GUI, the tabs are:
+            tab_init
+            tab_detector
+            tab_setup
+            tab_preprocess
+            tab_correct
+            tab_logs
+            tab_pynx
+            tab_strain
+            tab_data
+            tab_facet
+            tab_readme
+
+        Also defines:
+            path_scripts: path to folder in which bcdi script are stored
+            matplotlib_backend: backend used in GUI (default "Qt5Agg")
+            user_name: user_name used to login to slurm if working
+                on the ESRF cluster
+
         """
         super(Interface, self).__init__()
 
@@ -77,7 +97,7 @@ class Interface():
             print("If wrong login, please change self.user_name attribute")
         except:
             print(
-                "Could not get user name, please create self.user_name attribute for batch jobs")
+                "Could not get user name, please create self.user_name attribute for slurm batch jobs")
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(self.initialize_directories,
@@ -244,7 +264,7 @@ class Interface():
 
                                                        rocking_angle=widgets.Dropdown(
                                                            options=[
-                                                               'inplane', 'outofplane', 'energy'],
+                                                               'inplane', 'outofplane'],
                                                            value="inplane",
                                                            continuous_update=False,
                                                            description='Rocking angle',
@@ -253,17 +273,6 @@ class Interface():
                                                            layout=Layout(
                                                                height="50px"),
                                                            style={'description_width': 'initial'}),
-
-                                                       follow_bragg=widgets.Checkbox(
-                                                           value=False,
-                                                           description='Follow bragg',
-                                                           disabled=True,
-                                                           continuous_update=False,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
-                                                           tooltip='Only for energy scan, set to True if the detector was also scanned to follow the Bragg peak',
-                                                           layout=Layout(
-                                                               height="50px"),
-                                                           icon='check'),
 
 
                                                        # Parameters used in masking
@@ -523,7 +532,7 @@ class Interface():
                                                            tooltip='Save the orthogonalized diffraction pattern to VTK file',
                                                            icon='check'),
 
-                                                       save_asint=widgets.Checkbox(
+                                                       save_as_int=widgets.Checkbox(
                                                            value=False,
                                                            description='Save as integers',
                                                            continuous_update=False,
@@ -622,20 +631,6 @@ class Interface():
                             Template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'""",
                                                            layout=Layout(
                                                                width='90%'),
-                                                           style={'description_width': 'initial'}),
-
-                                                       nb_pixel_x=widgets.IntText(
-                                                           description='Nb pixel x',
-                                                           disabled=True,
-                                                           continuous_update=False,
-                                                           tooltip="fix to declare a known detector but with less pixels",
-                                                           style={'description_width': 'initial'}),
-
-                                                       nb_pixel_y=widgets.IntText(
-                                                           description='Nb pixel y',
-                                                           disabled=True,
-                                                           continuous_update=False,
-                                                           tooltip="fix to declare a known detector but with less pixels",
                                                            style={'description_width': 'initial'}),
 
                                                        # Define parameters below if you want to orthogonalize the data before phasing
@@ -947,11 +942,11 @@ class Interface():
             self.beamline_handler, names="value")
         self._list_widgets_preprocessing.children[8].observe(
             self.energy_scan_handler, names="value")
-        self._list_widgets_preprocessing.children[14].observe(
+        self._list_widgets_preprocessing.children[13].observe(
             self.bragg_peak_centering_handler, names="value")
-        self._list_widgets_preprocessing.children[26].observe(
+        self._list_widgets_preprocessing.children[25].observe(
             self.reload_data_handler, names="value")
-        self._list_widgets_preprocessing.children[47].observe(
+        self._list_widgets_preprocessing.children[44].observe(
             self.interpolation_handler, names="value")
         self._list_widgets_preprocessing.children[-2].observe(
             self.preprocess_handler, names="value")
@@ -963,28 +958,28 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[2:4]),
             widgets.HBox(self._list_widgets_preprocessing.children[4:7]),
             self._list_widgets_preprocessing.children[7],
-            widgets.HBox(self._list_widgets_preprocessing.children[8:10]),
-            self._list_widgets_preprocessing.children[10],
-            widgets.HBox(self._list_widgets_preprocessing.children[11:13]),
+            self._list_widgets_preprocessing.children[8],
+            self._list_widgets_preprocessing.children[9],
+            widgets.HBox(self._list_widgets_preprocessing.children[10:12]),
         ])
 
         # Parameters related to data cropping/padding/centering
         self.tab_reduction = widgets.VBox([
-            self._list_widgets_preprocessing.children[13],
-            widgets.HBox(self._list_widgets_preprocessing.children[14:16]),
-            self._list_widgets_preprocessing.children[16],
-            widgets.HBox(self._list_widgets_preprocessing.children[17:20]),
-            self._list_widgets_preprocessing.children[20],
-            widgets.HBox(self._list_widgets_preprocessing.children[21:24]),
-            self._list_widgets_preprocessing.children[24],
+            self._list_widgets_preprocessing.children[12],
+            widgets.HBox(self._list_widgets_preprocessing.children[13:15]),
+            self._list_widgets_preprocessing.children[15],
+            widgets.HBox(self._list_widgets_preprocessing.children[16:19]),
+            self._list_widgets_preprocessing.children[19],
+            widgets.HBox(self._list_widgets_preprocessing.children[20:23]),
+            self._list_widgets_preprocessing.children[23],
         ])
 
         # Parameters used when reloading processed data
         self.tab_save_load = widgets.VBox([
-            self._list_widgets_preprocessing.children[25],
-            widgets.HBox(self._list_widgets_preprocessing.children[26:29]),
-            self._list_widgets_preprocessing.children[29],
-            widgets.HBox(self._list_widgets_preprocessing.children[30:35]),
+            self._list_widgets_preprocessing.children[24],
+            widgets.HBox(self._list_widgets_preprocessing.children[25:28]),
+            self._list_widgets_preprocessing.children[28],
+            widgets.HBox(self._list_widgets_preprocessing.children[29:34]),
         ])
 
         # Group all preprocess tabs into a single one, besides detector and setup parameter
@@ -999,32 +994,31 @@ class Interface():
 
         # Parameters related to the detector used
         self.tab_detector = widgets.VBox([
+            self._list_widgets_preprocessing.children[34],
             self._list_widgets_preprocessing.children[35],
             self._list_widgets_preprocessing.children[36],
-            self._list_widgets_preprocessing.children[37],
-            widgets.HBox(self._list_widgets_preprocessing.children[38:40]),
+            widgets.HBox(self._list_widgets_preprocessing.children[37:39]),
+            self._list_widgets_preprocessing.children[39],
             self._list_widgets_preprocessing.children[40],
             self._list_widgets_preprocessing.children[41],
             self._list_widgets_preprocessing.children[42],
-            self._list_widgets_preprocessing.children[43],
-            widgets.HBox(self._list_widgets_preprocessing.children[44:46]),
         ])
 
         # Parameters to define the data orthogonalization
         self.tab_setup = widgets.VBox([
-            self._list_widgets_preprocessing.children[46],
+            self._list_widgets_preprocessing.children[43],
+            self._list_widgets_preprocessing.children[44],
+            widgets.HBox(self._list_widgets_preprocessing.children[45:47]),
             self._list_widgets_preprocessing.children[47],
-            widgets.HBox(self._list_widgets_preprocessing.children[48:50]),
-            self._list_widgets_preprocessing.children[50],
-            self._list_widgets_preprocessing.children[51],
+            self._list_widgets_preprocessing.children[48],
+            self._list_widgets_preprocessing.children[49],
+            widgets.HBox(self._list_widgets_preprocessing.children[50:52]),
             self._list_widgets_preprocessing.children[52],
             widgets.HBox(self._list_widgets_preprocessing.children[53:55]),
-            self._list_widgets_preprocessing.children[55],
-            widgets.HBox(self._list_widgets_preprocessing.children[56:58]),
+            widgets.HBox(self._list_widgets_preprocessing.children[55:58]),
             widgets.HBox(self._list_widgets_preprocessing.children[58:61]),
-            widgets.HBox(self._list_widgets_preprocessing.children[61:64]),
-            widgets.HBox(self._list_widgets_preprocessing.children[64:68]),
-            widgets.HBox(self._list_widgets_preprocessing.children[68:71]),
+            widgets.HBox(self._list_widgets_preprocessing.children[61:65]),
+            widgets.HBox(self._list_widgets_preprocessing.children[65:68]),
         ])
 
         # Widgets for angles correction
@@ -1805,7 +1799,7 @@ class Interface():
                                         layout=Layout(width='90%'),
                                         style={'description_width': 'initial'}),
 
-                                    file_list=widgets.Dropdown(
+                                    path_to_data=widgets.Dropdown(
                                         options=sorted(glob.glob(os.getcwd() + "/*.npz") + glob.glob(
                                             os.getcwd() + "/*.cxi") + glob.glob(os.getcwd() + "/*.h5")) + [""],
                                         description='Compatible file list',
@@ -2041,26 +2035,6 @@ class Interface():
                                                   style={
                                                       'description_width': 'initial'},
                                                   layout=Layout(width='90%', height="35px")),
-
-                                              use_operators=widgets.Checkbox(
-                                                  value=False,
-                                                  description='Use operator chain:',
-                                                  continuous_update=False,
-                                                  disabled=False,
-                                                  indent=False,
-                                                  layout=Layout(
-                                                      height="35px", width="15%"),
-                                                  icon='check'),
-
-                                              operator_chain=widgets.Text(
-                                                  value="",
-                                                  placeholder="",
-                                                  description='Operator chain',
-                                                  layout=Layout(
-                                                      height="35px", width="70%"),
-                                                  disabled=True,
-                                                  continuous_update=False,
-                                                  style={'description_width': 'initial'}),
 
                                               nb_raar=widgets.BoundedIntText(
                                                   value=1000,
@@ -2318,8 +2292,6 @@ class Interface():
             self.pynx_psf_handler, names="value")
         self._list_widgets_pynx.children[16].observe(
             self.pynx_peak_shape_handler, names="value")
-        self._list_widgets_pynx.children[21].observe(
-            self.pynx_operator_handler, names="value")
         self._list_widgets_pynx.children[-4].observe(
             self.run_pynx_handler, names="value")
         self._list_widgets_pynx.children[-2].observe(
@@ -2334,14 +2306,13 @@ class Interface():
             widgets.HBox(self._list_widgets_pynx.children[15:19]),
             self._list_widgets_pynx.children[19],
             self._list_widgets_pynx.children[20],
-            widgets.HBox(self._list_widgets_pynx.children[21:23]),
-            widgets.HBox(self._list_widgets_pynx.children[23:27]),
-            self._list_widgets_pynx.children[27],
-            self._list_widgets_pynx.children[31],
-            widgets.HBox(self._list_widgets_pynx.children[32:36]),
-            widgets.HBox(self._list_widgets_pynx.children[36:39]),
-            self._list_widgets_pynx.children[28],
-            widgets.HBox(self._list_widgets_pynx.children[29:31]),
+            widgets.HBox(self._list_widgets_pynx.children[21:25]),
+            self._list_widgets_pynx.children[25],
+            self._list_widgets_pynx.children[29],
+            widgets.HBox(self._list_widgets_pynx.children[30:34]),
+            widgets.HBox(self._list_widgets_pynx.children[34:37]),
+            self._list_widgets_pynx.children[26],
+            widgets.HBox(self._list_widgets_pynx.children[27:29]),
             self._list_widgets_pynx.children[-5],
             self._list_widgets_pynx.children[-4],
             self._list_widgets_pynx.children[-3],
@@ -2403,6 +2374,7 @@ class Interface():
                                           style={'description_width': 'initial'}))
 
         # Create the final window
+        # Ignore phase retrieval tab if PyNX could not be imported
         if pynx_import:
             self.window = widgets.Tab(
                 children=[
@@ -2430,8 +2402,6 @@ class Interface():
             self.window.set_title(9, 'Facets')
             self.window.set_title(10, 'Readme')
 
-            display(self.window)
-
         elif not pynx_import:
             self.window = widgets.Tab(
                 children=[
@@ -2441,7 +2411,6 @@ class Interface():
                     self.tab_preprocess,
                     self.tab_correct,
                     self.tab_logs,
-                    # self.tab_pynx,
                     self.tab_strain,
                     self.tab_data,
                     self.tab_facet,
@@ -2453,26 +2422,27 @@ class Interface():
             self.window.set_title(3, "Preprocess")
             self.window.set_title(4, 'Correct')
             self.window.set_title(5, 'Logs')
-            # self.window.set_title(6, 'PyNX')
             self.window.set_title(6, 'Strain')
             self.window.set_title(7, 'Plot data')
             self.window.set_title(8, 'Facets')
             self.window.set_title(9, 'Readme')
 
-            display(self.window)
+        # Display the final window
+        display(self.window)
 
     
     ######################################## Widgets interactive functions ########################################
-    def initialize_directories(self,
-                               unused_label_scan,
-                               sample_name,
-                               scan,
-                               data_dir,
-                               root_folder,
-                               comment,
-                               debug,
-                               run_dir_init,
-                               ):
+    def initialize_directories(
+        self,
+        unused_label_scan,
+        sample_name,
+        scan,
+        data_dir,
+        root_folder,
+        comment,
+        debug,
+        run_dir_init,
+    ):
         """
         Function to move file from `data_dir` to `root_folder`
         where it will be preprocessed.
@@ -2536,7 +2506,7 @@ class Interface():
                 print("File template:", self.Dataset.template_imagefile, end="\n\n")
 
                 # Save file name
-                self._list_widgets_preprocessing.children[43].value = self.Dataset.template_imagefile.split(
+                self._list_widgets_preprocessing.children[42].value = self.Dataset.template_imagefile.split(
                     "/")[-1]
 
             except IndexError:
@@ -2693,7 +2663,7 @@ class Interface():
                     #     "You need to select the diffraction data file in the `PyNX` tab.")
                     raise e
 
-                # Facets
+                # Facets analysis output
                 try:
                     print(
                         "\n#############################################################################################################\n")
@@ -2706,9 +2676,6 @@ class Interface():
 
                 print("\n#############################################################################################################\n")
 
-                # Reload previous data that was saved as .cxi file,
-                # initialize all related widgets values, authorize all functions
-                print("Not created yet")
 
             @button_reload_previous_data.on_click
             def action_button_save_as_cxi(selfbutton):
@@ -2716,94 +2683,95 @@ class Interface():
                 clear_output(True)
                 display(buttons_init)
                 print("\n#############################################################################################################\n")
-                print("Not available yet ...")
+                # Reload previous data that was saved as .cxi file,
+                # initialize all related widgets values, authorize all functions
+                print("Not created yet")
+                print("\n#############################################################################################################\n")
 
         elif not run_dir_init:
             clear_output(True)
 
 
     ################################################ Preprocessing ################################################
-    def initialize_preprocessing(self,
-                              unused_label_beamline,
-                              beamline,
-                              actuators,
-                              is_series,
-                              custom_scan,
-                              custom_images,
-                              custom_monitor,
-                              specfile_name,
-                              rocking_angle,
-                              follow_bragg,
-                              unused_label_masking,
-                              flag_interact,
-                              background_plot,
-                              unused_label_centering,
-                              centering,
-                              fix_bragg,
-                              fix_size,
-                              center_fft,
-                              pad_size,
-                              normalize_flux,
-                              unused_label_filtering,
-                              mask_zero_event,
-                              median_filter,
-                              median_filter_order,
-                              phasing_binning,
-                              unused_label_reload,
-                              reload_previous,
-                              reload_orthogonal,
-                              preprocessing_binning,
-                              unused_label_saving,
-                              save_rawdata,
-                              save_to_npz,
-                              save_to_mat,
-                              save_to_vti,
-                              save_asint,
-                              unused_label_detector,
-                              detector,
-                              roi_detector,
-                              photon_threshold,
-                              photon_filter,
-                              background_file,
-                              hotpixels_file,
-                              flatfield_file,
-                              template_imagefile,
-                              nb_pixel_x,
-                              nb_pixel_y,
-                              unused_label_ortho,
-                              use_rawdata,
-                              interpolation_method,
-                              fill_value_mask,
-                              beam_direction,
-                              sample_offsets,
-                              sdd,
-                              energy,
-                              custom_motors,
-                              unused_label_xru,
-                              align_q,
-                              ref_axis_q,
-                              outofplane_angle,
-                              inplane_angle,
-                              tilt_angle,
-                              sample_inplane,
-                              sample_outofplane,
-                              offset_inplane,
-                              cch1,
-                              cch2,
-                              direct_inplane,
-                              direct_outofplane,
-                              detrot,
-                              tiltazimuth,
-                              tilt_detector,
-                              unused_label_preprocess,
-                              init_para
-                              ):
+    def initialize_preprocessing(
+        self,
+        unused_label_beamline,
+        beamline,
+        actuators,
+        is_series,
+        custom_scan,
+        custom_images,
+        custom_monitor,
+        specfile_name,
+        rocking_angle,
+        unused_label_masking,
+        flag_interact,
+        background_plot,
+        unused_label_centering,
+        centering_method,
+        fix_bragg,
+        fix_size,
+        center_fft,
+        pad_size,
+        normalize_flux,
+        unused_label_filtering,
+        mask_zero_event,
+        median_filter,
+        median_filter_order,
+        phasing_binning,
+        unused_label_reload,
+        reload_previous,
+        reload_orthogonal,
+        preprocessing_binning,
+        unused_label_saving,
+        save_rawdata,
+        save_to_npz,
+        save_to_mat,
+        save_to_vti,
+        save_as_int,
+        unused_label_detector,
+        detector,
+        roi_detector,
+        photon_threshold,
+        photon_filter,
+        background_file,
+        hotpixels_file,
+        flatfield_file,
+        template_imagefile,
+        unused_label_ortho,
+        use_rawdata,
+        interpolation_method,
+        fill_value_mask,
+        beam_direction,
+        sample_offsets,
+        sdd,
+        energy,
+        custom_motors,
+        unused_label_xru,
+        align_q,
+        ref_axis_q,
+        outofplane_angle,
+        inplane_angle,
+        tilt_angle,
+        sample_inplane,
+        sample_outofplane,
+        offset_inplane,
+        cch1,
+        cch2,
+        direct_inplane, # correction
+        direct_outofplane, # correction
+        detrot,
+        tiltazimuth,
+        tilt_detector,
+        unused_label_preprocess,
+        init_para
+    ):
         """
-        Initialize the parameters used in bcdi_preprocess_BCDI.py python script
+        Initialize the parameters used in bcdi_preprocess_BCDI.py
         Necessary for preprocessing and postprocessing
 
         If init_para is True, displays a button that allow
-        the user to run bcdi_preprocess_BCDI.
+        the user to run the bcdi_preprocess_BCDI script
 
         All the parameters values are then saved in a yaml
         configuration file. 
@@ -2921,12 +2889,6 @@ class Interface():
          horizontal axis)
         :param linearity_func: name of the linearity correction for the detector, leave None
          otherwise.
-        :param x_bragg: e.g. 1577
-         horizontal pixel number of the Bragg peak, used for the definition of roi_detector
-         (see below). Leave None otherwise.
-        :param y_bragg: e.g. 833
-         vertical pixel number of the Bragg peak, used for the definition of roi_detector
-         (see below). Leave None otherwise.
         :param roi_detector: e.g.[0, 250, 10, 210]
          region of interest of the detector to load. If "x_bragg" or "y_bragg" are not None,
          it will consider that the current values in roi_detector define a window around the
@@ -3044,10 +3006,10 @@ class Interface():
             self.Dataset.phasing_binning = phasing_binning
             self.Dataset.flag_interact = flag_interact
             self.Dataset.background_plot = str(background_plot)
-            if centering == "manual":  # will be overridden
-                self.Dataset.centering = "max"
+            if centering_method == "manual":  # will be overridden
+                self.Dataset.centering_method = "max"
             else:
-                self.Dataset.centering = centering
+                self.Dataset.centering_method = centering_method
             self.Dataset.fix_bragg = fix_bragg
             self.Dataset.fix_size = fix_size
             self.Dataset.center_fft = center_fft
@@ -3063,7 +3025,7 @@ class Interface():
             self.Dataset.save_to_npz = save_to_npz
             self.Dataset.save_to_mat = save_to_mat
             self.Dataset.save_to_vti = save_to_vti
-            self.Dataset.save_asint = save_asint
+            self.Dataset.save_as_int = save_as_int
             self.Dataset.beamline = beamline
             self.Dataset.actuators = actuators
             self.Dataset.is_series = is_series
@@ -3071,7 +3033,6 @@ class Interface():
             self.Dataset.custom_images = custom_images
             self.Dataset.custom_monitor = custom_monitor
             self.Dataset.rocking_angle = rocking_angle
-            self.Dataset.follow_bragg = follow_bragg
             self.Dataset.specfile_name = specfile_name
             self.Dataset.detector = detector
             self.Dataset.roi_detector = roi_detector
@@ -3081,8 +3042,6 @@ class Interface():
             self.Dataset.hotpixels_file = hotpixels_file
             self.Dataset.flatfield_file = flatfield_file
             self.Dataset.template_imagefile = template_imagefile
-            self.Dataset.nb_pixel_x = nb_pixel_x
-            self.Dataset.nb_pixel_y = nb_pixel_y
             self.Dataset.use_rawdata = not use_rawdata
             self.Dataset.interpolation_method = interpolation_method
             self.Dataset.fill_value_mask = fill_value_mask
@@ -3174,12 +3133,6 @@ class Interface():
             if self.Dataset.specfile_name == "":
                 self.Dataset.specfile_name = None
 
-            if self.Dataset.nb_pixel_x == 0:
-                self.Dataset.nb_pixel_x = None
-
-            if self.Dataset.nb_pixel_y == 0:
-                self.Dataset.nb_pixel_y = None
-
             # self.Dataset.roi_detector = [self.Dataset.y_bragg - 160, self.Dataset.y_bragg + 160, self.Dataset.x_bragg - 160, self.Dataset.x_bragg + 160]
             # self.Dataset.roi_detector = None
             # [Vstart, Vstop, Hstart, Hstop]
@@ -3225,7 +3178,7 @@ class Interface():
                     flag_interact=self.Dataset.flag_interact,
                     background_plot=self.Dataset.background_plot,
                     # parameters related to data cropping/padding/centering
-                    centering_method=self.Dataset.centering,
+                    centering_method=self.Dataset.centering_method,
                     fix_bragg=self.Dataset.fix_bragg,
                     fix_size=self.Dataset.fix_size,
                     center_fft=self.Dataset.center_fft,
@@ -3243,7 +3196,7 @@ class Interface():
                     save_to_npz=self.Dataset.save_to_npz,
                     save_to_mat=self.Dataset.save_to_mat,
                     save_to_vti=self.Dataset.save_to_vti,
-                    save_as_int=self.Dataset.save_asint,
+                    save_as_int=self.Dataset.save_as_int,
                     # define beamline related parameters
                     beamline=self.Dataset.beamline,
                     actuators=self.Dataset.actuators,
@@ -3324,15 +3277,16 @@ class Interface():
             clear_output(True)
 
 
-    def correct_angles(self,
-                       unused_label_correct,
-                       csv_file,
-                       temp_bool,
-                       reflection,
-                       reference_spacing,
-                       reference_temperature,
-                       angles_bool,
-                       ):
+    def correct_angles(
+        self,
+        unused_label_correct,
+        csv_file,
+        temp_bool,
+        reflection,
+        reference_spacing,
+        reference_temperature,
+        angles_bool,
+    ):
         """
         Use this script to extract and save the rocking
         curve as well as the detector image at the 
@@ -3417,7 +3371,7 @@ class Interface():
                 #     root_folder=root_folder,
                 #     sample_name=self.Dataset.sample_name,
                 #     filtered_data=False,
-                #     peak_method=self.Dataset.centering,
+                #     peak_method=self.Dataset.centering_method,
                 #     normalize_flux=self.Dataset.normalize_flux,
                 #     debug=self.Dataset.debug,
                 #     beamline=self.Dataset.beamline,
@@ -3474,11 +3428,8 @@ class Interface():
     def initialize_cdi_operator(self, save_as_cxi=True):
         """
         Initialize the cdi operator by processing the possible inputs:
-         iobs, 
-         mask, 
-         support,
-         obj
-        Will also crop and center the data if specfied
+         iobs, mask, support, obj
+        Will also crop and center the data if specified
         Loads phase retrieval tab parameters values
 
         :param save_as_cxi: e.g. True
@@ -3686,55 +3637,130 @@ class Interface():
         return cdi
 
 
-    def initialize_phase_retrieval(self,
-                  unused_label_data,
-                  folder,
-                  iobs,
-                  mask,
-                  support,
-                  obj,
-                  auto_center_resize,
-                  max_size,
-                  unused_label_support,
-                  support_threshold,
-                  support_only_shrink,
-                  support_update_period,
-                  support_smooth_width,
-                  support_post_expand,
-                  unused_label_psf,
-                  psf,
-                  psf_model,
-                  fwhm,
-                  eta,
-                  update_psf,
-                  unused_label_algo,
-                  use_operators,
-                  operator_chain,
-                  nb_hio,
-                  nb_raar,
-                  nb_er,
-                  nb_ml,
-                  nb_run,
-                  unused_label_filtering,
-                  filter_criteria,
-                  nb_run_keep,
-                  unused_label_options,
-                  live_plot,
-                  # zero_mask,
-                  # crop_output,
-                  positivity,
-                  beta,
-                  detwin,
-                  rebin,
-                  verbose,
-                  pixel_size_detector,
-                  unused_label_phase_retrieval,
-                  run_phase_retrieval,
-                  unused_label_run_pynx_tools,
-                  run_pynx_tools,
-                  ):
+    def initialize_phase_retrieval(
+        self,
+        unused_label_data,
+        folder,
+        iobs,
+        mask,
+        support,
+        obj,
+        auto_center_resize,
+        max_size,
+        unused_label_support,
+        support_threshold,
+        support_only_shrink,
+        support_update_period,
+        support_smooth_width,
+        support_post_expand,
+        unused_label_psf,
+        psf,
+        psf_model,
+        fwhm,
+        eta,
+        update_psf,
+        unused_label_algo,
+        nb_hio,
+        nb_raar,
+        nb_er,
+        nb_ml,
+        nb_run,
+        unused_label_filtering,
+        filter_criteria,
+        nb_run_keep,
+        unused_label_options,
+        live_plot,
+        # zero_mask,
+        # crop_output,
+        positivity,
+        beta,
+        detwin,
+        rebin,
+        verbose,
+        pixel_size_detector,
+        unused_label_phase_retrieval,
+        run_phase_retrieval,
+        unused_label_run_pynx_tools,
+        run_pynx_tools,
+    ):
         """
-        Get parameters from widgets and run phase retrieval
+        Get parameters values from widgets and run phase retrieval
+        Possible to run phase retrieval via the CLI (with ot without MPI)
+        Or directly in python using the operators.
+        
+        :param folder: folder in which the raw data files are, and where the output will be saved
+        :param iobs: 2D/3D observed diffraction data (intensity).
+          Assumed to be corrected and following Poisson statistics, will be converted to float32.
+          Dimensions should be divisible by 4 and have a prime factor decomposition up to 7.
+          Internally, the following special values are used:
+          * values<=-1e19 are masked. Among those, values in ]-1e38;-1e19] are estimated values,
+            stored as -(iobs_est+1)*1e19, which can be used to make a loose amplitude projection.
+            Values <=-1e38 are masked (no amplitude projection applied), just below the minimum
+            float32 value
+          * -1e19 < values <= 1 are observed but used as free pixels
+            If the mask is not supplied, then it is assumed that the above special values are
+            used.
+        :param support: initial support in real space (1 = inside support, 0 = outside)
+        :param obj: initial object. If None, it should be initialised later.
+        :param mask: mask for the diffraction data (0: valid pixel, >0: masked)
+        :param auto_center_resize: if used (command-line keyword) or =True, the input data will be centered 
+            and cropped  so that the size of the array is compatible with the (GPU) 
+            FFT library used. If 'roi' is used, centering is based on ROI. 
+            [default=False]
+        :param max_size=256: maximum size for the array used for analysis, along all dimensions. The data
+            will be cropped to this value after centering. [default: no maximum size]
+        :param support_threshold: must be between 0 and 1. Only points with object amplitude above a value equal to
+            relative_threshold * reference_value are kept in the support.
+            reference_value can either:
+            - use the fact that when converged, the square norm of the object is equal to the number of
+            recorded photons (normalized Fourier Transform). Then:
+            reference_value = sqrt((abs(obj)**2).sum()/nb_points_support)
+            - or use threshold_percentile (see below, very slow, deprecated)
+        :param support_smooth_width: smooth the object amplitude using a gaussian of this width before calculating new support
+            If this is a scalar, the smooth width is fixed to this value.
+            If this is a 3-value tuple (or list or array), i.e. 'smooth_width=2,0.5,600', the smooth width
+            will vary with the number of cycles recorded in the CDI object (as cdi.cycle), varying
+            exponentially from the first to the second value over the number of cycles specified by the
+            last value.
+            With 'smooth_width=a,b,nb':
+            - smooth_width = a * exp(-cdi.cycle/nb*log(b/a)) if cdi.cycle < nb
+            - smooth_width = b if cdi.cycle >= nb
+        :param support_only_shrink: if True, the support can only shrink
+        :param method: either 'max' or 'average' or 'rms' (default), the threshold will be relative to either the maximum
+            amplitude in the object, or the average or root-mean-square amplitude (computed inside support)
+        :param support_post_expand=1: after the new support has been calculated, it can be processed using the SupportExpand
+            operator, either one or multiple times, in order to 'clean' the support:
+            - 'post_expand=1' will expand the support by 1 pixel
+            - 'post_expand=-1' will shrink the support by 1 pixel
+            - 'post_expand=(-1,1)' will shrink and then expand the support by 1 pixel
+            - 'post_expand=(-2,3)' will shrink and then expand the support by respectively 2 and 3 pixels
+        :param psf: e.g. True
+         whether or not to use the PSF, partial coherence point-spread function, estimated with 50 cycles of Richardson-Lucy
+        :param psf_model: "lorentzian", "gaussian" or "pseudo-voigt", or None to deactivate
+        :param fwhm: the full-width at half maximum, in pixels
+        :param eta: the eta parameter for the pseudo-voigt
+        :param update_psf: how often the psf is updated
+        :param nb_raar: number of relaxed averaged alternating reflections cycles, which the 
+            algorithm will use first. During RAAR and HIO, the support is updated regularly
+        :param nb_hio: number of hybrid input/output cycles, which the algorithm will use after RAAR. 
+            During RAAR and HIO, the support is updated regularly
+        :param nb_er: number of error reduction cycles, performed after HIO, without support update
+        :param nb_ml: number of maximum-likelihood conjugate gradient to perform after ER
+        :param nb_run: number of times to run the optimization
+        :param nb_run_keep: number of best run results to keep, according to filter_criteria.
+        :param filter_criteria: e.g. "LLK"
+            criteria onto which the best solutions will be chosen
+        :param live_plot: a live plot will be displayed every N cycle
+        :param beta: the beta value for the HIO operator
+        :param positivity: True or False
+        :param zero_mask: if True, masked pixels (iobs<-1e19) are forced to zero, otherwise the calculated
+            complex amplitude is kept with an optional scale factor.
+        :param detwin: if set (command-line) or if detwin=True (parameters file), 10 cycles will be performed
+            at 25% of the total number of RAAR or HIO cycles, with a support cut in half to bias
+            towards one twin image
+        :param pixel_size_detector: detector pixel size (meters)
+        :param wavelength: experiment wavelength (meters)
+        :param detector_distance: detector distance (meters)
         """
         self.Dataset.folder = folder
         self.Dataset.iobs = iobs
@@ -3753,8 +3779,8 @@ class Interface():
         self.Dataset.fwhm = fwhm
         self.Dataset.eta = eta
         self.Dataset.update_psf = update_psf
-        self.Dataset.use_operators = use_operators
-        self.Dataset.operator_chain = operator_chain
+        self.Dataset.use_operators = use_operators # todo delete
+        self.Dataset.operator_chain = operator_chain # todo delete
         self.Dataset.nb_raar = nb_raar
         self.Dataset.nb_hio = nb_hio
         self.Dataset.nb_er = nb_er
@@ -3790,9 +3816,9 @@ class Interface():
 
         print("Scan n°", self.Dataset.scan)
 
-        self.Dataset.energy = self._list_widgets_preprocessing.children[53].value
+        self.Dataset.energy = self._list_widgets_preprocessing.children[50].value
         self.Dataset.wavelength = 1.2399*1e-6 / self.Dataset.energy
-        self.Dataset.sdd = self._list_widgets_preprocessing.children[52].value
+        self.Dataset.sdd = self._list_widgets_preprocessing.children[49].value
 
         print("CXI input: Energy = %8.2feV" % self.Dataset.energy)
         print(f"CXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
@@ -4160,7 +4186,7 @@ class Interface():
                     clear_output(True)
                     print("Phase retrieval stopped by user ...")
 
-        # Tools
+        # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
             if self.run_pynx_tools == "modes":
                 self.run_modes_decomposition(self.Dataset.folder)
@@ -4179,7 +4205,7 @@ class Interface():
         folder,
         nb_run,
         nb_keep,
-        filter_criteria
+        filter_criteria,
     ):
         """
         Filter the phase retrieval output depending on a given parameter, 
@@ -4193,7 +4219,10 @@ class Interface():
         The parameters are specified in the phase retrieval tab, and 
         their values saved through self.initialize_phase_retrieval()
 
-        todo: add the possibility filter directly in tab
+        :param nb_run: number of times to run the optimization
+        :param nb_run_keep: number of best run results to keep, according to filter_criteria.
+        :param filter_criteria: e.g. "LLK"
+            criteria onto which the best solutions will be chosen
         """
         # Sorting functions depending on filtering criteria
         def filter_by_std(cxi_files, nb_keep):
@@ -4294,8 +4323,9 @@ class Interface():
             print("cxi files filtering stopped by user ...")
 
 
-    def run_modes_decomposition(self,
-        folder
+    def run_modes_decomposition(
+        self,
+        folder,
     ):
         """
         Decomposes several phase retrieval solutions into
@@ -4322,7 +4352,8 @@ class Interface():
             print("Decomposition into modes stopped by user...")
 
 
-    def save_as_cxi(self, 
+    def save_as_cxi(
+        self, 
         cdi_operator, 
         path_to_cxi
     ):
@@ -4333,6 +4364,21 @@ class Interface():
          created with PyNX
         :param path_to_cxi: path to future
          cxi data
+
+         Below are parameters that are saved in the cxi file
+        :param filename: the file name to save the data to
+        :param iobs: the observed intensity
+        :param wavelength: the wavelength of the experiment (in meters)
+        :param detector_distance: the detector distance (in meters)
+        :param pixel_size_detector: the pixel size of the detector (in meters)
+        :param mask: the mask indicating valid (=0) and bad pixels (>0)
+        :param sample_name: optional, the sample name
+        :param experiment_id: the string identifying the experiment, e.g.: 'HC1234: Siemens star calibration tests'
+        :param instrument: the string identifying the instrument, e.g.: 'ESRF id10'
+        :param iobs_is_fft_shifted: if true, input iobs (and mask if any) have their origin in (0,0[,0]) and will be shifted
+            back to centered-versions before being saved.
+        :param process_parameters: a dictionary of parameters which will be saved as a NXcollection
+        :return: Nothing. a CXI file is created
         """
         self.params = params
         self.params["data"] = self.Dataset.iobs
@@ -4421,69 +4467,70 @@ class Interface():
 
 
     ############################################### Postprocessing ################################################
-    def initialize_postprocessing(self,
-       unused_label_averaging,
-       sort_method,
-       correlation_threshold,
-       unused_label_FFT,
-       phasing_binning,
-       original_size,
-       preprocessing_binning,
-       output_size,
-       keep_size,
-       fix_voxel,
-       unused_label_disp_strain,
-       data_frame,
-       save_frame,
-       ref_axis_q,
-       isosurface_strain,
-       strain_method,
-       phase_offset,
-       phase_offset_origin,
-       offset_method,
-       centering_method,
-       unused_label_refraction,
-       correct_refraction,
-       optical_path_method,
-       dispersion,
-       absorption,
-       threshold_unwrap_refraction,
-       unused_label_options,
-       simulation,
-       invert_phase,
-       flip_reconstruction,
-       phase_ramp_removal,
-       threshold_gradient,
-       save_raw,
-       save_support,
-       save,
-       debug,
-       roll_modes,
-       unused_label_data_vis,
-       align_axis,
-       ref_axis,
-       axis_to_align,
-       strain_range,
-       phase_range,
-       grey_background,
-       tick_spacing,
-       tick_direction,
-       tick_length,
-       tick_width,
-       unused_label_average,
-       averaging_space,
-       threshold_avg,
-       unused_label_apodize,
-       apodize,
-       apodization_window,
-       half_width_avg_phase,
-       apodization_mu,
-       apodization_sigma,
-       apodization_alpha,
-       unused_label_strain,
-       unused_folder_strain,
-       reconstruction_file,
-       run_strain,
+    def initialize_postprocessing(
+        self,
+        unused_label_averaging,
+        sort_method,
+        correlation_threshold,
+        unused_label_FFT,
+        phasing_binning,
+        original_size,
+        preprocessing_binning,
+        output_size,
+        keep_size,
+        fix_voxel,
+        unused_label_disp_strain,
+        data_frame,
+        save_frame,
+        ref_axis_q,
+        isosurface_strain,
+        strain_method,
+        phase_offset,
+        phase_offset_origin,
+        offset_method,
+        centering_method,
+        unused_label_refraction,
+        correct_refraction,
+        optical_path_method,
+        dispersion,
+        absorption,
+        threshold_unwrap_refraction,
+        unused_label_options,
+        simulation,
+        invert_phase,
+        flip_reconstruction,
+        phase_ramp_removal,
+        threshold_gradient,
+        save_raw,
+        save_support,
+        save,
+        debug,
+        roll_modes,
+        unused_label_data_vis,
+        align_axis,
+        ref_axis,
+        axis_to_align,
+        strain_range,
+        phase_range,
+        grey_background,
+        tick_spacing,
+        tick_direction,
+        tick_length,
+        tick_width,
+        unused_label_average,
+        averaging_space,
+        threshold_avg,
+        unused_label_apodize,
+        apodize,
+        apodization_window,
+        half_width_avg_phase,
+        apodization_mu,
+        apodization_sigma,
+        apodization_alpha,
+        unused_label_strain,
+        unused_folder_strain,
+        reconstruction_file,
+        run_strain,
     ):
         """
         Loading argument from strain tab widgets but also values of parameters used in preprocessing that are common
@@ -4981,12 +5028,13 @@ class Interface():
             clear_output(True)
 
 
-    def facet_analysis(self,
-                       unused_label_facet,
-                       facet_folder,
-                       facet_filename,
-                       load_data,
-                       ):
+    def facet_analysis(
+        self,
+        unused_label_facet,
+        facet_folder,
+        facet_filename,
+        load_data,
+    ):
         """
         Allows one to:
             load a vtk file (previously created in paraview via theFacetAnalyser plugin)
@@ -5258,10 +5306,7 @@ class Interface():
             clear_output(True)
 
     @staticmethod
-    def create_yaml_file(
-        fname,
-        **kwargs
-    ):
+    def create_yaml_file(fname, **kwargs):
         config_file = []
 
         for k, v in kwargs.items():
@@ -5300,9 +5345,7 @@ class Interface():
 
 
     @staticmethod
-    def display_readme(
-        contents
-    ):
+    def display_readme(contents):
         """
         help text about different steps in data analysis workflow
 
@@ -6240,19 +6283,25 @@ class Interface():
                      """))
 
 
-    def display_logs(self,
+    def display_logs(
+        self,
         unused_label_logs,
         csv_file,
         show_logs
     ):
         """
         Loads exterior .csv file and displays it in the gui
+
+        :param csv_file: path to csv file
+        :param show_logs: True to display dataframe
         """
         self.csv_file = csv_file
 
+        # Load data
         if show_logs in ("load_csv", "load_field_data"):
             self.tab_logs.children[1].disabled = True
             try:
+                # csv data
                 if show_logs == "load_csv":
                     logs = pd.read_csv(self.csv_file)
                     print(
@@ -6264,6 +6313,7 @@ class Interface():
                     print(
                         "\n################################################################################################################\n")
 
+                # field data from facet analysis
                 elif show_logs == "load_field_data":
                     logs = self.Facets.field_data.copy()
 
@@ -6294,14 +6344,19 @@ class Interface():
             clear_output(True)
 
 
-    def load_data(self,
-                  unused_label_plot,
-                  unused_folder,
-                  file_list,
-                  data_use,
-                  ):
+    def load_data(
+        self,
+        unused_label_plot,
+        unused_folder,
+        path_to_data,
+        data_use,
+    ):
         """
         Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi files.
+
+        :param path_to_data: path to file to be loaded in GUI
+        :param data_use: e.g. "2D"
+            Can be "2D", "3D", "slices", "create_support", "extract_support", "smooth_support"
         """
         if data_use in ["2D", "3D", "slices"]:
             # Disable widgets
@@ -6309,7 +6364,7 @@ class Interface():
                 w.disabled = True
 
             # Plot data
-            plot.Plotter(file_list, plot=data_use, log="interact")
+            plot.Plotter(path_to_data, plot=data_use, log="interact")
 
         elif data_use == "create_support":
             # Disable widgets
@@ -6317,7 +6372,7 @@ class Interface():
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(path_to_data=file_list)
+            sup = support.SupportTools(path_to_data=path_to_data)
 
             # Interactive function to loadt threshold value
             window_support = interactive(sup.compute_support,
@@ -6361,7 +6416,7 @@ class Interface():
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(path_to_data=file_list)
+            sup = support.SupportTools(path_to_data=path_to_data)
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
@@ -6372,7 +6427,7 @@ class Interface():
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(path_to_support=file_list)
+            sup = support.SupportTools(path_to_support=path_to_data)
 
             # Interactive function to loadt threshold value
             window_support = interactive(sup.gaussian_convolution,
@@ -6594,7 +6649,7 @@ class Interface():
     # Below are handlers
 
     def init_handler(self, change):
-        """Handles changes on the widget used for the initialization"""
+        "Handles changes on the widget used for the initialization"
         if not change.new:
             for w in self._list_widgets_init_dir.children[:7]:
                 w.disabled = False
@@ -6614,14 +6669,14 @@ class Interface():
             self.energy_scan_handler(
                 change=self._list_widgets_preprocessing.children[8].value)
             self.bragg_peak_centering_handler(
-                change=self._list_widgets_preprocessing.children[14].value)
+                change=self._list_widgets_preprocessing.children[13].value)
             self.reload_data_handler(
-                change=self._list_widgets_preprocessing.children[26].value)
+                change=self._list_widgets_preprocessing.children[25].value)
             self.interpolation_handler(
-                change=self._list_widgets_preprocessing.children[47].value)
+                change=self._list_widgets_preprocessing.children[44].value)
 
     def beamline_handler(self, change):
-        "Handles changes on the widget used for the initialization"
+        "Handles changes on the widget used for the beamline"
         try:
             if change.new in ["SIXS_2019", "ID01"]:
                 for w in self._list_widgets_preprocessing.children[2:7]:
@@ -6639,78 +6694,64 @@ class Interface():
                 for w in self._list_widgets_preprocessing.children[2:7]:
                     w.disabled = False
 
-    def energy_scan_handler(self, change):
-        "Handles changes related to energy scan"
-        try:
-            if change.new == "energy":
-                self._list_widgets_preprocessing.children[9].disabled = False
-
-            if change.new != "energy":
-                self._list_widgets_preprocessing.children[9].disabled = True
-        except AttributeError:
-            if change == "energy":
-                self._list_widgets_preprocessing.children[9].disabled = False
-
-            if change != "energy":
-                self._list_widgets_preprocessing.children[9].disabled = True
 
     def bragg_peak_centering_handler(self, change):
         "Handles changes related to the centering of the Bragg peak"
         try:
             if change.new == "manual":
-                self._list_widgets_preprocessing.children[15].disabled = False
+                self._list_widgets_preprocessing.children[14].disabled = False
 
             if change.new != "manual":
-                self._list_widgets_preprocessing.children[15].disabled = True
+                self._list_widgets_preprocessing.children[14].disabled = True
 
         except AttributeError:
             if change == "manual":
-                self._list_widgets_preprocessing.children[15].disabled = False
+                self._list_widgets_preprocessing.children[14].disabled = False
 
             if change != "manual":
-                self._list_widgets_preprocessing.children[15].disabled = True
+                self._list_widgets_preprocessing.children[14].disabled = True
 
     def reload_data_handler(self, change):
         "Handles changes related to data reloading"
         try:
             if change.new:
-                for w in self._list_widgets_preprocessing.children[27:29]:
+                for w in self._list_widgets_preprocessing.children[26:28]:
                     w.disabled = False
 
             if not change.new:
-                for w in self._list_widgets_preprocessing.children[27:29]:
+                for w in self._list_widgets_preprocessing.children[26:28]:
                     w.disabled = True
 
         except AttributeError:
             if change:
-                for w in self._list_widgets_preprocessing.children[27:29]:
+                for w in self._list_widgets_preprocessing.children[26:28]:
                     w.disabled = False
 
             if not change:
-                for w in self._list_widgets_preprocessing.children[27:29]:
+                for w in self._list_widgets_preprocessing.children[26:28]:
                     w.disabled = True
 
     def interpolation_handler(self, change):
         "Handles changes related to data interpolation"
         try:
             if change.new:
-                for w in self._list_widgets_preprocessing.children[48:71]:
+                for w in self._list_widgets_preprocessing.children[45:68]:
                     w.disabled = False
 
             if not change.new:
-                for w in self._list_widgets_preprocessing.children[48:71]:
+                for w in self._list_widgets_preprocessing.children[45:68]:
                     w.disabled = True
         except AttributeError:
             if change:
-                for w in self._list_widgets_preprocessing.children[48:71]:
+                for w in self._list_widgets_preprocessing.children[45:68]:
                     w.disabled = False
 
             if not change:
-                for w in self._list_widgets_preprocessing.children[48:71]:
+                for w in self._list_widgets_preprocessing.children[45:68]:
                     w.disabled = True
 
     def preprocess_handler(self, change):
-        "Handles changes on the widget used for the initialization"
+        "Handles changes on the widget used for the preprocessing"
         try:
             if not change.new:
                 self._list_widgets_init_dir.children[7].disabled = False
@@ -6726,11 +6767,11 @@ class Interface():
                 self.energy_scan_handler(
                     change=self._list_widgets_preprocessing.children[8].value)
                 self.bragg_peak_centering_handler(
-                    change=self._list_widgets_preprocessing.children[14].value)
+                    change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
-                    change=self._list_widgets_preprocessing.children[26].value)
+                    change=self._list_widgets_preprocessing.children[25].value)
                 self.interpolation_handler(
-                    change=self._list_widgets_preprocessing.children[47].value)
+                    change=self._list_widgets_preprocessing.children[44].value)
 
             if change.new:
                 self._list_widgets_init_dir.children[7].disabled = True
@@ -6759,11 +6800,11 @@ class Interface():
                 self.energy_scan_handler(
                     change=self._list_widgets_preprocessing.children[8].value)
                 self.bragg_peak_centering_handler(
-                    change=self._list_widgets_preprocessing.children[14].value)
+                    change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
-                    change=self._list_widgets_preprocessing.children[26].value)
+                    change=self._list_widgets_preprocessing.children[25].value)
                 self.interpolation_handler(
-                    change=self._list_widgets_preprocessing.children[47].value)
+                    change=self._list_widgets_preprocessing.children[44].value)
 
             if change:
                 self._list_widgets_init_dir.children[7].disabled = True
@@ -6778,7 +6819,7 @@ class Interface():
                     change=self._list_widgets_correct.children[2].value)
 
     def temp_handler(self, change):
-        "Handles changes related to data interpolation"
+        "Handles changes related to the temperature estimation"
         try:
             if change.new:
                 for w in self._list_widgets_correct.children[3:6]:
@@ -6797,7 +6838,7 @@ class Interface():
                     w.disabled = True
 
     def correct_angles_handler(self, change):
-        "Handles changes related to data interpolation"
+        "Handles changes related to data correction"
         try:
             if change.new:
                 for w in self._list_widgets_correct.children[:-2]:
@@ -6823,7 +6864,7 @@ class Interface():
                     change=self._list_widgets_correct.children[2].value)
 
     def folder_pynx_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        "Handles changes on the widget used to load a data file"
         try:
             list_all_npz = sorted(glob.glob(change.new + "/*.npz"))
             list_probable_iobs_files = sorted(
@@ -6912,8 +6953,6 @@ class Interface():
 
         self.pynx_peak_shape_handler(
             change=self._list_widgets_pynx.children[16].value)
-        self.pynx_operator_handler(
-            change=self._list_widgets_pynx.children[21].value)
 
     def pynx_peak_shape_handler(self, change):
         "Handles changes related to psf the peak shape"
@@ -6931,23 +6970,8 @@ class Interface():
             if change == "pseudo-voigt":
                 self._list_widgets_pynx.children[18].disabled = False
 
-    def pynx_operator_handler(self, change):
-        "Handles changes related to operator algorithm instructions"
-        try:
-            if change.new:
-                self._list_widgets_pynx.children[22].disabled = False
-
-            if not change.new:
-                self._list_widgets_pynx.children[22].disabled = True
-
-        except:
-            if change:
-                self._list_widgets_pynx.children[22].disabled = False
-
-            if not change:
-                self._list_widgets_pynx.children[22].disabled = True
-
     def run_pynx_handler(self, change):
+        "Handles changes related to the phase retrieval"
         if change.new:
             for w in self._list_widgets_pynx.children[:-2]:
                 w.disabled = True
@@ -6961,7 +6985,7 @@ class Interface():
                 change=self._list_widgets_pynx.children[15].value)
 
     def folder_strain_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        "Handles changes on the widget used to load a data file"
         try:
             self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change.new + "/*.h5")) + sorted(glob.glob(
                 change.new + "/*.cxi")) + sorted(glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz"))
@@ -6970,7 +6994,7 @@ class Interface():
                 change + "/*.cxi")) + sorted(glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz"))
 
     def folder_plot_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        "Handles changes on the widget used to load a data file"
         try:
             self.tab_data.children[2].options = sorted(glob.glob(
                 change.new + "/*.npz") + glob.glob(change.new + "/*.cxi") + glob.glob(change.new + "/*.h5")) + [""]
@@ -6980,7 +7004,7 @@ class Interface():
                 change + "/*.npz") + glob.glob(change + "/*.cxi") + glob.glob(change + "/*.h5")) + [""]
 
     def folder_facet_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        "Handles changes on the widget used to load a data file"
         try:
             self.tab_facet.children[2].options = sorted(
                 glob.glob(change.new + "/*.vtk")) + [""]
