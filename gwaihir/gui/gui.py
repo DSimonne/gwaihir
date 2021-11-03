@@ -2492,9 +2492,12 @@ class Interface():
             print("Scan folder:", self.Dataset.scan_folder)
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
                 f"postprocessing/{self.Dataset.scan}_fa.vtk"
-            self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "preprocessing/"
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + \
+                "preprocessing/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + \
+                "preprocessing/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
+                "preprocessing/"
 
             # Filename for SIXS, should be temporary
             try:
@@ -2614,16 +2617,19 @@ class Interface():
             #         f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
             # PyNX folder, refresh values
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
+                "preprocessing/"
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
             # Plot folder, refresh
-            self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+            self.tab_data.children[1].value = self.Dataset.scan_folder + \
+                "preprocessing/"
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
             # Strain folder, refresh
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + "preprocessing/"
+            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + \
+                "preprocessing/"
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
@@ -2961,7 +2967,7 @@ class Interface():
 
                 # Create config file
                 self.create_yaml_file(
-                    fname = f"{self.Dataset.scan_folder}preprocessing/config_preprocessing.yml",
+                    fname=f"{self.Dataset.scan_folder}preprocessing/config_preprocessing.yml",
                     scans=self.Dataset.scan,
                     root_folder=self.Dataset.root_folder,
                     save_dir=f"{self.Dataset.scan_folder}preprocessing/",
@@ -2969,7 +2975,7 @@ class Interface():
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
                     debug=self.Dataset.debug,
-                    # parameters used in masking 
+                    # parameters used in masking
                     flag_interact=self.Dataset.flag_interact,
                     background_plot=self.Dataset.background_plot,
                     # parameters related to data cropping/padding/centering
@@ -3044,21 +3050,26 @@ class Interface():
                 )
 
                 # On lance bcdi_preprocess
-                print("#######################################################################")
+                print(
+                    "#######################################################################")
                 print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
-                print(f"Config file: {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
-                print("#######################################################################")
+                print(
+                    f"Config file: {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
+                print(
+                    "#######################################################################")
 
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
                     --config {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
 
                 # PyNX folder, refresh
-                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
+                    "preprocessing/"
                 self.folder_pynx_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
                 # Plot folder, refresh
-                self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + \
+                    "preprocessing/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
@@ -3309,7 +3320,8 @@ class Interface():
         # PyNX arguments text files
         self.Dataset.pynx_parameter_gui_file = self.Dataset.scan_folder + \
             '/preprocessing/pynx_run_gui.txt'
-        self.Dataset.pynx_parameter_cli_file = self.Dataset.scan_folder + '/preprocessing/pynx_run.txt'
+        self.Dataset.pynx_parameter_cli_file = self.Dataset.scan_folder + \
+            '/preprocessing/pynx_run.txt'
 
         # Phase retrieval
         if self.run_phase_retrieval and not self.run_pynx_tools:
@@ -4308,7 +4320,7 @@ class Interface():
                 # Run strain.py script
                 # self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final
                 self.create_yaml_file(
-                    fname = f"{self.Dataset.scan_folder}postprocessing/config_postprocessing.yml",
+                    fname=f"{self.Dataset.scan_folder}postprocessing/config_postprocessing.yml",
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
@@ -4403,14 +4415,16 @@ class Interface():
                     backend=self.matplotlib_backend,
                 )
                 # On lance bcdi_preprocess
-                print("#######################################################################")
+                print(
+                    "#######################################################################")
                 print(f"Running: {self.path_scripts}/bcdi_strain.py")
-                print(f"Config file: {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
-                print("#######################################################################")
+                print(
+                    f"Config file: {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
+                print(
+                    "#######################################################################")
 
                 os.system(f"{self.path_scripts}/bcdi_strain.py \
                     --config {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
-
 
                 # Temporary fix, recompute the transformation matrix
                 # print("\nSaving transformation matrix ...")
@@ -4454,7 +4468,8 @@ class Interface():
                 # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + "preprocessing/"
+                self.tab_data.children[1].value = self.Dataset.scan_folder + \
+                    "preprocessing/"
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
@@ -4752,7 +4767,7 @@ class Interface():
         **kwargs
     ):
         config_file = []
-        
+
         for k, v in kwargs.items():
             if isinstance(v, str):
                 config_file.append(f"{k}: \"{v}\"")
