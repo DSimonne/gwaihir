@@ -52,7 +52,7 @@ except ModuleNotFoundError:
 class Interface():
     """
     This class is a Graphical User Interface (gui).
-    This class makes extensive use of the ipywidgets and 
+    It makes extensive use of the ipywidgets and 
     is thus meant to be used with a jupyter notebook.
     Additional informations are provided in the "ReadMe"
     tab of the gui.
@@ -63,7 +63,7 @@ class Interface():
         """
         super(Interface, self).__init__()
 
-        self.work_dir = os.getcwd()
+        self.cwd = os.getcwd()
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0]+"/bin"
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
@@ -80,7 +80,7 @@ class Interface():
                 "Could not get user name, please create self.user_name attribute for batch jobs")
 
         # Widgets for initialization
-        self._list_widgets_init = interactive(self.initialize_directories,
+        self._list_widgets_init_dir = interactive(self.initialize_directories,
                                               # Define scan related parameters
                                               unused_label_scan=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
@@ -107,7 +107,7 @@ class Interface():
                                                   layout=Layout(width='45%'),
                                                   style={'description_width': 'initial'}),
 
-                                              data_directory=widgets.Text(
+                                              data_dir=widgets.Text(
                                                   value=os.getcwd() + "/data_dir/",
                                                   placeholder="Path to data directory",
                                                   description='Data directory',
@@ -116,7 +116,7 @@ class Interface():
                                                   layout=Layout(width='90%'),
                                                   style={'description_width': 'initial'}),
 
-                                              final_directory=widgets.Text(
+                                              root_folder=widgets.Text(
                                                   value=os.getcwd() + "/TestGui/",
                                                   placeholder="Path to target directory (parent to all scan directories)",
                                                   description='Target directory',
@@ -151,34 +151,24 @@ class Interface():
                                                   icon='step-forward',
                                                   layout=Layout(width='45%'),
                                                   style={'description_width': 'initial'}),
-
-                                              reload_previous_data=widgets.ToggleButton(
-                                                  value=False,
-                                                  description='Reload previous data (.cxi) from target directory ...',
-                                                  disabled=False,
-                                                  button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                                                  icon='step-forward',
-                                                  layout=Layout(width='45%'),
-                                                  style={'description_width': 'initial'}),
                                               )
-        self._list_widgets_init.children[7].observe(
-            self.init_handler, names="value")
-        self._list_widgets_init.children[8].observe(
+        self._list_widgets_init_dir.children[7].observe(
             self.init_handler, names="value")
 
+        # Organize into vertical and horizontal widgets boxes
         self.tab_init = widgets.VBox([
-            self._list_widgets_init.children[0],
-            widgets.HBox(self._list_widgets_init.children[1:3]),
-            self._list_widgets_init.children[3],
-            self._list_widgets_init.children[4],
-            self._list_widgets_init.children[5],
-            self._list_widgets_init.children[6],
-            widgets.HBox(self._list_widgets_init.children[7:9]),
-            self._list_widgets_init.children[-1],
+            self._list_widgets_init_dir.children[0],
+            widgets.HBox(self._list_widgets_init_dir.children[1:3]),
+            self._list_widgets_init_dir.children[3],
+            self._list_widgets_init_dir.children[4],
+            self._list_widgets_init_dir.children[5],
+            self._list_widgets_init_dir.children[6],
+            self._list_widgets_init_dir.children[7],
+            self._list_widgets_init_dir.children[-1],
         ])
 
-        # Widgets for preprocessing
-        self._list_widgets_preprocessing = interactive(self.initialize_parameters,
+        # Widgets for preprocessing, all in a single list because of interactive fct
+        self._list_widgets_preprocessing = interactive(self.initialize_preprocessing,
                                                        # Define beamline related parameters
                                                        unused_label_beamline=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters specific to the beamline",
@@ -592,7 +582,7 @@ class Interface():
 
                                                        background_file=widgets.Text(
                                                            value="",
-                                                           placeholder=f"{self.work_dir}/background.npz'",
+                                                           placeholder=f"{self.cwd}/background.npz'",
                                                            description='Background file',
                                                            disabled=True,
                                                            continuous_update=False,
@@ -602,7 +592,7 @@ class Interface():
 
                                                        flatfield_file=widgets.Text(
                                                            value="",
-                                                           placeholder=f"{self.work_dir}/flatfield_maxipix_8kev.npz",
+                                                           placeholder=f"{self.cwd}/flatfield_maxipix_8kev.npz",
                                                            description='Flatfield file',
                                                            disabled=True,
                                                            continuous_update=False,
@@ -612,7 +602,7 @@ class Interface():
 
                                                        hotpixels_file=widgets.Text(
                                                            value="",
-                                                           placeholder=f"{self.work_dir}/mask_merlin.npz",
+                                                           placeholder=f"{self.cwd}/mask_merlin.npz",
                                                            description='Hotpixels file',
                                                            disabled=True,
                                                            continuous_update=False,
@@ -966,6 +956,48 @@ class Interface():
         self._list_widgets_preprocessing.children[-2].observe(
             self.preprocess_handler, names="value")
 
+        # Parameters specific to the beamline
+        self.tab_beamline = widgets.VBox([
+            self._list_widgets_preprocessing.children[0],
+            self._list_widgets_preprocessing.children[1],
+            widgets.HBox(self._list_widgets_preprocessing.children[2:4]),
+            widgets.HBox(self._list_widgets_preprocessing.children[4:7]),
+            self._list_widgets_preprocessing.children[7],
+            widgets.HBox(self._list_widgets_preprocessing.children[8:10]),
+            self._list_widgets_preprocessing.children[10],
+            widgets.HBox(self._list_widgets_preprocessing.children[11:13]),
+        ])
+
+        # Parameters related to data cropping/padding/centering
+        self.tab_reduction = widgets.VBox([
+            self._list_widgets_preprocessing.children[13],
+            widgets.HBox(self._list_widgets_preprocessing.children[14:16]),
+            self._list_widgets_preprocessing.children[16],
+            widgets.HBox(self._list_widgets_preprocessing.children[17:20]),
+            self._list_widgets_preprocessing.children[20],
+            widgets.HBox(self._list_widgets_preprocessing.children[21:24]),
+            self._list_widgets_preprocessing.children[24],
+        ])
+
+        # Parameters used when reloading processed data
+        self.tab_save_load = widgets.VBox([
+            self._list_widgets_preprocessing.children[25],
+            widgets.HBox(self._list_widgets_preprocessing.children[26:29]),
+            self._list_widgets_preprocessing.children[29],
+            widgets.HBox(self._list_widgets_preprocessing.children[30:35]),
+        ])
+
+        # Group all preprocess tabs into a single one, besides detector and setup parameter
+        self.tab_preprocess = widgets.VBox([
+            self.tab_beamline,
+            self.tab_reduction,
+            self.tab_save_load,
+            self._list_widgets_preprocessing.children[-3],
+            self._list_widgets_preprocessing.children[-2],
+            self._list_widgets_preprocessing.children[-1]
+        ])
+
+        # Parameters related to the detector used
         self.tab_detector = widgets.VBox([
             self._list_widgets_preprocessing.children[35],
             self._list_widgets_preprocessing.children[36],
@@ -978,6 +1010,7 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[44:46]),
         ])
 
+        # Parameters to define the data orthogonalization
         self.tab_setup = widgets.VBox([
             self._list_widgets_preprocessing.children[46],
             self._list_widgets_preprocessing.children[47],
@@ -992,43 +1025,6 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[61:64]),
             widgets.HBox(self._list_widgets_preprocessing.children[64:68]),
             widgets.HBox(self._list_widgets_preprocessing.children[68:71]),
-        ])
-
-        self.tab_beamline = widgets.VBox([
-            self._list_widgets_preprocessing.children[0],
-            self._list_widgets_preprocessing.children[1],
-            widgets.HBox(self._list_widgets_preprocessing.children[2:4]),
-            widgets.HBox(self._list_widgets_preprocessing.children[4:7]),
-            self._list_widgets_preprocessing.children[7],
-            widgets.HBox(self._list_widgets_preprocessing.children[8:10]),
-            self._list_widgets_preprocessing.children[10],
-            widgets.HBox(self._list_widgets_preprocessing.children[11:13]),
-        ])
-
-        self.tab_reduction = widgets.VBox([
-            self._list_widgets_preprocessing.children[13],
-            widgets.HBox(self._list_widgets_preprocessing.children[14:16]),
-            self._list_widgets_preprocessing.children[16],
-            widgets.HBox(self._list_widgets_preprocessing.children[17:20]),
-            self._list_widgets_preprocessing.children[20],
-            widgets.HBox(self._list_widgets_preprocessing.children[21:24]),
-            self._list_widgets_preprocessing.children[24],
-        ])
-
-        self.tab_save_load = widgets.VBox([
-            self._list_widgets_preprocessing.children[25],
-            widgets.HBox(self._list_widgets_preprocessing.children[26:29]),
-            self._list_widgets_preprocessing.children[29],
-            widgets.HBox(self._list_widgets_preprocessing.children[30:35]),
-        ])
-
-        self.tab_preprocess = widgets.VBox([
-            self.tab_beamline,
-            self.tab_reduction,
-            self.tab_save_load,
-            self._list_widgets_preprocessing.children[-3],
-            self._list_widgets_preprocessing.children[-2],
-            self._list_widgets_preprocessing.children[-1]
         ])
 
         # Widgets for angles correction
@@ -1123,7 +1119,7 @@ class Interface():
         ])
 
         # Widgets for strain
-        self._list_widgets_strain = interactive(self.strain_gui,
+        self._list_widgets_strain = interactive(self.initialize_postprocessing,
                                                 unused_label_averaging=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when averaging several reconstruction",
                                                     style={
@@ -1848,7 +1844,7 @@ class Interface():
             self.folder_plot_handler, names="value")
 
         # Widgets for PyNX
-        self._list_widgets_pynx = interactive(self.init_pynx,
+        self._list_widgets_pynx = interactive(self.initialize_phase_retrieval,
                                               unused_label_data=widgets.HTML(
                                                   description="<p style='font-weight: bold;font-size:1.2em'>Data files",
                                                   style={
@@ -2465,42 +2461,55 @@ class Interface():
 
             display(self.window)
 
-    # Widgets interactive functions
+    
+    ######################################## Widgets interactive functions ########################################
     def initialize_directories(self,
                                unused_label_scan,
                                sample_name,
                                scan,
-                               data_directory,
-                               final_directory,
+                               data_dir,
+                               root_folder,
                                comment,
                                debug,
                                run_dir_init,
-                               reload_previous_data,
                                ):
         """
-        Function to move file from datadir to folder where 
-        it will be used by preprocess.bcdi
-
-        Also moves all the notebooks needed for data analysis, 
-        and a pynx_run.txt file with all the parameters for phase retrieval,
-        initialized for this Dataset.
+        Function to move file from `data_dir` to `root_folder`
+        where it will be preprocessed.
 
         Mandatory to run before any other step
+
+        :param sample_name: e.g. "S"
+         str or list of str of sample names (string in front of the scan number in the
+         folder name). If only one name is indicated, it will be repeated to match the
+         number of scans.
+        :param scan: e.g. 11
+         scan number or list of scan numbers
+        :param data_dir: e.g. None
+         use this to override the beamline default search path for the data
+        :param root_folder: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/"
+         folder of the experiment, where all scans are stored
+        :param comment: string use in filenames when saving
+        :param debug: e.g. False
+         True to see plots
         """
         if run_dir_init:
-            # Save as attributes for use in future widgets
 
-            # Create Dataset attribute (class from other module)
+            # Create Dataset attribute
             self.Dataset = gui_iterable.Dataset(
                 scan=scan, sample_name=sample_name,
-                data_directory=data_directory, root_folder=final_directory)
+                data_dir=data_dir, root_folder=root_folder)
 
+            # Start to assign attributes
             self.Dataset.comment = comment
             self.Dataset.debug = debug
+            self.Dataset.root_folder = root_folder
 
-            # Scan folder
+            # Create scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scan}/"
             print("Scan folder:", self.Dataset.scan_folder)
+
+            # Update widgets values with scan folder
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
                 f"postprocessing/{self.Dataset.scan}_fa.vtk"
             self.tab_data.children[1].value = self.Dataset.scan_folder + \
@@ -2510,18 +2519,18 @@ class Interface():
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
                 "preprocessing/"
 
-            # Filename for SIXS, should be temporary
+            # Get template_imagefile from data in data_dir, based on sixs routine
             try:
+                # Depends on mu or omega scan at sixs
                 try:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_directory}*mu*{self.Dataset.scan}*")[0]
+                        f"{self.Dataset.data_dir}*mu*{self.Dataset.scan}*")[0]
                     print("File path:", self.Dataset.path_to_data)
                 except IndexError:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_directory}*omega*{self.Dataset.scan}*")[0]
+                        f"{self.Dataset.data_dir}*omega*{self.Dataset.scan}*")[0]
                     print("Omega scan")
 
-                # If rotated before
                 self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
                     "%05d" % self.Dataset.scan)[0]+"%05d.nxs"
                 print("File template:", self.Dataset.template_imagefile, end="\n\n")
@@ -2538,7 +2547,7 @@ class Interface():
             # folder of the experiment, where all scan are stored
             self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
 
-            # Create final directory is not yet existing
+            # Create final directory, if not yet existing
             if not os.path.isdir(self.Dataset.root_folder):
                 print(self.Dataset.root_folder)
                 full_path = ""
@@ -2588,7 +2597,7 @@ class Interface():
                 print(
                     f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing exists", end="\n\n")
 
-            # move data file
+            # Move data file
             try:
                 shutil.copy2(self.Dataset.path_to_data,
                              f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
@@ -2600,32 +2609,6 @@ class Interface():
             except (AttributeError, FileNotFoundError):
                 pass
 
-            # move pynx_run.txt file
-            # try:
-            #     shutil.copy(f"{self.path_package}/pynx_run.txt", f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
-            #     print(f"Copied pynx_run.txt to {self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
-            # except FileExistsError:
-            #     print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing/pynx_run.txt exists")
-            #     pass
-
-            # Move notebooks
-            # if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing/PhasingNotebook.ipynb"):
-            #     shutil.copy(f"{self.path_package}/data_files/PhasingNotebook.ipynb",
-            #                 f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
-            #     print(
-            #         f"Copied PhasingNotebook.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
-            # else:
-            #     print(
-            #         f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing/PhasingNotebook.ipynb exists")
-
-            # if not os.path.exists(f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb"):
-            #     shutil.copy(f"{self.path_package}/data_files/CompareFacetsEvolution.ipynb",
-            #                 f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
-            #     print(
-            #         f"Copied CompareFacetsEvolution.ipynb to {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
-            # else:
-            #     print(
-            #         f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/CompareFacetsEvolution.ipynb exists")
 
             # PyNX folder, refresh values
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
@@ -2633,18 +2616,18 @@ class Interface():
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
-            # Plot folder, refresh
+            # Plot folder, refresh values
             self.tab_data.children[1].value = self.Dataset.scan_folder + \
                 "preprocessing/"
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
-            # Strain folder, refresh
+            # Strain folder, refresh values
             self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + \
                 "preprocessing/"
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
-            # Facet folder, refresh
+            # Facet folder, refresh values
             self.tab_facet.children[1].value = self.Dataset.scan_folder + \
                 "postprocessing/"
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
@@ -2656,23 +2639,35 @@ class Interface():
                 button_style='',  # 'success', 'info', 'warning', 'danger' or ''
                 layout=Layout(width='40%'),
                 style={'description_width': 'initial'},
-                icon='fast-forward')
-            display(button_save_as_cxi)
+                icon='step-forward')
+
+            # Button to reload data
+            button_reload_previous_data = Button(
+                description="Reload previous data (.cxi) from target directory ...",
+                continuous_update=False,
+                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                layout=Layout(width='40%'),
+                style={'description_width': 'initial'},
+                icon='step-forward')
+
+            buttons_init = widgets.HBox([button_save_as_cxi, button_reload_previous_data])
+            display(buttons_init)
 
             @button_save_as_cxi.on_click
             def action_button_save_as_cxi(selfbutton):
+                "Create button to save Dataset object as .cxi file"
                 clear_output(True)
-                display(button_save_as_cxi)
+                display(buttons_init)
                 print("\n#############################################################################################################\n")
                 print("Saving data, takes some time ...")
 
-                # Reciprocal space data
                 try:
+                    # Reciprocal space data
                     print(
                         "\n#############################################################################################################\n")
                     print(
                         "Saving diffraction data and mask selected in the PyNX tab...")
-                    self.init_cdi_operator()
+                    self.initialize_cdi_operator()
 
                     # Real space data
                     try:
@@ -2682,7 +2677,8 @@ class Interface():
                         print(
                             "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
                         self.Dataset.to_cxi(
-                            cxi_filename=self.cxi_filename, reconstruction_filename=self.Dataset.reconstruction_file)
+                            cxi_filename=self.cxi_filename, 
+                            reconstruction_filename=self.Dataset.reconstruction_file)
 
                     except AttributeError:
                         self.Dataset.to_cxi(
@@ -2710,14 +2706,24 @@ class Interface():
 
                 print("\n#############################################################################################################\n")
 
-        elif reload_previous_data:
-            # Reload previous data that was saved as .cxi file, initialize all related widgets values, authorize all functions
-            print("plop")
+                # Reload previous data that was saved as .cxi file,
+                # initialize all related widgets values, authorize all functions
+                print("Not created yet")
 
-        elif not run_dir_init and not reload_previous_data:
+            @button_reload_previous_data.on_click
+            def action_button_save_as_cxi(selfbutton):
+                "Create button to reload Dataset object from .cxi file"
+                clear_output(True)
+                display(buttons_init)
+                print("\n#############################################################################################################\n")
+                print("Not available yet ...")
+
+        elif not run_dir_init:
             clear_output(True)
 
-    def initialize_parameters(self,
+
+    ################################################ Preprocessing ################################################
+    def initialize_preprocessing(self,
                               unused_label_beamline,
                               beamline,
                               actuators,
@@ -2793,13 +2799,239 @@ class Interface():
                               init_para
                               ):
         """
-        Initialize the parameters of using in script taken from bcdi package, necessary for preprocessing, correction and strain
+        Initialize the parameters used in bcdi_preprocess_BCDI.py python script
+        Necessary for preprocessing and postprocessing
 
-        Will also run preprocessing of the data (cropping, masking, compiling files into .npz files, ...)
+        If init_para is True, displays a button that allow
+        the user to run bcdi_preprocess_BCDI.
+
+        All the parameters values are then saved in a yaml
+        configuration file. 
+
+        Parameters used in the interactive masking GUI:
+
+        :param flag_interact: e.g. True
+         True to interact with plots, False to close it automatically
+        :param background_plot: e.g. "0.5"
+         background color for the GUI in level of grey in [0,1], 0 being dark. For visual
+         comfort during interactive masking.
+        :param backend: e.g. "Qt5Agg"
+         Backend used in script, change to "Agg" to make sure the figures are saved, not
+         compaticle with interactive masking. Other possibilities are
+         'module://matplotlib_inline.backend_inline'
+         default value is "Qt5Agg"
+
+        Parameters related to data cropping/padding/centering #
+
+        :param centering_method: e.g. "max"
+         Bragg peak determination: 'max' or 'com', 'max' is better usually. It will be
+         overridden by 'fix_bragg' if not empty
+        :param fix_bragg: e.g. [121, 321, 256]
+         Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector.
+         It is useful if hotpixels or intense aliens. Leave None otherwise.
+        :param fix_size: e.g. [0, 256, 10, 240, 50, 350]
+         crop the array to that predefined size considering the full detector.
+         [zstart, zstop, ystart, ystop, xstart, xstop], ROI will be defaulted to [] if
+         fix_size is provided. Leave None otherwise
+        :param center_fft: e.g. "skip"
+         how to crop/pad/center the data, available options: 'crop_sym_ZYX','crop_asym_ZYX',
+         'pad_asym_Z_crop_sym_YX', 'pad_sym_Z_crop_asym_YX', 'pad_sym_Z', 'pad_asym_Z',
+         'pad_sym_ZYX','pad_asym_ZYX' or 'skip'
+        :param pad_size: e.g. [256, 512, 512]
+         Use this to pad the array. Used in 'pad_sym_Z_crop_sym_YX', 'pad_sym_Z' and
+         'pad_sym_ZYX'. Leave None otherwise.
+
+        Parameters for data filtering
+
+        :param mask_zero_event: e.g. False
+        mask pixels where the sum along the rocking curve is zero may be dead pixels
+        :param median_filter: e.g. "skip"
+         which filter to apply, available filters:
+
+         - 'median': to apply a med2filter [3,3]
+         - 'interp_isolated': to interpolate isolated empty pixels based on 'medfilt_order'
+           parameter
+         - 'mask_isolated': mask isolated empty pixels
+         - 'skip': skip filtering
+
+        :param median_filter_order: e.g. 7
+         minimum number of non-zero neighboring pixels to apply filtering
+
+        Parameters used when reloading processed data
+
+        :param reload_previous: e.g. False
+         True to resume a previous masking (load data and mask)
+        :param reload_orthogonal: e.g. False
+         True if the reloaded data is already intepolated in an orthonormal frame
+        :param preprocessing_binning: e.g. [1, 1, 1]
+         binning factors in each dimension of the binned data to be reloaded
+
+        Options for saving:
+
+        :param save_rawdata: e.g. False
+         True to save also the raw data when use_rawdata is False
+        :param save_to_npz: e.g. True
+         True to save the processed data in npz format
+        :param save_to_mat: e.g. False
+         True to save also in .mat format
+        :param save_to_vti: e.g. False
+         True to save the orthogonalized diffraction pattern to VTK file
+        :param save_as_int: e.g. False
+         True to save the result as an array of integers (save space)
+
+        Parameters for the beamline:
+
+        :param beamline: e.g. "ID01"
+         name of the beamline, used for data loading and normalization by monitor
+        :param actuators: e.g. {'rocking_angle': 'actuator_1_1'}
+         optional dictionary that can be used to define the entries corresponding to
+         actuators in data files (useful at CRISTAL where the location of data keeps
+         changing, or to declare a non-standard monitor)
+        :param is_series: e.g. True
+         specific to series measurement at P10
+        :param rocking_angle: e.g. "outofplane"
+         "outofplane" for a sample rotation around x outboard, "inplane" for a sample
+         rotation around y vertical up, "energy"
+        :param specfile_name: e.g. "l5.spec"
+         beamline-dependent parameter, use the following template:
+
+         - template for ID01 and 34ID: name of the spec file if it is at the default
+          location (in root_folder) or full path to the spec file
+         - template for SIXS: full path of the alias dictionnary or None to use the one in
+          the package folder
+         - for P10, either None (if you are using the same directory structure as the
+          beamline) or the full path to the .fio file
+         - template for all other beamlines: None
+
+        Parameters for custom scans:
+
+        :param custom_scan: e.g. False
+         True for a stack of images acquired without scan, e.g. with ct in a
+         macro, or when there is no spec/log file available
+        :param custom_images: list of image numbers for the custom_scan, None otherwise
+        :param custom_monitor: list of monitor values for normalization for the custom_scan,
+         None otherwise
+
+        Parameters for the detector:
+
+        :param detector: e.g. "Maxipix"
+         name of the detector
+        :param phasing_binning: e.g. [1, 2, 2]
+         binning to apply to the data (stacking dimension, detector vertical axis, detector
+         horizontal axis)
+        :param linearity_func: name of the linearity correction for the detector, leave None
+         otherwise.
+        :param x_bragg: e.g. 1577
+         horizontal pixel number of the Bragg peak, used for the definition of roi_detector
+         (see below). Leave None otherwise.
+        :param y_bragg: e.g. 833
+         vertical pixel number of the Bragg peak, used for the definition of roi_detector
+         (see below). Leave None otherwise.
+        :param roi_detector: e.g.[0, 250, 10, 210]
+         region of interest of the detector to load. If "x_bragg" or "y_bragg" are not None,
+         it will consider that the current values in roi_detector define a window around the
+         Bragg peak position and the final output will be:
+         [y_bragg - roi_detector[0], y_bragg + roi_detector[1],
+         x_bragg - roi_detector[2], x_bragg + roi_detector[3]]. Leave None to use the full
+         detector. Use with center_fft='skip' if you want this exact size for the output.
+        :param normalize_flux: e.g. "monitor"
+         'monitor' to normalize the intensity by the default monitor values,
+         'skip' to do nothing
+        :param photon_threshold: e.g. 0
+         voxels with a smaller intensity will be set to 0.
+        :param photon_filter: e.g. "loading"
+         'loading' or 'postprocessing', when the photon threshold should be applied.
+         If 'loading', it is applied before binning; if 'postprocessing', it is applied at
+         the end of the script before saving
+        :param bin_during_loading: e.g. False
+         True to bin during loading, faster
+        :param frames_pattern:  list of int, of length data.shape[0].
+         If frames_pattern is 0 at index, the frame at data[index] will be skipped, if 1
+         the frame will be added to the stack. Use this if you need to remove some frames
+         and you know it in advance.
+        :param background_file: non-empty file path or None
+        :param hotpixels_file: non-empty file path or None
+        :param flatfield_file: non-empty file path or None
+        :param template_imagefile: e.g. "data_mpx4_%05d.edf.gz"
+         use one of the following template:
+
+         - template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'
+         - template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs'
+         - template for SIXS_2019: 'spare_ascan_mu_%05d.nxs'
+         - template for Cristal: 'S%d.nxs'
+         - template for P10: '_master.h5'
+         - template for NANOMAX: '%06d.h5'
+         - template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'
+
+        Parameters below if you want to orthogonalize the data before phasing:
+
+        :param use_rawdata: e.g. True
+         False for using data gridded in laboratory frame, True for using data in detector
+         frame
+        :param interpolation_method: e.g. "xrayutilities"
+         'xrayutilities' or 'linearization'
+        :param fill_value_mask: e.g. 0
+         0 (not masked) or 1 (masked). It will define how the pixels outside of the data
+         range are processed during the interpolation. Because of the large number of masked
+         pixels, phase retrieval converges better if the pixels are not masked (0 intensity
+         imposed). The data is by default set to 0 outside of the defined range.
+        :param beam_direction: e.g. [1, 0, 0]
+         beam direction in the laboratory frame (downstream, vertical up, outboard)
+        :param sample_offsets: e.g. None
+         tuple of offsets in degrees of the sample for each sample circle (outer first).
+         convention: the sample offsets will be subtracted to the motor values. Leave None
+         if there is no offset.
+        :param sdd: e.g. 0.50678
+         in m, sample to detector distance in m
+        :param energy: e.g. 9000
+         X-ray energy in eV, it can be a number or a list in case of energy scans.
+        :param custom_motors: e.g. {"mu": 0, "phi": -15.98, "chi": 90, "theta": 0,
+         "delta": -0.5685, "gamma": 33.3147}
+         use this to declare motor positions if there is not log file, None otherwise
+
+        Parameters when orthogonalizing the data before phasing  using the linearized
+        transformation matrix:
+
+        :param align_q: e.g. True
+         if True it rotates the crystal to align q, along one axis of the array. It is used
+         only when interp_method is 'linearization'
+        :param ref_axis_q: e.g. "y"  # q will be aligned along that axis
+        :param outofplane_angle: e.g. 42.6093
+         detector angle in deg (rotation around x outboard, typically delta), corrected for
+         the direct beam position. Leave None to use the uncorrected position.
+        :param inplane_angle: e.g. -0.5783
+         detector angle in deg(rotation around y vertical up, typically gamma), corrected
+         for the direct beam position. Leave None to use the uncorrected position.
+
+        Parameters when orthogonalizing the data before phasing  using xrayutilities.
+        xrayutilities uses the xyz crystal frame (for zero incident angle x is downstream,
+        y outboard, and z vertical up):
+
+        :param sample_inplane: e.g. [1, 0, 0]
+         sample inplane reference direction along the beam at 0 angles in xrayutilities
+         frame
+        :param sample_outofplane: e.g. [0, 0, 1]
+         surface normal of the sample at 0 angles in xrayutilities frame
+        :param offset_inplane: e.g. 0
+         outer detector angle offset as determined by xrayutilities area detector
+         initialization
+        :param cch1: e.g. 208
+         direct beam vertical position in the full unbinned detector for xrayutilities 2D
+         detector calibration
+        :param cch2: e.g. 154
+         direct beam horizontal position in the full unbinned detector for xrayutilities 2D
+         detector calibration
+        :param detrot: e.g. 0
+         detrot parameter from xrayutilities 2D detector calibration
+        :param tiltazimuth: e.g. 360
+         tiltazimuth parameter from xrayutilities 2D detector calibration
+        :param tilt_detector: e.g. 0
+         tilt parameter from xrayutilities 2D detector calibration
+
         """
         if init_para:
             # Disable all widgets until the end of the program, will update automatticaly after
-            for w in self._list_widgets_init.children[:-1]:
+            for w in self._list_widgets_init_dir.children[:-1]:
                 w.disabled = True
 
             for w in self._list_widgets_preprocessing.children[:-2]:
@@ -2975,7 +3207,7 @@ class Interface():
                     save_dir = None
 
                 if self.Dataset.beamline == "ID01":
-                    root_folder = self.Dataset.data_directory
+                    root_folder = self.Dataset.data_dir
                     save_dir = self.Dataset.root_folder + \
                         f"S{self.Dataset.scan}/preprocessing/"
 
@@ -2985,7 +3217,7 @@ class Interface():
                     scans=self.Dataset.scan,
                     root_folder=self.Dataset.root_folder,
                     save_dir=f"{self.Dataset.scan_folder}preprocessing/",
-                    data_dir=self.Dataset.data_directory,
+                    data_dir=self.Dataset.data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
                     debug=self.Dataset.debug,
@@ -3091,6 +3323,7 @@ class Interface():
         if not init_para:
             clear_output(True)
 
+
     def correct_angles(self,
                        unused_label_correct,
                        csv_file,
@@ -3101,12 +3334,29 @@ class Interface():
                        angles_bool,
                        ):
         """
-        Use this script to extract and save the rocking curve as well as the detector image at the rocking curve's COM
-        Will correct the values of the inplane and outofplane angles corresponding to the COM of the Bragg peak, values used then to compute q_hkl
+        Use this script to extract and save the rocking
+        curve as well as the detector image at the 
+        rocking curve's COM.
+        Will correct the values of the inplane and 
+        outofplane angles corresponding to the COM 
+        of the Bragg peak, values used then to compute q_hkl
+
+        Parameters for temperature estimation:
+
+        :param get_temperature: e.g. False
+         True to estimate the temperature, only available for platinum at the moment
+        :param reflection: e.g. [1, 1, 1]
+        measured reflection, use for estimating the temperature from the lattice parameter
+        :param reference_spacing: 3.9236
+         for calibrating the thermal expansion, if None it is fixed to the one of Platinum
+         3.9236/norm(reflection)
+        :param reference_temperature: 325
+         temperature in Kelvins used to calibrate the thermal expansion, if None it is fixed
+         to 293.15K (room temperature)
         """
         if angles_bool:
             # # Disable all widgets until the end of the program, will update automatticaly after, no need here because quite fast
-            # for w in self._list_widgets_init.children[:-1]:
+            # for w in self._list_widgets_init_dir.children[:-1]:
             #     w.disabled = True
 
             # for w in self._list_widgets_preprocessing.children[:-1]:
@@ -3133,7 +3383,7 @@ class Interface():
                     root_folder = self.Dataset.root_folder
 
                 elif self.Dataset.beamline == "ID01":
-                    root_folder = self.Dataset.data_directory
+                    root_folder = self.Dataset.data_dir
 
                 save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/corrections/"
 
@@ -3219,7 +3469,224 @@ class Interface():
         if not angles_bool:
             clear_output(True)
 
-    def init_pynx(self,
+
+    ############################################### Phase retrieval ###############################################
+    def initialize_cdi_operator(self, save_as_cxi=True):
+        """
+        Initialize the cdi operator by processing the possible inputs:
+         iobs, 
+         mask, 
+         support,
+         obj
+        Will also crop and center the data if specfied
+        Loads phase retrieval tab parameters values
+
+        :param save_as_cxi: e.g. True
+         Save the instanced cdi object as .cxi following
+         the cxi convention
+        """
+        if self.Dataset.iobs not in ("", None):
+            if self.Dataset.iobs.endswith(".npy"):
+                iobs = np.load(self.Dataset.iobs)
+                print("CXI input: loading data")
+            elif self.Dataset.iobs.endswith(".npz"):
+                try:
+                    iobs = np.load(self.Dataset.iobs)["data"]
+                    print("CXI input: loading data")
+                except:
+                    print("Could not load 'data' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    iobs = bin_data(iobs, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+                    raise e
+
+            # fft shift
+            iobs = fftshift(iobs)
+
+        else:
+            self.Dataset.iobs = None
+            iobs = None
+
+        if self.Dataset.mask not in ("", None):
+            if self.Dataset.mask.endswith(".npy"):
+                mask = np.load(self.Dataset.mask).astype(np.int8)
+                nb = mask.sum()
+                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                    nb, nb * 100 / mask.size))
+            elif self.Dataset.mask.endswith(".npz"):
+                try:
+                    mask = np.load(self.Dataset.mask)[
+                        "mask"].astype(np.int8)
+                    nb = mask.sum()
+                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                        nb, nb * 100 / mask.size))
+                except:
+                    print("Could not load 'mask' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    mask = bin_data(mask, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            mask = fftshift(mask)
+
+        else:
+            self.Dataset.mask = None
+            mask = None
+
+        if self.Dataset.support not in ("", None):
+            if self.Dataset.support.endswith(".npy"):
+                support = np.load(self.Dataset.support)
+                print("CXI input: loading support")
+            elif self.Dataset.support.endswith(".npz"):
+                try:
+                    support = np.load(self.Dataset.support)["data"]
+                    print("CXI input: loading support")
+                except:
+                    # print("Could not load 'data' array from npz file")
+                    try:
+                        support = np.load(self.Dataset.support)[
+                            "support"]
+                        print("CXI input: loading support")
+                    except:
+                        # print("Could not load 'support' array from npz file")
+                        try:
+                            support = np.load(
+                                self.Dataset.support)["obj"]
+                            print("CXI input: loading support")
+                        except:
+                            print("Could not load support")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    support = bin_data(support, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            support = fftshift(support)
+
+        else:
+            self.Dataset.support = None
+            support = None
+
+        if self.Dataset.obj not in ("", None):
+            if self.Dataset.obj.endswith(".npy"):
+                obj = np.load(self.Dataset.obj)
+                print("CXI input: loading object")
+            elif self.Dataset.obj.endswith(".npz"):
+                try:
+                    obj = np.load(self.Dataset.obj)["data"]
+                    print("CXI input: loading object")
+                except:
+                    print("Could not load 'data' array from npz file")
+
+            if self.Dataset.rebin != (1, 1, 1):
+                try:
+                    obj = bin_data(obj, self.Dataset.rebin)
+                except Exception as e:
+                    print("Could not bin data")
+
+            # fft shift
+            obj = fftshift(obj)
+
+        else:
+            self.Dataset.obj = None
+            obj = None
+
+        # Center and crop data
+        if self.Dataset.auto_center_resize:
+            if iobs.ndim == 3:
+                nz0, ny0, nx0 = iobs.shape
+
+                # Find center of mass
+                z0, y0, x0 = center_of_mass(iobs)
+                print("Center of mass at:", z0, y0, x0)
+                iz0, iy0, ix0 = int(round(z0)), int(
+                    round(y0)), int(round(x0))
+
+                # Max symmetrical box around center of mass
+                nx = 2 * min(ix0, nx0 - ix0)
+                ny = 2 * min(iy0, ny0 - iy0)
+                nz = 2 * min(iz0, nz0 - iz0)
+
+                if self.Dataset.max_size is not None:
+                    nx = min(nx, self.Dataset.max_size)
+                    ny = min(ny, self.Dataset.max_size)
+                    nz = min(nz, self.Dataset.max_size)
+
+                # Crop data to fulfill FFT size requirements
+                nz1, ny1, nx1 = smaller_primes(
+                    (nz, ny, nx), maxprime=7, required_dividers=(2,))
+
+                print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
+                      (nz0, ny0, nx0, nz1, ny1, nx1))
+                iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
+                            ix0 - nx1 // 2:ix0 + nx1 // 2]
+                if mask is not None:
+                    mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
+                                ix0 - nx1 // 2:ix0 + nx1 // 2]
+                    print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
+                          (nz0, ny0, nx0, nz1, ny1, nx1))
+
+            else:
+                ny0, nx0 = iobs.shape
+
+                # Find center of mass
+                y0, x0 = center_of_mass(iobs)
+                iy0, ix0 = int(round(y0)), int(round(x0))
+                print("Center of mass (rounded) at:", iy0, ix0)
+
+                # Max symmetrical box around center of mass
+                nx = 2 * min(ix0, nx0 - ix0)
+                ny = 2 * min(iy0, ny0 - iy0)
+                if self.Dataset.max_size is not None:
+                    nx = min(nx, self.Dataset.max_size)
+                    ny = min(ny, self.Dataset.max_size)
+                    nz = min(nz, self.Dataset.max_size)
+
+                # Crop data to fulfill FFT size requirements
+                ny1, nx1 = smaller_primes(
+                    (ny, nx), maxprime=7, required_dividers=(2,))
+
+                print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
+                      (ny0, nx0, ny1, nx1))
+                iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
+                            2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+                if mask is not None:
+                    mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
+                                2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+        # Create cdi object with data and mask, load the main parameters
+        cdi = CDI(iobs,
+                  support=support,
+                  obj=obj,
+                  mask=mask,
+                  wavelength=self.Dataset.wavelength,
+                  pixel_size_detector=self.Dataset.pixel_size_detector,
+                  detector_distance=self.Dataset.sdd,
+                  )
+
+        if save_as_cxi:
+            # Save diffraction pattern
+            self.cxi_filename = "{}{}{}/preprocessing/{}.cxi".format(
+                self.Dataset.root_folder,
+                self.Dataset.sample_name,
+                self.Dataset.scan,
+                self.Dataset.iobs.split("/")[-1].split(".")[0]
+            )
+            self.save_as_cxi(cdi_operator=cdi, path_to_cxi=self.cxi_filename)
+
+        return cdi
+
+
+    def initialize_phase_retrieval(self,
                   unused_label_data,
                   folder,
                   iobs,
@@ -3296,6 +3763,7 @@ class Interface():
         self.Dataset.filter_criteria = filter_criteria
         self.Dataset.nb_run_keep = nb_run_keep
         self.Dataset.live_plot = live_plot
+        # To do 
         # self.Dataset.zero_mask = zero_mask
         # self.Dataset.crop_output = crop_output
         self.Dataset.positivity = positivity
@@ -3469,7 +3937,7 @@ class Interface():
                 self.Dataset.calc_llk = 50  # for now
 
                 # Initialise the cdi operator
-                cdi = self.init_cdi_operator()
+                cdi = self.initialize_cdi_operator()
 
                 print("\n#############################################################################################################\n")
 
@@ -3705,6 +4173,7 @@ class Interface():
         if not self.run_phase_retrieval and not self.run_pynx_tools:
             clear_output(True)
 
+
     @staticmethod
     def filter_reconstructions(
         folder,
@@ -3713,13 +4182,26 @@ class Interface():
         filter_criteria
     ):
         """
-        Filter the phase retrieval output depending on a given parameter, for now only LLK and standard deviation are available.
-        This allows the user to run a lot of reconstructions but to then automatically keep the "best" ones, according to this parameter.
+        Filter the phase retrieval output depending on a given parameter, 
+        for now only LLK and standard deviation are available.
+        This allows the user to run a lot of reconstructions but to then 
+        automatically keep the "best" ones, according to this parameter.
         filter_criteria can take the values "LLK" or "standard_deviation"
-        If you take filter based on both, the function will filter nb_keep/2 files by the first criteria, and the remaining files by the second criteria 
+        If you filter based on both, the function will filter nb_keep/2 
+        files by the first criteria, and the remaining files by the second criteria
+
+        The parameters are specified in the phase retrieval tab, and 
+        their values saved through self.initialize_phase_retrieval()
+
+        todo: add the possibility filter directly in tab
         """
-        # Different functions depending in the criteria
+        # Sorting functions depending on filtering criteria
         def filter_by_std(cxi_files, nb_keep):
+            """
+            Use the standard deviation of the reconstructed
+            object as filtering criteria. The lowest standard 
+            deviations are best.
+            """
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
 
@@ -3737,6 +4219,12 @@ class Interface():
                 os.remove(f)
 
         def filter_by_LLK(cxi_files, nb_keep):
+            """
+            Use the free log-likelihood values of the reconstructed
+            object as filtering criteria. The lowest standard 
+            deviations are best.
+            See PyNX for details
+            """
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
 
@@ -3753,7 +4241,7 @@ class Interface():
                 print(f"Removed scan {f}")
                 os.remove(f)
 
-        # Main function, different cases
+        # Main function supporting different cases
         try:
             print(f"Iterating on files corresponding to {folder}/*LLK*.cxi")
             cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
@@ -3762,12 +4250,15 @@ class Interface():
                 print(f"No *LLK*.cxi files in {folder}/result_scan*LLK*.cxi")
 
             else:
+                # only standard_deviation
                 if filter_criteria == "standard_deviation":
                     filter_by_std(cxi_files, nb_keep)
 
+                # only LLK
                 elif filter_criteria == "LLK":
                     filter_by_LLK(cxi_files, nb_keep)
 
+                # standard_deviation then LLK
                 elif filter_criteria == "standard_deviation_LLK":
                     filter_by_std(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
@@ -3782,6 +4273,7 @@ class Interface():
                     else:
                         filter_by_LLK(cxi_files, nb_keep)
 
+                # LLK then standard_deviation
                 elif filter_criteria == "LLK_standard_deviation":
                     filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
@@ -3801,11 +4293,17 @@ class Interface():
         except KeyboardInterrupt:
             print("cxi files filtering stopped by user ...")
 
+
     def run_modes_decomposition(self,
-                                folder
-                                ):
+        folder
+    ):
         """
-        Run a decomposition into modes of the phase retrieval solutions, saves only the first mode
+        Decomposes several phase retrieval solutions into
+        modes, saves only the first mode to save space
+
+        :param folder: path to folder in which are stored
+         the .cxi files, all files corresponding to 
+         *LLK* pattern are loaded
         """
         try:
             print(
@@ -3823,9 +4321,18 @@ class Interface():
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
 
-    def save_as_cxi(self, cdi_operator, path_to_cxi):
+
+    def save_as_cxi(self, 
+        cdi_operator, 
+        path_to_cxi
+    ):
         """
         We need to create a dictionnary with the parameters to save in the cxi file
+
+        :param cdi_operator: cdi object 
+         created with PyNX
+        :param path_to_cxi: path to future
+         cxi data
         """
         self.params = params
         self.params["data"] = self.Dataset.iobs
@@ -3912,279 +4419,252 @@ class Interface():
             process_parameters=self.params,
         )
 
-    def init_cdi_operator(self, save_as_cxi=True):
-        """
-        Initialize the cdi poerator by processing the possible inputs, iobs, mask, support and obj
-        Will also crop the data if needed
-        """
-        if self.Dataset.iobs not in ("", None):
-            if self.Dataset.iobs.endswith(".npy"):
-                iobs = np.load(self.Dataset.iobs)
-                print("CXI input: loading data")
-            elif self.Dataset.iobs.endswith(".npz"):
-                try:
-                    iobs = np.load(self.Dataset.iobs)["data"]
-                    print("CXI input: loading data")
-                except:
-                    print("Could not load 'data' array from npz file")
 
-            if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    iobs = bin_data(iobs, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
-                    raise e
-
-            # fft shift
-            iobs = fftshift(iobs)
-
-        else:
-            self.Dataset.iobs = None
-            iobs = None
-
-        if self.Dataset.mask not in ("", None):
-            if self.Dataset.mask.endswith(".npy"):
-                mask = np.load(self.Dataset.mask).astype(np.int8)
-                nb = mask.sum()
-                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                    nb, nb * 100 / mask.size))
-            elif self.Dataset.mask.endswith(".npz"):
-                try:
-                    mask = np.load(self.Dataset.mask)[
-                        "mask"].astype(np.int8)
-                    nb = mask.sum()
-                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                        nb, nb * 100 / mask.size))
-                except:
-                    print("Could not load 'mask' array from npz file")
-
-            if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    mask = bin_data(mask, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
-
-            # fft shift
-            mask = fftshift(mask)
-
-        else:
-            self.Dataset.mask = None
-            mask = None
-
-        if self.Dataset.support not in ("", None):
-            if self.Dataset.support.endswith(".npy"):
-                support = np.load(self.Dataset.support)
-                print("CXI input: loading support")
-            elif self.Dataset.support.endswith(".npz"):
-                try:
-                    support = np.load(self.Dataset.support)["data"]
-                    print("CXI input: loading support")
-                except:
-                    # print("Could not load 'data' array from npz file")
-                    try:
-                        support = np.load(self.Dataset.support)[
-                            "support"]
-                        print("CXI input: loading support")
-                    except:
-                        # print("Could not load 'support' array from npz file")
-                        try:
-                            support = np.load(
-                                self.Dataset.support)["obj"]
-                            print("CXI input: loading support")
-                        except:
-                            print("Could not load support")
-
-            if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    support = bin_data(support, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
-
-            # fft shift
-            support = fftshift(support)
-
-        else:
-            self.Dataset.support = None
-            support = None
-
-        if self.Dataset.obj not in ("", None):
-            if self.Dataset.obj.endswith(".npy"):
-                obj = np.load(self.Dataset.obj)
-                print("CXI input: loading object")
-            elif self.Dataset.obj.endswith(".npz"):
-                try:
-                    obj = np.load(self.Dataset.obj)["data"]
-                    print("CXI input: loading object")
-                except:
-                    print("Could not load 'data' array from npz file")
-
-            if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    obj = bin_data(obj, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
-
-            # fft shift
-            obj = fftshift(obj)
-
-        else:
-            self.Dataset.obj = None
-            obj = None
-
-        # Center and crop data
-        if self.Dataset.auto_center_resize:
-            if iobs.ndim == 3:
-                nz0, ny0, nx0 = iobs.shape
-
-                # Find center of mass
-                z0, y0, x0 = center_of_mass(iobs)
-                print("Center of mass at:", z0, y0, x0)
-                iz0, iy0, ix0 = int(round(z0)), int(
-                    round(y0)), int(round(x0))
-
-                # Max symmetrical box around center of mass
-                nx = 2 * min(ix0, nx0 - ix0)
-                ny = 2 * min(iy0, ny0 - iy0)
-                nz = 2 * min(iz0, nz0 - iz0)
-
-                if self.Dataset.max_size is not None:
-                    nx = min(nx, self.Dataset.max_size)
-                    ny = min(ny, self.Dataset.max_size)
-                    nz = min(nz, self.Dataset.max_size)
-
-                # Crop data to fulfill FFT size requirements
-                nz1, ny1, nx1 = smaller_primes(
-                    (nz, ny, nx), maxprime=7, required_dividers=(2,))
-
-                print("Centering & reshaping data: (%d, %d, %d) -> (%d, %d, %d)" %
-                      (nz0, ny0, nx0, nz1, ny1, nx1))
-                iobs = iobs[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
-                            ix0 - nx1 // 2:ix0 + nx1 // 2]
-                if mask is not None:
-                    mask = mask[iz0 - nz1 // 2:iz0 + nz1 // 2, iy0 - ny1 // 2:iy0 + ny1 // 2,
-                                ix0 - nx1 // 2:ix0 + nx1 // 2]
-                    print("Centering & reshaping mask: (%d, %d, %d) -> (%d, %d, %d)" %
-                          (nz0, ny0, nx0, nz1, ny1, nx1))
-
-            else:
-                ny0, nx0 = iobs.shape
-
-                # Find center of mass
-                y0, x0 = center_of_mass(iobs)
-                iy0, ix0 = int(round(y0)), int(round(x0))
-                print("Center of mass (rounded) at:", iy0, ix0)
-
-                # Max symmetrical box around center of mass
-                nx = 2 * min(ix0, nx0 - ix0)
-                ny = 2 * min(iy0, ny0 - iy0)
-                if self.Dataset.max_size is not None:
-                    nx = min(nx, self.Dataset.max_size)
-                    ny = min(ny, self.Dataset.max_size)
-                    nz = min(nz, self.Dataset.max_size)
-
-                # Crop data to fulfill FFT size requirements
-                ny1, nx1 = smaller_primes(
-                    (ny, nx), maxprime=7, required_dividers=(2,))
-
-                print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
-                      (ny0, nx0, ny1, nx1))
-                iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
-                            2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-
-                if mask is not None:
-                    mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
-                                2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-
-        # Create cdi object with data and mask, load the main parameters
-        cdi = CDI(iobs,
-                  support=support,
-                  obj=obj,
-                  mask=mask,
-                  wavelength=self.Dataset.wavelength,
-                  pixel_size_detector=self.Dataset.pixel_size_detector,
-                  detector_distance=self.Dataset.sdd,
-                  )
-
-        if save_as_cxi:
-            # Save diffraction pattern
-            self.cxi_filename = "{}{}{}/preprocessing/{}.cxi".format(
-                self.Dataset.root_folder,
-                self.Dataset.sample_name,
-                self.Dataset.scan,
-                self.Dataset.iobs.split("/")[-1].split(".")[0]
-            )
-            self.save_as_cxi(cdi_operator=cdi, path_to_cxi=self.cxi_filename)
-
-        return cdi
-
-    def strain_gui(self,
-                   unused_label_averaging,
-                   sort_method,
-                   correlation_threshold,
-                   unused_label_FFT,
-                   phasing_binning,
-                   original_size,
-                   preprocessing_binning,
-                   output_size,
-                   keep_size,
-                   fix_voxel,
-                   unused_label_disp_strain,
-                   data_frame,
-                   save_frame,
-                   ref_axis_q,
-                   isosurface_strain,
-                   strain_method,
-                   phase_offset,
-                   phase_offset_origin,
-                   offset_method,
-                   centering_method,
-                   unused_label_refraction,
-                   correct_refraction,
-                   optical_path_method,
-                   dispersion,
-                   absorption,
-                   threshold_unwrap_refraction,
-                   unused_label_options,
-                   simulation,
-                   invert_phase,
-                   flip_reconstruction,
-                   phase_ramp_removal,
-                   threshold_gradient,
-                   save_raw,
-                   save_support,
-                   save,
-                   debug,
-                   roll_modes,
-                   unused_label_data_vis,
-                   align_axis,
-                   ref_axis,
-                   axis_to_align,
-                   strain_range,
-                   phase_range,
-                   grey_background,
-                   tick_spacing,
-                   tick_direction,
-                   tick_length,
-                   tick_width,
-                   unused_label_average,
-                   averaging_space,
-                   threshold_avg,
-                   unused_label_apodize,
-                   apodize,
-                   apodization_window,
-                   half_width_avg_phase,
-                   apodization_mu,
-                   apodization_sigma,
-                   apodization_alpha,
-                   unused_label_strain,
-                   unused_folder_strain,
-                   reconstruction_file,
-                   run_strain,
-                   ):
+    ############################################### Postprocessing ################################################
+    def initialize_postprocessing(self,
+       unused_label_averaging,
+       sort_method,
+       correlation_threshold,
+       unused_label_FFT,
+       phasing_binning,
+       original_size,
+       preprocessing_binning,
+       output_size,
+       keep_size,
+       fix_voxel,
+       unused_label_disp_strain,
+       data_frame,
+       save_frame,
+       ref_axis_q,
+       isosurface_strain,
+       strain_method,
+       phase_offset,
+       phase_offset_origin,
+       offset_method,
+       centering_method,
+       unused_label_refraction,
+       correct_refraction,
+       optical_path_method,
+       dispersion,
+       absorption,
+       threshold_unwrap_refraction,
+       unused_label_options,
+       simulation,
+       invert_phase,
+       flip_reconstruction,
+       phase_ramp_removal,
+       threshold_gradient,
+       save_raw,
+       save_support,
+       save,
+       debug,
+       roll_modes,
+       unused_label_data_vis,
+       align_axis,
+       ref_axis,
+       axis_to_align,
+       strain_range,
+       phase_range,
+       grey_background,
+       tick_spacing,
+       tick_direction,
+       tick_length,
+       tick_width,
+       unused_label_average,
+       averaging_space,
+       threshold_avg,
+       unused_label_apodize,
+       apodize,
+       apodization_window,
+       half_width_avg_phase,
+       apodization_mu,
+       apodization_sigma,
+       apodization_alpha,
+       unused_label_strain,
+       unused_folder_strain,
+       reconstruction_file,
+       run_strain,
+    ):
         """
         Loading argument from strain tab widgets but also values of parameters used in preprocessing that are common
         Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase. 
         Also plots images depending on the given isosurface.
+
+        Parameters used in the interactive masking GUI:
+
+        :param backend: e.g. "Qt5Agg"
+         Backend used in script, change to "Agg" to make sure the figures are saved, not
+         compaticle with interactive masking. Other possibilities are
+         'module://matplotlib_inline.backend_inline'
+         default value is "Qt5Agg"
+
+        Parameters used when averaging several reconstruction:
+
+        :param sort_method: e.g. "variance/mean"
+         'mean_amplitude' or 'variance' or 'variance/mean' or 'volume', metric for averaging
+        :param correlation_threshold: e.g. 0.90
+         minimum correlation between two arrays to average them
+
+        Parameters related to centering:
+
+        :param centering_method: e.g. "max_com"
+        'com' (center of mass), 'max', 'max_com' (max then com), 'do_nothing'
+        :param roll_modes: e.g. [0, 0, 0]
+        correct a roll of few pixels after the decomposition into modes in PyNX
+        axis=(0, 1, 2)
+
+        Prameters relative to the FFT window and voxel sizes:
+
+        :param original_size: e.g. [150, 256, 500]
+         size of the FFT array before binning. It will be modified to take into account
+         binning during phasing automatically. Leave it to None if the shape did not change.
+        :param phasing_binning: e.g. [1, 1, 1]
+         binning factor applied during phase retrieval
+        :param preprocessing_binning: e.g. [1, 2, 2]
+         binning factors in each dimension used in preprocessing (not phase retrieval)
+        :param output_size: e.g. [100, 100, 100]
+         (z, y, x) Fix the size of the output array, leave None to use the object size
+        :param keep_size: e.g. False
+         True to keep the initial array size for orthogonalization (slower), it will be
+         cropped otherwise
+        :param fix_voxel: e.g. 10
+         voxel size in nm for the interpolation during the geometrical transformation.
+         If a single value is provided, the voxel size will be identical in all 3
+         directions. Set it to None to use the default voxel size (calculated from q values,
+         it will be different in each dimension).
+
+        Parameters related to the strain calculation:
+
+        :param data_frame: e.g. "detector"
+         in which frame is defined the input data, available options:
+
+         - 'crystal' if the data was interpolated into the crystal frame using
+           xrayutilities or (transformation matrix + align_q=True)
+         - 'laboratory' if the data was interpolated into the laboratory frame using
+           the transformation matrix (align_q: False)
+         - 'detector' if the data is still in the detector frame
+
+        :param ref_axis_q: e.g. "y"
+         axis along which q will be aligned (data_frame= 'detector' or 'laboratory') or is
+         already aligned (data_frame='crystal')
+        :param save_frame: e.g. "laboratory"
+         in which frame should be saved the data, available options:
+
+         - 'crystal' to save the data with q aligned along ref_axis_q
+         - 'laboratory' to save the data in the laboratory frame (experimental geometry)
+         - 'lab_flat_sample' to save the data in the laboratory frame, with all sample
+           angles rotated back to 0. The rotations for 'laboratory' and 'lab_flat_sample'
+           are realized after the strain calculation (which is always done in the crystal
+           frame along ref_axis_q)
+
+        :param isosurface_strain: e.g. 0.2
+         threshold use for removing the outer layer (the strain is undefined at the exact
+         surface voxel)
+        :param strain_method: e.g. "default"
+         how to calculate the strain, available options:
+
+         - 'default': use the single value calculated from the gradient of the phase
+         - 'defect': it will offset the phase in a loop and keep the smallest magnitude
+           value for the strain. See: F. Hofmann et al. PhysRevMaterials 4, 013801 (2020)
+
+        Parameters related to the refraction correction:
+
+        :param correct_refraction: e.g. True
+         True for correcting the phase shift due to refraction
+        :param optical_path_method: e.g. "threshold"
+         'threshold' or 'defect', if 'threshold' it uses isosurface_strain to define the
+         support  for the optical path calculation, if 'defect' (holes) it tries to remove
+         only outer layers even if the amplitude is lower than isosurface_strain inside
+         the crystal
+        :param dispersion: e.g. 5.0328e-05
+         delta value used for refraction correction, for Pt:  3.0761E-05 @ 10300eV,
+         5.0328E-05 @ 8170eV, 3.2880E-05 @ 9994eV, 4.1184E-05 @ 8994eV, 5.2647E-05 @ 7994eV,
+         4.6353E-05 @ 8500eV / Ge 1.4718E-05 @ 8keV
+        :param absorption: e.g. 4.1969e-06
+         beta value, for Pt:  2.0982E-06 @ 10300eV, 4.8341E-06 @ 8170eV,
+         2.3486E-06 @ 9994eV, 3.4298E-06 @ 8994eV, 5.2245E-06 @ 7994eV, 4.1969E-06 @ 8500eV
+        :param threshold_unwrap_refraction: e.g. 0.05
+         threshold used to calculate the optical path. The threshold for refraction
+         correction should be low, to correct for an object larger than the real one,
+         otherwise it messes up the phase
+
+        Parameters related to the phase:
+
+        :param simulation: e.g. False
+         True if it is a simulation, the parameter invert_phase will be set to 0 (see below)
+        :param invert_phase: e.g. True
+        True for the displacement to have the right sign (FFT convention), it is False only
+        for simulations
+        :param flip_reconstruction: e.g. True
+         True if you want to get the conjugate object
+        :param phase_ramp_removal: e.g. "gradient"
+         'gradient' or 'upsampling', 'gradient' is much faster
+        :param threshold_gradient: e.g. 1.0
+         upper threshold of the gradient of the phase, use for ramp removal
+        :param phase_offset: e.g. 0
+         manual offset to add to the phase, should be 0 in most cases
+        :param phase_offset_origin: e.g. [12, 32, 65]
+         the phase at this voxel will be set to phase_offset, leave None to use the default
+         position computed using offset_method (see below)
+        :param offset_method: e.g. "mean"
+         'com' (center of mass) or 'mean', method for determining the phase offset origin
+
+        Parameters related to data visualization:
+
+        :param debug: e.g. False
+         True to show all plots for debugging
+        :param align_axis: e.g. False
+         True to rotate the crystal to align axis_to_align along ref_axis for visualization.
+         This is done after the calculation of the strain and has no effect on it.
+        :param ref_axis: e.g. "y"
+         it will align axis_to_align to that axis if align_axis is True
+        :param axis_to_align: e.g. [-0.01166, 0.9573, -0.2887]
+         axis to align with ref_axis in the order x y z (axis 2, axis 1, axis 0)
+        :param strain_range: e.g. 0.001
+         range of the colorbar for strain plots
+        :param phase_range: e.g. 0.4
+         range of the colorbar for phase plots
+        :param grey_background: e.g. True
+         True to set the background to grey in phase and strain plots
+        :param tick_spacing: e.g. 50
+         spacing between axis ticks in plots, in nm
+        :param tick_direction: e.g. "inout"
+         direction of the ticks in plots: 'out', 'in', 'inout'
+        :param tick_length: e.g. 3
+         length of the ticks in plots
+        :param tick_width: e.g. 1
+         width of the ticks in plots
+
+        Parameters for averaging several reconstructed objects:
+
+        :param averaging_space: e.g. "reciprocal_space"
+         in which space to average, 'direct_space' or 'reciprocal_space'
+        :param threshold_avg: e.g. 0.90
+         minimum correlation between arrays for averaging
+
+        Parameters for phase averaging or apodization:
+
+        :param half_width_avg_phase: e.g. 0
+         (width-1)/2 of the averaging window for the phase, 0 means no phase averaging
+        :param apodize: e.g. False
+         True to multiply the diffraction pattern by a filtering window
+        :param apodization_window: e.g. "blackman"
+         filtering window, multivariate 'normal' or 'tukey' or 'blackman'
+        :param apodization_mu: e.g. [0.0, 0.0, 0.0]
+         mu of the gaussian window
+        :param apodization_sigma: e.g. [0.30, 0.30, 0.30]
+         sigma of the gaussian window
+        :param apodization_alpha: e.g. [1.0, 1.0, 1.0]
+         shape parameter of the tukey window
+
+        Parameters related to saving:
+
+        :param save_rawdata: e.g. False
+         True to save the amp-phase.vti before orthogonalization
+        :param save_support: e.g. False
+         True to save the non-orthogonal support for later phase retrieval
+        :param save: e.g. True
+         True to save amp.npz, phase.npz, strain.npz and vtk files
         """
         if run_strain:
             # Disable all widgets until the end of the program, will update automatticaly after
@@ -4305,7 +4785,7 @@ class Interface():
                     root_folder = self.Dataset.root_folder
 
                 if self.Dataset.beamline == "ID01":
-                    root_folder = self.Dataset.data_directory
+                    root_folder = self.Dataset.data_dir
 
                 save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/result_{self.Dataset.save_frame}/"
             except AttributeError:
@@ -4339,7 +4819,7 @@ class Interface():
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
-                    data_dir=self.Dataset.data_directory,
+                    data_dir=self.Dataset.data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
                     # parameters used when averaging several reconstruction #
@@ -4499,6 +4979,7 @@ class Interface():
                 w.disabled = False
 
             clear_output(True)
+
 
     def facet_analysis(self,
                        unused_label_facet,
@@ -4817,9 +5298,18 @@ class Interface():
             for line in config_file:
                 v.write(line+"\n")
 
+
     @staticmethod
-    def display_readme(contents):
-        """Docs about different steps in data analysis workflow"""
+    def display_readme(
+        contents
+    ):
+        """
+        help text about different steps in data analysis workflow
+
+        :param contents: e.g. "Preprocessing"
+         Possible values are "Preprocessing", "Phase retrieval"
+         or "Postprocessing"
+        """
         if contents == "Preprocessing":
             clear_output(True)
             display(Markdown("""
@@ -5749,11 +6239,12 @@ class Interface():
                  (only cubic lattices are supported).
                      """))
 
+
     def display_logs(self,
-                     unused_label_logs,
-                     csv_file,
-                     show_logs
-                     ):
+        unused_label_logs,
+        csv_file,
+        show_logs
+    ):
         """
         Loads exterior .csv file and displays it in the gui
         """
@@ -5801,6 +6292,7 @@ class Interface():
         else:
             self.tab_logs.children[1].disabled = False
             clear_output(True)
+
 
     def load_data(self,
                   unused_label_plot,
@@ -5935,8 +6427,7 @@ class Interface():
                 w.disabled = False
             clear_output(True)
 
-    # Non widgets functions
-
+    ###################################### Non-Widgets interactive functions ######################################
     def rotate_sixs_data(self):
         """
         Python script to rotate the data for vertical configuration
@@ -6105,14 +6596,14 @@ class Interface():
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization"""
         if not change.new:
-            for w in self._list_widgets_init.children[:7]:
+            for w in self._list_widgets_init_dir.children[:7]:
                 w.disabled = False
 
             for w in self._list_widgets_preprocessing.children[:-1]:
                 w.disabled = True
 
         if change.new:
-            for w in self._list_widgets_init.children[:7]:
+            for w in self._list_widgets_init_dir.children[:7]:
                 w.disabled = True
 
             for w in self._list_widgets_preprocessing.children[:-1]:
@@ -6222,7 +6713,7 @@ class Interface():
         "Handles changes on the widget used for the initialization"
         try:
             if not change.new:
-                self._list_widgets_init.children[7].disabled = False
+                self._list_widgets_init_dir.children[7].disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
@@ -6242,7 +6733,7 @@ class Interface():
                     change=self._list_widgets_preprocessing.children[47].value)
 
             if change.new:
-                self._list_widgets_init.children[7].disabled = True
+                self._list_widgets_init_dir.children[7].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
@@ -6255,7 +6746,7 @@ class Interface():
 
         except:
             if not change:
-                self._list_widgets_init.children[7].disabled = False
+                self._list_widgets_init_dir.children[7].disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
@@ -6275,7 +6766,7 @@ class Interface():
                     change=self._list_widgets_preprocessing.children[47].value)
 
             if change:
-                self._list_widgets_init.children[7].disabled = True
+                self._list_widgets_init_dir.children[7].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
