@@ -803,6 +803,17 @@ class Interface():
                                                                width='25%'),
                                                            style={'description_width': 'initial'}),
 
+
+                                                       tilt_angle=widgets.FloatText(
+                                                           value=0.003,
+                                                           step=0.0001,
+                                                           description='Tilt angle',
+                                                           continuous_update=False,
+                                                           disabled=True,
+                                                           layout=Layout(
+                                                               width='25%'),
+                                                           style={'description_width': 'initial'}),
+
                                                        sample_inplane=widgets.Text(
                                                            value="(1, 0, 0)",
                                                            placeholder="(1, 0, 0)",
@@ -969,7 +980,7 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[44:46]),
         ])
 
-        self.tab_ortho = widgets.VBox([
+        self.tab_setup = widgets.VBox([
             self._list_widgets_preprocessing.children[46],
             self._list_widgets_preprocessing.children[47],
             widgets.HBox(self._list_widgets_preprocessing.children[48:50]),
@@ -980,9 +991,9 @@ class Interface():
             self._list_widgets_preprocessing.children[55],
             widgets.HBox(self._list_widgets_preprocessing.children[56:58]),
             widgets.HBox(self._list_widgets_preprocessing.children[58:61]),
-            widgets.HBox(self._list_widgets_preprocessing.children[61:63]),
-            widgets.HBox(self._list_widgets_preprocessing.children[63:67]),
-            widgets.HBox(self._list_widgets_preprocessing.children[67:70]),
+            widgets.HBox(self._list_widgets_preprocessing.children[61:64]),
+            widgets.HBox(self._list_widgets_preprocessing.children[64:68]),
+            widgets.HBox(self._list_widgets_preprocessing.children[68:71]),
         ])
 
         self.tab_beamline = widgets.VBox([
@@ -1200,6 +1211,8 @@ class Interface():
                                                     disabled=False,
                                                     continuous_update=False,
                                                     style={'description_width': 'initial'}),
+
+                                                # link to setup
 
                                                 unused_label_disp_strain=widgets.HTML(
                                                     description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to displacement and strain calculation",
@@ -2401,7 +2414,7 @@ class Interface():
                 children=[
                     self.tab_init,
                     self.tab_detector,
-                    self.tab_ortho,
+                    self.tab_setup,
                     self.tab_preprocess,
                     self.tab_correct,
                     self.tab_logs,
@@ -2430,7 +2443,7 @@ class Interface():
                 children=[
                     self.tab_init,
                     self.tab_detector,
-                    self.tab_ortho,
+                    self.tab_setup,
                     self.tab_preprocess,
                     self.tab_correct,
                     self.tab_logs,
@@ -2767,6 +2780,7 @@ class Interface():
                               ref_axis_q,
                               outofplane_angle,
                               inplane_angle,
+                              tilt_angle,
                               sample_inplane,
                               sample_outofplane,
                               offset_inplane,
@@ -2851,6 +2865,7 @@ class Interface():
             self.Dataset.ref_axis_q = ref_axis_q
             self.Dataset.outofplane_angle = outofplane_angle
             self.Dataset.inplane_angle = inplane_angle
+            self.Dataset.tilt_angle = tilt_angle
             self.Dataset.sample_inplane = sample_inplane
             self.Dataset.sample_outofplane = sample_outofplane
             self.Dataset.offset_inplane = offset_inplane
@@ -3038,6 +3053,7 @@ class Interface():
                     ref_axis_q=self.Dataset.ref_axis_q,
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
+                    tilt_angle=self.Dataset.tilt_angle,
                     # parameters when orthogonalizing the data before phasing  using xrayutilities
                     sample_inplane=self.Dataset.sample_inplane,
                     sample_outofplane=self.Dataset.sample_outofplane,
@@ -5631,19 +5647,19 @@ class Interface():
         "Handles changes related to data interpolation"
         try:
             if change.new:
-                for w in self._list_widgets_preprocessing.children[48:70]:
+                for w in self._list_widgets_preprocessing.children[48:71]:
                     w.disabled = False
 
             if not change.new:
-                for w in self._list_widgets_preprocessing.children[48:70]:
+                for w in self._list_widgets_preprocessing.children[48:71]:
                     w.disabled = True
         except AttributeError:
             if change:
-                for w in self._list_widgets_preprocessing.children[48:70]:
+                for w in self._list_widgets_preprocessing.children[48:71]:
                     w.disabled = False
 
             if not change:
-                for w in self._list_widgets_preprocessing.children[48:70]:
+                for w in self._list_widgets_preprocessing.children[48:71]:
                     w.disabled = True
 
     def preprocess_handler(self, change):
