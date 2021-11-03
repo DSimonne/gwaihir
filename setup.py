@@ -45,6 +45,7 @@ setuptools.setup(
         "ipywidgets",
         "ipython",
         "ipyvolume",
+        "ipyfilechooser",
         "scipy",
         "xrayutilities",
         "tables",
