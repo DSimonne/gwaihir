@@ -24,7 +24,6 @@ from IPython.display import display, Markdown, Latex, clear_output
 # gwaihir package
 import gwaihir
 from gwaihir import plot
-from gwaihir.sixs import ReadNxs4 as rd
 # from gwaihir.runner import preprocess, correct_angles, strain, transfer_matrix
 from gwaihir.gui import gui_iterable
 from gwaihir.support import SupportTools
@@ -32,6 +31,7 @@ from gwaihir.support import SupportTools
 # bcdi package
 from bcdi.utils.utilities import bin_data
 from bcdi.postprocessing import facet_analysis
+from bcdi.preprocessing import ReadNxs3 as rd
 
 # PyNX package
 import h5py
