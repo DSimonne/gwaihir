@@ -54,7 +54,7 @@ class Dataset():
         """
         Save all the parameters used in the data analysis with a specific architecture
         Alias for hdf5 file,
-        Can be reloaded with the load_cxi() function 
+        Can be reloaded with the load_cxi() function
         Always overwrites for now
         """
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"

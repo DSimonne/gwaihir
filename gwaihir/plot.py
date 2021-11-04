@@ -76,9 +76,9 @@ class Plotter():
 
                 except (KeyError, OSError):
                     print("""
-                        The file could not be loaded, verify that you are loading a file 
+                        The file could not be loaded, verify that you are loading a file
                         with an hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
-                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:], 
+                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:],
                         as it should be following csi conventions.
                         """)
 
@@ -93,9 +93,9 @@ class Plotter():
 
                 except (KeyError, OSError):
                     print("""
-                        The file could not be loaded, verify that you are loading a file with an 
+                        The file could not be loaded, verify that you are loading a file with an
                         hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
-                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:], 
+                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:],
                         as it should be following csi conventions.
                         """)
 
@@ -180,7 +180,7 @@ class Plotter():
 
 class ThreeDViewer(widgets.Box):
     """
-    Widget to display 3D objects from CDI optimisation, 
+    Widget to display 3D objects from CDI optimisation,
     loaded from a result CXI file or a mode file.
 
     This is a quick & dirty implementation but should be useful.
@@ -721,9 +721,9 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
     Plot 2d image from 2d array
 
     :param two_d_array: np.ndarray to plot, must be 2D
-    :param fig: plt.figure to plot in, default is None and 
+    :param fig: plt.figure to plot in, default is None and
      will create a figure
-    :param ax: axes of figure, default is None and 
+    :param ax: axes of figure, default is None and
      will create axes
     :param log: True to have a logarithmic scale
      False to have a linear scale
