@@ -40,7 +40,7 @@ try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
     from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport,\
-    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
+        InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
     from pynx.cdi.runner.id01 import params
     from pynx.cdi.widgets import CDIViewer
     from pynx.utils.math import smaller_primes

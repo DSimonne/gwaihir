@@ -63,7 +63,7 @@ class Dataset():
             print("\nSaving phase retrieval output ...")
             try:
                 with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
-                    h5py.File(final_data_path, "a") as final_file:
+                        h5py.File(final_data_path, "a") as final_file:
                     # Real space data is already here
 
                     # Reciprocal space data
@@ -154,13 +154,13 @@ class Dataset():
                             reconstruction_file.copy(
                                 '/entry_1/data_2/',
                                 final_file["entry_1"]["image_2"],
-                                 name="modes_percentage")
+                                name="modes_percentage")
                         except RuntimeError:
                             del final_file["entry_1"]["image_2"]["modes_percentage"]
                             reconstruction_file.copy(
                                 '/entry_1/data_2/',
                                 final_file["entry_1"]["image_2"],
-                                 name="modes_percentage")
+                                name="modes_percentage")
 
             except OSError:
                 # No reconstruction file yet

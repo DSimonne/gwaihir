@@ -204,8 +204,8 @@ class ThreeDViewer(widgets.Box):
             display(
                 HTML("<style>.container { width:%d%% !important; }\
                     </style>" % int(html_width)
-                    )
-                )
+                     )
+            )
 
         # focus_label = widgets.Label(value='Focal distance (cm):')
         self.threshold = widgets.FloatSlider(
@@ -269,8 +269,8 @@ class ThreeDViewer(widgets.Box):
 
         # self.toggle_mode = widgets.ToggleButtons(options=['Volume','X','Y','Z'])
         self.progress = widgets.IntProgress(
-            value=10, min=0, max=10,description='Processing:',
-            bar_style='',style={'bar_color': 'green'}, orientation='horizontal')
+            value=10, min=0, max=10, description='Processing:',
+            bar_style='', style={'bar_color': 'green'}, orientation='horizontal')
 
         # Set observers
         self.threshold.observe(self.on_update_plot)
@@ -449,7 +449,7 @@ class ThreeDViewer(widgets.Box):
                 # Fix label colours (see self.fig.style)
                 ipv.pylab.style.use(
                     {'axes': {'label': {'color': 'black'},
-                    'ticklabel': {'color': 'black'}}})
+                              'ticklabel': {'color': 'black'}}})
             if self.toggle_box.value:
                 ipv.pylab.style.box_on()
             else:
