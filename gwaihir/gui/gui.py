@@ -2658,7 +2658,7 @@ class Interface():
                     print(
                         "\n####################################################"
                         "#########################################################\n"
-                        )
+                    )
                     print("Saving data, takes some time ...")
 
                     try:
@@ -2666,7 +2666,7 @@ class Interface():
                         print(
                             "\n####################################################"
                             "#########################################################\n"
-                            )
+                        )
                         print(
                             "Saving diffraction data and mask selected in the PyNX tab...")
                         self.initialize_cdi_operator()
@@ -2676,7 +2676,7 @@ class Interface():
                             print(
                                 "\n####################################################"
                                 "#########################################################\n"
-                                )
+                            )
                             print("\nSaving parameters used in the GUI...")
                             print(
                                 "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
@@ -2702,7 +2702,7 @@ class Interface():
                         print(
                             "\n####################################################"
                             "#########################################################\n"
-                            )
+                        )
                         print("Saving Facets class data")
                         self.Facets.to_hdf5(
                             f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
@@ -2713,7 +2713,7 @@ class Interface():
                     print(
                         "\n####################################################"
                         "#########################################################\n"
-                        )
+                    )
 
                 @button_reload_previous_data.on_click
                 def action_reload_previous_data(selfbutton):
@@ -2723,14 +2723,14 @@ class Interface():
                     print(
                         "\n####################################################"
                         "#########################################################\n"
-                        )
+                    )
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all functions
                     print("Not created yet")
                     print(
                         "\n####################################################"
                         "#########################################################\n"
-                        )
+                    )
         elif not run_dir_init:
             clear_output(True)
 
@@ -3550,7 +3550,7 @@ class Interface():
                             print(
                                 "\"obj\" key does not exist."
                                 "Could not load support array."
-                                )
+                            )
 
             if self.Dataset.rebin != (1, 1, 1):
                 support = bin_data(support, self.Dataset.rebin)
@@ -3996,7 +3996,7 @@ class Interface():
                 print(
                     "\n####################################################"
                     "#########################################################\n"
-                    )
+                )
                 try:
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
@@ -4207,7 +4207,7 @@ class Interface():
                         print(
                             "\n####################################################"
                             "#########################################################\n"
-                            )
+                        )
 
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
@@ -6354,7 +6354,7 @@ class Interface():
                         "You can then work on the `df` dataframe as you please.\n"
                         "\n###########################################################"
                         "#####################################################\n"
-                        )
+                    )
 
                 # field data from facet analysis
                 elif show_logs == "load_field_data":
