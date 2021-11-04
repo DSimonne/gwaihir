@@ -13,6 +13,7 @@ import gwaihir.plot as plot
 
 class SupportTools():
     """Class that regroups the methods used to create/extract/optimize support in BCDI"""
+
     def __init__(self, path_to_data=None, path_to_support=None, saving_directory=None):
         """
         Initialize the class with either a reconstructed object or
@@ -118,7 +119,7 @@ class SupportTools():
 
                 print(
                     f"Shape of real space complex electronic density array {np.shape(electronic_density)}"
-                    )
+                )
 
                 # Find max value in image, we work with the module
                 amp = np.abs(electronic_density)
@@ -132,7 +133,7 @@ class SupportTools():
                 rnocc = np.where(support == 0)
                 print(
                     f"Percentage of 3D array occupied by support:\n{np.shape(rocc)[1] / np.shape(rnocc)[1]}"
-                    )
+                )
 
                 # Save support
                 np.savez(self.saving_directory +
