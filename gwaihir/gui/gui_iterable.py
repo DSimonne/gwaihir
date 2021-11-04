@@ -36,12 +36,12 @@ class Dataset():
     THE DATASETS CLASS IS MEANT TO BE READ VIA THE gwaihir.gui CLASS !!
     """
 
-    def __init__(self, scan, sample_name, data_directory, root_folder):
+    def __init__(self, scan, sample_name, data_dir, root_folder):
         """Initialiaze the Dataset class, some metadata can be associated as well
         """
         self.scan = scan
         self.sample_name = sample_name
-        self.data_directory = data_directory
+        self.data_dir = data_dir
         self.root_folder = root_folder
 
     def __repr__(self):

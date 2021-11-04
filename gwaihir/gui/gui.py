@@ -46,7 +46,8 @@ try:
     pynx_import = True
 except ModuleNotFoundError:
     pynx_import = False
-    print("Could not load PyNX, the phase retrieval tab will be disabled")
+    print("Could not load PyNX, the phase retrieval tab will be disabled.\n"
+        "Make sure you have the right version of PyNX installed.")
 
 
 class Interface():
@@ -83,9 +84,14 @@ class Interface():
         """
         super(Interface, self).__init__()
 
+        # Get path to scripts folder
         self.cwd = os.getcwd()
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0]+"/bin"
+        print(f"Using `{self.path_scripts}` as absolute path to scripts containing folder.\n"
+            "This should be correct if gwaihir was installed in an environment.\n"
+            "Otherwise change self.path_scripts attribute to the correct folder.\n")
+
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
 
@@ -93,8 +99,8 @@ class Interface():
         try:
             self.user_name = getpass.getuser()
 
-            print("Login used for slurm:", self.user_name)
-            print("If wrong login, please change self.user_name attribute")
+            print(f"Login used for slurm: {self.user_name}\n"
+                "If wrong login, please change self.user_name attribute")
         except:
             print(
                 "Could not get user name, please create self.user_name attribute for slurm batch jobs")
@@ -3780,8 +3786,11 @@ class Interface():
         self.Dataset.fwhm = fwhm
         self.Dataset.eta = eta
         self.Dataset.update_psf = update_psf
+<<<<<<< HEAD
         self.Dataset.use_operators = use_operators  # todo delete
         self.Dataset.operator_chain = operator_chain  # todo delete
+=======
+>>>>>>> 13eb407 (Add docs about path_scripts)
         self.Dataset.nb_raar = nb_raar
         self.Dataset.nb_hio = nb_hio
         self.Dataset.nb_er = nb_er
@@ -5655,8 +5664,8 @@ class Interface():
 
                 `nb_run=1`: number of times to run the optimization [default=1]
 
-                `nb_run_keep`: number of best run results to keep, according to likelihood statistics. This is only useful
-                             associated with nb_run [default: keep all run results]
+                `nb_run_keep`: number of best run results to keep, according to likelihood statistics. This is 
+                    only useful associated with nb_run [default: keep all run results]
 
                 `data2cxi`: if used as keyword (or data2cxi=True in a parameters file), convert the original 
                           data to CXI(HDF5)  format. Will be saved to file 'data.cxi', or if a data file
@@ -5678,24 +5687,25 @@ class Interface():
                 `mask=zero`: mask for the diffraction data. If 'zero', all pixels with iobs <= 0 will be masked.
                           If 'negative', all pixels with iobs < 0 will be masked. 
                           If 'maxipix', the maxipix gaps will be masked.
-                          Other possibilities: give a filename for the mask file and  import mask from .npy, .npz, .edf, .mat.
-                          (the first available array will be used if multiple are present) file.
+                          Other possibilities: give a filename for the mask file and  import mask from .npy, 
+                          .npz, .edf, .mat. (the first available array will be used if multiple are present) file.
                           Pixels = 0 are valid, > 0 are masked. If the mask is 2D
                           and the data 3D, the mask is repeated for all frames along the first dimension (depth).
                           [default=None, no mask]
 
-                `iobs_saturation=1e6`: saturation value for the observed intensity. Any pixel above this intensity will be masked
+                `iobs_saturation=1e6`: saturation value for the observed intensity. Any pixel above this intensity
+                    will be masked
                                      [default: no saturation value]
 
-                `zero_mask`: by default masked pixels are free and keep the calculated intensities during HIO, RAAR, ER and CF cycles.
-                           Setting this flag will force all masked pixels to zero intensity. This can be more stable with a large 
-                           number of masked pixels and low intensity diffraction data.
+                `zero_mask`: by default masked pixels are free and keep the calculated intensities during HIO, RAAR,
+                     ER and CF cycles. Setting this flag will force all masked pixels to zero intensity. 
+                     This can be more stable with a large  number of masked pixels and low intensity diffraction data.
                            If a value is supplied the following options can be used:
                            zero_mask=0: masked pixels are free and keep the calculated complex amplitudes
                            zero_mask=1: masked pixels are set to zero
-                           zero_mask=auto: this is only meaningful when using a 'standard' algorithm below. The masked pixels will
-                                           be set to zero during the first 60% of the HIO/RAAR cycles, and will be free during the 
-                                           last 40% and ER, ML ones.
+                           zero_mask=auto: this is only meaningful when using a 'standard' algorithm below. 
+                                The masked pixels will be set to zero during the first 60% of the HIO/RAAR cycles, 
+                                and will be free during the last 40% and ER, ML ones.
 
                 `object=obj.npy`: starting object. Import object from .npy, .npz, .mat (the first available array 
                       will  be used if multiple are present), or CXI file.
@@ -5722,10 +5732,9 @@ class Interface():
                                                        threshold.
                                                        [default value: 0.1]
 
-                `support_threshold=0.25`: threshold for the support update. Alternatively two values can be given, and the threshold
-                                        will be randomly chosen in the interval given by two values: support_threshold=0.20,0.28.
-                                        This is mostly useful in combination with nb_run.
-                                        [default=0.25]
+                `support_threshold=0.25`: threshold for the support update. Alternatively two values can be given,
+                    and the threshold will be randomly chosen in the interval given by two values: 
+                    support_threshold=0.20,0.28.
 
                 `support_threshold_method=max`: method used to determine the absolute threshold for the 
                                               support update. Either:'max' or 'average' (the default) values,
@@ -5764,7 +5773,8 @@ class Interface():
                                        - etc..
                                        [default=None, no shrinking or expansion]
 
-                `support_update_border_n`: if > 0, the only pixels affected by the support updated lie within +/- N pixels around                          the outer border of the support.
+                `support_update_border_n`: if > 0, the only pixels affected by the support updated 
+                    lie within +/- N pixels around the outer border of the support.
 
                 `positivity`: if set or positivity=True, the algorithms will be biased towards a real, positive
                             object. Object is still complex-valued, but random start will begin with real 
@@ -5786,9 +5796,11 @@ class Interface():
                 `max_size=256`: maximum size for the array used for analysis, along all dimensions. The data
                               will be cropped to this value after centering. [default: no maximum size]
 
-                `user_config*=*`: this can be used to store a custom configuration parameter which will be ignored by the 
-                                algorithm, but will be stored among configuration parameters in the CXI file (data and output).
-                                e.g.: user_config_temperature=268K  user_config_comment="Vibrations during measurement" etc...
+                `user_config*=*`: this can be used to store a custom configuration parameter which will be 
+                    ignored by the algorithm, but will be stored among configuration parameters in the CXI 
+                    file (data and output). 
+                    e.g.: user_config_temperature=268K  user_config_comment="Vibrations during measurement" 
+                    etc...
 
                 ### ALGORITHMS: standard version, using RAAR, then HIO, then ER and ML
 
@@ -5816,7 +5828,8 @@ class Interface():
                 `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: give a specific sequence of algorithms and/or 
                           parameters to be  used for the optimisation (note: this string is case-insensitive).
                 #### Important: 
-                1. when supplied from the command line, there should be NO SPACE in the expression ! And if there are parenthesis in the expression, quotes are required around the algorithm string
+                1. when supplied from the command line, there should be NO SPACE in the expression ! And if 
+                there are parenthesis in the expression, quotes are required around the algorithm string
                 2. the string and operators are applied from right to left
 
                 #### Valid changes of individual parameters include (see detailed description above):
@@ -5892,12 +5905,18 @@ class Interface():
                 `algorithm=ER**100` : 100 cycles of HIO
                 `algorithm=ER**50,HIO**100` : 100 cycles of HIO, followed by 50 cycles of ER
                 `algorithm=ER**50*HIO**100` : 100 cycles of HIO, followed by 50 cycles of ER
-                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: 10 times [50 HIO + 5 ER + Support update], followed by 50 ER
-                `algorithm="ER**50,verbose=1,(Sup*ER**5*HIO**50)**10,verbose=100,HIO**100"`: change the periodicity of verbose output
-                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10,support_post_expand=1, (Sup*ER**5*HIO**50)**10,support_post_expand=-1#2,HIO**100"`: same but change the post-expand (wrap) method
-                `algorithm="ER**50,(Sup*PSF*ER**5*HIO**50)**5,(Sup*ER**5*HIO**50)**10,HIO**100"`: activate partial correlation after a first series of algorithms
-                `algorithm="ER**50,(Sup*PSF*HIO**50)**4,(Sup*HIO**50)**8"`: typical algorithm steps with partial coherence
-                `algorithm="ER**50,(Sup*HIO**50)**4,(Sup*HIO**50)**4,positivity=0,(Sup*HIO**50)**8,positivity=1"`: same as previous but starting with positivity constraint, removed at the end.
+                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: 10 times [50 HIO + 5 ER + Support update], 
+                    followed by 50 ER
+                `algorithm="ER**50,verbose=1,(Sup*ER**5*HIO**50)**10,verbose=100,HIO**100"`: change the 
+                    periodicity of verbose output
+                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10,support_post_expand=1, (Sup*ER**5*HIO**50)**10,
+                    support_post_expand=-1#2,HIO**100"`: same but change the post-expand (wrap) method
+                `algorithm="ER**50,(Sup*PSF*ER**5*HIO**50)**5,(Sup*ER**5*HIO**50)**10,HIO**100"`: 
+                    activate partial correlation after a first series of algorithms
+                `algorithm="ER**50,(Sup*PSF*HIO**50)**4,(Sup*HIO**50)**8"`: typical algorithm steps with 
+                    partial coherence
+                `algorithm="ER**50,(Sup*HIO**50)**4,(Sup*HIO**50)**4,positivity=0,(Sup*HIO**50)**8,
+                    positivity=1"`: same as previous but starting with positivity constraint, removed at the end.
 
                 **Default**: use nb_raar, nb_hio, nb_er and nb_ml to perform the sequence of algorithms]     
 
