@@ -101,9 +101,10 @@ class Interface():
 
             print(f"Login used for batch jobs: {self.user_name}\n"
                 "If wrong login, please change self.user_name attribute")
-        except:
+        except Exception as e:
             print(
                 "Could not get user name, please create self.user_name attribute for jobs")
+            raise e
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(self.initialize_directories,
@@ -2331,7 +2332,7 @@ class Interface():
             self.folder_plot_handler, names="value")
 
         # Widgets for facet analysis
-        self.tab_facet = interactive(self.facet_analysis,
+        self.tab_facet = interactive(self.init_facet_analysis,
                                      unused_label_facet=widgets.HTML(
                                          description="<p style='font-weight: bold;font-size:1.2em'>Extract facet specific data from vtk file",
                                          style={
@@ -3263,12 +3264,14 @@ class Interface():
 
                 # On lance bcdi_preprocess
                 print(
-                    "#######################################################################")
+                    "##########################################"
+                    "#############################")
                 print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
                 print(
                     f"Config file: {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
                 print(
-                    "#######################################################################")
+                    "############################################"
+                    "###########################")
 
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
                     --config {self.Dataset.scan_folder}preprocessing/config_preprocessing.yml")
@@ -3455,15 +3458,12 @@ class Interface():
                 try:
                     iobs = np.load(self.Dataset.iobs)["data"]
                     print("CXI input: loading data")
-                except:
-                    print("Could not load 'data' array from npz file")
+                except KeyError:
+                    print("\"data\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    iobs = bin_data(iobs, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
-                    raise e
+                iobs = bin_data(mask, self.Dataset.rebin)
+
 
             # fft shift
             iobs = fftshift(iobs)
@@ -3485,14 +3485,11 @@ class Interface():
                     nb = mask.sum()
                     print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
                         nb, nb * 100 / mask.size))
-                except:
-                    print("Could not load 'mask' array from npz file")
+                except KeyError:
+                    print("\"mask\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    mask = bin_data(mask, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
+                mask = bin_data(mask, self.Dataset.rebin)
 
             # fft shift
             mask = fftshift(mask)
@@ -3509,26 +3506,26 @@ class Interface():
                 try:
                     support = np.load(self.Dataset.support)["data"]
                     print("CXI input: loading support")
-                except:
-                    # print("Could not load 'data' array from npz file")
+                except (FileNotFoundError, ValueError):
+                    print("File not supported or does not exist.")
+                except KeyError:
+                    print("\"data\" key does not exist.")
                     try:
                         support = np.load(self.Dataset.support)[
                             "support"]
                         print("CXI input: loading support")
-                    except:
-                        # print("Could not load 'support' array from npz file")
+                    except KeyError:
+                        print("\"support\" key does not exist.")
                         try:
                             support = np.load(
                                 self.Dataset.support)["obj"]
                             print("CXI input: loading support")
-                        except:
-                            print("Could not load support")
+                        except KeyError:
+                            print("\"obj\" key does not exist."
+                                "Could not load support array.")
 
             if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    support = bin_data(support, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
+                support = bin_data(support, self.Dataset.rebin)
 
             # fft shift
             support = fftshift(support)
@@ -3545,14 +3542,11 @@ class Interface():
                 try:
                     obj = np.load(self.Dataset.obj)["data"]
                     print("CXI input: loading object")
-                except:
-                    print("Could not load 'data' array from npz file")
+                except KeyError:
+                    print("\"data\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
-                try:
-                    obj = bin_data(obj, self.Dataset.rebin)
-                except Exception as e:
-                    print("Could not bin data")
+                obj = bin_data(obj, self.Dataset.rebin)
 
             # fft shift
             obj = fftshift(obj)
@@ -3789,11 +3783,6 @@ class Interface():
         self.Dataset.fwhm = fwhm
         self.Dataset.eta = eta
         self.Dataset.update_psf = update_psf
-<<<<<<< HEAD
-        self.Dataset.use_operators = use_operators  # todo delete
-        self.Dataset.operator_chain = operator_chain  # todo delete
-=======
->>>>>>> 13eb407 (Add docs about path_scripts)
         self.Dataset.nb_raar = nb_raar
         self.Dataset.nb_hio = nb_hio
         self.Dataset.nb_er = nb_er
@@ -4968,12 +4957,14 @@ class Interface():
                 )
                 # On lance bcdi_preprocess
                 print(
-                    "#######################################################################")
+                    "#########################################"
+                    "##############################")
                 print(f"Running: {self.path_scripts}/bcdi_strain.py")
                 print(
                     f"Config file: {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
                 print(
-                    "#######################################################################")
+                    "##########################################"
+                    "#############################")
 
                 os.system(f"{self.path_scripts}/bcdi_strain.py \
                     --config {self.Dataset.scan_folder}postprocessing/config_postprocessing.yml")
@@ -5037,7 +5028,7 @@ class Interface():
 
             clear_output(True)
 
-    def facet_analysis(
+    def init_facet_analysis(
         self,
         unused_label_facet,
         facet_folder,
@@ -5061,13 +5052,10 @@ class Interface():
             fn = self.Dataset.facet_filename.split("/")[-1]
             pathdir = self.Dataset.facet_filename.replace(fn, "")
 
-            try:
-                self.Facets = facet_analysis.Facets(
-                    filename=fn, pathdir=pathdir)
-                print(
-                    "Facets object saved as self.Facets, call help(self.Facets) for more details.")
-            except:
-                return "Wrong file."
+            self.Facets = facet_analysis.Facets(
+                filename=fn, pathdir=pathdir)
+            print(
+                "Facets object saved as self.Facets, call help(self.Facets) for more details.")
 
             # Button to rotate data
             button_rotate = Button(
@@ -6322,13 +6310,15 @@ class Interface():
                 if show_logs == "load_csv":
                     logs = pd.read_csv(self.csv_file)
                     print(
-                        "\n################################################################################################################\n")
+                        "\n############################################################"
+                        "####################################################\n")
                     print("For a more detailed analysis, please proceed as follows")
                     print("import pandas as pd")
                     print(f"df = pd.read_csv({self.csv_file})\n")
                     print("You can then work on the `df` dataframe as you please.")
                     print(
-                        "\n################################################################################################################\n")
+                        "\n###########################################################"
+                        "#####################################################\n")
 
                 # field data from facet analysis
                 elif show_logs == "load_field_data":
@@ -6527,12 +6517,12 @@ class Interface():
                     #     data_og = f.root.com.scan_data.merlin_image[:]
                     print("Calling merlin the enchanter in SBS...")
                     self.Dataset.scan_type = "SBS"
-                except:
+                except tb.NoSuchNodeError:
                     try:
                         data_og = f.root.com.scan_data.self_image[:]
                         print("Calling merlin the enchanter in FLY...")
                         self.Dataset.scan_type = "FLY"
-                    except:
+                    except tb.NoSuchNodeError:
                         print("This data does not result from Merlin :/")
 
                 # Just an index for plotting schemes
@@ -6572,7 +6562,7 @@ class Interface():
                         f.root.com.scan_data.data_10[:] = data
                     elif self.Dataset.scan_type == "FLY":
                         f.root.com.scan_data.test_image[:] = data
-                except:
+                except tb.NoSuchNodeError:
                     print("Could not overwrite data ><")
 
         else:
@@ -6592,75 +6582,70 @@ class Interface():
                  )
 
         # Save in a csv file
+        if self.Dataset.beamline == "SIXS_2019":
+            # Load Dataset, quite slow
+            data = rd.DataSet(self.Dataset.path_to_data)
+
+            # Add new data
+            temp_df = pd.DataFrame([[
+                self.Dataset.scan,
+                self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
+                self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+                self.Dataset.bragg_x, self.Dataset.bragg_y,
+                data.x[0], data.y[0], data.z[0], data.mu[0], data.delta[0], data.omega[0],
+                data.gamma[0], data.gamma[0] - data.mu[0],
+                (data.mu[-1] - data.mu[-0]) /
+                len(data.mu), data.integration_time[0], len(
+                    data.integration_time),
+                self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+                data.ssl3hg[0], data.ssl3vg[0],
+                # data.ssl1hg[0], data.ssl1vg[0]
+            ]],
+                columns=[
+                    "scan",
+                    "qx", "qy", "qz", "q_norm", "d_hkl",
+                    "inplane_angle", "out_of_plane_angle",
+                    "bragg_x", "bragg_y",
+                    "x", "y", "z", "mu", "delta", "omega",
+                    "gamma", 'gamma-mu',
+                    "step size", "integration time", "steps",
+                    "FWHM", "COM_rocking_curve",
+                    "ssl3hg", "ssl3vg",
+                #     "ssl1hg", "ssl1vg",
+            ])
+        else:
+            # Add new data
+            temp_df = pd.DataFrame([[
+                self.Dataset.scan,
+                self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
+                self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+                self.Dataset.bragg_x, self.Dataset.bragg_y,
+                self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+            ]],
+                columns=[
+                    "scan",
+                    "qx", "qy", "qz", "q_norm", "d_hkl",
+                    "inplane_angle", "out_of_plane_angle",
+                    "bragg_x", "bragg_y",
+                    "FWHM", "COM_rocking_curve",
+            ])
+
+        # Load all the logs
         try:
-            if self.Dataset.beamline == "SIXS_2019":
-                # Load Dataset, quite slow
-                data = rd.DataSet(self.Dataset.path_to_data)
+            df = pd.read_csv(self.csv_file)
 
-                # Add new data
-                temp_df = pd.DataFrame([[
-                    self.Dataset.scan,
-                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
-                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                    self.Dataset.bragg_x, self.Dataset.bragg_y,
-                    data.x[0], data.y[0], data.z[0], data.mu[0], data.delta[0], data.omega[0],
-                    data.gamma[0], data.gamma[0] - data.mu[0],
-                    (data.mu[-1] - data.mu[-0]) /
-                    len(data.mu), data.integration_time[0], len(
-                        data.integration_time),
-                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                    data.ssl3hg[0], data.ssl3vg[0],
-                    # data.ssl1hg[0], data.ssl1vg[0]
-                ]],
-                    columns=[
-                        "scan",
-                        "qx", "qy", "qz", "q_norm", "d_hkl",
-                        "inplane_angle", "out_of_plane_angle",
-                        "bragg_x", "bragg_y",
-                        "x", "y", "z", "mu", "delta", "omega",
-                        "gamma", 'gamma-mu',
-                        "step size", "integration time", "steps",
-                        "FWHM", "COM_rocking_curve",
-                        "ssl3hg", "ssl3vg",
-                    #     "ssl1hg", "ssl1vg",
-                ])
-            else:
-                # Add new data
-                temp_df = pd.DataFrame([[
-                    self.Dataset.scan,
-                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2], self.Dataset.qnorm, self.Dataset.dist_plane,
-                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                    self.Dataset.bragg_x, self.Dataset.bragg_y,
-                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                ]],
-                    columns=[
-                        "scan",
-                        "qx", "qy", "qz", "q_norm", "d_hkl",
-                        "inplane_angle", "out_of_plane_angle",
-                        "bragg_x", "bragg_y",
-                        "FWHM", "COM_rocking_curve",
-                ])
+            # Replace old data linked to this scan, no problem if this row does not exist yet
+            indices = df[df['scan'] == self.Dataset.scan].index
+            df.drop(indices, inplace=True)
 
-            # Load all the logs
-            try:
-                df = pd.read_csv(self.csv_file)
+            result = pd.concat([df, temp_df])
 
-                # Replace old data linked to this scan, no problem if this row does not exist yet
-                indices = df[df['scan'] == self.Dataset.scan].index
-                df.drop(indices, inplace=True)
+        except FileNotFoundError:
+            result = temp_df
 
-                result = pd.concat([df, temp_df])
-
-            except FileNotFoundError:
-                result = temp_df
-
-            # Save
-            result.to_csv(self.csv_file, index=False)
-            print(f"Saved logs in {self.csv_file}")
-
-        except Exception as e:
-            raise e
-            # print("Could not extract metadata from Dataset ...")
+        # Save
+        result.to_csv(self.csv_file, index=False)
+        print(f"Saved logs in {self.csv_file}")
 
     # Below are handlers
 
@@ -6796,7 +6781,7 @@ class Interface():
                 self.temp_handler(
                     change=self._list_widgets_correct.children[2].value)
 
-        except:
+        except AttributeError:
             if not change:
                 self._list_widgets_init_dir.children[7].disabled = False
 
@@ -6837,7 +6822,7 @@ class Interface():
             if not change.new:
                 for w in self._list_widgets_correct.children[3:6]:
                     w.disabled = True
-        except:
+        except AttributeError:
             if change:
                 for w in self._list_widgets_correct.children[3:6]:
                     w.disabled = False
@@ -6951,7 +6936,7 @@ class Interface():
                 for w in self._list_widgets_pynx.children[16:20]:
                     w.disabled = True
 
-        except:
+        except AttributeError:
             if change:
                 for w in self._list_widgets_pynx.children[16:20]:
                     w.disabled = False
@@ -6972,7 +6957,7 @@ class Interface():
             if change.new == "pseudo-voigt":
                 self._list_widgets_pynx.children[18].disabled = False
 
-        except:
+        except AttributeError:
             if change != "pseudo-voigt":
                 self._list_widgets_pynx.children[18].disabled = True
 
@@ -6998,7 +6983,7 @@ class Interface():
         try:
             self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change.new + "/*.h5")) + sorted(glob.glob(
                 change.new + "/*.cxi")) + sorted(glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz"))
-        except:
+        except AttributeError:
             self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change + "/*.h5")) + sorted(glob.glob(
                 change + "/*.cxi")) + sorted(glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz"))
 

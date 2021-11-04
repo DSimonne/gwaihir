@@ -69,94 +69,93 @@ class Dataset():
         if reconstruction_filename:
             print("\nSaving phase retrieval output ...")
             try:
-                with h5py.File(reconstruction_filename, "r") as reconstruction_file:
-                    with h5py.File(final_data_path, "a") as final_file:
-                        # Real space data is already here
+                with h5py.File(reconstruction_filename, "r") as reconstruction_file, h5py.File(final_data_path, "a") as final_file:
+                    # Real space data is already here
 
-                        # Reciprocal space data
+                    # Reciprocal space data
 
-                        # Copy image_1 from reconstruction to entry_1.image_2
+                    # Copy image_1 from reconstruction to entry_1.image_2
+                    try:
+                        reconstruction_file.copy(
+                            '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+                    except RuntimeError:
+                        del final_file["entry_1"]["image_2"]
+                        reconstruction_file.copy(
+                            '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+
+                    # Update params if reconstruction file results from mode decomposition
+                    if reconstruction_filename.endswith(".h5"):
+                        final_file["entry_1"]["image_2"].create_dataset(
+                            "data_space", data="real")
+                        final_file["entry_1"]["image_2"].create_dataset(
+                            "data_type", data="electron density")
+
+                    # Update entry_1.image_2.support softlink
+                    if reconstruction_filename.endswith(".cxi"):
+                        del final_file["entry_1"]["image_2"]["support"]
+                        final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
+                            "/entry_1/image_2/mask")
+
+                    # Create entry_1.data_2 and create softlink to entry_1.image_2.data
+                    try:
+                        group = final_file["entry_1"].create_group(
+                            "data_2")
+                        group["data"] = h5py.SoftLink(
+                            "/entry_1/image_2/data")
+                    except ValueError:
+                        group = final_file["entry_1"]["data_2"]
+                        del final_file["entry_1"]["data_2"]["data"]
+                        group["data"] = h5py.SoftLink(
+                            "/entry_1/image_2/data")
+                    # Assign correct type to entry_1.data_2
+                    final_file["entry_1"]["data_2"].attrs['NX_class'] = 'NXdata'
+                    final_file["entry_1"]["data_2"].attrs['signal'] = 'data'
+
+                    # Rename entry_1.image_2.process_1 to entry_1.image_2.process_2
+                    try:
+                        final_file["entry_1"]["image_2"]["process_1"].move(
+                            "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
+                    except ValueError:
+                        del final_file["entry_1"]["image_2"]["process_2"]
+                        final_file["entry_1"]["image_2"]["process_1"].move(
+                            "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
+                    # Assign correct type to entry_1.image_2.process_2
+                    final_file["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
+
+                    # Move pynx configuration
+                    try:
+                        conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
+                        if reconstruction_filename.endswith(".h5"):
+                            final_file.create_group(
+                                "entry_1/image_2/process_2/configuration/")
+                        for k in conf.keys():
+                            final_file.move(
+                                f"entry_1/data_1/process_1/configuration/{k}",
+                                f"entry_1/image_2/process_2/configuration/{k}"
+                            )
+
+                        del final_file["entry_1"]["data_1"]["process_1"]
+                    except KeyError:
+                        # Already moved or does not exist
+                        pass
+                    final_file.move("entry_1/program_name",
+                                    "entry_1/image_2/process_2/program_name")
+
+                    # Delete entry_1.instrument_1 if exists
+                    try:
+                        del final_file["entry_1"]["image_2"]["instrument_1"]
+                    except:
+                        pass
+
+                    # Also copy mode data to entry_1.image_2.modes_percentage
+                    if reconstruction_filename.endswith(".h5"):
                         try:
                             reconstruction_file.copy(
-                                '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+                                '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
                         except RuntimeError:
-                            del final_file["entry_1"]["image_2"]
+                            del final_file["entry_1"]["image_2"]["modes_percentage"]
                             reconstruction_file.copy(
-                                '/entry_1/image_1/', final_file["entry_1"], name="image_2")
-
-                        # Update params if reconstruction file results from mode decomposition
-                        if reconstruction_filename.endswith(".h5"):
-                            final_file["entry_1"]["image_2"].create_dataset(
-                                "data_space", data="real")
-                            final_file["entry_1"]["image_2"].create_dataset(
-                                "data_type", data="electron density")
-
-                        # Update entry_1.image_2.support softlink
-                        if reconstruction_filename.endswith(".cxi"):
-                            del final_file["entry_1"]["image_2"]["support"]
-                            final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
-                                "/entry_1/image_2/mask")
-
-                        # Create entry_1.data_2 and create softlink to entry_1.image_2.data
-                        try:
-                            group = final_file["entry_1"].create_group(
-                                "data_2")
-                            group["data"] = h5py.SoftLink(
-                                "/entry_1/image_2/data")
-                        except ValueError:
-                            group = final_file["entry_1"]["data_2"]
-                            del final_file["entry_1"]["data_2"]["data"]
-                            group["data"] = h5py.SoftLink(
-                                "/entry_1/image_2/data")
-                        # Assign correct type to entry_1.data_2
-                        final_file["entry_1"]["data_2"].attrs['NX_class'] = 'NXdata'
-                        final_file["entry_1"]["data_2"].attrs['signal'] = 'data'
-
-                        # Rename entry_1.image_2.process_1 to entry_1.image_2.process_2
-                        try:
-                            final_file["entry_1"]["image_2"]["process_1"].move(
-                                "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
-                        except ValueError:
-                            del final_file["entry_1"]["image_2"]["process_2"]
-                            final_file["entry_1"]["image_2"]["process_1"].move(
-                                "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
-                        # Assign correct type to entry_1.image_2.process_2
-                        final_file["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
-
-                        # Move pynx configuration
-                        try:
-                            conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
-                            if reconstruction_filename.endswith(".h5"):
-                                final_file.create_group(
-                                    "entry_1/image_2/process_2/configuration/")
-                            for k in conf.keys():
-                                final_file.move(
-                                    f"entry_1/data_1/process_1/configuration/{k}",
-                                    f"entry_1/image_2/process_2/configuration/{k}"
-                                )
-
-                            del final_file["entry_1"]["data_1"]["process_1"]
-                        except KeyError:
-                            # Already moved or does not exist
-                            pass
-                        final_file.move("entry_1/program_name",
-                                        "entry_1/image_2/process_2/program_name")
-
-                        # Delete entry_1.instrument_1 if exists
-                        try:
-                            del final_file["entry_1"]["image_2"]["instrument_1"]
-                        except:
-                            pass
-
-                        # Also copy mode data to entry_1.image_2.modes_percentage
-                        if reconstruction_filename.endswith(".h5"):
-                            try:
-                                reconstruction_file.copy(
-                                    '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
-                            except RuntimeError:
-                                del final_file["entry_1"]["image_2"]["modes_percentage"]
-                                reconstruction_file.copy(
-                                    '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
+                                '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
 
             except OSError:
                 # No reconstruction file yet

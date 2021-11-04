@@ -8,7 +8,7 @@ from IPython.display import display, Markdown, Latex, clear_output
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
-import gwaihir.plot
+import gwaihir.plot as plot
 
 
 class SupportTools():

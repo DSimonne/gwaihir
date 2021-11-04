@@ -12,6 +12,7 @@ import os
 import h5py as h5
 import tables as tb
 import glob
+import ast
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -20,7 +21,7 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import display, Markdown, Latex, clear_output
+from IPython.display import Markdown, Latex, clear_output
 # import ipyfilechooser
 import ipyvolume as ipv
 
@@ -309,9 +310,8 @@ class ThreeDViewer(widgets.Box):
         :param k: ignored
         :return:
         """
-        if v is not None:
-            if v['name'] != 'value':
-                return
+        if v is not None and v['name'] != 'value':
+            return
         self.progress.value = 7
 
         # See https://github.com/maartenbreddels/ipyvolume/issues/174 to support using normals
@@ -365,7 +365,7 @@ class ThreeDViewer(widgets.Box):
             self.plane_text.value = ""
             c = 1
         try:
-            verts, faces, normals, values = marching_cubes(
+            verts, faces, normals, _ = marching_cubes(
                 abs(self.d) * c, level=self.threshold.value, step_size=1)
             vals = self.rgi(verts)
             if self.toggle_phase.value == "Phase":
@@ -377,7 +377,7 @@ class ThreeDViewer(widgets.Box):
                 cs = cm.ScalarMappable(
                     norm=Normalize(
                         vmin=self.colormap_range.value[0], vmax=self.colormap_range.value[1]),
-                    cmap=eval('cm.%s' % (self.colormap.value.lower())))
+                    cmap=ast.literal_eval('cm.%s' % (self.colormap.value.lower())))
                 color = cs.to_rgba(abs(vals))[..., :3]
             else:
                 # TODO: Gradient
@@ -508,18 +508,17 @@ class ThreeDViewer(widgets.Box):
         self.rgi = RegularGridInterpolator(
             (z, y, x), self.d, method='linear', bounds_error=False, fill_value=0)
 
-        if False:
-            # Also prepare the phase gradient
-            gz, gy, gx = np.gradient(self.d)
-            a = np.maximum(abs(self.d), 1e-6)
-            ph = self.d / a
-            gaz, gay, gax = np.gradient(a)
-            self.rgi_gx = RegularGridInterpolator((z, y, x), ((gx - gax * ph) / (ph * a)).real, method='linear',
-                                                  bounds_error=False, fill_value=0)
-            self.rgi_gy = RegularGridInterpolator((z, y, x), ((gy - gay * ph) / (ph * a)).real, method='linear',
-                                                  bounds_error=False, fill_value=0)
-            self.rgi_gz = RegularGridInterpolator((z, y, x), ((gz - gaz * ph) / (ph * a)).real, method='linear',
-                                                  bounds_error=False, fill_value=0)
+        # Also prepare the phase gradient
+        gz, gy, gx = np.gradient(self.d)
+        a = np.maximum(abs(self.d), 1e-6)
+        ph = self.d / a
+        gaz, gay, gax = np.gradient(a)
+        self.rgi_gx = RegularGridInterpolator((z, y, x), ((gx - gax * ph) / (ph * a)).real, method='linear',
+                                              bounds_error=False, fill_value=0)
+        self.rgi_gy = RegularGridInterpolator((z, y, x), ((gy - gay * ph) / (ph * a)).real, method='linear',
+                                              bounds_error=False, fill_value=0)
+        self.rgi_gz = RegularGridInterpolator((z, y, x), ((gz - gaz * ph) / (ph * a)).real, method='linear',
+                                              bounds_error=False, fill_value=0)
 
         # Fix extent
         ipv.pylab.xlim(0, max(self.d.shape))
@@ -528,7 +527,7 @@ class ThreeDViewer(widgets.Box):
         ipv.squarelim()
         self.on_update_plot()
 
-    def on_animate(self, v):
+    def on_animate(self):
         """
         Trigger the animation (rotation around vertical axis)
         :param v:
@@ -772,7 +771,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
         # Create colorbar
         cbar = fig.colorbar(mappable=img, cax=cbar_ax)
 
-    except (TypeError, ValueError):
+    except ValueError:
         plt.close()
         if scale == "logarithmic":
             print("Log scale can not handle this kind of data ...")
@@ -816,7 +815,7 @@ def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
             position='right', size='5%', pad=0.1)
 
         # Create colorbar
-        cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+        # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
     except TypeError:
         plt.close()
         if scale == "logarithmic":
