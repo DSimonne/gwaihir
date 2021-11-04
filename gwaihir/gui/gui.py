@@ -53,7 +53,7 @@ except ModuleNotFoundError:
 class Interface():
     """
     This class is a Graphical User Interface (gui).
-    It makes extensive use of the ipywidgets and 
+    It makes extensive use of the ipywidgets and
     is thus meant to be used with a jupyter notebook.
     Additional informations are provided in the "ReadMe"
     tab of the gui.
@@ -638,8 +638,8 @@ class Interface():
                                                            tooltip="""Template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'; Template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs';
                             Template for SIXS_2019: 'spare_ascan_mu_%05d.nxs';
                             Template for Cristal: 'S%d.nxs';
-                            Template for P10: '_master.h5'; 
-                            Template for NANOMAX: '%06d.h5'; 
+                            Template for P10: '_master.h5';
+                            Template for NANOMAX: '%06d.h5';
                             Template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'""",
                                                            layout=Layout(
                                                                width='90%'),
@@ -703,7 +703,7 @@ class Interface():
                                                                width='25%'),
                                                            style={
                                                                'description_width': 'initial'},
-                                                           tooltip="""Tuple of offsets in degrees of the sample for each sample circle (outer first). 
+                                                           tooltip="""Tuple of offsets in degrees of the sample for each sample circle (outer first).
                             Convention: the sample offsets will be subtracted to the motor values"""),
 
                                                        sdd=widgets.FloatText(
@@ -2641,7 +2641,8 @@ class Interface():
                     "Create button to save Dataset object as .cxi file"
                     clear_output(True)
                     display(buttons_init)
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
                     print("Saving data, takes some time ...")
 
                     try:
@@ -2687,18 +2688,21 @@ class Interface():
                         print(
                             "Could not save facets' data, run the analysis in the `Facets` tab first...")
 
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
 
                 @button_reload_previous_data.on_click
                 def action_button_save_as_cxi(selfbutton):
                     "Create button to reload Dataset object from .cxi file"
                     clear_output(True)
                     display(buttons_init)
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all functions
                     print("Not created yet")
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
 
         elif not run_dir_init:
             clear_output(True)
@@ -2786,7 +2790,7 @@ class Interface():
         the user to run the bcdi_preprocess_BCDI script
 
         All the parameters values are then saved in a yaml
-        configuration file. 
+        configuration file.
 
         Parameters used in the interactive masking GUI:
 
@@ -3300,10 +3304,10 @@ class Interface():
     ):
         """
         Use this script to extract and save the rocking
-        curve as well as the detector image at the 
+        curve as well as the detector image at the
         rocking curve's COM.
-        Will correct the values of the inplane and 
-        outofplane angles corresponding to the COM 
+        Will correct the values of the inplane and
+        outofplane angles corresponding to the COM
         of the Bragg peak, values used then to compute q_hkl
 
         Parameters for temperature estimation:
@@ -3713,9 +3717,9 @@ class Interface():
         :param support: initial support in real space (1 = inside support, 0 = outside)
         :param obj: initial object. If None, it should be initialised later.
         :param mask: mask for the diffraction data (0: valid pixel, >0: masked)
-        :param auto_center_resize: if used (command-line keyword) or =True, the input data will be centered 
-            and cropped  so that the size of the array is compatible with the (GPU) 
-            FFT library used. If 'roi' is used, centering is based on ROI. 
+        :param auto_center_resize: if used (command-line keyword) or =True, the input data will be centered
+            and cropped  so that the size of the array is compatible with the (GPU)
+            FFT library used. If 'roi' is used, centering is based on ROI.
             [default=False]
         :param max_size=256: maximum size for the array used for analysis, along all dimensions. The data
             will be cropped to this value after centering. [default: no maximum size]
@@ -3750,9 +3754,9 @@ class Interface():
         :param fwhm: the full-width at half maximum, in pixels
         :param eta: the eta parameter for the pseudo-voigt
         :param update_psf: how often the psf is updated
-        :param nb_raar: number of relaxed averaged alternating reflections cycles, which the 
+        :param nb_raar: number of relaxed averaged alternating reflections cycles, which the
             algorithm will use first. During RAAR and HIO, the support is updated regularly
-        :param nb_hio: number of hybrid input/output cycles, which the algorithm will use after RAAR. 
+        :param nb_hio: number of hybrid input/output cycles, which the algorithm will use after RAAR.
             During RAAR and HIO, the support is updated regularly
         :param nb_er: number of error reduction cycles, performed after HIO, without support update
         :param nb_ml: number of maximum-likelihood conjugate gradient to perform after ER
@@ -3789,11 +3793,13 @@ class Interface():
         self.Dataset.fwhm = fwhm
         self.Dataset.eta = eta
         self.Dataset.update_psf = update_psf
-<<<<<<< HEAD
+
+
+<< << << < HEAD
         self.Dataset.use_operators = use_operators  # todo delete
         self.Dataset.operator_chain = operator_chain  # todo delete
-=======
->>>>>>> 13eb407 (Add docs about path_scripts)
+== == == =
+>>>>>> > 13eb407(Add docs about path_scripts)
         self.Dataset.nb_raar = nb_raar
         self.Dataset.nb_hio = nb_hio
         self.Dataset.nb_er = nb_er
@@ -5630,7 +5636,7 @@ class Interface():
         if contents == "Phase retrieval":
             clear_output(True)
             display(Markdown("""
-                ## Pynx parameters
+                # Pynx parameters
                 `data=data.npy`: name of the data file including the 3D observed intensity.
                                recognized formats include .npy, .npz (if several arrays are included iobs, 
                                should be named 'data' or 'iobs'), .tif or .tiff 
@@ -5805,7 +5811,7 @@ class Interface():
                     e.g.: user_config_temperature=268K  user_config_comment="Vibrations during measurement" 
                     etc...
 
-                ### ALGORITHMS: standard version, using RAAR, then HIO, then ER and ML
+                # ALGORITHMS: standard version, using RAAR, then HIO, then ER and ML
 
                 `nb_raar=600`: number of relaxed averaged alternating reflections cycles, which the 
                              algorithm will use first. During RAAR and HIO, the support is updated regularly
@@ -5826,16 +5832,16 @@ class Interface():
 
 
 
-                ### ALGORITHMS: customized version 
+                # ALGORITHMS: customized version 
 
                 `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: give a specific sequence of algorithms and/or 
                           parameters to be  used for the optimisation (note: this string is case-insensitive).
-                #### Important: 
+                # Important: 
                 1. when supplied from the command line, there should be NO SPACE in the expression ! And if 
                 there are parenthesis in the expression, quotes are required around the algorithm string
                 2. the string and operators are applied from right to left
 
-                #### Valid changes of individual parameters include (see detailed description above):
+                # Valid changes of individual parameters include (see detailed description above):
                 `positivity` = 0 or 1
 
                 `support_only_shrink` = 0 or 1
@@ -5865,7 +5871,7 @@ class Interface():
                 `fig_num`=1: change the figure number for plotting
 
 
-                #### Valid basic operators include:
+                # Valid basic operators include:
 
                 `ER`: Error Reduction
 
@@ -5926,7 +5932,7 @@ class Interface():
                 `save=all`: either 'final' or 'all' this keyword will activate saving after each optimisation 
                           step (comma-separated) of the algorithm in any given run [default=final]
 
-                #### Script to perform a CDI reconstruction of data from id01@ESRF.
+                # Script to perform a CDI reconstruction of data from id01@ESRF.
                 command-line/file parameters arguments: (all keywords are case-insensitive):
 
                 `specfile=/some/dir/to/specfile.spec`: path to specfile [mandatory, unless data= is used instead]
@@ -5941,7 +5947,7 @@ class Interface():
                 `imgname=/dir/to/images/prefix%05d.edf.gz`: images location with prefix 
                         [default: will be extracted from the ULIMA_mpx4 entry in the spec scan header]
 
-                #### Specific defaults for this script:
+                # Specific defaults for this script:
                 auto_center_resize = True
 
                 detwin = True
