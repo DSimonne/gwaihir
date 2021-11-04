@@ -47,7 +47,7 @@ try:
 except ModuleNotFoundError:
     pynx_import = False
     print("Could not load PyNX, the phase retrieval tab will be disabled.\n"
-        "Make sure you have the right version of PyNX installed.")
+          "Make sure you have the right version of PyNX installed.")
 
 
 class Interface():
@@ -89,8 +89,8 @@ class Interface():
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0]+"/bin"
         print(f"Using `{self.path_scripts}` as absolute path to scripts containing folder.\n"
-            "This should be correct if gwaihir was installed in an environment.\n"
-            "Otherwise change self.path_scripts attribute to the correct folder.\n")
+              "This should be correct if gwaihir was installed in an environment.\n"
+              "Otherwise change self.path_scripts attribute to the correct folder.\n")
 
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
@@ -100,7 +100,7 @@ class Interface():
             self.user_name = getpass.getuser()
 
             print(f"Login used for batch jobs: {self.user_name}\n"
-                "If wrong login, please change self.user_name attribute")
+                  "If wrong login, please change self.user_name attribute")
         except Exception as e:
             print(
                 "Could not get user name, please create self.user_name attribute for jobs")
@@ -2642,7 +2642,8 @@ class Interface():
                     "Create button to save Dataset object as .cxi file"
                     clear_output(True)
                     display(buttons_init)
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
                     print("Saving data, takes some time ...")
 
                     try:
@@ -2688,18 +2689,21 @@ class Interface():
                         print(
                             "Could not save facets' data, run the analysis in the `Facets` tab first...")
 
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
 
                 @button_reload_previous_data.on_click
                 def action_button_save_as_cxi(selfbutton):
                     "Create button to reload Dataset object from .cxi file"
                     clear_output(True)
                     display(buttons_init)
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all functions
                     print("Not created yet")
-                    print("\n#############################################################################################################\n")
+                    print(
+                        "\n#############################################################################################################\n")
 
         elif not run_dir_init:
             clear_output(True)
@@ -3464,7 +3468,6 @@ class Interface():
             if self.Dataset.rebin != (1, 1, 1):
                 iobs = bin_data(mask, self.Dataset.rebin)
 
-
             # fft shift
             iobs = fftshift(iobs)
 
@@ -3522,7 +3525,7 @@ class Interface():
                             print("CXI input: loading support")
                         except KeyError:
                             print("\"obj\" key does not exist."
-                                "Could not load support array.")
+                                  "Could not load support array.")
 
             if self.Dataset.rebin != (1, 1, 1):
                 support = bin_data(support, self.Dataset.rebin)
