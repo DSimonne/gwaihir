@@ -37,7 +37,7 @@ class Plotter():
     def __init__(self, filename, plot=False, log=False):
         """
         Create basic class attributes and run get_data_array() function from filename
-        
+
         :param filename: path to data, supported files extensions are .cxi, .npy or .npz
         :param plot: either '2D', '3D' or False
         :param log: True to have a logarithmic scale
@@ -118,8 +118,8 @@ class Plotter():
                     f"\tShape: {self.data_array.shape}\n"
                     "#########################################################"
                     "########################################################"
-                    )
-                
+                )
+
         # Need to select data array interactively
         elif self.filename.endswith(".npz"):
             # Open npz file and allow the user to pick an array
@@ -742,7 +742,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             # extent=(0, 2, 0, 2),
             # vmin=dmin,
             # vmax=dmax,
-            )
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(ax).append_axes(
@@ -763,7 +763,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             # extent=(0, 2, 0, 2),
             # vmin=dmin,
             # vmax=dmax,
-            )
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(ax).append_axes(
@@ -787,9 +787,9 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
 # def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
 #     """
 #     :param two_d_array: np.ndarray to plot, must be 2D
-#     :param fig: plt.figure to plot in, default is None and 
+#     :param fig: plt.figure to plot in, default is None and
 #      will create a figure
-#     :param ax: axes of figure, default is None and 
+#     :param ax: axes of figure, default is None and
 #      will create axes
 #     :param log: True to have a logarithmic scale
 #      False to have a linear scale
