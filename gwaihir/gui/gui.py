@@ -54,7 +54,7 @@ except ModuleNotFoundError:
 class Interface():
     """
     This class is a Graphical User Interface (gui).
-    It makes extensive use of the ipywidgets and 
+    It makes extensive use of the ipywidgets and
     is thus meant to be used with a jupyter notebook.
     Additional informations are provided in the "ReadMe"
     tab of the gui.
@@ -88,7 +88,7 @@ class Interface():
         # Get path to scripts folder
         self.cwd = os.getcwd()
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
-        self.path_scripts = self.path_package.split("/lib/python")[0]+"/bin"
+        self.path_scripts = self.path_package.split("/lib/python")[0] + "/bin"
         print(
             f"Using `{self.path_scripts}` as absolute path to scripts containing folder.\n"
             "This should be correct if gwaihir was installed in an environment.\n"
@@ -121,7 +121,8 @@ class Interface():
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(self.initialize_directories,
-                                                  # Define scan related parameters
+                                                  # Define scan related
+                                                  # parameters
                                                   unused_label_scan=widgets.HTML(
                                                       description="<p style='font-weight: bold;font-size:1.2em'>Define working directory and scan number",
                                                       style={
@@ -213,9 +214,11 @@ class Interface():
             self._list_widgets_init_dir.children[-1],
         ])
 
-        # Widgets for preprocessing, all in a single list because of interactive fct
+        # Widgets for preprocessing, all in a single list because of
+        # interactive fct
         self._list_widgets_preprocessing = interactive(self.initialize_preprocessing,
-                                                       # Define beamline related parameters
+                                                       # Define beamline
+                                                       # related parameters
                                                        unused_label_beamline=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters specific to the beamline",
                                                            style={
@@ -247,7 +250,10 @@ class Interface():
                                                            value=False,
                                                            description='Is series (P10)',
                                                            disabled=True,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            continuous_update=False,
                                                            tooltip='specific to series measurement at P10',
                                                            icon='check'),
@@ -258,12 +264,19 @@ class Interface():
                                                            continuous_update=False,
                                                            disabled=True,
                                                            indent=False,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='set it to True for a stack of images acquired without scan, e.g. with ct in a macro, or when there is no spec/log file available',
                                                            icon='check'),
 
                                                        custom_images=widgets.Text(
-                                                           # np.arange(11353, 11453, 1)  # list of image numbers for the custom_scan
+                                                           # np.arange(11353,
+                                                           # 11453, 1)  # list
+                                                           # of image numbers
+                                                           # for the
+                                                           # custom_scan
                                                            value="[]",
                                                            description='Custom images',
                                                            continuous_update=False,
@@ -271,7 +284,10 @@ class Interface():
                                                            style={'description_width': 'initial'}),
 
                                                        custom_monitor=widgets.IntText(
-                                                           # np.ones(51),  # monitor values for normalization for the custom_scan
+                                                           # np.ones(51),  #
+                                                           # monitor values for
+                                                           # normalization for
+                                                           # the custom_scan
                                                            value=0,
                                                            description='Custom monitor',
                                                            continuous_update=False,
@@ -301,7 +317,8 @@ class Interface():
                                                            style={'description_width': 'initial'}),
 
 
-                                                       # Parameters used in masking
+                                                       # Parameters used in
+                                                       # masking
                                                        unused_label_masking=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in masking",
                                                            style={
@@ -314,7 +331,10 @@ class Interface():
                                                            continuous_update=False,
                                                            disabled=True,
                                                            indent=False,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='True to interact with plots and manually mask points',
                                                            layout=Layout(
                                                                height="50px"),
@@ -336,7 +356,9 @@ class Interface():
                                                            disabled=True),
 
 
-                                                       # Parameters related to data cropping/padding/centering
+                                                       # Parameters related to
+                                                       # data
+                                                       # cropping/padding/centering
                                                        unused_label_centering=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to data cropping/padding/centering</p>",
                                                            style={
@@ -357,9 +379,17 @@ class Interface():
 
                                                        fix_bragg=widgets.Text(
                                                            placeholder="[z_bragg, y_bragg, x_bragg]",
-                                                           # fix the Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector
+                                                           # fix the Bragg peak
+                                                           # position [z_bragg,
+                                                           # y_bragg, x_bragg]
+                                                           # considering the
+                                                           # full detector
                                                            description='Bragg peak position',
-                                                           # It is useful if hotpixels or intense aliens. Leave it [] otherwise.
+                                                           # It is useful if
+                                                           # hotpixels or
+                                                           # intense aliens.
+                                                           # Leave it []
+                                                           # otherwise.
                                                            disabled=True,
                                                            continuous_update=False,
                                                            layout=Layout(
@@ -368,7 +398,17 @@ class Interface():
 
                                                        fix_size=widgets.Text(
                                                            placeholder="[zstart, zstop, ystart, ystop, xstart, xstop]",
-                                                           description='Fix array size',  # crop the array to predefined size considering the full detector, leave it to [] otherwise [zstart, zstop, ystart, ystop, xstart, xstop]. ROI will be defaulted to []
+                                                           description='Fix array size',
+                                                           # crop the array to
+                                                           # predefined size
+                                                           # considering the
+                                                           # full detector,
+                                                           # leave it to []
+                                                           # otherwise [zstart,
+                                                           # zstop, ystart,
+                                                           # ystop, xstart,
+                                                           # xstop]. ROI will
+                                                           # be defaulted to []
                                                            disabled=True,
                                                            continuous_update=False,
                                                            layout=Layout(
@@ -396,7 +436,9 @@ class Interface():
                                                                width='50%', height="50px"),
                                                            style={'description_width': 'initial'}),
 
-                                                       # Parameters used in intensity normalization
+                                                       # Parameters used in
+                                                       # intensity
+                                                       # normalization
                                                        normalize_flux=widgets.Dropdown(
                                                            options=[
                                                                "skip", "monitor"],
@@ -406,13 +448,17 @@ class Interface():
                                                            continuous_update=False,
                                                            layout=Layout(
                                                                height="50px"),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='Monitor to normalize the intensity by the default monitor values, skip to do nothing',
                                                            # icon = 'check',
                                                            style={'description_width': 'initial'}),
 
 
-                                                       # Parameters for data filtering
+                                                       # Parameters for data
+                                                       # filtering
                                                        unused_label_filtering=widgets.HTML(
                                                            description="""<p style='font-weight: bold;font-size:1.2em'>Parameters for data filtering</p>""",
                                                            style={
@@ -425,7 +471,10 @@ class Interface():
                                                            disabled=True,
                                                            continuous_update=False,
                                                            indent=False,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='Mask pixels where the sum along the rocking curve is zero - may be dead pixels',
                                                            icon='check'),
 
@@ -459,7 +508,9 @@ class Interface():
                                                                'description_width': 'initial'},
                                                            tooltip="binning that will be used for phasing (stacking dimension, detector vertical axis, detector horizontal axis)"),
 
-                                                       # Parameters used when reloading processed data
+                                                       # Parameters used when
+                                                       # reloading processed
+                                                       # data
                                                        unused_label_reload=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used when reloading processed data</p>",
                                                            style={
@@ -474,7 +525,10 @@ class Interface():
                                                            indent=False,
                                                            layout=Layout(
                                                                height="50px"),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='True to resume a previous masking (load data and mask)',
                                                            icon='check'),
 
@@ -486,13 +540,19 @@ class Interface():
                                                            indent=False,
                                                            layout=Layout(
                                                                height="50px"),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='True if the reloaded data is already intepolated in an orthonormal frame',
                                                            icon='check'),
 
                                                        preprocessing_binning=widgets.Text(
                                                            value="(1, 1, 1)",
-                                                           # binning factors in each dimension of the binned data to be reloaded
+                                                           # binning factors in
+                                                           # each dimension of
+                                                           # the binned data to
+                                                           # be reloaded
                                                            placeholder="(1, 1, 1)",
                                                            description='Binning used in data to be reloaded',
                                                            disabled=True,
@@ -518,7 +578,10 @@ class Interface():
                                                            indent=False,
                                                            layout=Layout(
                                                                width="20%", height="50px"),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='Save also the raw data when use_rawdata is False',
                                                            icon='check'),
 
@@ -530,7 +593,10 @@ class Interface():
                                                            indent=False,
                                                            layout=Layout(
                                                                width="20%", height="50px"),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='True to save the processed data in npz format',
                                                            icon='check'),
 
@@ -542,7 +608,10 @@ class Interface():
                                                            indent=False,
                                                            layout=Layout(
                                                                width="20%", height="50px"),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='True to save also in .mat format',
                                                            icon='check'),
 
@@ -551,7 +620,10 @@ class Interface():
                                                            description='Save to vti',
                                                            continuous_update=False,
                                                            disabled=True,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            indent=False,
                                                            layout=Layout(
                                                                width="20%", height="50px"),
@@ -563,14 +635,18 @@ class Interface():
                                                            description='Save as integers',
                                                            continuous_update=False,
                                                            disabled=True,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            indent=False,
                                                            layout=Layout(
                                                                width="20%", height="50px"),
                                                            tooltip='if True, the result will be saved as an array of integers (save space)',
                                                            icon='check'),
 
-                                                       # Detector related parameters
+                                                       # Detector related
+                                                       # parameters
                                                        unused_label_detector=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters related to the detector used</p>",
                                                            style={
@@ -588,9 +664,17 @@ class Interface():
 
                                                        roi_detector=widgets.Text(
                                                            placeholder="[low_y_bound, high_y_bound, low_x_bound, high_x_bound]",
-                                                           # fix the Bragg peak position [z_bragg, y_bragg, x_bragg] considering the full detector
+                                                           # fix the Bragg peak
+                                                           # position [z_bragg,
+                                                           # y_bragg, x_bragg]
+                                                           # considering the
+                                                           # full detector
                                                            description='Fix roi area, will overwrite cropping parameters',
-                                                           # It is useful if hotpixels or intense aliens. Leave it [] otherwise.
+                                                           # It is useful if
+                                                           # hotpixels or
+                                                           # intense aliens.
+                                                           # Leave it []
+                                                           # otherwise.
                                                            disabled=True,
                                                            continuous_update=False,
                                                            layout=Layout(
@@ -652,14 +736,17 @@ class Interface():
                                                            tooltip="""Template for ID01: 'data_mpx4_%05d.edf.gz' or 'align_eiger2M_%05d.edf.gz'; Template for SIXS_2018: 'align.spec_ascan_mu_%05d.nxs';
                             Template for SIXS_2019: 'spare_ascan_mu_%05d.nxs';
                             Template for Cristal: 'S%d.nxs';
-                            Template for P10: '_master.h5'; 
-                            Template for NANOMAX: '%06d.h5'; 
+                            Template for P10: '_master.h5';
+                            Template for NANOMAX: '%06d.h5';
                             Template for 34ID: 'Sample%dC_ES_data_51_256_256.npz'""",
                                                            layout=Layout(
                                                                width='90%'),
                                                            style={'description_width': 'initial'}),
 
-                                                       # Define parameters below if you want to orthogonalize the data before phasing
+                                                       # Define parameters
+                                                       # below if you want to
+                                                       # orthogonalize the data
+                                                       # before phasing
                                                        unused_label_ortho=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters to define the data orthogonalization</p>",
                                                            style={
@@ -672,7 +759,10 @@ class Interface():
                                                            description='Orthogonalize data',
                                                            disabled=True,
                                                            indent=False,
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip='False for using data gridded in laboratory frame/ True for using data in detector frame',
                                                            icon='check'),
 
@@ -717,7 +807,7 @@ class Interface():
                                                                width='25%'),
                                                            style={
                                                                'description_width': 'initial'},
-                                                           tooltip="""Tuple of offsets in degrees of the sample for each sample circle (outer first). 
+                                                           tooltip="""Tuple of offsets in degrees of the sample for each sample circle (outer first).
                             Convention: the sample offsets will be subtracted to the motor values"""),
 
                                                        sdd=widgets.FloatText(
@@ -757,17 +847,29 @@ class Interface():
                                                        # SIXS: beta, mu, gamma, delta
                                                        # P10: om, phi, chi, mu, gamma, delta
                                                        # NANOMAX: theta, phi, gamma, delta, energy, radius
-                                                       # 34ID: mu, phi (incident angle), chi, theta (inplane), delta (inplane), gamma (outofplane)
+                                                       # 34ID: mu, phi
+                                                       # (incident angle), chi,
+                                                       # theta (inplane), delta
+                                                       # (inplane), gamma
+                                                       # (outofplane)
 
 
-                                                       # Parameters for xrayutilities to orthogonalize the data before phasing
+                                                       # Parameters for
+                                                       # xrayutilities to
+                                                       # orthogonalize the data
+                                                       # before phasing
                                                        unused_label_xru=widgets.HTML(
                                                            description="<p style='font-weight: bold;font-size:1.2em'>Parameters used in xrayutilities to orthogonalize the data before phasing (initialize the directories before)</p>",
                                                            style={
                                                                'description_width': 'initial'},
                                                            layout=Layout(width='90%', height="35px")),
 
-                                                       # xrayutilities uses the xyz crystal frame: for incident angle = 0, x is downstream, y outboard, and z vertical up
+                                                       # xrayutilities uses the
+                                                       # xyz crystal frame: for
+                                                       # incident angle = 0, x
+                                                       # is downstream, y
+                                                       # outboard, and z
+                                                       # vertical up
                                                        align_q=widgets.Checkbox(
                                                            value=True,
                                                            description='Align q',
@@ -776,7 +878,10 @@ class Interface():
                                                            indent=False,
                                                            layout=Layout(
                                                                width='20%'),
-                                                           # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                           # button_style = '',
+                                                           # # 'success',
+                                                           # 'info', 'warning',
+                                                           # 'danger' or ''
                                                            tooltip="""used only when interpolation_method is 'linearization', if True it rotates the crystal to align q along one axis of the array""",
                                                            icon='check'),
 
@@ -885,7 +990,11 @@ class Interface():
                                                            min=0,
                                                            max=360,
                                                            continuous_update=False,
-                                                           # detector angle in deg(rotation around y vertical up, typically gamma), corrected
+                                                           # detector angle in
+                                                           # deg(rotation
+                                                           # around y vertical
+                                                           # up, typically
+                                                           # gamma), corrected
                                                            description='Direct inplane angle:',
                                                            layout=Layout(
                                                                width='30%'),
@@ -900,7 +1009,11 @@ class Interface():
                                                            min=0,
                                                            max=360,
                                                            continuous_update=False,
-                                                           # detector angle in deg (rotation around x outboard, typically delta), corrected
+                                                           # detector angle in
+                                                           # deg (rotation
+                                                           # around x outboard,
+                                                           # typically delta),
+                                                           # corrected
                                                            description='Direct outofplane angle:',
                                                            layout=Layout(
                                                                width='30%'),
@@ -1035,7 +1148,8 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[65:68]),
         ])
 
-        # Group all preprocess tabs into a single one, besides detector and setup parameter
+        # Group all preprocess tabs into a single one, besides detector and
+        # setup parameter
         self.tab_preprocess = widgets.VBox([
             self.tab_beamline,
             self.tab_reduction,
@@ -1067,7 +1181,10 @@ class Interface():
                                                      value=False,
                                                      description='Estimate the temperature (Pt only)',
                                                      disabled=True,
-                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
+                                                     # button_style = '', #
+                                                     # 'success', 'info',
+                                                     # 'warning', 'danger' or
+                                                     # ''
                                                      tooltip='Click to estimate the mean temperature of the sample from the Bragg peak angles',
                                                      # icon = 'check',
                                                      layout=Layout(
@@ -1728,7 +1845,11 @@ class Interface():
 
                                                 keep_size=widgets.Checkbox(
                                                     value=False,
-                                                    # True to keep the initial array size for orthogonalization (slower), it will be cropped otherwise
+                                                    # True to keep the initial
+                                                    # array size for
+                                                    # orthogonalization
+                                                    # (slower), it will be
+                                                    # cropped otherwise
                                                     description='Keep the initial array size for orthogonalization (slower)',
                                                     disabled=False,
                                                     layout=Layout(width='45%'),
@@ -1907,7 +2028,8 @@ class Interface():
                                                     value=0.05,
                                                     # threshold used to calculate the optical path
                                                     # the threshold for refraction/absorption corrections should be low, to correct for an object larger than the real one,
-                                                    # otherwise it messes up the phase
+                                                    # otherwise it messes up
+                                                    # the phase
                                                     step=0.01,
                                                     continuous_update=False,
                                                     description='Threshold unwrap refraction:',
@@ -1935,7 +2057,10 @@ class Interface():
 
                                                 invert_phase=widgets.Checkbox(
                                                     value=True,  # False only for simulations
-                                                    # True for the displacement to have the right sign (FFT convention), False only for simulations
+                                                    # True for the displacement
+                                                    # to have the right sign
+                                                    # (FFT convention), False
+                                                    # only for simulations
                                                     description='Invert phase',
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
@@ -1947,7 +2072,8 @@ class Interface():
 
                                                 flip_reconstruction=widgets.Checkbox(
                                                     value=False,
-                                                    # True if you want to get the conjugate object
+                                                    # True if you want to get
+                                                    # the conjugate object
                                                     description='Get conjugated object',
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
@@ -1970,7 +2096,9 @@ class Interface():
                                                     value=1.0,
                                                     step=0.01,
                                                     continuous_update=False,
-                                                    # upper threshold of the gradient of the phase, use for ramp removal
+                                                    # upper threshold of the
+                                                    # gradient of the phase,
+                                                    # use for ramp removal
                                                     description='Upper threshold gradient:',
                                                     readout=True,
                                                     style={
@@ -1979,7 +2107,10 @@ class Interface():
 
                                                 save_raw=widgets.Checkbox(
                                                     value=False,
-                                                    description='Save raw data',  # True to save the amp-phase.vti before orthogonalizatio
+                                                    description='Save raw data',
+                                                    # True to save the
+                                                    # amp-phase.vti before
+                                                    # orthogonalizatio
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
                                                     # icon = 'check',
@@ -1989,7 +2120,9 @@ class Interface():
 
                                                 save_support=widgets.Checkbox(
                                                     value=False,
-                                                    # True to save the non-orthogonal support for later phase retrieval
+                                                    # True to save the
+                                                    # non-orthogonal support
+                                                    # for later phase retrieval
                                                     description='Save support',
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
@@ -2000,7 +2133,10 @@ class Interface():
 
                                                 save=widgets.Checkbox(
                                                     value=True,
-                                                    description='Save output',  # True to save amp.npz, phase.npz, strain.npz and vtk files
+                                                    description='Save output',
+                                                    # True to save amp.npz,
+                                                    # phase.npz, strain.npz and
+                                                    # vtk files
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
                                                     # icon = 'check',
@@ -2020,7 +2156,10 @@ class Interface():
                                                 roll_modes=widgets.Text(
                                                     value="(0, 0, 0)",
                                                     placeholder="(0, 0, 0)",
-                                                    # axis=(0, 1, 2), correct a roll of few pixels after the decomposition into modes in PyNX
+                                                    # axis=(0, 1, 2), correct a
+                                                    # roll of few pixels after
+                                                    # the decomposition into
+                                                    # modes in PyNX
                                                     description='Roll modes',
                                                     disabled=False,
                                                     continuous_update=False,
@@ -2037,7 +2176,11 @@ class Interface():
 
                                                 align_axis=widgets.Checkbox(
                                                     value=False,
-                                                    # if True rotates the crystal to align axis_to_align along ref_axis after the calculation of the strain
+                                                    # if True rotates the
+                                                    # crystal to align
+                                                    # axis_to_align along
+                                                    # ref_axis after the
+                                                    # calculation of the strain
                                                     description='Align axis',
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
@@ -2059,7 +2202,10 @@ class Interface():
                                                 axis_to_align=widgets.Text(
                                                     value="[0.0, 0.0, 0.0]",
                                                     placeholder="[0.0, 0.0, 0.0]",
-                                                    # axis to align with ref_axis in the order x y z (axis 2, axis 1, axis 0)
+                                                    # axis to align with
+                                                    # ref_axis in the order x y
+                                                    # z (axis 2, axis 1, axis
+                                                    # 0)
                                                     description='Axis to align for ref axis',
                                                     disabled=False,
                                                     continuous_update=False,
@@ -2087,7 +2233,9 @@ class Interface():
 
                                                 grey_background=widgets.Checkbox(
                                                     value=True,
-                                                    # True to set the background to grey in phase and strain plots
+                                                    # True to set the
+                                                    # background to grey in
+                                                    # phase and strain plots
                                                     description='Grey background in plots',
                                                     disabled=False,
                                                     # button_style = '', # 'success', 'info', 'warning', 'danger' or ''
@@ -2156,7 +2304,9 @@ class Interface():
                                                     value=0.90,
                                                     step=0.01,
                                                     continuous_update=False,
-                                                    # minimum correlation within reconstructed object for averaging
+                                                    # minimum correlation
+                                                    # within reconstructed
+                                                    # object for averaging
                                                     description='Average threshold:',
                                                     readout=True,
                                                     style={
@@ -2513,7 +2663,8 @@ class Interface():
             self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
                 "preprocessing/"
 
-            # Get template_imagefile from data in data_dir, based on sixs routine
+            # Get template_imagefile from data in data_dir, based on sixs
+            # routine
             try:
                 # Depends on mu or omega scan at sixs
                 try:
@@ -2526,8 +2677,11 @@ class Interface():
                     print("Omega scan")
 
                 self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
-                    "%05d" % self.Dataset.scan)[0]+"%05d.nxs"
-                print("File template:", self.Dataset.template_imagefile, end="\n\n")
+                    "%05d" % self.Dataset.scan)[0] + "%05d.nxs"
+                print(
+                    "File template:",
+                    self.Dataset.template_imagefile,
+                    end="\n\n")
 
                 # Save file name
                 self._list_widgets_preprocessing.children[42].value = self.Dataset.template_imagefile.split(
@@ -2688,14 +2842,10 @@ class Interface():
                             self.Dataset.to_cxi(
                                 cxi_filename=self.cxi_filename, reconstruction_filename=False)
 
-                    # except NameError:
-                    #     # Could not load cdi object
-                    #     print("Could not save reciprocal space data, needs PyNX package")
-                    except Exception as e:
-                        # No diffraction data selected
-                        # print(
-                        #     "You need to select the diffraction data file in the `PyNX` tab.")
-                        raise e
+                    except NameError:
+                        # Could not load cdi object
+                        print(
+                            "Could not save reciprocal space data, needs PyNX package")
 
                     # Facets analysis output
                     try:
@@ -2725,7 +2875,8 @@ class Interface():
                         "#########################################################\n"
                     )
                     # Reload previous data that was saved as .cxi file,
-                    # initialize all related widgets values, authorize all functions
+                    # initialize all related widgets values, authorize all
+                    # functions
                     print("Not created yet")
                     print(
                         "\n####################################################"
@@ -2817,7 +2968,7 @@ class Interface():
         the user to run the bcdi_preprocess_BCDI script
 
         All the parameters values are then saved in a yaml
-        configuration file. 
+        configuration file.
 
         Parameters used in the interactive masking GUI:
 
@@ -3035,7 +3186,8 @@ class Interface():
 
         """
         if init_para:
-            # Disable all widgets until the end of the program, will update automatticaly after
+            # Disable all widgets until the end of the program, will update
+            # automatticaly after
             for w in self._list_widgets_init_dir.children[:-1]:
                 w.disabled = True
 
@@ -3179,7 +3331,8 @@ class Interface():
             # self.Dataset.roi_detector = [self.Dataset.y_bragg - 160, self.Dataset.y_bragg + 160, self.Dataset.x_bragg - 160, self.Dataset.x_bragg + 160]
             # self.Dataset.roi_detector = None
             # [Vstart, Vstop, Hstart, Hstop]
-            # leave it as [] to use the full detector. Use with center_fft='skip' if you want this exact size.
+            # leave it as [] to use the full detector. Use with
+            # center_fft='skip' if you want this exact size.
 
             self.Dataset.linearity_func = None
             print("Parameters initialized...")
@@ -3261,7 +3414,8 @@ class Interface():
                     hotpixels_file=self.Dataset.hotpixels_file,
                     flatfield_file=self.Dataset.flatfield_file,
                     template_imagefile=self.Dataset.template_imagefile,
-                    # define parameters below if you want to orthogonalize the data before phasing
+                    # define parameters below if you want to orthogonalize the
+                    # data before phasing
                     use_rawdata=self.Dataset.use_rawdata,
                     interpolation_method=self.Dataset.interpolation_method,
                     fill_value_mask=self.Dataset.fill_value_mask,
@@ -3277,7 +3431,8 @@ class Interface():
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
                     tilt_angle=self.Dataset.tilt_angle,
-                    # parameters when orthogonalizing the data before phasing  using xrayutilities
+                    # parameters when orthogonalizing the data before phasing
+                    # using xrayutilities
                     sample_inplane=self.Dataset.sample_inplane,
                     sample_outofplane=self.Dataset.sample_outofplane,
                     offset_inplane=self.Dataset.offset_inplane,
@@ -3330,10 +3485,10 @@ class Interface():
     ):
         """
         Use this script to extract and save the rocking
-        curve as well as the detector image at the 
+        curve as well as the detector image at the
         rocking curve's COM.
-        Will correct the values of the inplane and 
-        outofplane angles corresponding to the COM 
+        Will correct the values of the inplane and
+        outofplane angles corresponding to the COM
         of the Bragg peak, values used then to compute q_hkl
 
         Parameters for temperature estimation:
@@ -3735,9 +3890,9 @@ class Interface():
         :param support: initial support in real space (1 = inside support, 0 = outside)
         :param obj: initial object. If None, it should be initialised later.
         :param mask: mask for the diffraction data (0: valid pixel, >0: masked)
-        :param auto_center_resize: if used (command-line keyword) or =True, the input data will be centered 
-            and cropped  so that the size of the array is compatible with the (GPU) 
-            FFT library used. If 'roi' is used, centering is based on ROI. 
+        :param auto_center_resize: if used (command-line keyword) or =True, the input data will be centered
+            and cropped  so that the size of the array is compatible with the (GPU)
+            FFT library used. If 'roi' is used, centering is based on ROI.
             [default=False]
         :param max_size=256: maximum size for the array used for analysis, along all dimensions. The data
             will be cropped to this value after centering. [default: no maximum size]
@@ -3772,9 +3927,9 @@ class Interface():
         :param fwhm: the full-width at half maximum, in pixels
         :param eta: the eta parameter for the pseudo-voigt
         :param update_psf: how often the psf is updated
-        :param nb_raar: number of relaxed averaged alternating reflections cycles, which the 
+        :param nb_raar: number of relaxed averaged alternating reflections cycles, which the
             algorithm will use first. During RAAR and HIO, the support is updated regularly
-        :param nb_hio: number of hybrid input/output cycles, which the algorithm will use after RAAR. 
+        :param nb_hio: number of hybrid input/output cycles, which the algorithm will use after RAAR.
             During RAAR and HIO, the support is updated regularly
         :param nb_er: number of error reduction cycles, performed after HIO, without support update
         :param nb_ml: number of maximum-likelihood conjugate gradient to perform after ER
@@ -3828,7 +3983,7 @@ class Interface():
         self.Dataset.rebin = rebin
         self.Dataset.verbose = verbose
         self.Dataset.pixel_size_detector = np.round(
-            pixel_size_detector*1e-6, 6)
+            pixel_size_detector * 1e-6, 6)
         self.run_phase_retrieval = run_phase_retrieval
         self.run_pynx_tools = run_pynx_tools
 
@@ -3847,7 +4002,7 @@ class Interface():
         print("Scan n°", self.Dataset.scan)
 
         self.Dataset.energy = self._list_widgets_preprocessing.children[50].value
-        self.Dataset.wavelength = 1.2399*1e-6 / self.Dataset.energy
+        self.Dataset.wavelength = 1.2399 * 1e-6 / self.Dataset.energy
         self.Dataset.sdd = self._list_widgets_preprocessing.children[49].value
 
         print("CXI input: Energy = %8.2feV" % self.Dataset.energy)
@@ -3870,7 +4025,8 @@ class Interface():
 
                 # Load files
                 self.text_file.append("# Parameters\n")
-                for file, parameter in [(self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
+                for file, parameter in [
+                        (self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
                     if file != "":
                         self.text_file.append(f"{parameter} = \"{file}\"\n")
 
@@ -3958,7 +4114,8 @@ class Interface():
                     f"Saved parameters in {self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
-                    # Runs modes directly and saves all data in an "all" subdir, filter based on LLK
+                    # Runs modes directly and saves all data in an "all"
+                    # subdir, filter based on LLK
                     print(
                         f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}preprocessing --filtering {nb_keep_std} --modes true")
                     print(
@@ -4025,7 +4182,8 @@ class Interface():
                         # Initialize the free pixels for LLK
                         # cdi = InitFreePixels() * cdi
 
-                        # Initialize the support with autocorrelation, if no support given
+                        # Initialize the support with autocorrelation, if no
+                        # support given
                         if not self.Dataset.support:
                             sup_init = "autocorrelation"
                             if isinstance(self.Dataset.live_plot, int):
@@ -4046,7 +4204,8 @@ class Interface():
                         else:
                             sup_init = "support"
 
-                        # Begin with HIO cycles without PSF and with support updates
+                        # Begin with HIO cycles without PSF and with support
+                        # updates
                         try:
                             # update_psf = 0 probably enough but not sure
                             if self.Dataset.psf:
@@ -4060,7 +4219,7 @@ class Interface():
                                         beta=self.Dataset.beta,
                                         calc_llk=self.Dataset.calc_llk,
                                         show_cdi=self.Dataset.live_plot
-                                    ) ** (self.Dataset.nb_raar//2) * cdi
+                                    ) ** (self.Dataset.nb_raar // 2) * cdi
 
                                     # PSF is introduced at 66% of HIO and RAAR
                                     if psf_model != "pseudo-voigt":
@@ -4081,7 +4240,7 @@ class Interface():
                                         calc_llk=self.Dataset.calc_llk,
                                         show_cdi=self.Dataset.live_plot,
                                         update_psf=self.Dataset.update_psf
-                                    ) ** (self.Dataset.nb_raar//2) * cdi
+                                    ) ** (self.Dataset.nb_raar // 2) * cdi
                                     cdi = ER(
                                         calc_llk=self.Dataset.calc_llk,
                                         show_cdi=self.Dataset.live_plot,
@@ -4089,10 +4248,10 @@ class Interface():
                                     ) ** self.Dataset.nb_er * cdi
 
                                 else:
-                                    hio_power = self.Dataset.nb_hio//self.Dataset.support_update_period
+                                    hio_power = self.Dataset.nb_hio // self.Dataset.support_update_period
                                     raar_power = (
-                                        self.Dataset.nb_raar//2)//self.Dataset.support_update_period
-                                    er_power = self.Dataset.nb_er//self.Dataset.support_update_period
+                                        self.Dataset.nb_raar // 2) // self.Dataset.support_update_period
+                                    er_power = self.Dataset.nb_er // self.Dataset.support_update_period
 
                                     cdi = (sup * HIO(
                                         beta=self.Dataset.beta,
@@ -4107,7 +4266,8 @@ class Interface():
                                     )**self.Dataset.support_update_period
                                     ) ** raar_power * cdi
 
-                                    # PSF is introduced at 66% of HIO and RAAR so from cycle n°924
+                                    # PSF is introduced at 66% of HIO and RAAR
+                                    # so from cycle n°924
                                     if psf_model != "pseudo-voigt":
                                         cdi = InitPSF(
                                             model=self.Dataset.psf_model,
@@ -4154,9 +4314,9 @@ class Interface():
                                     ) ** self.Dataset.nb_er * cdi
 
                                 else:
-                                    hio_power = self.Dataset.nb_hio//self.Dataset.support_update_period
-                                    raar_power = self.Dataset.nb_raar//self.Dataset.support_update_period
-                                    er_power = self.Dataset.nb_er//self.Dataset.support_update_period
+                                    hio_power = self.Dataset.nb_hio // self.Dataset.support_update_period
+                                    raar_power = self.Dataset.nb_raar // self.Dataset.support_update_period
+                                    er_power = self.Dataset.nb_er // self.Dataset.support_update_period
 
                                     cdi = (sup * HIO(
                                         beta=self.Dataset.beta,
@@ -4239,15 +4399,15 @@ class Interface():
         filter_criteria,
     ):
         """
-        Filter the phase retrieval output depending on a given parameter, 
+        Filter the phase retrieval output depending on a given parameter,
         for now only LLK and standard deviation are available.
-        This allows the user to run a lot of reconstructions but to then 
+        This allows the user to run a lot of reconstructions but to then
         automatically keep the "best" ones, according to this parameter.
         filter_criteria can take the values "LLK" or "standard_deviation"
-        If you filter based on both, the function will filter nb_keep/2 
+        If you filter based on both, the function will filter nb_keep/2
         files by the first criteria, and the remaining files by the second criteria
 
-        The parameters are specified in the phase retrieval tab, and 
+        The parameters are specified in the phase retrieval tab, and
         their values saved through self.initialize_phase_retrieval()
 
         :param nb_run: number of times to run the optimization
@@ -4259,14 +4419,16 @@ class Interface():
         def filter_by_std(cxi_files, nb_keep):
             """
             Use the standard deviation of the reconstructed
-            object as filtering criteria. The lowest standard 
+            object as filtering criteria. The lowest standard
             deviations are best.
             """
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
 
             for filename in cxi_files:
-                print("Computing standard deviation of object modulus for ", filename)
+                print(
+                    "Computing standard deviation of object modulus for ",
+                    filename)
                 with tb.open_file(filename, "r") as f:
                     data = f.root.entry_1.image_1.data[:]
                     filtering_criteria_value[filename] = np.std(np.abs(data))
@@ -4281,7 +4443,7 @@ class Interface():
         def filter_by_LLK(cxi_files, nb_keep):
             """
             Use the free log-likelihood values of the reconstructed
-            object as filtering criteria. The lowest standard 
+            object as filtering criteria. The lowest standard
             deviations are best.
             See PyNX for details
             """
@@ -4289,7 +4451,9 @@ class Interface():
             filtering_criteria_value = {}
 
             for filename in cxi_files:
-                print("Extracting llk value for poisson statistics for ", filename)
+                print(
+                    "Extracting llk value for poisson statistics for ",
+                    filename)
                 with tb.open_file(filename, "r") as f:
                     llk = f.root.entry_1.image_1.process_1.results.llk_poisson[...]
                     filtering_criteria_value[filename] = llk
@@ -4362,7 +4526,7 @@ class Interface():
         modes, saves only the first mode to save space
 
         :param folder: path to folder in which are stored
-         the .cxi files, all files corresponding to 
+         the .cxi files, all files corresponding to
          *LLK* pattern are loaded
         """
         try:
@@ -4389,7 +4553,7 @@ class Interface():
         """
         We need to create a dictionnary with the parameters to save in the cxi file
 
-        :param cdi_operator: cdi object 
+        :param cdi_operator: cdi object
          created with PyNX
         :param path_to_cxi: path to future
          cxi data
@@ -4563,7 +4727,7 @@ class Interface():
     ):
         """
         Loading argument from strain tab widgets but also values of parameters used in preprocessing that are common
-        Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase. 
+        Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase.
         Also plots images depending on the given isosurface.
 
         Parameters used in the interactive masking GUI:
@@ -4743,7 +4907,8 @@ class Interface():
          True to save amp.npz, phase.npz, strain.npz and vtk files
         """
         if run_strain:
-            # Disable all widgets until the end of the program, will update automatticaly after
+            # Disable all widgets until the end of the program, will update
+            # automatticaly after
             for w in self._list_widgets_strain.children[:-1]:
                 w.disabled = True
 
@@ -5117,7 +5282,7 @@ class Interface():
                 # Run interactive function
                 @interact(
                     facet_a_id=widgets.Dropdown(
-                        options=[i+1 for i in range(self.Facets.nb_facets)],
+                        options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=1,
                         description='Facet a id:',
                         disabled=False,
@@ -5125,7 +5290,7 @@ class Interface():
                         layout=Layout(width='45%'),
                         style={'description_width': 'initial'}),
                     facet_b_id=widgets.Dropdown(
-                        options=[i+1 for i in range(self.Facets.nb_facets)],
+                        options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=2,
                         description='Facet b id:',
                         disabled=False,
@@ -5220,7 +5385,8 @@ class Interface():
                     except ValueError:
                         print(f"Wrong list syntax for {p}")
 
-                    # Plot the chosen facet to help the user to pick the facets he wants to use to orient the particule
+                    # Plot the chosen facet to help the user to pick the facets
+                    # he wants to use to orient the particule
                     self.Facets.extract_facet(
                         facet_id=self.Facets.facet_a_id, plot=True, elev=self.Facets.elev, azim=self.Facets.azim, output=False, save=False)
                     self.Facets.extract_facet(
@@ -5241,7 +5407,8 @@ class Interface():
 
                         display(button_fix_facets)
 
-                        display(Markdown("""# Computing the rotation matrix"""))
+                        display(
+                            Markdown("""# Computing the rotation matrix"""))
 
                         # Take those facets' vectors
                         u = np.array([self.Facets.field_data.n0[self.Facets.facet_a_id],
@@ -5374,7 +5541,7 @@ class Interface():
 
         with open(fname, "w") as v:
             for line in config_file:
-                v.write(line+"\n")
+                v.write(line + "\n")
 
     @staticmethod
     def display_readme(contents):
@@ -5656,8 +5823,8 @@ class Interface():
             display(Markdown("""
                 ## Pynx parameters
                 `data=data.npy`: name of the data file including the 3D observed intensity.
-                               recognized formats include .npy, .npz (if several arrays are included iobs, 
-                               should be named 'data' or 'iobs'), .tif or .tiff 
+                               recognized formats include .npy, .npz (if several arrays are included iobs,
+                               should be named 'data' or 'iobs'), .tif or .tiff
                                (assumes a multiframe tiff image), or .cxi (hdf5).
                                [mandatory unless another beamline-specific method to import data is used]
 
@@ -5669,32 +5836,32 @@ class Interface():
 
                 `verbose=20`: the run will print and optionally plot every 'verbose' cycles
 
-                `live_plot`: if used as keyword (or live_plot=True in a parameters file), a live plot 
-                           will be shown  every 'verbose' cycle. If an integer number N is given, 
+                `live_plot`: if used as keyword (or live_plot=True in a parameters file), a live plot
+                           will be shown  every 'verbose' cycle. If an integer number N is given,
                            display every N cycle.
 
                 `gpu=Titan`: name of the gpu to use [optional, by default the fastest available will be used]
 
-                `auto_center_resize`: if used (command-line keyword) or =True, the input data will be centered 
-                                    and cropped  so that the size of the array is compatible with the (GPU) 
-                                    FFT library used. If 'roi' is used, centering is based on ROI. 
+                `auto_center_resize`: if used (command-line keyword) or =True, the input data will be centered
+                                    and cropped  so that the size of the array is compatible with the (GPU)
+                                    FFT library used. If 'roi' is used, centering is based on ROI.
                                     [default=False]
 
-                `roi=0,120,0,235,0,270`: set the region-of-interest to be used, with min,max given along each 
+                `roi=0,120,0,235,0,270`: set the region-of-interest to be used, with min,max given along each
                                        dimension in python fashion (min included, max excluded), for the 2 or 3
                                        axis. ROI coordinates should be indicated before any rebin is done.
                                        Note that if 'auto_center_resize' is used, the ROI may still be shrunk
-                                       to obtain an array size compatible with the FFT library used. Similarly 
+                                       to obtain an array size compatible with the FFT library used. Similarly
                                        it will be shrunk if 'max_size' is used but ROI size is larger.
                                        Other example: roi=0,-1,300-356,300+256,500-256,500+256
                                        [default=None]
 
                 `nb_run=1`: number of times to run the optimization [default=1]
 
-                `nb_run_keep`: number of best run results to keep, according to likelihood statistics. This is 
+                `nb_run_keep`: number of best run results to keep, according to likelihood statistics. This is
                     only useful associated with nb_run [default: keep all run results]
 
-                `data2cxi`: if used as keyword (or data2cxi=True in a parameters file), convert the original 
+                `data2cxi`: if used as keyword (or data2cxi=True in a parameters file), convert the original
                           data to CXI(HDF5)  format. Will be saved to file 'data.cxi', or if a data file
                           has been supplied (e.g. data57.npz), to the same file with extension .cxi.
 
@@ -5703,7 +5870,7 @@ class Interface():
                                      [Default='cxi']
 
                 `note`='This Dataset was measure... Citation: Journal of coherent imaging (2018), 729...':
-                     Optional text note which will be saved as a note in the output CXI file 
+                     Optional text note which will be saved as a note in the output CXI file
                      (and also for data2cxi).
 
                 `instrument='ESRF-idxx'`: the name of the beamline/instrument used for data collection
@@ -5712,9 +5879,9 @@ class Interface():
                 `sample_name='GaN nanowire'`: optional name for the sample
 
                 `mask=zero`: mask for the diffraction data. If 'zero', all pixels with iobs <= 0 will be masked.
-                          If 'negative', all pixels with iobs < 0 will be masked. 
+                          If 'negative', all pixels with iobs < 0 will be masked.
                           If 'maxipix', the maxipix gaps will be masked.
-                          Other possibilities: give a filename for the mask file and  import mask from .npy, 
+                          Other possibilities: give a filename for the mask file and  import mask from .npy,
                           .npz, .edf, .mat. (the first available array will be used if multiple are present) file.
                           Pixels = 0 are valid, > 0 are masked. If the mask is 2D
                           and the data 3D, the mask is repeated for all frames along the first dimension (depth).
@@ -5725,49 +5892,49 @@ class Interface():
                                      [default: no saturation value]
 
                 `zero_mask`: by default masked pixels are free and keep the calculated intensities during HIO, RAAR,
-                     ER and CF cycles. Setting this flag will force all masked pixels to zero intensity. 
+                     ER and CF cycles. Setting this flag will force all masked pixels to zero intensity.
                      This can be more stable with a large  number of masked pixels and low intensity diffraction data.
                            If a value is supplied the following options can be used:
                            zero_mask=0: masked pixels are free and keep the calculated complex amplitudes
                            zero_mask=1: masked pixels are set to zero
-                           zero_mask=auto: this is only meaningful when using a 'standard' algorithm below. 
-                                The masked pixels will be set to zero during the first 60% of the HIO/RAAR cycles, 
+                           zero_mask=auto: this is only meaningful when using a 'standard' algorithm below.
+                                The masked pixels will be set to zero during the first 60% of the HIO/RAAR cycles,
                                 and will be free during the last 40% and ER, ML ones.
 
-                `object=obj.npy`: starting object. Import object from .npy, .npz, .mat (the first available array 
+                `object=obj.npy`: starting object. Import object from .npy, .npz, .mat (the first available array
                       will  be used if multiple are present), or CXI file.
                       [default=None, object will be defined as random values inside the support area]
 
-                `support=sup.npy`: starting support. Import support from .npy, .npz, .edf, .mat (the first 
+                `support=sup.npy`: starting support. Import support from .npy, .npz, .edf, .mat (the first
                           available array will be used if multiple are present) file.  Pixels > 0 are in
                           the support, 0 outside. if 'auto', support will be estimated using the intensity
-                          auto-correlation. If 'circle' or 'square', the suppport will be initialized to a 
+                          auto-correlation. If 'circle' or 'square', the suppport will be initialized to a
                           circle (sphere in 3d), or a square (cube).
                           [default='auto', support will be defined otherwise]
 
-                `support_size=50`: size (radius or half-size) for the initial support, to be used in 
+                `support_size=50`: size (radius or half-size) for the initial support, to be used in
                                  combination with 'support_type'. The size is given in pixel units.
-                                 Alternatively one value can be given for each dimension, i.e. 
-                                 support_size=20,40 for 2D data, and support_size=20,40,60 for 3D data. 
+                                 Alternatively one value can be given for each dimension, i.e.
+                                 support_size=20,40 for 2D data, and support_size=20,40,60 for 3D data.
                                  This will result in an initial support which is a rectangle/parallelepiped
-                                 or ellipsis/ellipsoid. 
-                                 [if not given, this will trigger the use of auto-correlation 
+                                 or ellipsis/ellipsoid.
+                                 [if not given, this will trigger the use of auto-correlation
                                   to estimate the initial support]
 
-                `support_autocorrelation_threshold=0.1`: if no support is given, it will be estimated 
-                                                       from the intensity autocorrelation, with this relative 
+                `support_autocorrelation_threshold=0.1`: if no support is given, it will be estimated
+                                                       from the intensity autocorrelation, with this relative
                                                        threshold.
                                                        [default value: 0.1]
 
                 `support_threshold=0.25`: threshold for the support update. Alternatively two values can be given,
-                    and the threshold will be randomly chosen in the interval given by two values: 
+                    and the threshold will be randomly chosen in the interval given by two values:
                     support_threshold=0.20,0.28.
 
-                `support_threshold_method=max`: method used to determine the absolute threshold for the 
+                `support_threshold_method=max`: method used to determine the absolute threshold for the
                                               support update. Either:'max' or 'average' (the default) values,
                                               taken over the support area/volume, after smoothing
 
-                `support_only_shrink`: if set or support_only_shrink=True, the support will only shrink 
+                `support_only_shrink`: if set or support_only_shrink=True, the support will only shrink
                                      (default: the support can grow again)
 
                 `support_smooth_width_begin=2`
@@ -5775,36 +5942,36 @@ class Interface():
                 `support_smooth_width_end=0.25`: during support update, the object amplitude is convoluted by a
                                                gaussian with a size
                                                (sigma) exponentially decreasing from support_smooth_width_begin
-                                               to support_smooth_width_end from the first to the last RAAR or 
+                                               to support_smooth_width_end from the first to the last RAAR or
                                                HIO cycle.
                                                [default values: 2 and 0.5]
 
                 `support_smooth_width_relax_n`: the number of cycles over which the support smooth width will
-                                              exponentially decrease from support_smooth_width_begin to 
-                                              support_smooth_width_end, and then stay constant. 
-                                              This is ignored if nb_hio, nb_raar, nb_er are used, 
+                                              exponentially decrease from support_smooth_width_begin to
+                                              support_smooth_width_end, and then stay constant.
+                                              This is ignored if nb_hio, nb_raar, nb_er are used,
                                               and the number of cycles used
                                               is the total number of HIO+RAAR cycles [default:500]
 
-                `support_post_expand=1`: after the support has been updated using a threshold,  it can be shrunk 
+                `support_post_expand=1`: after the support has been updated using a threshold,  it can be shrunk
                                        or expanded by a few pixels, either one or multiple times, e.g. in order
                                        to 'clean' the support:
                                        - support_post_expand=1 will expand the support by 1 pixel
                                        - support_post_expand=-1 will shrink the support by 1 pixel
-                                       - support_post_expand=-1,1 will shrink and then expand the support 
+                                       - support_post_expand=-1,1 will shrink and then expand the support
                                          by 1 pixel
-                                       - support_post_expand=-2,3 will shrink and then expand the support 
+                                       - support_post_expand=-2,3 will shrink and then expand the support
                                          by 2 and 3 pixels
-                                       - support_post_expand=2,-4,2 will expand/shrink/expand the support 
+                                       - support_post_expand=2,-4,2 will expand/shrink/expand the support
                                          by 2, 4 and 2 pixels
                                        - etc..
                                        [default=None, no shrinking or expansion]
 
-                `support_update_border_n`: if > 0, the only pixels affected by the support updated 
+                `support_update_border_n`: if > 0, the only pixels affected by the support updated
                     lie within +/- N pixels around the outer border of the support.
 
                 `positivity`: if set or positivity=True, the algorithms will be biased towards a real, positive
-                            object. Object is still complex-valued, but random start will begin with real 
+                            object. Object is still complex-valued, but random start will begin with real
                             values. [default=False]
 
                 `beta=0.9`: beta value for the HIO/RAAR algorithm [default=0.9]
@@ -5823,18 +5990,18 @@ class Interface():
                 `max_size=256`: maximum size for the array used for analysis, along all dimensions. The data
                               will be cropped to this value after centering. [default: no maximum size]
 
-                `user_config*=*`: this can be used to store a custom configuration parameter which will be 
-                    ignored by the algorithm, but will be stored among configuration parameters in the CXI 
-                    file (data and output). 
-                    e.g.: user_config_temperature=268K  user_config_comment="Vibrations during measurement" 
+                `user_config*=*`: this can be used to store a custom configuration parameter which will be
+                    ignored by the algorithm, but will be stored among configuration parameters in the CXI
+                    file (data and output).
+                    e.g.: user_config_temperature=268K  user_config_comment="Vibrations during measurement"
                     etc...
 
                 ### ALGORITHMS: standard version, using RAAR, then HIO, then ER and ML
 
-                `nb_raar=600`: number of relaxed averaged alternating reflections cycles, which the 
+                `nb_raar=600`: number of relaxed averaged alternating reflections cycles, which the
                              algorithm will use first. During RAAR and HIO, the support is updated regularly
 
-                `nb_hio=0`: number of hybrid input/output cycles, which the algorithm will use after RAAR. 
+                `nb_hio=0`: number of hybrid input/output cycles, which the algorithm will use after RAAR.
                             During RAAR and HIO, the support is updated regularly
 
                 `nb_er=200`: number of error reduction cycles, performed after HIO, without support update
@@ -5850,12 +6017,12 @@ class Interface():
 
 
 
-                ### ALGORITHMS: customized version 
+                ### ALGORITHMS: customized version
 
-                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: give a specific sequence of algorithms and/or 
+                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: give a specific sequence of algorithms and/or
                           parameters to be  used for the optimisation (note: this string is case-insensitive).
-                #### Important: 
-                1. when supplied from the command line, there should be NO SPACE in the expression ! And if 
+                #### Important:
+                1. when supplied from the command line, there should be NO SPACE in the expression ! And if
                 there are parenthesis in the expression, quotes are required around the algorithm string
                 2. the string and operators are applied from right to left
 
@@ -5913,40 +6080,40 @@ class Interface():
 
                 `ML`: Maximum Likelihood conjugate gradient (incompatible with partial coherence PSF)
 
-                `PSF` or `EstimatePSF`: calculate partial coherence point-spread function 
+                `PSF` or `EstimatePSF`: calculate partial coherence point-spread function
                                     with 50 cycles of Richardson-Lucy
 
                 `Sup` or `SupportUpdate`: update the support according to the support_* parameters
 
                 `ShowCDI`: display of the object and calculated/observed intensity. This can be used
-                         to trigger this plot at specific steps, instead of regularly using 
+                         to trigger this plot at specific steps, instead of regularly using
                          live_plot=N. This is thus best used using live_plot=0
 
                 Examples of algorithm strings, where steps are separated with commas (and NO SPACE!),
                 and are applied from right to left. Operations in a given step will be applied
-                mathematically, also from right to left, and `**N` means repeating N tymes (N cycles) 
+                mathematically, also from right to left, and `**N` means repeating N tymes (N cycles)
                 the  operation on the left of the exponent:
 
                 `algorithm=HIO` : single HIO cycle
                 `algorithm=ER**100` : 100 cycles of HIO
                 `algorithm=ER**50,HIO**100` : 100 cycles of HIO, followed by 50 cycles of ER
                 `algorithm=ER**50*HIO**100` : 100 cycles of HIO, followed by 50 cycles of ER
-                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: 10 times [50 HIO + 5 ER + Support update], 
+                `algorithm="ER**50,(Sup*ER**5*HIO**50)**10"`: 10 times [50 HIO + 5 ER + Support update],
                     followed by 50 ER
-                `algorithm="ER**50,verbose=1,(Sup*ER**5*HIO**50)**10,verbose=100,HIO**100"`: change the 
+                `algorithm="ER**50,verbose=1,(Sup*ER**5*HIO**50)**10,verbose=100,HIO**100"`: change the
                     periodicity of verbose output
                 `algorithm="ER**50,(Sup*ER**5*HIO**50)**10,support_post_expand=1, (Sup*ER**5*HIO**50)**10,
                     support_post_expand=-1#2,HIO**100"`: same but change the post-expand (wrap) method
-                `algorithm="ER**50,(Sup*PSF*ER**5*HIO**50)**5,(Sup*ER**5*HIO**50)**10,HIO**100"`: 
+                `algorithm="ER**50,(Sup*PSF*ER**5*HIO**50)**5,(Sup*ER**5*HIO**50)**10,HIO**100"`:
                     activate partial correlation after a first series of algorithms
-                `algorithm="ER**50,(Sup*PSF*HIO**50)**4,(Sup*HIO**50)**8"`: typical algorithm steps with 
+                `algorithm="ER**50,(Sup*PSF*HIO**50)**4,(Sup*HIO**50)**8"`: typical algorithm steps with
                     partial coherence
                 `algorithm="ER**50,(Sup*HIO**50)**4,(Sup*HIO**50)**4,positivity=0,(Sup*HIO**50)**8,
                     positivity=1"`: same as previous but starting with positivity constraint, removed at the end.
 
-                **Default**: use nb_raar, nb_hio, nb_er and nb_ml to perform the sequence of algorithms]     
+                **Default**: use nb_raar, nb_hio, nb_er and nb_ml to perform the sequence of algorithms]
 
-                `save=all`: either 'final' or 'all' this keyword will activate saving after each optimisation 
+                `save=all`: either 'final' or 'all' this keyword will activate saving after each optimisation
                           step (comma-separated) of the algorithm in any given run [default=final]
 
                 #### Script to perform a CDI reconstruction of data from id01@ESRF.
@@ -5961,7 +6128,7 @@ class Interface():
                 `imgcounter=mpx4inr`: spec counter name for image number
                                     [default='auto', will use either 'mpx4inr' or 'ei2mint']
 
-                `imgname=/dir/to/images/prefix%05d.edf.gz`: images location with prefix 
+                `imgname=/dir/to/images/prefix%05d.edf.gz`: images location with prefix
                         [default: will be extracted from the ULIMA_mpx4 entry in the spec scan header]
 
                 #### Specific defaults for this script:
@@ -6562,7 +6729,7 @@ class Interface():
                         print("This data does not result from Merlin :/")
 
                 # Just an index for plotting schemes
-                half = int(data_og.shape[0]/2)
+                half = int(data_og.shape[0] / 2)
 
                 # Rotate data
                 data = np.transpose(data_og, axes=(0, 2, 1))
@@ -6670,7 +6837,8 @@ class Interface():
         try:
             df = pd.read_csv(self.csv_file)
 
-            # Replace old data linked to this scan, no problem if this row does not exist yet
+            # Replace old data linked to this scan, no problem if this row does
+            # not exist yet
             indices = df[df['scan'] == self.Dataset.scan].index
             df.drop(indices, inplace=True)
 

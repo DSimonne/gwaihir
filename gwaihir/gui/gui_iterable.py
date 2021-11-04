@@ -141,7 +141,7 @@ class Dataset():
                     # Delete entry_1.instrument_1 if exists
                     try:
                         del final_file["entry_1"]["image_2"]["instrument_1"]
-                    except:
+                    except KeyError:
                         pass
 
                     # Also copy mode data to entry_1.image_2.modes_percentage

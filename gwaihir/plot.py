@@ -66,7 +66,7 @@ class Plotter():
                 try:
                     self.data_array = np.load(self.filename)
 
-                except Exception as E:
+                except ValueError:
                     print("Could not load data ... ")
 
             elif self.filename.endswith(".cxi"):
@@ -74,7 +74,7 @@ class Plotter():
                     self.data_array = h5.File(self.filename, mode='r')[
                         'entry_1/data_1/data'][()]
 
-                except Exception as E:
+                except (KeyError, OSError):
                     print("""
                         The file could not be loaded, verify that you are loading a file 
                         with an hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
@@ -91,7 +91,7 @@ class Plotter():
                     # Due to labelling of axes x,y,z and not z,y,x
                     self.data_array = np.swapaxes(self.data_array, 0, 2)
 
-                except Exception as E:
+                except (KeyError, OSError):
                     print("""
                         The file could not be loaded, verify that you are loading a file with an 
                         hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
@@ -158,8 +158,8 @@ class Plotter():
                             "########################################################"
                         )
 
-            except Exception as E:
-                raise E
+            except ValueError:
+                print("Could not load data.")
 
     def plot_data(self, **kwargs):
         """Run plot_data function with class arguments"""
@@ -279,6 +279,12 @@ class ThreeDViewer(widgets.Box):
         self.toggle_axes.observe(self.on_update_style)
 
         self.toggle_rotate.observe(self.on_animate)
+
+        # Future attributes
+        self.mesh = None
+        self.color = None
+        self.d0 = self.d
+        self.progress.value = None
 
         # Create final box
         self.vbox = widgets.VBox([self.threshold,
@@ -692,7 +698,7 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
                 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 
                 # Get scale
-                log = True if scale == "logarithmic" else False
+                log = scale == "logarithmic"
 
                 # Plot 2D image in interactive environment
                 plot_2d_image(two_d_array=dt, log=log, fig=fig, ax=ax)
@@ -777,10 +783,6 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             print("Log scale can not handle this kind of data ...")
         else:
             pass
-
-    except Exception as E:
-        plt.close()
-        raise E
 
 
 # def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
@@ -886,7 +888,7 @@ def plot_3d_slices(data_array, figsize=None, log=False):
             shape = data_array.shape
 
             # Get scale
-            log = True if scale == "logarithmic" else False
+            log = scale == "logarithmic"
 
             two_d_array = data_array[shape[0]//2, :, :]
             plot_2d_image(two_d_array, fig=fig, ax=axs[0], log=log)

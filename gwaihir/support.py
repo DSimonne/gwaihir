@@ -81,8 +81,11 @@ class SupportTools():
         if compute:
             try:
                 old_support = np.load(self.path_to_support)["support"]
-            except:
-                old_support = np.load(self.path_to_support)["data"]
+            except KeyError:
+                try:
+                    old_support = np.load(self.path_to_support)["data"]
+                except KeyError:
+                    Print("Could not load 'data' or 'support' array from file.")
 
             bigdata = 100 * old_support
             conv_support = np.where(gaussian_filter(
@@ -102,7 +105,7 @@ class SupportTools():
 
     def compute_support(self, threshold, compute=True):
         """
-        Create support from data, based on maximum value of electronic 
+        Create support from data, based on maximum value of electronic
         density module, a threshold is applied.
 
         :param compute: True to run function
