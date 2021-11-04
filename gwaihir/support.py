@@ -90,7 +90,7 @@ class SupportTools():
                 bigdata, sigma) > threshold, 1, 0)
 
             np.savez(self.saving_directory +
-                f"filter_sig{sigma}_t{threshold}", oldsupport=old_support, support=conv_support)
+                     f"filter_sig{sigma}_t{threshold}", oldsupport=old_support, support=conv_support)
 
             print(
                 f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")
@@ -119,7 +119,7 @@ class SupportTools():
 
                 print(
                     f"Shape of real space complex electronic density array {np.shape(electronic_density)}"
-                    )
+                )
 
                 # Find max value in image, we work with the module
                 amp = np.abs(electronic_density)
@@ -133,7 +133,7 @@ class SupportTools():
                 rnocc = np.where(support == 0)
                 print(
                     f"Percentage of 3D array occupied by support:\n{np.shape(rocc)[1] / np.shape(rnocc)[1]}"
-                    )
+                )
 
                 # Save support
                 np.savez(self.saving_directory +
