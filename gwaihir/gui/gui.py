@@ -92,6 +92,16 @@ class Interface():
             "This should be correct if gwaihir was installed in an environment.\n"
             "Otherwise change self.path_scripts attribute to the correct folder.\n")
 
+        # Initialize future attributes
+        self.Dataset = None
+        self.cxi_filename = None
+        self.run_phase_retrieval = False
+        self.run_pynx_tools = False
+        self.text_file = None
+        self.params = None
+        self.Facets = None
+        self.csv_file = None
+
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
 
@@ -2339,7 +2349,7 @@ class Interface():
                                              'description_width': 'initial'},
                                          layout=Layout(width='90%', height="35px")),
 
-                                     facet_folder=widgets.Text(
+                                     unused_facet_folder=widgets.Text(
                                          value=os.getcwd() + "/postprocessing/",
                                          placeholder=os.getcwd() + "/postprocessing/",
                                          description='Facet data (.vtk) folder:',
@@ -2639,7 +2649,7 @@ class Interface():
 
                 @button_save_as_cxi.on_click
                 def action_button_save_as_cxi(selfbutton):
-                    "Create button to save Dataset object as .cxi file"
+                    """Create button to save Dataset object as .cxi file"""
                     clear_output(True)
                     display(buttons_init)
                     print("\n#############################################################################################################\n")
@@ -2691,8 +2701,8 @@ class Interface():
                     print("\n#############################################################################################################\n")
 
                 @button_reload_previous_data.on_click
-                def action_button_save_as_cxi(selfbutton):
-                    "Create button to reload Dataset object from .cxi file"
+                def action_reload_previous_data(selfbutton):
+                    """Create button to reload Dataset object from .cxi file"""
                     clear_output(True)
                     display(buttons_init)
                     print("\n#############################################################################################################\n")
@@ -3170,18 +3180,15 @@ class Interface():
                 if self.Dataset.beamline == "SIXS_2019":
                     self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
-                    save_dir = None
 
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
-                    save_dir = self.Dataset.root_folder + \
-                        f"S{self.Dataset.scan}/preprocessing/"
 
                 # Create config file
                 self.create_yaml_file(
                     fname=f"{self.Dataset.scan_folder}preprocessing/config_preprocessing.yml",
                     scans=self.Dataset.scan,
-                    root_folder=self.Dataset.root_folder,
+                    root_folder=root_folder,
                     save_dir=f"{self.Dataset.scan_folder}preprocessing/",
                     data_dir=self.Dataset.data_dir,
                     sample_name=self.Dataset.sample_name,
@@ -3462,7 +3469,7 @@ class Interface():
                     print("\"data\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
-                iobs = bin_data(mask, self.Dataset.rebin)
+                iobs = bin_data(iobs, self.Dataset.rebin)
 
 
             # fft shift
@@ -3930,9 +3937,7 @@ class Interface():
                     f"Saved parameters in {self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
-                    """
-                    Runs modes directly and saves all data in an "all" subdir, filter based on LLK
-                    """
+                    # Runs modes directly and saves all data in an "all" subdir, filter based on LLK
                     print(
                         f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.Dataset.scan_folder}preprocessing --filtering {nb_keep_std} --modes true")
                     print(
@@ -4337,12 +4342,12 @@ class Interface():
         """
         try:
             print(
-                f"Using {self.path_scripts}/pynx-cdi-analysis.py (py38-stable environment)")
-            print(f"Using {folder}/*LLK* files.")
-            print("Running pynx-cdi-analysis.py *LLK* modes=1")
-            print(f"Output in {folder}/modes_gui.h5")
+                f"Using {self.path_scripts}/pynx-cdi-analysis.py (py38-stable environment)"
+                f"Using {folder}/*LLK* files."
+                "Running pynx-cdi-analysis.py *LLK* modes=1"
+                f"Output in {folder}/modes_gui.h5")
             os.system(
-                "{s}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+                "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
                     quote(self.path_script),
                     quote(folder),
                     quote(folder),
@@ -5031,7 +5036,7 @@ class Interface():
     def init_facet_analysis(
         self,
         unused_label_facet,
-        facet_folder,
+        unused_facet_folder,
         facet_filename,
         load_data,
     ):
@@ -5206,7 +5211,7 @@ class Interface():
 
                     @button_fix_facets.on_click
                     def action_button_fix_facets(selfbutton):
-                        "Fix facets to compute the new rotation matrix and launch the data extraction"
+                        """Fix facets to compute the new rotation matrix and launch the data extraction"""
                         clear_output(True)
 
                         display(button_fix_facets)
@@ -5304,6 +5309,12 @@ class Interface():
 
     @staticmethod
     def create_yaml_file(fname, **kwargs):
+        """
+        Create yaml file storing all keywords arguments given in input
+        Used for bcdi scripts
+
+        :param fname: path to created yaml file
+        """
         config_file = []
 
         for k, v in kwargs.items():
@@ -5343,7 +5354,7 @@ class Interface():
     @staticmethod
     def display_readme(contents):
         """
-        help text about different steps in data analysis workflow
+        Help text about different steps in data analysis workflow
 
         :param contents: e.g. "Preprocessing"
          Possible values are "Preprocessing", "Phase retrieval"
@@ -6650,7 +6661,7 @@ class Interface():
     # Below are handlers
 
     def init_handler(self, change):
-        "Handles changes on the widget used for the initialization"
+        """Handles changes on the widget used for the initialization"""
         if not change.new:
             for w in self._list_widgets_init_dir.children[:7]:
                 w.disabled = False
@@ -6675,7 +6686,7 @@ class Interface():
                 change=self._list_widgets_preprocessing.children[44].value)
 
     def beamline_handler(self, change):
-        "Handles changes on the widget used for the beamline"
+        """Handles changes on the widget used for the beamline"""
         try:
             if change.new in ["SIXS_2019", "ID01"]:
                 for w in self._list_widgets_preprocessing.children[2:7]:
@@ -6694,7 +6705,7 @@ class Interface():
                     w.disabled = False
 
     def bragg_peak_centering_handler(self, change):
-        "Handles changes related to the centering of the Bragg peak"
+        """Handles changes related to the centering of the Bragg peak"""
         try:
             if change.new == "manual":
                 self._list_widgets_preprocessing.children[14].disabled = False
@@ -6710,7 +6721,7 @@ class Interface():
                 self._list_widgets_preprocessing.children[14].disabled = True
 
     def reload_data_handler(self, change):
-        "Handles changes related to data reloading"
+        """Handles changes related to data reloading"""
         try:
             if change.new:
                 for w in self._list_widgets_preprocessing.children[26:28]:
@@ -6730,7 +6741,7 @@ class Interface():
                     w.disabled = True
 
     def interpolation_handler(self, change):
-        "Handles changes related to data interpolation"
+        """Handles changes related to data interpolation"""
         try:
             if change.new:
                 for w in self._list_widgets_preprocessing.children[45:68]:
@@ -6749,7 +6760,7 @@ class Interface():
                     w.disabled = True
 
     def preprocess_handler(self, change):
-        "Handles changes on the widget used for the preprocessing"
+        """Handles changes on the widget used for the preprocessing"""
         try:
             if not change.new:
                 self._list_widgets_init_dir.children[7].disabled = False
@@ -6813,7 +6824,7 @@ class Interface():
                     change=self._list_widgets_correct.children[2].value)
 
     def temp_handler(self, change):
-        "Handles changes related to the temperature estimation"
+        """Handles changes related to the temperature estimation"""
         try:
             if change.new:
                 for w in self._list_widgets_correct.children[3:6]:
@@ -6832,7 +6843,7 @@ class Interface():
                     w.disabled = True
 
     def correct_angles_handler(self, change):
-        "Handles changes related to data correction"
+        """Handles changes related to data correction"""
         try:
             if change.new:
                 for w in self._list_widgets_correct.children[:-2]:
@@ -6858,7 +6869,7 @@ class Interface():
                     change=self._list_widgets_correct.children[2].value)
 
     def folder_pynx_handler(self, change):
-        "Handles changes on the widget used to load a data file"
+        """Handles changes on the widget used to load a data file"""
         try:
             list_all_npz = sorted(glob.glob(change.new + "/*.npz"))
             list_probable_iobs_files = sorted(
@@ -6926,7 +6937,7 @@ class Interface():
                 ""] + sorted(glob.glob(change + "/*.npz"))  # obj list
 
     def pynx_psf_handler(self, change):
-        "Handles changes related to the psf"
+        """Handles changes related to the psf"""
         try:
             if change.new:
                 for w in self._list_widgets_pynx.children[16:20]:
@@ -6949,7 +6960,7 @@ class Interface():
             change=self._list_widgets_pynx.children[16].value)
 
     def pynx_peak_shape_handler(self, change):
-        "Handles changes related to psf the peak shape"
+        """Handles changes related to psf the peak shape"""
         try:
             if change.new != "pseudo-voigt":
                 self._list_widgets_pynx.children[18].disabled = True
@@ -6965,7 +6976,7 @@ class Interface():
                 self._list_widgets_pynx.children[18].disabled = False
 
     def run_pynx_handler(self, change):
-        "Handles changes related to the phase retrieval"
+        """Handles changes related to the phase retrieval"""
         if change.new:
             for w in self._list_widgets_pynx.children[:-2]:
                 w.disabled = True
@@ -6979,7 +6990,7 @@ class Interface():
                 change=self._list_widgets_pynx.children[15].value)
 
     def folder_strain_handler(self, change):
-        "Handles changes on the widget used to load a data file"
+        """Handles changes on the widget used to load a data file"""
         try:
             self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change.new + "/*.h5")) + sorted(glob.glob(
                 change.new + "/*.cxi")) + sorted(glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz"))
@@ -6988,7 +6999,7 @@ class Interface():
                 change + "/*.cxi")) + sorted(glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz"))
 
     def folder_plot_handler(self, change):
-        "Handles changes on the widget used to load a data file"
+        """Handles changes on the widget used to load a data file"""
         try:
             self.tab_data.children[2].options = sorted(glob.glob(
                 change.new + "/*.npz") + glob.glob(change.new + "/*.cxi") + glob.glob(change.new + "/*.h5")) + [""]
@@ -6998,7 +7009,7 @@ class Interface():
                 change + "/*.npz") + glob.glob(change + "/*.cxi") + glob.glob(change + "/*.h5")) + [""]
 
     def folder_facet_handler(self, change):
-        "Handles changes on the widget used to load a data file"
+        """Handles changes on the widget used to load a data file"""
         try:
             self.tab_facet.children[2].options = sorted(
                 glob.glob(change.new + "/*.vtk")) + [""]

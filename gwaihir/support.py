@@ -12,9 +12,7 @@ import gwaihir.plot as plot
 
 
 class SupportTools():
-    """
-    Class that regroups the methods used to create/extract/optimize support in BCDI
-    """
+    """Class that regroups the methods used to create/extract/optimize support in BCDI"""
 
     def __init__(self, path_to_data=None, path_to_support=None, saving_directory=None):
         """

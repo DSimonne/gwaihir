@@ -3,7 +3,6 @@
 
 # In[ ]:
 
-"""
-Welcome to phdutils.bcdi.gui"""
+"""Welcome to phdutils.bcdi.gui"""
 
 __all__ = ["gui", "gui_iterable"]
