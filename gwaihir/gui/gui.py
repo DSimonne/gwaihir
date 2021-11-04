@@ -2611,91 +2611,94 @@ class Interface():
                 "postprocessing/"
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
 
-            # Button to save data
-            button_save_as_cxi = Button(
-                description="Save work as .cxi file",
-                continuous_update=False,
-                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                layout=Layout(width='40%'),
-                style={'description_width': 'initial'},
-                icon='step-forward')
+            # Only allow to save data if PyNX is imported to avoid errors
+            # PyNX is needed to create the cxi file
+            if pynx_import:
+                # Button to save data
+                button_save_as_cxi = Button(
+                    description="Save work as .cxi file",
+                    continuous_update=False,
+                    button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                    layout=Layout(width='40%'),
+                    style={'description_width': 'initial'},
+                    icon='step-forward')
 
-            # Button to reload data
-            button_reload_previous_data = Button(
-                description="Reload previous data (.cxi) from target directory ...",
-                continuous_update=False,
-                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                layout=Layout(width='40%'),
-                style={'description_width': 'initial'},
-                icon='step-forward')
+                # Button to reload data
+                button_reload_previous_data = Button(
+                    description="Reload previous data (.cxi) from target directory ...",
+                    continuous_update=False,
+                    button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                    layout=Layout(width='40%'),
+                    style={'description_width': 'initial'},
+                    icon='step-forward')
 
-            buttons_init = widgets.HBox(
-                [button_save_as_cxi, button_reload_previous_data])
-            display(buttons_init)
-
-            @button_save_as_cxi.on_click
-            def action_button_save_as_cxi(selfbutton):
-                "Create button to save Dataset object as .cxi file"
-                clear_output(True)
+                buttons_init = widgets.HBox(
+                    [button_save_as_cxi, button_reload_previous_data])
                 display(buttons_init)
-                print("\n#############################################################################################################\n")
-                print("Saving data, takes some time ...")
 
-                try:
-                    # Reciprocal space data
-                    print(
-                        "\n#############################################################################################################\n")
-                    print(
-                        "Saving diffraction data and mask selected in the PyNX tab...")
-                    self.initialize_cdi_operator()
+                @button_save_as_cxi.on_click
+                def action_button_save_as_cxi(selfbutton):
+                    "Create button to save Dataset object as .cxi file"
+                    clear_output(True)
+                    display(buttons_init)
+                    print("\n#############################################################################################################\n")
+                    print("Saving data, takes some time ...")
 
-                    # Real space data
+                    try:
+                        # Reciprocal space data
+                        print(
+                            "\n#############################################################################################################\n")
+                        print(
+                            "Saving diffraction data and mask selected in the PyNX tab...")
+                        self.initialize_cdi_operator()
+
+                        # Real space data
+                        try:
+                            print(
+                                "\n#############################################################################################################\n")
+                            print("\nSaving parameters used in the GUI...")
+                            print(
+                                "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
+                            self.Dataset.to_cxi(
+                                cxi_filename=self.cxi_filename,
+                                reconstruction_filename=self.Dataset.reconstruction_file)
+
+                        except AttributeError:
+                            self.Dataset.to_cxi(
+                                cxi_filename=self.cxi_filename, reconstruction_filename=False)
+
+                    # except NameError:
+                    #     # Could not load cdi object
+                    #     print("Could not save reciprocal space data, needs PyNX package")
+                    except Exception as e:
+                        # No diffraction data selected
+                        # print(
+                        #     "You need to select the diffraction data file in the `PyNX` tab.")
+                        raise e
+
+                    # Facets analysis output
                     try:
                         print(
                             "\n#############################################################################################################\n")
-                        print("\nSaving parameters used in the GUI...")
-                        print(
-                            "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
-                        self.Dataset.to_cxi(
-                            cxi_filename=self.cxi_filename,
-                            reconstruction_filename=self.Dataset.reconstruction_file)
-
+                        print("Saving Facets class data")
+                        self.Facets.to_hdf5(
+                            f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
                     except AttributeError:
-                        self.Dataset.to_cxi(
-                            cxi_filename=self.cxi_filename, reconstruction_filename=False)
+                        print(
+                            "Could not save facets' data, run the analysis in the `Facets` tab first...")
 
-                # except NameError:
-                #     # Could not load cdi object
-                #     print("Could not save reciprocal space data, needs PyNX package")
-                except Exception as e:
-                    # No diffraction data selected
-                    # print(
-                    #     "You need to select the diffraction data file in the `PyNX` tab.")
-                    raise e
+                    print("\n#############################################################################################################\n")
 
-                # Facets analysis output
-                try:
-                    print(
-                        "\n#############################################################################################################\n")
-                    print("Saving Facets class data")
-                    self.Facets.to_hdf5(
-                        f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
-                except AttributeError:
-                    print(
-                        "Could not save facets' data, run the analysis in the `Facets` tab first...")
-
-                print("\n#############################################################################################################\n")
-
-            @button_reload_previous_data.on_click
-            def action_button_save_as_cxi(selfbutton):
-                "Create button to reload Dataset object from .cxi file"
-                clear_output(True)
-                display(buttons_init)
-                print("\n#############################################################################################################\n")
-                # Reload previous data that was saved as .cxi file,
-                # initialize all related widgets values, authorize all functions
-                print("Not created yet")
-                print("\n#############################################################################################################\n")
+                @button_reload_previous_data.on_click
+                def action_button_save_as_cxi(selfbutton):
+                    "Create button to reload Dataset object from .cxi file"
+                    clear_output(True)
+                    display(buttons_init)
+                    print("\n#############################################################################################################\n")
+                    # Reload previous data that was saved as .cxi file,
+                    # initialize all related widgets values, authorize all functions
+                    print("Not created yet")
+                    print("\n#############################################################################################################\n")
 
         elif not run_dir_init:
             clear_output(True)
