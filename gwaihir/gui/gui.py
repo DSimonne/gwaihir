@@ -52,36 +52,24 @@ except ModuleNotFoundError:
 
 
 class Interface():
-    """
-    This class is a Graphical User Interface (gui).
-    It makes extensive use of the ipywidgets and
-    is thus meant to be used with a jupyter notebook.
-    Additional informations are provided in the "ReadMe"
-    tab of the gui.
+    """This class is a Graphical User Interface (gui).
+
+    It makes extensive use of the ipywidgets and is thus meant to be
+    used with a jupyter notebook. Additional informations are provided
+    in the "ReadMe" tab of the gui.
     """
 
     def __init__(self):
-        """
-        All the widgets for the GUI are defined here.
-        They are regrouped in a few tabs that design the GUI, the tabs are:
-            tab_init
-            tab_detector
-            tab_setup
-            tab_preprocess
-            tab_correct
-            tab_logs
-            tab_pynx
-            tab_strain
-            tab_data
-            tab_facet
-            tab_readme
+        """All the widgets for the GUI are defined here. They are regrouped in
+        a few tabs that design the GUI, the tabs are: tab_init tab_detector
+        tab_setup tab_preprocess tab_correct tab_logs tab_pynx tab_strain
+        tab_data tab_facet tab_readme.
 
         Also defines:
             path_scripts: path to folder in which bcdi script are stored
             matplotlib_backend: backend used in GUI (default "Qt5Agg")
             user_name: user_name used to login to slurm if working
                 on the ESRF cluster
-
         """
         super(Interface, self).__init__()
 
@@ -2617,9 +2605,8 @@ class Interface():
         debug,
         run_dir_init,
     ):
-        """
-        Function to move file from `data_dir` to `root_folder`
-        where it will be preprocessed.
+        """Function to move file from `data_dir` to `root_folder` where it will
+        be preprocessed.
 
         Mandatory to run before any other step
 
@@ -2806,7 +2793,7 @@ class Interface():
 
                 @button_save_as_cxi.on_click
                 def action_button_save_as_cxi(selfbutton):
-                    """Create button to save Dataset object as .cxi file"""
+                    """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(buttons_init)
                     print(
@@ -2867,7 +2854,8 @@ class Interface():
 
                 @button_reload_previous_data.on_click
                 def action_reload_previous_data(selfbutton):
-                    """Create button to reload Dataset object from .cxi file"""
+                    """Create button to reload Dataset object from .cxi
+                    file."""
                     clear_output(True)
                     display(buttons_init)
                     print(
@@ -2960,9 +2948,8 @@ class Interface():
         unused_label_preprocess,
         init_para
     ):
-        """
-        Initialize the parameters used in bcdi_preprocess_BCDI.py
-        Necessary for preprocessing and postprocessing
+        """Initialize the parameters used in bcdi_preprocess_BCDI.py Necessary
+        for preprocessing and postprocessing.
 
         If init_para is True, displays a button that allow
         the user to run the bcdi_preprocess_BCDI script
@@ -3183,7 +3170,6 @@ class Interface():
          tiltazimuth parameter from xrayutilities 2D detector calibration
         :param tilt_detector: e.g. 0
          tilt parameter from xrayutilities 2D detector calibration
-
         """
         if init_para:
             # Disable all widgets until the end of the program, will update
@@ -3483,13 +3469,10 @@ class Interface():
         reference_temperature,
         angles_bool,
     ):
-        """
-        Use this script to extract and save the rocking
-        curve as well as the detector image at the
-        rocking curve's COM.
-        Will correct the values of the inplane and
-        outofplane angles corresponding to the COM
-        of the Bragg peak, values used then to compute q_hkl
+        """Use this script to extract and save the rocking curve as well as the
+        detector image at the rocking curve's COM. Will correct the values of
+        the inplane and outofplane angles corresponding to the COM of the Bragg
+        peak, values used then to compute q_hkl.
 
         Parameters for temperature estimation:
 
@@ -3622,11 +3605,9 @@ class Interface():
     # Phase retrieval
 
     def initialize_cdi_operator(self, save_as_cxi=True):
-        """
-        Initialize the cdi operator by processing the possible inputs:
-         iobs, mask, support, obj
-        Will also crop and center the data if specified
-        Loads phase retrieval tab parameters values
+        """Initialize the cdi operator by processing the possible inputs: iobs,
+        mask, support, obj Will also crop and center the data if specified
+        Loads phase retrieval tab parameters values.
 
         :param save_as_cxi: e.g. True
          Save the instanced cdi object as .cxi following
@@ -3870,10 +3851,9 @@ class Interface():
         unused_label_run_pynx_tools,
         run_pynx_tools,
     ):
-        """
-        Get parameters values from widgets and run phase retrieval
-        Possible to run phase retrieval via the CLI (with ot without MPI)
-        Or directly in python using the operators.
+        """Get parameters values from widgets and run phase retrieval Possible
+        to run phase retrieval via the CLI (with ot without MPI) Or directly in
+        python using the operators.
 
         :param folder: folder in which the raw data files are, and where the output will be saved
         :param iobs: 2D/3D observed diffraction data (intensity).
@@ -4398,14 +4378,13 @@ class Interface():
         nb_keep,
         filter_criteria,
     ):
-        """
-        Filter the phase retrieval output depending on a given parameter,
-        for now only LLK and standard deviation are available.
-        This allows the user to run a lot of reconstructions but to then
-        automatically keep the "best" ones, according to this parameter.
-        filter_criteria can take the values "LLK" or "standard_deviation"
-        If you filter based on both, the function will filter nb_keep/2
-        files by the first criteria, and the remaining files by the second criteria
+        """Filter the phase retrieval output depending on a given parameter,
+        for now only LLK and standard deviation are available. This allows the
+        user to run a lot of reconstructions but to then automatically keep the
+        "best" ones, according to this parameter. filter_criteria can take the
+        values "LLK" or "standard_deviation" If you filter based on both, the
+        function will filter nb_keep/2 files by the first criteria, and the
+        remaining files by the second criteria.
 
         The parameters are specified in the phase retrieval tab, and
         their values saved through self.initialize_phase_retrieval()
@@ -4417,10 +4396,10 @@ class Interface():
         """
         # Sorting functions depending on filtering criteria
         def filter_by_std(cxi_files, nb_keep):
-            """
-            Use the standard deviation of the reconstructed
-            object as filtering criteria. The lowest standard
-            deviations are best.
+            """Use the standard deviation of the reconstructed object as
+            filtering criteria.
+
+            The lowest standard deviations are best.
             """
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
@@ -4441,11 +4420,11 @@ class Interface():
                 os.remove(f)
 
         def filter_by_LLK(cxi_files, nb_keep):
-            """
-            Use the free log-likelihood values of the reconstructed
-            object as filtering criteria. The lowest standard
-            deviations are best.
-            See PyNX for details
+            """Use the free log-likelihood values of the reconstructed object
+            as filtering criteria.
+
+            The lowest standard deviations are best. See PyNX for
+            details
             """
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
@@ -4521,9 +4500,8 @@ class Interface():
         self,
         folder,
     ):
-        """
-        Decomposes several phase retrieval solutions into
-        modes, saves only the first mode to save space
+        """Decomposes several phase retrieval solutions into modes, saves only
+        the first mode to save space.
 
         :param folder: path to folder in which are stored
          the .cxi files, all files corresponding to
@@ -4550,8 +4528,8 @@ class Interface():
         cdi_operator,
         path_to_cxi
     ):
-        """
-        We need to create a dictionnary with the parameters to save in the cxi file
+        """We need to create a dictionnary with the parameters to save in the
+        cxi file.
 
         :param cdi_operator: cdi object
          created with PyNX
@@ -4725,10 +4703,10 @@ class Interface():
         reconstruction_file,
         run_strain,
     ):
-        """
-        Loading argument from strain tab widgets but also values of parameters used in preprocessing that are common
-        Runs postprocessing script from bcdi package to extract the strain from the reconstructed phase.
-        Also plots images depending on the given isosurface.
+        """Loading argument from strain tab widgets but also values of
+        parameters used in preprocessing that are common Runs postprocessing
+        script from bcdi package to extract the strain from the reconstructed
+        phase. Also plots images depending on the given isosurface.
 
         Parameters used in the interactive masking GUI:
 
@@ -5230,11 +5208,11 @@ class Interface():
         facet_filename,
         load_data,
     ):
-        """
-        Allows one to:
-            load a vtk file (previously created in paraview via theFacetAnalyser plugin)
-            realign the particle by assigning a vector to 2 of its facets
-            extract information from each facet
+        """Allows one to:
+
+        load a vtk file (previously created in paraview via
+        theFacetAnalyser plugin) realign the particle by assigning a
+        vector to 2 of its facets extract information from each facet
         """
         # plt.switch_backend(
         #     'module://ipykernel.pylab.backend_inline'
@@ -5360,7 +5338,8 @@ class Interface():
                     elev,
                     azim,
                 ):
-                    """Function to interactively visualize the two facets tht will be chosen, to also help pick two vectors"""
+                    """Function to interactively visualize the two facets tht
+                    will be chosen, to also help pick two vectors."""
                     # Save parameters value
                     self.Facets.facet_a_id = facet_a_id
                     self.Facets.facet_b_id = facet_b_id
@@ -5402,7 +5381,8 @@ class Interface():
 
                     @button_fix_facets.on_click
                     def action_button_fix_facets(selfbutton):
-                        """Fix facets to compute the new rotation matrix and launch the data extraction"""
+                        """Fix facets to compute the new rotation matrix and
+                        launch the data extraction."""
                         clear_output(True)
 
                         display(button_fix_facets)
@@ -5501,9 +5481,8 @@ class Interface():
 
     @staticmethod
     def create_yaml_file(fname, **kwargs):
-        """
-        Create yaml file storing all keywords arguments given in input
-        Used for bcdi scripts
+        """Create yaml file storing all keywords arguments given in input Used
+        for bcdi scripts.
 
         :param fname: path to created yaml file
         """
@@ -5545,8 +5524,7 @@ class Interface():
 
     @staticmethod
     def display_readme(contents):
-        """
-        Help text about different steps in data analysis workflow
+        """Help text about different steps in data analysis workflow.
 
         :param contents: e.g. "Preprocessing"
          Possible values are "Preprocessing", "Phase retrieval"
@@ -6496,8 +6474,7 @@ class Interface():
         csv_file,
         show_logs
     ):
-        """
-        Loads exterior .csv file and displays it in the gui
+        """Loads exterior .csv file and displays it in the gui.
 
         :param csv_file: path to csv file
         :param show_logs: True to display dataframe
@@ -6559,8 +6536,9 @@ class Interface():
         path_to_data,
         data_use,
     ):
-        """
-        Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi files.
+        """Allows the user to plot an array (1D, 2D or 3D) from npz, npy or.
+
+        .cxi files.
 
         :param path_to_data: path to file to be loaded in GUI
         :param data_use: e.g. "2D"
@@ -6607,7 +6585,8 @@ class Interface():
                                          )
 
             def support_handler(change):
-                """Handles changes on the widget used for the initialization"""
+                """Handles changes on the widget used for the
+                initialization."""
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -6669,7 +6648,8 @@ class Interface():
                                          )
 
             def support_handler(change):
-                """Handles changes on the widget used for the initialization"""
+                """Handles changes on the widget used for the
+                initialization."""
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -6693,10 +6673,8 @@ class Interface():
     # Non-Widgets interactive functions
 
     def rotate_sixs_data(self):
-        """
-        Python script to rotate the data for vertical configuration
-        Only for SIXS data in the vertical MED configuration
-        """
+        """Python script to rotate the data for vertical configuration Only for
+        SIXS data in the vertical MED configuration."""
         # Check if already rotated
         with h5py.File(self.Dataset.path_to_data, "a") as f:
             try:
@@ -6772,10 +6750,8 @@ class Interface():
             print("Data already rotated ...")
 
     def extract_metadata(self):
-        """
-        Needs Dataset to be corrected beforehand
-        Extract meaningful data and saves them in a csv file to allow comparison
-        """
+        """Needs Dataset to be corrected beforehand Extract meaningful data and
+        saves them in a csv file to allow comparison."""
         # Save rocking curve data
         np.savez(f"{self.Dataset.scan_folder}postprocessing/interpolated_rocking_curve.npz",
                  tilt_values=self.Dataset.tilt_values,
@@ -6854,7 +6830,7 @@ class Interface():
     # Below are handlers
 
     def init_handler(self, change):
-        """Handles changes on the widget used for the initialization"""
+        """Handles changes on the widget used for the initialization."""
         if not change.new:
             for w in self._list_widgets_init_dir.children[:7]:
                 w.disabled = False
@@ -6879,7 +6855,7 @@ class Interface():
                 change=self._list_widgets_preprocessing.children[44].value)
 
     def beamline_handler(self, change):
-        """Handles changes on the widget used for the beamline"""
+        """Handles changes on the widget used for the beamline."""
         try:
             if change.new in ["SIXS_2019", "ID01"]:
                 for w in self._list_widgets_preprocessing.children[2:7]:
@@ -6898,7 +6874,7 @@ class Interface():
                     w.disabled = False
 
     def bragg_peak_centering_handler(self, change):
-        """Handles changes related to the centering of the Bragg peak"""
+        """Handles changes related to the centering of the Bragg peak."""
         try:
             if change.new == "manual":
                 self._list_widgets_preprocessing.children[14].disabled = False
@@ -6914,7 +6890,7 @@ class Interface():
                 self._list_widgets_preprocessing.children[14].disabled = True
 
     def reload_data_handler(self, change):
-        """Handles changes related to data reloading"""
+        """Handles changes related to data reloading."""
         try:
             if change.new:
                 for w in self._list_widgets_preprocessing.children[26:28]:
@@ -6934,7 +6910,7 @@ class Interface():
                     w.disabled = True
 
     def interpolation_handler(self, change):
-        """Handles changes related to data interpolation"""
+        """Handles changes related to data interpolation."""
         try:
             if change.new:
                 for w in self._list_widgets_preprocessing.children[45:68]:
@@ -6953,7 +6929,7 @@ class Interface():
                     w.disabled = True
 
     def preprocess_handler(self, change):
-        """Handles changes on the widget used for the preprocessing"""
+        """Handles changes on the widget used for the preprocessing."""
         try:
             if not change.new:
                 self._list_widgets_init_dir.children[7].disabled = False
@@ -7017,7 +6993,7 @@ class Interface():
                     change=self._list_widgets_correct.children[2].value)
 
     def temp_handler(self, change):
-        """Handles changes related to the temperature estimation"""
+        """Handles changes related to the temperature estimation."""
         try:
             if change.new:
                 for w in self._list_widgets_correct.children[3:6]:
@@ -7036,7 +7012,7 @@ class Interface():
                     w.disabled = True
 
     def correct_angles_handler(self, change):
-        """Handles changes related to data correction"""
+        """Handles changes related to data correction."""
         try:
             if change.new:
                 for w in self._list_widgets_correct.children[:-2]:
@@ -7062,7 +7038,7 @@ class Interface():
                     change=self._list_widgets_correct.children[2].value)
 
     def folder_pynx_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        """Handles changes on the widget used to load a data file."""
         try:
             list_all_npz = sorted(glob.glob(change.new + "/*.npz"))
             list_probable_iobs_files = sorted(
@@ -7130,7 +7106,7 @@ class Interface():
                 ""] + sorted(glob.glob(change + "/*.npz"))  # obj list
 
     def pynx_psf_handler(self, change):
-        """Handles changes related to the psf"""
+        """Handles changes related to the psf."""
         try:
             if change.new:
                 for w in self._list_widgets_pynx.children[16:20]:
@@ -7153,7 +7129,7 @@ class Interface():
             change=self._list_widgets_pynx.children[16].value)
 
     def pynx_peak_shape_handler(self, change):
-        """Handles changes related to psf the peak shape"""
+        """Handles changes related to psf the peak shape."""
         try:
             if change.new != "pseudo-voigt":
                 self._list_widgets_pynx.children[18].disabled = True
@@ -7169,7 +7145,7 @@ class Interface():
                 self._list_widgets_pynx.children[18].disabled = False
 
     def run_pynx_handler(self, change):
-        """Handles changes related to the phase retrieval"""
+        """Handles changes related to the phase retrieval."""
         if change.new:
             for w in self._list_widgets_pynx.children[:-2]:
                 w.disabled = True
@@ -7183,7 +7159,7 @@ class Interface():
                 change=self._list_widgets_pynx.children[15].value)
 
     def folder_strain_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        """Handles changes on the widget used to load a data file."""
         try:
             self._list_widgets_strain.children[-3].options = [""] + sorted(glob.glob(change.new + "/*.h5")) + sorted(glob.glob(
                 change.new + "/*.cxi")) + sorted(glob.glob(change.new + "/*.npy") + glob.glob(change.new + "/*.npz"))
@@ -7192,7 +7168,7 @@ class Interface():
                 change + "/*.cxi")) + sorted(glob.glob(change + "/*.npy") + glob.glob(change + "/*.npz"))
 
     def folder_plot_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        """Handles changes on the widget used to load a data file."""
         try:
             self.tab_data.children[2].options = sorted(glob.glob(
                 change.new + "/*.npz") + glob.glob(change.new + "/*.cxi") + glob.glob(change.new + "/*.h5")) + [""]
@@ -7202,7 +7178,7 @@ class Interface():
                 change + "/*.npz") + glob.glob(change + "/*.cxi") + glob.glob(change + "/*.h5")) + [""]
 
     def folder_facet_handler(self, change):
-        """Handles changes on the widget used to load a data file"""
+        """Handles changes on the widget used to load a data file."""
         try:
             self.tab_facet.children[2].options = sorted(
                 glob.glob(change.new + "/*.vtk")) + [""]

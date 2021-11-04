@@ -32,11 +32,11 @@ warnings.filterwarnings("ignore")
 # Classes
 
 class Plotter():
-    """Class based on interactive functions for plotting"""
+    """Class based on interactive functions for plotting."""
 
     def __init__(self, filename, plot=False, log=False):
-        """
-        Create basic class attributes and run get_data_array() function from filename
+        """Create basic class attributes and run get_data_array() function from
+        filename.
 
         :param filename: path to data, supported files extensions are .cxi, .npy or .npz
         :param plot: either '2D', '3D' or False
@@ -55,8 +55,7 @@ class Plotter():
         self.get_data_array(plot=self.plot)
 
     def get_data_array(self, plot=False):
-        """
-        Get numpy array from file
+        """Get numpy array from file.
 
         :param plot: either '2D', '3D' or False
         """
@@ -162,7 +161,7 @@ class Plotter():
                 print("Could not load data.")
 
     def plot_data(self, **kwargs):
-        """Run plot_data function with class arguments"""
+        """Run plot_data function with class arguments."""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -170,7 +169,7 @@ class Plotter():
                   figsize=self.figsize, fontsize=self.fontsize)
 
     def plot_3d_slices(self, **kwargs):
-        """Run plot_3d_slices function with class arguments"""
+        """Run plot_3d_slices function with class arguments."""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -179,12 +178,11 @@ class Plotter():
 
 
 class ThreeDViewer(widgets.Box):
-    """
-    Widget to display 3D objects from CDI optimisation,
-    loaded from a result CXI file or a mode file.
+    """Widget to display 3D objects from CDI optimisation, loaded from a result
+    CXI file or a mode file.
 
-    This is a quick & dirty implementation but should be useful.
-    Quickly adapted from @Vincent Favre Nicolin (ESRF)
+    This is a quick & dirty implementation but should be useful. Quickly
+    adapted from @Vincent Favre Nicolin (ESRF)
     """
 
     def __init__(self, input_file=None, html_width=None):
@@ -320,8 +318,8 @@ class ThreeDViewer(widgets.Box):
             print("Could not load data")
 
     def on_update_plot(self, v=None):
-        """
-        Update the plot according to parameters. The points are re-computed
+        """Update the plot according to parameters. The points are re-computed.
+
         :param k: ignored
         :return:
         """
@@ -546,8 +544,8 @@ class ThreeDViewer(widgets.Box):
         self.on_update_plot()
 
     def on_animate(self):
-        """
-        Trigger the animation (rotation around vertical axis)
+        """Trigger the animation (rotation around vertical axis)
+
         :param v:
         :return:
         """
@@ -559,7 +557,7 @@ class ThreeDViewer(widgets.Box):
             self.pcb_rotate.stop()
 
     def callback_rotate(self):
-        """Used for periodic rotation"""
+        """Used for periodic rotation."""
         # ipv.view() only supports a rotation against the starting azimuth and elevation
         # ipv.view(azimuth=ipv.view()[0]+1)
 
@@ -575,8 +573,7 @@ class ThreeDViewer(widgets.Box):
 # Methods
 
 def plot_data(data_array, figsize=(15, 15), fontsize=15):
-    """
-    Create figure based on the data dimensions
+    """Create figure based on the data dimensions.
 
     :param data_array: np.ndarray to plot
     :param figsize: default (15, 15)
@@ -717,8 +714,7 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
 
 
 def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
-    """
-    Plot 2d image from 2d array
+    """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
     :param fig: plt.figure to plot in, default is None and
@@ -834,8 +830,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
 
 
 def plot_3d_slices(data_array, figsize=None, log=False):
-    """
-    Create figure for 3d data
+    """Create figure for 3d data.
 
     :param data_array: np.ndarray to plotn must be 3d
     :param figsize: default (15, 15)

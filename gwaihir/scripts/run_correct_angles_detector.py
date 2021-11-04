@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-"""Part of script to allow systematic use
-defining scan, root_folder, save_dir, comment, sample_name and template_imagefile
+"""Part of script to allow systematic use defining scan, root_folder, save_dir,
+comment, sample_name and template_imagefile.
 
-Remenber that you may have to change the mask, the central pixel, the rocking angle, the angles...
-
+Remenber that you may have to change the mask, the central pixel, the
+rocking angle, the angles...
 """
 
 from gwaihir.runner import correct_angles

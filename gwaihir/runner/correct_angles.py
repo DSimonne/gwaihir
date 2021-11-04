@@ -63,9 +63,8 @@ def correct_angles_detector(
     energy,
     GUI,
 ):
-    """
-    Calculate exact inplane and out-of-plane detector angles from the direct beam and Bragg peak positions,
-    based on the beamline geometry.
+    """Calculate exact inplane and out-of-plane detector angles from the direct
+    beam and Bragg peak positions, based on the beamline geometry.
 
     Supported beamlines: ESRF ID01, PETRAIII P10, SOLEIL SIXS, SOLEIL CRISTAL.
 

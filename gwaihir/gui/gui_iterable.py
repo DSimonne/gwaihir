@@ -3,10 +3,8 @@
 
 # In[ ]:
 
-"""
-Regroups all the possible classes that can be used used as iterable in the Interface class
-For now only Dataset
-"""
+"""Regroups all the possible classes that can be used used as iterable in the
+Interface class For now only Dataset."""
 
 try:
     import numpy as np
@@ -35,7 +33,8 @@ class Dataset():
     """THE DATASETS CLASS IS MEANT TO BE READ VIA THE gwaihir.gui CLASS !!"""
 
     def __init__(self, scan, sample_name, data_dir, root_folder):
-        """Initialiaze the Dataset class, some metadata can be associated as well"""
+        """Initialiaze the Dataset class, some metadata can be associated as
+        well."""
         self.scan = scan
         self.sample_name = sample_name
         self.data_dir = data_dir
@@ -51,12 +50,9 @@ class Dataset():
         return repr(self)
 
     def to_cxi(self, cxi_filename, reconstruction_filename=False):
-        """
-        Save all the parameters used in the data analysis with a specific architecture
-        Alias for hdf5 file,
-        Can be reloaded with the load_cxi() function
-        Always overwrites for now
-        """
+        """Save all the parameters used in the data analysis with a specific
+        architecture Alias for hdf5 file, Can be reloaded with the load_cxi()
+        function Always overwrites for now."""
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
         # if not os.path.exists(f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"):
         shutil.copy(cxi_filename,
