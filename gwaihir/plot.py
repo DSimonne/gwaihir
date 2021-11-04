@@ -39,7 +39,7 @@ class Plotter():
     def __init__(self, filename, plot=False, log=False):
         """
         Create basic class attributes and run get_data_array() function from filename
-        
+
         :param filename: path to data, supported files extensions are .cxi, .npy or .npz
         :param plot: either '2D', '3D' or False
         :param log: True to have a logarithmic scale
@@ -120,7 +120,7 @@ class Plotter():
                     f"\tShape: {self.data_array.shape}\n"
                     "#########################################################"
                     "########################################################")
-                
+
         # Need to select data array interactively
         elif self.filename.endswith(".npz"):
             # Open npz file and allow the user to pick an array
@@ -150,13 +150,13 @@ class Plotter():
 
                     else:
                         print(
-                        "#########################################################"
-                        "########################################################\n"
-                        f"Loaded data array from {self.filename}\n"
-                        f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
-                        f"\tShape: {self.data_array.shape}\n"
-                        "#########################################################"
-                        "########################################################")
+                            "#########################################################"
+                            "########################################################\n"
+                            f"Loaded data array from {self.filename}\n"
+                            f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
+                            f"\tShape: {self.data_array.shape}\n"
+                            "#########################################################"
+                            "########################################################")
 
             except Exception as E:
                 raise E
@@ -523,11 +523,11 @@ class ThreeDViewer(widgets.Box):
         ph = self.d / a
         gaz, gay, gax = np.gradient(a)
         self.rgi_gx = RegularGridInterpolator((z, y, x), ((gx - gax * ph) / (ph * a)).real,
-            method='linear', bounds_error=False, fill_value=0)
+                                              method='linear', bounds_error=False, fill_value=0)
         self.rgi_gy = RegularGridInterpolator((z, y, x), ((gy - gay * ph) / (ph * a)).real,
-            method='linear', bounds_error=False, fill_value=0)
+                                              method='linear', bounds_error=False, fill_value=0)
         self.rgi_gz = RegularGridInterpolator((z, y, x), ((gz - gaz * ph) / (ph * a)).real,
-            method='linear', bounds_error=False, fill_value=0)
+                                              method='linear', bounds_error=False, fill_value=0)
 
         # Fix extent
         ipv.pylab.xlim(0, max(self.d.shape))
@@ -739,7 +739,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             # extent=(0, 2, 0, 2),
             # vmin=dmin,
             # vmax=dmax,
-            )
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(ax).append_axes(
@@ -760,7 +760,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             # extent=(0, 2, 0, 2),
             # vmin=dmin,
             # vmax=dmax,
-            )
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(ax).append_axes(
