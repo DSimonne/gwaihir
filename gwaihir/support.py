@@ -87,8 +87,9 @@ class SupportTools():
             conv_support = np.where(gaussian_filter(
                 bigdata, sigma) > threshold, 1, 0)
 
-            np.savez(self.saving_directory +
-                f"filter_sig{sigma}_t{threshold}", oldsupport=old_support, support=conv_support)
+            np.savez(
+                f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
+                oldsupport=old_support, support=conv_support)
 
             print(
                 f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")

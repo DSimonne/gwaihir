@@ -2454,7 +2454,7 @@ class Interface():
         # Display the final window
         display(self.window)
 
-    ######################################## Widgets interactive functions ########################################
+    # Widgets interactive functions
 
     def initialize_directories(
         self,
@@ -2734,7 +2734,7 @@ class Interface():
         elif not run_dir_init:
             clear_output(True)
 
-    ################################################ Preprocessing ################################################
+    # Preprocessing
 
     def initialize_preprocessing(
         self,
@@ -3464,7 +3464,7 @@ class Interface():
         if not angles_bool:
             clear_output(True)
 
-    ############################################### Phase retrieval ###############################################
+    # Phase retrieval
 
     def initialize_cdi_operator(self, save_as_cxi=True):
         """
@@ -4494,7 +4494,7 @@ class Interface():
             process_parameters=self.params,
         )
 
-    ############################################### Postprocessing ################################################
+    # Postprocessing
 
     def initialize_postprocessing(
         self,
@@ -5915,13 +5915,12 @@ class Interface():
 
                 `PSF` or `EstimatePSF`: calculate partial coherence point-spread function 
                                     with 50 cycles of Richardson-Lucy
-                                    
+
                 `Sup` or `SupportUpdate`: update the support according to the support_* parameters
 
                 `ShowCDI`: display of the object and calculated/observed intensity. This can be used
                          to trigger this plot at specific steps, instead of regularly using 
                          live_plot=N. This is thus best used using live_plot=0
-                         
 
                 Examples of algorithm strings, where steps are separated with commas (and NO SPACE!),
                 and are applied from right to left. Operations in a given step will be applied
@@ -6524,7 +6523,8 @@ class Interface():
                 w.disabled = False
             clear_output(True)
 
-    ###################################### Non-Widgets interactive functions ######################################
+    # Non-Widgets interactive functions
+
     def rotate_sixs_data(self):
         """
         Python script to rotate the data for vertical configuration

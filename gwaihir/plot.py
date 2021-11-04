@@ -29,7 +29,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-############################################################### Classes ##############################################################
+# Classes
 
 class Plotter():
     """Class based on interactive functions for plotting"""
@@ -566,8 +566,7 @@ class ThreeDViewer(widgets.Box):
         self.fig.camera.position = tuple(r.apply(self.fig.camera.position))
 
 
-############################################################### methods ##############################################################
-
+# Methods
 
 def plot_data(data_array, figsize=(15, 15), fontsize=15):
     """
