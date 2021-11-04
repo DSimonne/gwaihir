@@ -2,7 +2,6 @@ try:
     from pynx.utils.plot_utils import complex2rgbalin
 except ModuleNotFoundError:
     pass
-from IPython.core.display import display, HTML
 from tornado.ioloop import PeriodicCallback
 from skimage.measure import marching_cubes
 from scipy.spatial.transform import Rotation
@@ -22,6 +21,7 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
 from IPython.display import Markdown, Latex, clear_output
+from IPython.core.display import display, HTML
 # import ipyfilechooser
 import ipyvolume as ipv
 
@@ -32,9 +32,7 @@ warnings.filterwarnings("ignore")
 ############################################################### Classes ##############################################################
 
 class Plotter():
-    """
-    Class based on interactive functions for plotting
-    """
+    """Class based on interactive functions for plotting"""
 
     def __init__(self, filename, plot=False, log=False):
         """
@@ -119,7 +117,8 @@ class Plotter():
                     f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
                     f"\tShape: {self.data_array.shape}\n"
                     "#########################################################"
-                    "########################################################")
+                    "########################################################"
+                    )
                 
         # Need to select data array interactively
         elif self.filename.endswith(".npz"):
@@ -150,19 +149,20 @@ class Plotter():
 
                     else:
                         print(
-                        "#########################################################"
-                        "########################################################\n"
-                        f"Loaded data array from {self.filename}\n"
-                        f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
-                        f"\tShape: {self.data_array.shape}\n"
-                        "#########################################################"
-                        "########################################################")
+                            "#########################################################"
+                            "########################################################\n"
+                            f"Loaded data array from {self.filename}\n"
+                            f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
+                            f"\tShape: {self.data_array.shape}\n"
+                            "#########################################################"
+                            "########################################################"
+                        )
 
             except Exception as E:
                 raise E
 
     def plot_data(self, **kwargs):
-        #
+        """Run plot_data function with class arguments"""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -170,7 +170,7 @@ class Plotter():
                   figsize=self.figsize, fontsize=self.fontsize)
 
     def plot_3d_slices(self, **kwargs):
-        #
+        """Run plot_3d_slices function with class arguments"""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -374,7 +374,7 @@ class ThreeDViewer(widgets.Box):
             self.plane_text.value = ""
             c = 1
         try:
-            verts, faces, normals, _ = marching_cubes(
+            verts, faces, _, _ = marching_cubes(
                 abs(self.d) * c, level=self.threshold.value, step_size=1)
             vals = self.rgi(verts)
             if self.toggle_phase.value == "Phase":
@@ -522,11 +522,14 @@ class ThreeDViewer(widgets.Box):
         a = np.maximum(abs(self.d), 1e-6)
         ph = self.d / a
         gaz, gay, gax = np.gradient(a)
-        self.rgi_gx = RegularGridInterpolator((z, y, x), ((gx - gax * ph) / (ph * a)).real,
+        self.rgi_gx = RegularGridInterpolator(
+            (z, y, x), ((gx - gax * ph) / (ph * a)).real,
             method='linear', bounds_error=False, fill_value=0)
-        self.rgi_gy = RegularGridInterpolator((z, y, x), ((gy - gay * ph) / (ph * a)).real,
+        self.rgi_gy = RegularGridInterpolator(
+            (z, y, x), ((gy - gay * ph) / (ph * a)).real,
             method='linear', bounds_error=False, fill_value=0)
-        self.rgi_gz = RegularGridInterpolator((z, y, x), ((gz - gaz * ph) / (ph * a)).real,
+        self.rgi_gz = RegularGridInterpolator(
+            (z, y, x), ((gz - gaz * ph) / (ph * a)).real,
             method='linear', bounds_error=False, fill_value=0)
 
         # Fix extent
@@ -781,55 +784,52 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
         raise E
 
 
-def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
-    """
-    :param two_d_array: np.ndarray to plot, must be 2D
-    :param fig: plt.figure to plot in, default is None and 
-     will create a figure
-    :param ax: axes of figure, default is None and 
-     will create axes
-    :param log: True to have a logarithmic scale
-     False to have a linear scale
-    """
-    # Find max and min
-    dmax = two_d_array.max()
-    dmin = two_d_array.min()
+# def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
+#     """
+#     :param two_d_array: np.ndarray to plot, must be 2D
+#     :param fig: plt.figure to plot in, default is None and 
+#      will create a figure
+#     :param ax: axes of figure, default is None and 
+#      will create axes
+#     :param log: True to have a logarithmic scale
+#      False to have a linear scale
+#     """
+#     # Find max and min
+#     dmax = two_d_array.max()
+#     dmin = two_d_array.min()
 
-    scale = "logarithmic" if log else "linear"
+#     scale = "logarithmic" if log else "linear"
 
-    ticks = [dmin + n * (dmax-dmin)/10 for n in range(0, 11)] if scale == "linear" else [
-        pow(10, x) for x in range(0, len(str(dmax)))]
+#     ticks = [dmin + n * (dmax-dmin)/10 for n in range(0, 11)] if scale == "linear" else [
+#         pow(10, x) for x in range(0, len(str(dmax)))]
 
-    if not fig:
-        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+#     if not fig:
+#         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
-    try:
-        img = ax.contour(two_d_array,
-                         ticks,
-                         norm={"linear": None, "logarithmic": LogNorm()}[
-                             scale],
-                         cmap='YlGnBu_r',
-                         # cmap="cividis",
-                         # extent=(0, 2, 0, 2),
-                         # vmin=dmin,
-                         # vmax=dmax,
-                         )
+#     try:
+#         img = ax.contour(two_d_array,
+#                          ticks,
+#                          norm={"linear": None, "logarithmic": LogNorm()}[
+#                              scale],
+#                          cmap='YlGnBu_r',
+#                          # cmap="cividis",
+#                          # extent=(0, 2, 0, 2),
+#                          # vmin=dmin,
+#                          # vmax=dmax,
+#                          )
 
-        # Create axis for colorbar
-        cbar_ax = make_axes_locatable(ax).append_axes(
-            position='right', size='5%', pad=0.1)
+#         # Create axis for colorbar
+#         cbar_ax = make_axes_locatable(ax).append_axes(
+#             position='right', size='5%', pad=0.1)
 
-        # Create colorbar
-        # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
-    except TypeError:
-        plt.close()
-        if scale == "logarithmic":
-            print("Log scale can not handle this kind of data ...")
-        else:
-            pass
-    except:
-        plt.close()
-        pass
+#         # Create colorbar
+#         # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+#     except TypeError:
+#         plt.close()
+#         if scale == "logarithmic":
+#             print("Log scale can not handle this kind of data ...")
+#         else:
+#             pass
 
 
 def plot_3d_slices(data_array, figsize=None, log=False):
