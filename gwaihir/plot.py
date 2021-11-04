@@ -34,12 +34,16 @@ warnings.filterwarnings("ignore")
 class Plotter():
     """
     Class based on interactive functions for plotting
-    :param filename: path to data, supported files extensions are .cxi, .npy or .npz
     """
 
     def __init__(self, filename, plot=False, log=False):
         """
-        param plot: either '2D', '3D' or False
+        Create basic class attributes and run get_data_array() function from filename
+        
+        :param filename: path to data, supported files extensions are .cxi, .npy or .npz
+        :param plot: either '2D', '3D' or False
+        :param log: True to have a logarithmic scale
+         False to have a linear scale
         """
         # Path of file to be imported
         self.filename = filename
@@ -55,6 +59,8 @@ class Plotter():
     def get_data_array(self, plot=False):
         """
         Get numpy array from file
+
+        :param plot: either '2D', '3D' or False
         """
         # No need to select data array interactively
         if self.filename.endswith((".npy", ".h5", ".cxi")):
@@ -72,8 +78,10 @@ class Plotter():
 
                 except Exception as E:
                     print("""
-                        The file could not be loaded, verify that you are loading a file with an hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
-                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:], as it should be following csi conventions.
+                        The file could not be loaded, verify that you are loading a file 
+                        with an hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
+                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:], 
+                        as it should be following csi conventions.
                         """)
 
             elif self.filename.endswith(".h5"):
@@ -87,8 +95,10 @@ class Plotter():
 
                 except Exception as E:
                     print("""
-                        The file could not be loaded, verify that you are loading a file with an hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
-                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:], as it should be following csi conventions.
+                        The file could not be loaded, verify that you are loading a file with an 
+                        hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
+                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:], 
+                        as it should be following csi conventions.
                         """)
 
             # Plot data
@@ -103,14 +113,16 @@ class Plotter():
 
             else:
                 print(
-                    "#################################################################################################################")
+                    "###########################################################"
+                    "######################################################")
                 print(f"Loaded data array from {self.filename}")
                 print(
                     f"\tNb of dimensions: {np.ndim(self.data_array)}")
                 print(f"\tShape: {self.data_array.shape}")
                 print(
-                    "#################################################################################################################")
-
+                    "###########################################################"
+                    "######################################################")
+                
         # Need to select data array interactively
         elif self.filename.endswith(".npz"):
             # Open npz file and allow the user to pick an array
@@ -140,13 +152,15 @@ class Plotter():
 
                     else:
                         print(
-                            "#################################################################################################################")
-                        print(f"Loaded data array from {self.filename}")
+                        "###########################################################"
+                        "######################################################")
+                    print(f"Loaded data array from {self.filename}")
                         print(
                             f"\tNb of dimensions: {np.ndim(self.data_array)}")
                         print(f"\tShape: {self.data_array.shape}")
                         print(
-                            "#################################################################################################################")
+                        "###########################################################"
+                        "######################################################")
 
             except Exception as E:
                 raise E
@@ -170,8 +184,8 @@ class Plotter():
 
 class ThreeDViewer(widgets.Box):
     """
-    Widget to display 3D objects from CDI optimisation, loaded from a result CXI file
-    or a mode file.
+    Widget to display 3D objects from CDI optimisation, 
+    loaded from a result CXI file or a mode file.
 
     This is a quick & dirty implementation but should be useful.
     Quickly adapted from @Vincent Favre Nicolin (ESRF)
@@ -198,7 +212,6 @@ class ThreeDViewer(widgets.Box):
                                                   disabled=False, value='Phase',
                                                   button_style='')  # 'success', 'info', 'warning', 'danger' or ''
 
-        # self.toggle_phase = widgets.ToggleButton(value=True, description='Phase', tooltips='Color surface with phase')
         self.toggle_rotate = widgets.ToggleButton(
             value=False, description='Rotate', tooltips='Rotate')
         self.pcb_rotate = None
@@ -513,12 +526,12 @@ class ThreeDViewer(widgets.Box):
         a = np.maximum(abs(self.d), 1e-6)
         ph = self.d / a
         gaz, gay, gax = np.gradient(a)
-        self.rgi_gx = RegularGridInterpolator((z, y, x), ((gx - gax * ph) / (ph * a)).real, method='linear',
-                                              bounds_error=False, fill_value=0)
-        self.rgi_gy = RegularGridInterpolator((z, y, x), ((gy - gay * ph) / (ph * a)).real, method='linear',
-                                              bounds_error=False, fill_value=0)
-        self.rgi_gz = RegularGridInterpolator((z, y, x), ((gz - gaz * ph) / (ph * a)).real, method='linear',
-                                              bounds_error=False, fill_value=0)
+        self.rgi_gx = RegularGridInterpolator((z, y, x), ((gx - gax * ph) / (ph * a)).real,
+            method='linear', bounds_error=False, fill_value=0)
+        self.rgi_gy = RegularGridInterpolator((z, y, x), ((gy - gay * ph) / (ph * a)).real,
+            method='linear', bounds_error=False, fill_value=0)
+        self.rgi_gz = RegularGridInterpolator((z, y, x), ((gz - gaz * ph) / (ph * a)).real,
+            method='linear', bounds_error=False, fill_value=0)
 
         # Fix extent
         ipv.pylab.xlim(0, max(self.d.shape))
@@ -541,7 +554,7 @@ class ThreeDViewer(widgets.Box):
             self.pcb_rotate.stop()
 
     def callback_rotate(self):
-        """ Used for periodic rotation"""
+        """Used for periodic rotation"""
         # ipv.view() only supports a rotation against the starting azimuth and elevation
         # ipv.view(azimuth=ipv.view()[0]+1)
 
@@ -559,8 +572,13 @@ class ThreeDViewer(widgets.Box):
 
 def plot_data(data_array, figsize=(15, 15), fontsize=15):
     """
+    Create figure based on the data dimensions
+
+    :param data_array: np.ndarray to plot
+    :param figsize: default (15, 15)
+    :param fontsize: default 15
     """
-    # get dimensions
+    # Get dimensions
     data_dimensions = np.ndim(data_array)
 
     if data_dimensions == 1:
@@ -693,36 +711,18 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
 
                 #     plt.show()
 
-                # elif PlottingOptions == "3D" :
-                #     plt.close()
-
-                #     # Create figure and add axis
-                #     fig = plt.figure(figsize=(15,15))
-                #     ax = plt.subplot(111, projection='3d')
-
-                #     # Create meshgrid
-
-                #     X, Y = np.meshgrid(np.arange(0, dt.shape[0], 1), np.arange(0, dt.shape[1], 1))
-
-                #     plot = ax.plot_surface(X=X, Y=Y, Z=dt, cmap='YlGnBu_r', vmin=dmin, vmax=dmax)
-
-                #     # Adjust plot view
-                #     ax.view_init(elev=50, azim=225)
-                #     ax.dist=11
-
-                #     # Add colorbar
-                #     cbar = fig.colorbar(plot, ax=ax, shrink=0.6)
-
-                #     # Edit colorbar ticks and labels
-                #     ticks = [dmin + n * (dmax-dmin)/10 for n in range(0, 11)]
-                #     tickslabel = [f"{t}" for t in ticks]
-
-                #     cbar.set_ticks(ticks)
-                #     cbar.set_ticklabels(tickslabel)
-
 
 def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
     """
+    Plot 2d image from 2d array
+
+    :param two_d_array: np.ndarray to plot, must be 2D
+    :param fig: plt.figure to plot in, default is None and 
+     will create a figure
+    :param ax: axes of figure, default is None and 
+     will create axes
+    :param log: True to have a logarithmic scale
+     False to have a linear scale
     """
     # Find max and min
     # dmax = two_d_array.max()
@@ -734,15 +734,16 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
     scale = "logarithmic" if log else "linear"
 
     try:
-        img = ax.imshow(two_d_array,
-                        norm={"linear": None, "logarithmic": LogNorm()}[
-                            scale],
-                        cmap='YlGnBu_r',
-                        # cmap="cividis",
-                        # extent=(0, 2, 0, 2),
-                        # vmin=dmin,
-                        # vmax=dmax,
-                        )
+        img = ax.imshow(
+            two_d_array,
+            norm={"linear": None, "logarithmic": LogNorm()}[
+                scale],
+            cmap='YlGnBu_r',
+            # cmap="cividis",
+            # extent=(0, 2, 0, 2),
+            # vmin=dmin,
+            # vmax=dmax,
+            )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(ax).append_axes(
@@ -754,15 +755,16 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
         # plt.close()
         print("Using complex data, automatically switching to array module")
 
-        img = ax.imshow(np.abs(two_d_array),
-                        norm={"linear": None, "logarithmic": LogNorm()}[
-                            scale],
-                        cmap='YlGnBu_r',
-                        # cmap="cividis",
-                        # extent=(0, 2, 0, 2),
-                        # vmin=dmin,
-                        # vmax=dmax,
-                        )
+        img = ax.imshow(
+            np.abs(two_d_array),
+            norm={"linear": None, "logarithmic": LogNorm()}[
+                scale],
+            cmap='YlGnBu_r',
+            # cmap="cividis",
+            # extent=(0, 2, 0, 2),
+            # vmin=dmin,
+            # vmax=dmax,
+            )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(ax).append_axes(
@@ -785,6 +787,13 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
 
 def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
     """
+    :param two_d_array: np.ndarray to plot, must be 2D
+    :param fig: plt.figure to plot in, default is None and 
+     will create a figure
+    :param ax: axes of figure, default is None and 
+     will create axes
+    :param log: True to have a logarithmic scale
+     False to have a linear scale
     """
     # Find max and min
     dmax = two_d_array.max()
@@ -829,7 +838,11 @@ def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
 
 def plot_3d_slices(data_array, figsize=None, log=False):
     """
-    param log: boolean (True, False) or anything else which raises an interactive window
+    Create figure for 3d data
+
+    :param data_array: np.ndarray to plotn must be 3d
+    :param figsize: default (15, 15)
+    :param log: boolean (True, False) or anything else which raises an interactive window
     """
     if type(log) is bool:
         # Create figure

@@ -13,10 +13,17 @@ import gwaihir.plot as plot
 
 class SupportTools():
     """
-Class that regroups the methods used to create/extract/optimize support in BCDI
-"""
+    Class that regroups the methods used to create/extract/optimize support in BCDI
+    """
 
     def __init__(self, path_to_data=None, path_to_support=None, saving_directory=None):
+        """
+        Initialize the class with either a reconstructed object or
+        the support of the reconstructed object.
+
+        :param path_to_data: path to reconstructed object file
+        :param path_to_support: path to support of reconstructed object file
+        """
 
         self.path_to_data = path_to_data
         self.path_to_support = path_to_support
@@ -38,6 +45,8 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
     def extract_support(self, compute=True):
         """
         Extract support as a 3D array of 0 et 1 from a reconstruction
+
+        :param compute: True to run function
         """
         # Work on cxi files
         if compute:
@@ -65,7 +74,12 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
 
     def gaussian_convolution(self, sigma, threshold, compute=True):
         """
-        Apply a gaussian convolution to the support, to avoid having holes inside.
+        Apply a gaussian convolution to the support, to avoid having holes inside.*
+
+        :param sigma: parameter used in scipy.ndimage.gaussian_filter
+        :param threshold: threshold above which we define the support
+         between 1 and 0, 1 being the maximum intensity
+        :param compute: True to run function
         """
         if compute:
             try:
@@ -78,7 +92,7 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                 bigdata, sigma) > threshold, 1, 0)
 
             np.savez(self.saving_directory +
-                     f"filter_sig{sigma}_t{threshold}", oldsupport=old_support, support=conv_support)
+                f"filter_sig{sigma}_t{threshold}", oldsupport=old_support, support=conv_support)
 
             print(
                 f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")
@@ -90,7 +104,10 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
 
     def compute_support(self, threshold, compute=True):
         """
-        Create support from data, based on maximum value of electronic density module, a threshold is applied.
+        Create support from data, based on maximum value of electronic 
+        density module, a threshold is applied.
+
+        :param compute: True to run function
         """
         if compute:
             with tb.open_file(self.path_to_data, "r") as f:
@@ -103,7 +120,8 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                     electronic_density = f.root.entry_1.data_1.data[:][0]
 
                 print(
-                    f"Shape of real space complex electronic density array {np.shape(electronic_density)}")
+                    f"Shape of real space complex electronic density array {np.shape(electronic_density)}"
+                    )
 
                 # Find max value in image, we work with the module
                 amp = np.abs(electronic_density)
@@ -116,7 +134,8 @@ Class that regroups the methods used to create/extract/optimize support in BCDI
                 rocc = np.where(support == 1)
                 rnocc = np.where(support == 0)
                 print(
-                    f"Percentage of 3D array occupied by support:\n{np.shape(rocc)[1] / np.shape(rnocc)[1]}")
+                    f"Percentage of 3D array occupied by support:\n{np.shape(rocc)[1] / np.shape(rnocc)[1]}"
+                    )
 
                 # Save support
                 np.savez(self.saving_directory +
