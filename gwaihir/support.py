@@ -22,7 +22,6 @@ class SupportTools():
         :param path_to_data: path to reconstructed object file
         :param path_to_support: path to support of reconstructed object file
         """
-
         self.path_to_data = path_to_data
         self.path_to_support = path_to_support
 

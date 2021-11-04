@@ -2652,21 +2652,25 @@ class Interface():
                     """Create button to save Dataset object as .cxi file"""
                     clear_output(True)
                     display(buttons_init)
-                    print("\n#############################################################################################################\n")
+                    print("\n####################################################"
+                        "#########################################################\n"
+                        )
                     print("Saving data, takes some time ...")
 
                     try:
                         # Reciprocal space data
-                        print(
-                            "\n#############################################################################################################\n")
+                        print("\n####################################################"
+                            "#########################################################\n"
+                            )
                         print(
                             "Saving diffraction data and mask selected in the PyNX tab...")
                         self.initialize_cdi_operator()
 
                         # Real space data
                         try:
-                            print(
-                                "\n#############################################################################################################\n")
+                            print("\n####################################################"
+                            "#########################################################\n"
+                            )
                             print("\nSaving parameters used in the GUI...")
                             print(
                                 "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output ...")
@@ -2689,8 +2693,9 @@ class Interface():
 
                     # Facets analysis output
                     try:
-                        print(
-                            "\n#############################################################################################################\n")
+                        print("\n####################################################"
+                        "#########################################################\n"
+                        )
                         print("Saving Facets class data")
                         self.Facets.to_hdf5(
                             f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
@@ -2698,19 +2703,24 @@ class Interface():
                         print(
                             "Could not save facets' data, run the analysis in the `Facets` tab first...")
 
-                    print("\n#############################################################################################################\n")
+                    print("\n####################################################"
+                    "#########################################################\n"
+                    )
 
                 @button_reload_previous_data.on_click
                 def action_reload_previous_data(selfbutton):
                     """Create button to reload Dataset object from .cxi file"""
                     clear_output(True)
                     display(buttons_init)
-                    print("\n#############################################################################################################\n")
+                    print("\n####################################################"
+                    "#########################################################\n"
+                    )
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all functions
                     print("Not created yet")
-                    print("\n#############################################################################################################\n")
-
+                    print("\n####################################################"
+                    "#########################################################\n"
+                    )
         elif not run_dir_init:
             clear_output(True)
 
@@ -3360,7 +3370,7 @@ class Interface():
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing/corrections/"
+                save_dir = f"{root_folder}S{self.Dataset.scan}/postprocessing/corrections/"
 
                 # Create final directory is not yet existing
                 if not os.path.isdir(save_dir):
@@ -3972,8 +3982,9 @@ class Interface():
                 # Initialise the cdi operator
                 cdi = self.initialize_cdi_operator()
 
-                print("\n#############################################################################################################\n")
-
+                print("\n####################################################"
+                "#########################################################\n"
+                )
                 try:
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
@@ -4181,8 +4192,9 @@ class Interface():
                             print(
                                 "Threshold value probably too low, support too large too continue")
 
-                        print(
-                            "\n#############################################################################################################\n")
+                        print("\n####################################################"
+                        "#########################################################\n"
+                        )
 
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
@@ -6322,14 +6334,14 @@ class Interface():
                     logs = pd.read_csv(self.csv_file)
                     print(
                         "\n############################################################"
-                        "####################################################\n")
-                    print("For a more detailed analysis, please proceed as follows")
-                    print("import pandas as pd")
-                    print(f"df = pd.read_csv({self.csv_file})\n")
-                    print("You can then work on the `df` dataframe as you please.")
-                    print(
+                        "####################################################\n"
+                        "For a more detailed analysis, please proceed as follows\n"
+                        "import pandas as pd\n"
+                        f"df = pd.read_csv({self.csv_file})\n"
+                        "You can then work on the `df` dataframe as you please.\n"
                         "\n###########################################################"
-                        "#####################################################\n")
+                        "#####################################################\n"
+                        )
 
                 # field data from facet analysis
                 elif show_logs == "load_field_data":

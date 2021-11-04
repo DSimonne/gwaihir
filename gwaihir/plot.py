@@ -114,10 +114,10 @@ class Plotter():
             else:
                 print(
                     "#########################################################"
-                    "########################################################"
-                    f"Loaded data array from {self.filename}"
-                    f"\tNb of dimensions: {np.ndim(self.data_array)}"
-                    f"\tShape: {self.data_array.shape}"
+                    "########################################################\n"
+                    f"Loaded data array from {self.filename}\n"
+                    f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
+                    f"\tShape: {self.data_array.shape}\n"
                     "#########################################################"
                     "########################################################")
                 
@@ -150,15 +150,13 @@ class Plotter():
 
                     else:
                         print(
-                        "###########################################################"
-                        "######################################################")
-                    print(f"Loaded data array from {self.filename}")
-                        print(
-                            f"\tNb of dimensions: {np.ndim(self.data_array)}")
-                        print(f"\tShape: {self.data_array.shape}")
-                        print(
-                        "###########################################################"
-                        "######################################################")
+                        "#########################################################"
+                        "########################################################\n"
+                        f"Loaded data array from {self.filename}\n"
+                        f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
+                        f"\tShape: {self.data_array.shape}\n"
+                        "#########################################################"
+                        "########################################################")
 
             except Exception as E:
                 raise E
