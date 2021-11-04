@@ -39,7 +39,8 @@ from scipy.ndimage import gaussian_filter
 try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
-    from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport, InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
+    from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport,\
+    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
     from pynx.cdi.runner.id01 import params
     from pynx.cdi.widgets import CDIViewer
     from pynx.utils.math import smaller_primes
@@ -78,9 +79,12 @@ class Interface():
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0] + "/bin"
         print(
-            f"Using `{self.path_scripts}` as absolute path to scripts containing folder.\n"
-            "This should be correct if gwaihir was installed in an environment.\n"
-            "Otherwise change self.path_scripts attribute to the correct folder.\n")
+            f"Using `{self.path_scripts}` as absolute path to \
+            scripts containing folder.\n"
+            "This should be correct if gwaihir was installed in an \
+            environment.\n"
+            "Otherwise change self.path_scripts attribute to the correct \
+            folder.\n")
 
         # Initialize future attributes
         self.Dataset = None
@@ -104,7 +108,8 @@ class Interface():
                 "If wrong login, please change self.user_name attribute")
         except Exception as e:
             print(
-                "Could not get user name, please create self.user_name attribute for jobs")
+                "Could not get user name, please create self.user_name \
+                attribute for jobs")
             raise e
 
         # Widgets for initialization

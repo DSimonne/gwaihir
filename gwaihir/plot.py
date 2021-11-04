@@ -38,14 +38,15 @@ class Plotter():
         """Create basic class attributes and run get_data_array() function from
         filename.
 
-        :param filename: path to data, supported files extensions are .cxi, .npy or .npz
+        :param filename: path to data, supported files extensions are .cxi,
+         .npy or .npz
         :param plot: either '2D', '3D' or False
         :param log: True to have a logarithmic scale
          False to have a linear scale
         """
         # Path of file to be imported
         self.filename = filename
-        self.plot = plot
+        self.plot = None
         self.log = log
         self.figsize = (15, 15)
         self.fontsize = 15
@@ -59,6 +60,7 @@ class Plotter():
 
         :param plot: either '2D', '3D' or False
         """
+        self.plot = plot
         # No need to select data array interactively
         if self.filename.endswith((".npy", ".h5", ".cxi")):
             if self.filename.endswith(".npy"):
@@ -75,9 +77,10 @@ class Plotter():
 
                 except (KeyError, OSError):
                     print("""
-                        The file could not be loaded, verify that you are loading a file
-                        with an hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
-                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:],
+                        The file could not be loaded, verify that you are
+                        loading a file with an hdf5 architecture (.nxs, .cxi,
+                        .h5, ...) and that the file exists. Otherwise, verify
+                        that the data is saved in f.root.entry_1.data_1.data[:],
                         as it should be following csi conventions.
                         """)
 
@@ -92,9 +95,10 @@ class Plotter():
 
                 except (KeyError, OSError):
                     print("""
-                        The file could not be loaded, verify that you are loading a file with an
-                        hdf5 architecture (.nxs, .cxi, .h5, ...) and that the file exists.
-                        Otherwise, verify that the data is saved in f.root.entry_1.data_1.data[:],
+                        The file could not be loaded, verify that you are
+                        loading a file with an hdf5 architecture (.nxs, .cxi,
+                        .h5, ...) and that the file exists. Otherwise, verify
+                        that the data is saved in f.root.entry_1.data_1.data[:],
                         as it should be following csi conventions.
                         """)
 
@@ -148,13 +152,15 @@ class Plotter():
 
                     else:
                         print(
-                            "#########################################################"
-                            "########################################################\n"
+                            "###########################################\
+                            ############################################\
+                            ##########################\n"
                             f"Loaded data array from {self.filename}\n"
                             f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
                             f"\tShape: {self.data_array.shape}\n"
-                            "#########################################################"
-                            "########################################################"
+                            "############################################\
+                            #############################################\
+                            ########################"
                         )
 
             except ValueError:
@@ -189,23 +195,26 @@ class ThreeDViewer(widgets.Box):
         """
 
         :param input_file: the data filename or directly the 3D data array.
-        :param html_width: html width in %. If given, the width of the notebook will be
-            changed to that value (e.g. full width with 100)
+        :param html_width: html width in %. If given, the width of the
+         notebook will be changed to that value (e.g. full width with 100)
         """
         super(ThreeDViewer, self).__init__()
 
         if html_width is not None:
             display(
-                HTML("<style>.container { width:%d%% !important; }</style>" % int(html_width)))
+                HTML("<style>.container { width:%d%% !important; }\
+                    </style>" % int(html_width)
+                    )
+                )
 
         # focus_label = widgets.Label(value='Focal distance (cm):')
-        self.threshold = widgets.FloatSlider(value=5, min=0, max=20, step=0.02, description='Contour.',
-                                             disabled=False, continuous_update=False, orientation='horizontal',
-                                             readout=True, readout_format='.01f')
-        self.toggle_phase = widgets.ToggleButtons(options=['Abs', 'Phase'], description='',  # , 'Grad'
-                                                  disabled=False, value='Phase',
-                                                  button_style='')  # 'success', 'info', 'warning', 'danger' or ''
-
+        self.threshold = widgets.FloatSlider(
+            value=5, min=0, max=20, step=0.02, description='Contour.',
+            disabled=False, continuous_update=False, orientation='horizontal',
+            readout=True, readout_format='.01f')
+        self.toggle_phase = widgets.ToggleButtons(
+            options=['Abs', 'Phase'], description='',
+            disabled=False, value='Phase', button_style='')
         self.toggle_rotate = widgets.ToggleButton(
             value=False, description='Rotate', tooltips='Rotate')
         self.pcb_rotate = None
@@ -241,25 +250,27 @@ class ThreeDViewer(widgets.Box):
             value="", description="", tooltips='Plane equation')
         hbox_plane = widgets.HBox([self.toggle_plane, self.plane_text])
 
-        self.clipx = widgets.FloatSlider(value=1, min=-1, max=1, step=0.1, description='Plane Ux',
-                                         disabled=False, continuous_update=False, orientation='horizontal',
-                                         readout=True, readout_format='.01f')
-        self.clipy = widgets.FloatSlider(value=1, min=-1, max=1, step=0.1, description='Plane Uy',
-                                         disabled=False, continuous_update=False, orientation='horizontal',
-                                         readout=True, readout_format='.01f')
-        self.clipz = widgets.FloatSlider(value=1, min=-1, max=1, step=0.1, description='Plane Uz',
-                                         disabled=False, continuous_update=False, orientation='horizontal',
-                                         readout=True, readout_format='.01f')
-        self.clipdist = widgets.FloatRangeSlider(value=[0, 100], min=0, max=100, step=0.5, description='Planes dist',
-                                                 disabled=False, continuous_update=False, orientation='horizontal',
-                                                 readout=True, readout_format='.1f')
+        self.clipx = widgets.FloatSlider(
+            value=1, min=-1, max=1, step=0.1, description='Plane Ux',
+            disabled=False, continuous_update=False, orientation='horizontal',
+            eadout=True, readout_format='.01f')
+        self.clipy = widgets.FloatSlider(
+            value=1, min=-1, max=1, step=0.1, description='Plane Uy',
+            disabled=False, continuous_update=False, orientation='horizontal',
+            readout=True, readout_format='.01f')
+        self.clipz = widgets.FloatSlider(
+            value=1, min=-1, max=1, step=0.1, description='Plane Uz',
+            disabled=False, continuous_update=False, orientation='horizontal',
+            readout=True, readout_format='.01f')
+        self.clipdist = widgets.FloatRangeSlider(
+            value=[0, 100], min=0, max=100, step=0.5, description='Planes dist',
+            disabled=False, continuous_update=False, orientation='horizontal',
+            readout=True, readout_format='.1f')
 
         # self.toggle_mode = widgets.ToggleButtons(options=['Volume','X','Y','Z'])
-        self.progress = widgets.IntProgress(value=10, min=0, max=10,
-                                            description='Processing:',
-                                            bar_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                                            style={'bar_color': 'green'},
-                                            orientation='horizontal')
+        self.progress = widgets.IntProgress(
+            value=10, min=0, max=10,description='Processing:',
+            bar_style='',style={'bar_color': 'green'}, orientation='horizontal')
 
         # Set observers
         self.threshold.observe(self.on_update_plot)
@@ -289,7 +300,8 @@ class ThreeDViewer(widgets.Box):
                                   hbox1, hbox_toggle,
                                   self.colormap, self.colormap_range,
                                   hbox_plane,
-                                  self.clipx, self.clipy, self.clipz, self.clipdist,
+                                  self.clipx, self.clipy, self.clipz,
+                                  self.clipdist,
                                   self.progress,
                                   # self.fc
                                   ])
@@ -327,7 +339,8 @@ class ThreeDViewer(widgets.Box):
             return
         self.progress.value = 7
 
-        # See https://github.com/maartenbreddels/ipyvolume/issues/174 to support using normals
+        # See https://github.com/maartenbreddels/ipyvolume/issues/174
+        # to support using normals
 
         # Unobserve as we disable/enable buttons and that triggers events
         try:
@@ -369,7 +382,8 @@ class ThreeDViewer(widgets.Box):
             c = ((x * ux + y * uy + z * uz) / u > self.clipdist.value[0]) * (
                 ((x * ux + y * uy + z * uz) / u < self.clipdist.value[1]))
             self.plane_text.value = "%6.1f < (%4.2f*x %+4.2f*y %+4.2f*z) < %6.1f" % (
-                self.clipdist.value[0], ux / u, uy / u, uz / u, self.clipdist.value[1])
+                self.clipdist.value[0], ux / u, uy / u,
+                uz / u, self.clipdist.value[1])
         else:
             self.clipx.disabled = True
             self.clipy.disabled = True
@@ -389,8 +403,10 @@ class ThreeDViewer(widgets.Box):
                 self.colormap.disabled = False
                 cs = cm.ScalarMappable(
                     norm=Normalize(
-                        vmin=self.colormap_range.value[0], vmax=self.colormap_range.value[1]),
-                    cmap=ast.literal_eval('cm.%s' % (self.colormap.value.lower())))
+                        vmin=self.colormap_range.value[0],
+                        vmax=self.colormap_range.value[1]),
+                    cmap=ast.literal_eval(
+                        'cm.%s' % (self.colormap.value.lower())))
                 color = cs.to_rgba(abs(vals))[..., :3]
             else:
                 # TODO: Gradient
@@ -419,7 +435,8 @@ class ThreeDViewer(widgets.Box):
 
     def on_update_style(self, v):
         """
-        Update the plot style - for all parameters which do not involved recomputing
+        Update the plot style - for all parameters which
+        do not involved recomputing
         the displayed object.
         :param k: ignored
         :return:
@@ -431,7 +448,8 @@ class ThreeDViewer(widgets.Box):
                 ipv.pylab.style.set_style_light()
                 # Fix label colours (see self.fig.style)
                 ipv.pylab.style.use(
-                    {'axes': {'label': {'color': 'black'}, 'ticklabel': {'color': 'black'}}})
+                    {'axes': {'label': {'color': 'black'},
+                    'ticklabel': {'color': 'black'}}})
             if self.toggle_box.value:
                 ipv.pylab.style.box_on()
             else:
@@ -452,7 +470,8 @@ class ThreeDViewer(widgets.Box):
     # def change_file(self, file_name):
     #     """
     #     Function used to load data from a new file
-    #     :param file_name: the file where the object data is loaded, either a CXI or modes h5 file
+    #     :param file_name: the file where the object data is loaded,
+    #      either a CXI or modes h5 file
     #     :return:
     #     """
     #     self.progress.value = 3
@@ -471,7 +490,8 @@ class ThreeDViewer(widgets.Box):
     #             d = np.log10(np.maximum(0.1, abs(d)))
     #         self.set_data(d)
     #     except:
-    #         print("Failed to load file - is this a result CXI result or a modes file from a 3D CDI analysis ?")
+    #         print("Failed to load file - is this a \
+    #               result CXI result or a modes file from a 3D CDI analysis ?")
 
     def on_change_type(self, v):
         if v['name'] == 'value':
@@ -519,7 +539,8 @@ class ThreeDViewer(widgets.Box):
         z, y, x = np.arange(nz), np.arange(ny), np.arange(nx)
         # Interpolate probe to object grid
         self.rgi = RegularGridInterpolator(
-            (z, y, x), self.d, method='linear', bounds_error=False, fill_value=0)
+            (z, y, x), self.d, method='linear',
+            bounds_error=False, fill_value=0)
 
         # Also prepare the phase gradient
         gz, gy, gx = np.gradient(self.d)
@@ -558,7 +579,8 @@ class ThreeDViewer(widgets.Box):
 
     def callback_rotate(self):
         """Used for periodic rotation."""
-        # ipv.view() only supports a rotation against the starting azimuth and elevation
+        # ipv.view() only supports a rotation against
+        # the starting azimuth and elevation
         # ipv.view(azimuth=ipv.view()[0]+1)
 
         # Use a quaternion and the camera's 'up' as rotation axis
@@ -665,7 +687,7 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
                 #     value="2D",
                 #     description='Plotting options',
                 #     disabled=False,
-                #     button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+                #     button_style='',
                 #     tooltip=['Plot only contour or not', "", ""],
                 #     # icon='check'
                 # ),
@@ -746,11 +768,11 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
         )
 
         # Create axis for colorbar
-        cbar_ax = make_axes_locatable(ax).append_axes(
-            position='right', size='5%', pad=0.1)
+        # cbar_ax = make_axes_locatable(ax).append_axes(
+        #     position='right', size='5%', pad=0.1)
 
         # Create colorbar
-        cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+        # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
     except TypeError:
         # plt.close()
         print("Using complex data, automatically switching to array module")
@@ -766,12 +788,12 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             # vmax=dmax,
         )
 
-        # Create axis for colorbar
-        cbar_ax = make_axes_locatable(ax).append_axes(
-            position='right', size='5%', pad=0.1)
+        # # Create axis for colorbar
+        # cbar_ax = make_axes_locatable(ax).append_axes(
+        #     position='right', size='5%', pad=0.1)
 
         # Create colorbar
-        cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+        # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
 
     except ValueError:
         plt.close()
@@ -834,7 +856,8 @@ def plot_3d_slices(data_array, figsize=None, log=False):
 
     :param data_array: np.ndarray to plotn must be 3d
     :param figsize: default (15, 15)
-    :param log: boolean (True, False) or anything else which raises an interactive window
+    :param log: boolean (True, False) or anything else which
+     raises an interactive window
     """
     if type(log) is bool:
         # Create figure

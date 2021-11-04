@@ -13,14 +13,21 @@ import gwaihir.plot as plot
 
 class SupportTools():
     """Class that regroups the methods used to create/extract/optimize support
-    in BCDI."""
+    in BCDI.
+    """
 
-    def __init__(self, path_to_data=None, path_to_support=None, saving_directory=None):
+    def __init__(
+        self,
+        path_to_data=None,
+        path_to_support=None,
+        saving_directory=None
+    ):
         """Initialize the class with either a reconstructed object or the
         support of the reconstructed object.
 
         :param path_to_data: path to reconstructed object file
         :param path_to_support: path to support of reconstructed object file
+        :param saving_directory: where the figures will be saved
         """
         self.path_to_data = path_to_data
         self.path_to_support = path_to_support
@@ -33,8 +40,8 @@ class SupportTools():
                 try:
                     self.saving_directory = self.path_to_support.replace(
                         self.path_to_support.split("/")[-1], "")
-                except Exception as e:
-                    raise e
+                except AttributeError:
+                    raise AttributeError("Please provide a saving_directory.")
         else:
             self.saving_directory = saving_directory
         print("Saving directory:", self.saving_directory)
@@ -49,14 +56,16 @@ class SupportTools():
             if self.path_to_data.endswith(".cxi"):
                 with tb.open_file(self.path_to_data, "r") as f:
 
-                    # Since .cxi files follow a specific architectture, we know where the mask is.
+                    # Since .cxi files follow a specific architectture,
+                    # we know where the mask is.
                     support = f.root.entry_1.image_1.mask[:]
 
                     # Save support
                     np.savez(self.saving_directory +
                              "extracted_support.npz", support=support)
                     print(
-                        f"Saved support in {self.saving_directory} as extracted_support.npz")
+                        f"Saved support in {self.saving_directory} as \
+                        extracted_support.npz")
                     plot.plot_3d_slices(support, log=False)
 
             # elif self.self.path_to_data.endswith(".npz"):
@@ -70,7 +79,7 @@ class SupportTools():
 
     def gaussian_convolution(self, sigma, threshold, compute=True):
         """Apply a gaussian convolution to the support, to avoid having holes
-        inside.*
+        inside.
 
         :param sigma: parameter used in scipy.ndimage.gaussian_filter
         :param threshold: threshold above which we define the support
@@ -84,7 +93,8 @@ class SupportTools():
                 try:
                     old_support = np.load(self.path_to_support)["data"]
                 except KeyError:
-                    Print("Could not load 'data' or 'support' array from file.")
+                    print("Could not load 'data' or 'support' array from \
+                        file.")
 
             bigdata = 100 * old_support
             conv_support = np.where(gaussian_filter(
@@ -95,7 +105,8 @@ class SupportTools():
                 oldsupport=old_support, support=conv_support)
 
             print(
-                f"Support saved in {self.saving_directory} as \nfilter_sig{sigma}_t{threshold}")
+                f"Support saved in {self.saving_directory} as \
+                \nfilter_sig{sigma}_t{threshold}")
             plot.plot_3d_slices(conv_support, log=False)
 
         else:
@@ -110,7 +121,8 @@ class SupportTools():
         """
         if compute:
             with tb.open_file(self.path_to_data, "r") as f:
-                # Since .cxi files follow a specific architecture, we know where our data is
+                # Since .cxi files follow a specific architecture,
+                # we know where our data is
                 if self.path_to_data.endswith(".cxi"):
                     electronic_density = f.root.entry_1.data_1.data[:]
 
@@ -119,7 +131,8 @@ class SupportTools():
                     electronic_density = f.root.entry_1.data_1.data[:][0]
 
                 print(
-                    f"Shape of real space complex electronic density array {np.shape(electronic_density)}"
+                    f"Shape of real space complex electronic density array \
+                    {np.shape(electronic_density)}"
                 )
 
                 # Find max value in image, we work with the module
@@ -133,14 +146,16 @@ class SupportTools():
                 rocc = np.where(support == 1)
                 rnocc = np.where(support == 0)
                 print(
-                    f"Percentage of 3D array occupied by support:\n{np.shape(rocc)[1] / np.shape(rnocc)[1]}"
+                    f"Percentage of 3D array occupied by support:\n\
+                    {np.shape(rocc)[1] / np.shape(rnocc)[1]}"
                 )
 
                 # Save support
                 np.savez(self.saving_directory +
                          "computed_support.npz", support=support)
                 print(
-                    f"Saved support in {self.saving_directory} as computed_support.npz")
+                    f"Saved support in {self.saving_directory} as \
+                    computed_support.npz")
                 plot.plot_3d_slices(support, log=False)
 
         else:

@@ -68,9 +68,11 @@ def correct_angles_detector(
 
     Supported beamlines: ESRF ID01, PETRAIII P10, SOLEIL SIXS, SOLEIL CRISTAL.
 
-    For Pt samples it gives also an estimation of the temperature based on the thermal expansion.
+    For Pt samples it gives also an estimation of the temperature based on the
+    thermal expansion.
 
-    Input: direct beam and Bragg peak position, sample to detector distance, energy
+    Input: direct beam and Bragg peak position, sample to detector distance,
+    energy
     Output: corrected inplane, out-of-plane detector angles for the Bragg peak.
     """
 
@@ -166,7 +168,8 @@ def correct_angles_detector(
         nb_thresholded = (data > high_threshold).sum()
         data[data > high_threshold] = 0
         print(
-            f"Applying photon threshold, {nb_thresholded} high intensity pixels masked")
+            f"Applying photon threshold, {nb_thresholded} high intensity pixels\
+            masked")
 
     ###############################
     # load releavant motor values #
@@ -177,7 +180,8 @@ def correct_angles_detector(
         setup.inplane_angle,
         setup.outofplane_angle,
     ) = setup.diffractometer.goniometer_values(
-        logfile=logfile, scan_number=scan, setup=setup, frames_logical=frames_logical
+        logfile=logfile, scan_number=scan, setup=setup,
+        frames_logical=frames_logical
     )
     setup.tilt_angle = (tilt_values[1:] - tilt_values[0:-1]).mean()
 
@@ -270,7 +274,8 @@ def correct_angles_detector(
         f"del={direct_outofplane}) (X, Y): {directbeam_x}, {directbeam_y}"
     )
     print(
-        f"Direct beam at (gam=0, del=0) (X, Y): ({x_direct_0:.2f}, {y_direct_0:.2f})")
+        f"Direct beam at (gam=0, del=0) (X, Y): ({x_direct_0:.2f}, \
+        {y_direct_0:.2f})")
     print(
         f"\nBragg peak at (gam={setup.inplane_angle}, "
         f"del={setup.outofplane_angle}) (X, Y): ({bragg_x:.2f}, {bragg_y:.2f})"
@@ -290,7 +295,8 @@ def correct_angles_detector(
     )  # outofplane_coeff is +1 or -1
 
     print(
-        f"\nBragg angles before correction (gam, del): ({setup.inplane_angle:.4f}, "
+        f"\nBragg angles before correction (gam, del): \
+        ({setup.inplane_angle:.4f}, "
         f"{setup.outofplane_angle:.4f})"
     )
     print(

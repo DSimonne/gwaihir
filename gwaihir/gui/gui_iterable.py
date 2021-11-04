@@ -26,7 +26,8 @@ try:
 
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
-        """The following packages must be installed: numpy, pandas ipywidgets, iPython, thorondor and pytables.""")
+        """The following packages must be installed: numpy, pandas ipywidgets, \
+        iPython, thorondor and pytables.""")
 
 
 class Dataset():
@@ -54,7 +55,6 @@ class Dataset():
         architecture Alias for hdf5 file, Can be reloaded with the load_cxi()
         function Always overwrites for now."""
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
-        # if not os.path.exists(f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"):
         shutil.copy(cxi_filename,
                     final_data_path,
                     )
@@ -62,7 +62,8 @@ class Dataset():
         if reconstruction_filename:
             print("\nSaving phase retrieval output ...")
             try:
-                with h5py.File(reconstruction_filename, "r") as reconstruction_file, h5py.File(final_data_path, "a") as final_file:
+                with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
+                    h5py.File(final_data_path, "a") as final_file:
                     # Real space data is already here
 
                     # Reciprocal space data
@@ -70,13 +71,16 @@ class Dataset():
                     # Copy image_1 from reconstruction to entry_1.image_2
                     try:
                         reconstruction_file.copy(
-                            '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+                            '/entry_1/image_1/', final_file["entry_1"],
+                            name="image_2")
                     except RuntimeError:
                         del final_file["entry_1"]["image_2"]
                         reconstruction_file.copy(
-                            '/entry_1/image_1/', final_file["entry_1"], name="image_2")
+                            '/entry_1/image_1/', final_file["entry_1"],
+                            name="image_2")
 
-                    # Update params if reconstruction file results from mode decomposition
+                    # Update params if reconstruction file results
+                    # from mode decomposition
                     if reconstruction_filename.endswith(".h5"):
                         final_file["entry_1"]["image_2"].create_dataset(
                             "data_space", data="real")
@@ -89,7 +93,8 @@ class Dataset():
                         final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
                             "/entry_1/image_2/mask")
 
-                    # Create entry_1.data_2 and create softlink to entry_1.image_2.data
+                    # Create entry_1.data_2 and create softlink to
+                    #  entry_1.image_2.data
                     try:
                         group = final_file["entry_1"].create_group(
                             "data_2")
@@ -104,14 +109,17 @@ class Dataset():
                     final_file["entry_1"]["data_2"].attrs['NX_class'] = 'NXdata'
                     final_file["entry_1"]["data_2"].attrs['signal'] = 'data'
 
-                    # Rename entry_1.image_2.process_1 to entry_1.image_2.process_2
+                    # Rename entry_1.image_2.process_1 to
+                    # entry_1.image_2.process_2
                     try:
                         final_file["entry_1"]["image_2"]["process_1"].move(
-                            "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
+                            "/entry_1/image_2/process_1/",
+                            "/entry_1/image_2/process_2/")
                     except ValueError:
                         del final_file["entry_1"]["image_2"]["process_2"]
                         final_file["entry_1"]["image_2"]["process_1"].move(
-                            "/entry_1/image_2/process_1/", "/entry_1/image_2/process_2/")
+                            "/entry_1/image_2/process_1/",
+                            "/entry_1/image_2/process_2/")
                     # Assign correct type to entry_1.image_2.process_2
                     final_file["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
 
@@ -144,11 +152,15 @@ class Dataset():
                     if reconstruction_filename.endswith(".h5"):
                         try:
                             reconstruction_file.copy(
-                                '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
+                                '/entry_1/data_2/',
+                                final_file["entry_1"]["image_2"],
+                                 name="modes_percentage")
                         except RuntimeError:
                             del final_file["entry_1"]["image_2"]["modes_percentage"]
                             reconstruction_file.copy(
-                                '/entry_1/data_2/', final_file["entry_1"]["image_2"], name="modes_percentage")
+                                '/entry_1/data_2/',
+                                final_file["entry_1"]["image_2"],
+                                 name="modes_percentage")
 
             except OSError:
                 # No reconstruction file yet
@@ -183,7 +195,8 @@ class Dataset():
 
             # Preprocessing
             preprocessing = parameters.create_group("preprocessing")
-            print("\n#############################################################################################################\n")
+            print("\n###################################################\
+                ##########################################################\n")
             print("Saving parameters used in preprocessing ...")
 
             # Masking
@@ -360,7 +373,8 @@ class Dataset():
                 print("Could not save angles_corrections parameters")
 
             # Orthogonalisation
-            print("\n#############################################################################################################\n")
+            print("\n##########################################################\
+                ###################################################\n")
             print("Saving orthogonalisation parameters ...")
             orthogonalisation = parameters.create_group("orthogonalisation")
 
@@ -387,7 +401,8 @@ class Dataset():
                 linearized_transformation_matrix.create_dataset(
                     "custom_motors", data=str(self.custom_motors))
             except AttributeError:
-                print("Could not save linearized transformation matrix parameters")
+                print("Could not save linearized transformation matrix \
+                    parameters")
 
             # xrayutilities
             xrayutilities = orthogonalisation.create_group("xrayutilities")
@@ -429,7 +444,8 @@ class Dataset():
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
-            print("\n#############################################################################################################\n")
+            print("\n##########################################################\
+                ###################################################\n")
             print("Saving parameters used in postprocessing ...")
 
             # Averaging reconstructions
@@ -484,7 +500,8 @@ class Dataset():
                 displacement_strain_calculation.create_dataset(
                     "centering_method", data=self.centering_method)
             except AttributeError:
-                print("Could not save displacement & strain calculation parameters")
+                print("Could not save displacement & strain calculation\
+                 parameters")
 
             # Refraction
             refraction = postprocessing.create_group("refraction")
@@ -496,7 +513,8 @@ class Dataset():
                 refraction.create_dataset("dispersion", data=self.dispersion)
                 refraction.create_dataset("absorption", data=self.absorption)
                 refraction.create_dataset(
-                    "threshold_unwrap_refraction", data=self.threshold_unwrap_refraction)
+                    "threshold_unwrap_refraction",
+                    data=self.threshold_unwrap_refraction)
             except AttributeError:
                 print("Could not save refraction parameters")
 
@@ -555,7 +573,8 @@ class Dataset():
                 averaging_reconstructed_objects.create_dataset(
                     "avg_threshold", data=self.avg_threshold)
             except AttributeError:
-                print("Could not save averaging reconstructed objects parameters")
+                print("Could not save averaging reconstructed objects\
+                 parameters")
 
             # Phase averaging apodization
             phase_averaging_apodization = postprocessing.create_group(
