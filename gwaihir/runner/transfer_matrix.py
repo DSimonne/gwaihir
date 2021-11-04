@@ -17,6 +17,7 @@ import numpy as np
 from numbers import Real, Integral
 from collections.abc import Sequence
 
+
 def compute_transformation_matrix(
     scan,
     original_size,

@@ -4,7 +4,8 @@
 # In[ ]:
 
 """Regroups all the possible classes that can be used used as iterable in the
-Interface class For now only Dataset."""
+Interface class For now only Dataset.
+"""
 
 try:
     import numpy as np
@@ -35,7 +36,8 @@ class Dataset():
 
     def __init__(self, scan, sample_name, data_dir, root_folder):
         """Initialiaze the Dataset class, some metadata can be associated as
-        well."""
+        well.
+        """
         self.scan = scan
         self.sample_name = sample_name
         self.data_dir = data_dir
@@ -53,7 +55,8 @@ class Dataset():
     def to_cxi(self, cxi_filename, reconstruction_filename=False):
         """Save all the parameters used in the data analysis with a specific
         architecture Alias for hdf5 file, Can be reloaded with the load_cxi()
-        function Always overwrites for now."""
+        function Always overwrites for now.
+        """
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
         shutil.copy(cxi_filename,
                     final_data_path,
@@ -63,7 +66,7 @@ class Dataset():
             print("\nSaving phase retrieval output ...")
             try:
                 with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
-                    h5py.File(final_data_path, "a") as final_file:
+                        h5py.File(final_data_path, "a") as final_file:
                     # Real space data is already here
 
                     # Reciprocal space data
@@ -154,13 +157,13 @@ class Dataset():
                             reconstruction_file.copy(
                                 '/entry_1/data_2/',
                                 final_file["entry_1"]["image_2"],
-                                 name="modes_percentage")
+                                name="modes_percentage")
                         except RuntimeError:
                             del final_file["entry_1"]["image_2"]["modes_percentage"]
                             reconstruction_file.copy(
                                 '/entry_1/data_2/',
                                 final_file["entry_1"]["image_2"],
-                                 name="modes_percentage")
+                                name="modes_percentage")
 
             except OSError:
                 # No reconstruction file yet
