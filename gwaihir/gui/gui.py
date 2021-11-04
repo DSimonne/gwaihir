@@ -99,11 +99,11 @@ class Interface():
         try:
             self.user_name = getpass.getuser()
 
-            print(f"Login used for slurm: {self.user_name}\n"
+            print(f"Login used for batch jobs: {self.user_name}\n"
                 "If wrong login, please change self.user_name attribute")
         except:
             print(
-                "Could not get user name, please create self.user_name attribute for slurm batch jobs")
+                "Could not get user name, please create self.user_name attribute for jobs")
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(self.initialize_directories,
