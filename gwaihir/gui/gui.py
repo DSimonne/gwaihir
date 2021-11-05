@@ -20,7 +20,6 @@ import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
 from IPython.display import display, Markdown, Latex, clear_output
 
-
 # gwaihir package
 import gwaihir
 from gwaihir import plot, support
@@ -79,8 +78,8 @@ class Interface():
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0] + "/bin"
         print(
-            f"Using `{self.path_scripts}` as absolute path to \
-            scripts containing folder.\n"
+            f"Using `{self.path_scripts}` as absolute path to scripts \
+            containing folder.\n"
             "This should be correct if gwaihir was installed in an \
             environment.\n"
             "Otherwise change self.path_scripts attribute to the correct \
@@ -95,6 +94,7 @@ class Interface():
         self.params = None
         self.Facets = None
         self.csv_file = None
+        self.scan_name = None
 
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
@@ -2436,14 +2436,15 @@ class Interface():
             self.display_readme,
             contents=widgets.ToggleButtons(
                 options=[
+                    False,
                     'Preprocessing', 'Phase retrieval',
                     'Postprocessing', "Facet analysis"],
-                value='Phase retrieval',
+                value=False,
                 description='Show info about:',
                 disabled=False,
                 tooltips=[
-                    'Nothing is shown', 'Insight in the functions used \
-                    for preprocessing',
+                    'Nothing is shown',
+                    'Insight in the functions used for preprocessing',
                     'Insight in the functions used for phase retrieval',
                     'Insight in the functions used for postprocessing'
                     'Insight in the functions used for facet analysis'
@@ -2550,20 +2551,30 @@ class Interface():
             self.Dataset.comment = comment
             self.Dataset.debug = debug
             self.Dataset.root_folder = root_folder
+            self.scan_name = self.Dataset.sample_name + str(self.Dataset.scan)
 
             # Create scan folder
-            self.Dataset.scan_folder = self.Dataset.root_folder + f"S{scan}/"
+            self.Dataset.scan_folder = self.Dataset.root_folder \
+                + self.Dataset.scan_name + "/"
             print("Scan folder:", self.Dataset.scan_folder)
 
+            # Create preprocessing folder
+            self.preprocessing_folder = self.Dataset.scan_folder \
+                + "preprocessing/"
+
+            # Create postprocessing folder
+            self.postprocessing_folder = self.Dataset.scan_folder \
+                + "postprocessing/"
+
+            # Create data folder
+            self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
+
             # Update widgets values with scan folder
-            self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                f"postprocessing/{self.Dataset.scan}_fa.vtk"
-            self.tab_data.children[1].value = self.Dataset.scan_folder + \
-                "preprocessing/"
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + \
-                "preprocessing/"
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
-                "preprocessing/"
+            self.tab_facet.children[1].value = f"{self.preprocessing_folder}\
+            {self.Dataset.scan}_fa.vtk"
+            self.tab_data.children[1].value = self.preprocessing_folder
+            self._list_widgets_strain.children[-4].value = self.preprocessing_folder
+            self._list_widgets_pynx.children[1].value = self.preprocessing_folder
 
             # Get template_imagefile from data in data_dir, based on sixs
             # routine
@@ -2572,30 +2583,25 @@ class Interface():
                 try:
                     self.Dataset.path_to_data = glob.glob(
                         f"{self.Dataset.data_dir}*mu*{self.Dataset.scan}*")[0]
-                    print("File path:", self.Dataset.path_to_data)
                 except IndexError:
                     self.Dataset.path_to_data = glob.glob(
                         f"{self.Dataset.data_dir}*omega*{self.Dataset.scan}*")[0]
-                    print("Omega scan")
+                finally:
+                    print("File path:", self.Dataset.path_to_data)
 
                 self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
                     "%05d" % self.Dataset.scan)[0] + "%05d.nxs"
                 print(
-                    "File template:",
-                    self.Dataset.template_imagefile,
-                    end="\n\n")
+                    f"File template: {self.Dataset.template_imagefile}\n\n")
 
                 # Save file name
-                self._list_widgets_preprocessing.children[42].value = self.Dataset.template_imagefile.split(
+                self._list_widgets_preprocessing.children[42].value \
+                    = self.Dataset.template_imagefile.split(
                     "/")[-1]
 
             except IndexError:
                 self.Dataset.template_imagefile = ""
                 self.Dataset.path_to_data = ""
-
-            # Data folder
-            # folder of the experiment, where all scan are stored
-            self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
 
             # Create final directory, if not yet existing
             if not os.path.isdir(self.Dataset.root_folder):
@@ -2612,73 +2618,75 @@ class Interface():
 
             # Scan directory
             try:
-                os.mkdir(f"{self.Dataset.root_folder}S{self.Dataset.scan}")
+                os.mkdir(f"{self.Dataset.scan_folder}")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}")
+                    f"Created {self.Dataset.scan_folder}")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scan} exists")
+                print(f"{self.Dataset.scan_folder} exists")
 
             # /data directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
+                    f"{self.Dataset.data_folder}")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/data")
+                    f"Created {self.Dataset.data_folder}")
             except FileExistsError:
-                print(f"{self.Dataset.root_folder}S{self.Dataset.scan}/data exists")
+                print(f"{self.Dataset.data_folder} exists")
 
             # /preprocessing directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
-                print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing")
+                    f"{self.preprocessing_folder}")
+                print(scan_name
+                      f"Created {self.preprocessing_folder}")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/preprocessing exists")
+                    f"{self.preprocessing_folder} exists")
 
             # /postprocessing directory
             try:
                 os.mkdir(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing")
+                    f"{self.postprocessing_folder}")
                 print(
-                    f"Created {self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing", end="\n\n")
+                    f"Created {self.postprocessing_folder}", end="\n\n")
             except FileExistsError:
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/postprocessing exists", end="\n\n")
+                    f"{self.postprocessing_folder} exists", end="\n\n")
 
             # Move data file
             try:
-                shutil.copy2(self.Dataset.path_to_data,
-                             f"{self.Dataset.root_folder}S{self.Dataset.scan}/data")
+                shutil.copy2(
+                    self.Dataset.path_to_data,
+                    self.Dataset.data_folder
+                )
                 print(
-                    f"Copied {self.Dataset.path_to_data} to {self.Dataset.root_folder}S{self.Dataset.scan}/data")
+                    f"Copied {self.Dataset.path_to_data} to \
+                    {self.Dataset.data_folder}")
             except (FileExistsError, shutil.SameFileError):
                 print(
-                    f"{self.Dataset.root_folder}S{self.Dataset.scan}/data/{self.Dataset.path_to_data} exists")
+                    f"{self.Dataset.data_folder}\
+                    {self.Dataset.path_to_data} exists")
             except (AttributeError, FileNotFoundError):
                 pass
 
             # PyNX folder, refresh values
-            self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
-                "preprocessing/"
+            self._list_widgets_pynx.children[1].value\
+                = self.preprocessing_folder
             self.folder_pynx_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
             # Plot folder, refresh values
-            self.tab_data.children[1].value = self.Dataset.scan_folder + \
-                "preprocessing/"
+            self.tab_data.children[1].value = self.preprocessing_folder
             self.folder_plot_handler(change=self.tab_data.children[1].value)
 
             # Strain folder, refresh values
-            self._list_widgets_strain.children[-4].value = self.Dataset.scan_folder + \
-                "preprocessing/"
+            self._list_widgets_strain.children[-4].value\
+                = self.preprocessing_folder
             self.folder_strain_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
             # Facet folder, refresh values
-            self.tab_facet.children[1].value = self.Dataset.scan_folder + \
-                "postprocessing/"
+            self.tab_facet.children[1].value = self.postprocessing_folder
             self.folder_facet_handler(change=self.tab_facet.children[1].value)
 
             # Only allow to save data if PyNX is imported to avoid errors
@@ -2767,7 +2775,7 @@ class Interface():
                         )
                         print("Saving Facets class data")
                         self.Facets.to_hdf5(
-                            f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
+                            f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
                     except AttributeError:
                         print(
                             "Could not save facets' data, run the analysis \
@@ -2895,8 +2903,8 @@ class Interface():
          For visual comfort during interactive masking.
         :param backend: e.g. "Qt5Agg"
          Backend used in script, change to "Agg" to make sure the figures are
-         saved, not compaticle with interactive masking. Other possibilities are
-         'module://matplotlib_inline.backend_inline'
+         saved, not compaticle with interactive masking. Other possibilities
+         are 'module://matplotlib_inline.backend_inline'
          default value is "Qt5Agg"
 
         Parameters related to data cropping/padding/centering #
@@ -3284,11 +3292,11 @@ class Interface():
 
                 # Create config file
                 self.create_yaml_file(
-                    fname=f"{self.Dataset.scan_folder}preprocessing/\
+                    fname=f"{self.preprocessing_folder}\
                     config_preprocessing.yml",
                     scans=self.Dataset.scan,
                     root_folder=root_folder,
-                    save_dir=f"{self.Dataset.scan_folder}preprocessing/",
+                    save_dir=self.preprocessing_folder,
                     data_dir=self.Dataset.data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
@@ -3376,25 +3384,24 @@ class Interface():
                     "#############################")
                 print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
                 print(
-                    f"Config file: {self.Dataset.scan_folder}preprocessing/\
+                    f"Config file: {self.preprocessing_folder}\
                     config_preprocessing.yml")
                 print(
                     "############################################"
                     "###########################")
 
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
-                    --config {self.Dataset.scan_folder}preprocessing/\
+                    --config {self.preprocessing_folder}\
                     config_preprocessing.yml")
 
                 # PyNX folder, refresh
-                self._list_widgets_pynx.children[1].value = self.Dataset.scan_folder + \
-                    "preprocessing/"
+                self._list_widgets_pynx.children[1].value\
+                    = self.preprocessing_folder
                 self.folder_pynx_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
                 # Plot folder, refresh
-                self.tab_data.children[1].value = self.Dataset.scan_folder + \
-                    "preprocessing/"
+                self.tab_data.children[1].value = self.preprocessing_folder
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
@@ -3453,7 +3460,7 @@ class Interface():
             try:
                 self.Dataset.reflection = np.array(literal_eval(reflection))
             except ValueError:
-                print("Wrong list syntax for refelction")
+                print("Wrong list syntax for reflection")
 
             try:
                 # Check beamline for save folder
@@ -3463,8 +3470,7 @@ class Interface():
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
 
-                save_dir = f"{root_folder}S{self.Dataset.scan}/postprocessing\
-                /corrections/"
+                save_dir = f"{self.postprocessing_folder}/corrections/"
 
                 # Create final directory is not yet existing
                 if not os.path.isdir(save_dir):
@@ -3531,8 +3537,10 @@ class Interface():
 
                 # # Save corrected angles in the widgets
                 # print("Saving corrected angles values...")
-                # self._list_widgets_preprocessing.children[58].value = self.Dataset.bragg_outofplane
-                # self._list_widgets_preprocessing.children[59].value = self.Dataset.bragg_inplane
+                # self._list_widgets_preprocessing.children[58].value\
+                #   = self.Dataset.bragg_outofplane
+                # self._list_widgets_preprocessing.children[59].value\
+                #   = self.Dataset.bragg_inplane
                 # self.Dataset.tilt_angle = np.round(
                 #     np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
                 # print("Corrected angles values saved in setup tab.")
@@ -3586,15 +3594,15 @@ class Interface():
             if self.Dataset.mask.endswith(".npy"):
                 mask = np.load(self.Dataset.mask).astype(np.int8)
                 nb = mask.sum()
-                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                    nb, nb * 100 / mask.size))
+                print("CXI input: loading mask, with %d pixels masked \
+                    (%6.3f%%)" % (nb, nb * 100 / mask.size))
             elif self.Dataset.mask.endswith(".npz"):
                 try:
                     mask = np.load(self.Dataset.mask)[
                         "mask"].astype(np.int8)
                     nb = mask.sum()
-                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                        nb, nb * 100 / mask.size))
+                    print("CXI input: loading mask, with %d pixels masked \
+                        (%6.3f%%)" % (nb, nb * 100 / mask.size))
                 except KeyError:
                     print("\"mask\" key does not exist.")
 
@@ -3621,14 +3629,12 @@ class Interface():
                 except KeyError:
                     print("\"data\" key does not exist.")
                     try:
-                        support = np.load(self.Dataset.support)[
-                            "support"]
+                        support = np.load(self.Dataset.support)["support"]
                         print("CXI input: loading support")
                     except KeyError:
                         print("\"support\" key does not exist.")
                         try:
-                            support = np.load(
-                                self.Dataset.support)["obj"]
+                            support = np.load(self.Dataset.support)["obj"]
                             print("CXI input: loading support")
                         except KeyError:
                             print(
@@ -3747,10 +3753,8 @@ class Interface():
 
         if save_as_cxi:
             # Save diffraction pattern
-            self.cxi_filename = "{}{}{}/preprocessing/{}.cxi".format(
-                self.Dataset.root_folder,
-                self.Dataset.sample_name,
-                self.Dataset.scan,
+            self.cxi_filename = "{}/preprocessing/{}.cxi".format(
+                self.Dataset.scan_folder,
                 self.Dataset.iobs.split("/")[-1].split(".")[0]
             )
             self.save_as_cxi(cdi_operator=cdi, path_to_cxi=self.cxi_filename)
@@ -3964,13 +3968,14 @@ class Interface():
         print(f"CXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
         print("CXI input: detector distance = %8.2fm" % self.Dataset.sdd)
         print(
-            f"CXI input: detector pixel size = {self.Dataset.pixel_size_detector}")
+            f"CXI input: detector pixel size \
+            = {self.Dataset.pixel_size_detector}")
 
         # PyNX arguments text files
-        self.Dataset.pynx_parameter_gui_file = self.Dataset.scan_folder + \
-            '/preprocessing/pynx_run_gui.txt'
-        self.Dataset.pynx_parameter_cli_file = self.Dataset.scan_folder + \
-            '/preprocessing/pynx_run.txt'
+        self.Dataset.pynx_parameter_gui_file = self.preprocessing_folder\
+            + "/pynx_run_gui.txt"
+        self.Dataset.pynx_parameter_cli_file = self.preprocessing_folder\
+            + "/pynx_run.txt"
 
         # Phase retrieval
         if self.run_phase_retrieval and not self.run_pynx_tools:
@@ -3981,7 +3986,10 @@ class Interface():
                 # Load files
                 self.text_file.append("# Parameters\n")
                 for file, parameter in [
-                        (self.Dataset.iobs, "data"), (self.Dataset.mask, "mask"), (self.Dataset.obj, "object")]:
+                        (self.Dataset.iobs, "data"),
+                        (self.Dataset.mask, "mask"),
+                        (self.Dataset.obj, "object")
+                ]:
                     if file != "":
                         self.text_file.append(f"{parameter} = \"{file}\"\n")
 
@@ -3991,16 +3999,24 @@ class Interface():
                         '\n']
                 # else no support, just don't write it
 
+                # Clean threshold syntax
+                support_threshold = support_threshold.replace("(", "")
+                support_threshold = support_threshold.replace(")", "")
+                support_threshold = support_threshold.replace(" ", "")
+
                 # Other support parameters
                 self.text_file += [
-                    f'support_threshold= {
-                        str(self.Dataset.support_threshold).replace("(",
-                                                                    "").replace(")", "").replace(" ", "")}\n',
-                    f'support_only_shrink = {self.Dataset.support_only_shrink}\n',
-                    f'support_update_period = {self.Dataset.support_update_period}\n',
-                    f'support_smooth_width_begin = {self.Dataset.support_smooth_width[0]}\n',
-                    f'support_smooth_width_end = {self.Dataset.support_smooth_width[1]}\n',
-                    f'support_post_expand = {self.Dataset.support_post_expand}\n'
+                    f'support_threshold= {support_threshold}\n',
+                    f'support_only_shrink = \
+                    {self.Dataset.support_only_shrink}\n',
+                    f'support_update_period = \
+                    {self.Dataset.support_update_period}\n',
+                    f'support_smooth_width_begin = \
+                    {self.Dataset.support_smooth_width[0]}\n',
+                    f'support_smooth_width_end = \
+                    {self.Dataset.support_smooth_width[1]}\n',
+                    f'support_post_expand = \
+                    {self.Dataset.support_post_expand}\n'
                     '\n',
                 ]
 
@@ -4008,11 +4024,13 @@ class Interface():
                 if self.Dataset.psf:
                     if self.Dataset.psf_model != "pseudo-voigt":
                         self.text_file.append(
-                            f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm}\"\n")
+                            f"psf = \"{self.Dataset.psf_model},\
+                            {self.Dataset.fwhm}\"\n")
 
                     if self.Dataset.psf_model == "pseudo-voigt":
                         self.text_file.append(
-                            f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm},{self.Dataset.eta}\"\n")
+                            f"psf = \"{self.Dataset.psf_model},\
+                            {self.Dataset.fwhm},{self.Dataset.eta}\"\n")
                 # no PSF, just don't write anything
 
                 # Filtering the reconstructions
@@ -4028,6 +4046,11 @@ class Interface():
                     nb_keep_LLK = self.Dataset.nb_run_keep + \
                         (self.Dataset.nb_run - self.Dataset.nb_run_keep) // 2
                     nb_keep_std = self.Dataset.nb_run_keep
+
+                # Clean rebin syntax
+                rebin = rebin.replace("(", "")
+                rebin = rebin.replace(")", "")
+                rebin = rebin.replace(" ", "")
 
                 # Other parameters
                 self.text_file += [
@@ -4053,11 +4076,12 @@ class Interface():
                     f'positivity = {self.Dataset.positivity}\n',
                     f'beta = {self.Dataset.beta}\n',
                     f'detwin = {self.Dataset.detwin}\n',
-                    f'rebin = {str(self.Dataset.rebin).replace("(", "").replace(")", "").replace(" ", "")}\n',
+                    f'rebin = {rebin}\n',
                     '\n',
                     '# Generic parameters\n',
                     f'detector_distance = {self.Dataset.sdd}\n',
-                    f'pixel_size_detector = {self.Dataset.pixel_size_detector}\n',
+                    f'pixel_size_detector = \
+                    {self.Dataset.pixel_size_detector}\n',
                     f'wavelength = {self.Dataset.wavelength}\n',
                     f'verbose = {self.Dataset.verbose}\n',
                     "output_format= 'cxi'\n",
@@ -4070,7 +4094,8 @@ class Interface():
                         v.write(line)
 
                 print(
-                    f"Saved parameters in {self.Dataset.pynx_parameter_gui_file}")
+                    f"Saved parameters in \
+                    {self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
                     # Runs modes directly and saves all data in an "all"
@@ -4079,7 +4104,7 @@ class Interface():
                         f"\nRunning {self.path_scripts}/run_slurm_job.sh \
                         --reconstruct gui \
                         --username {self.user_name} \
-                        --path {self.Dataset.scan_folder}preprocessing \
+                        --path {self.preprocessing_folder} \
                         --filtering {nb_keep_std} \
                         --modes true")
                     print(
@@ -4089,12 +4114,12 @@ class Interface():
                         "{}/run_slurm_job.sh \
                         --reconstruct gui \
                         --username {} \
-                        --path {}preprocessing \
+                        --path {} \
                         --filtering {} \
                         --modes true".format(
                             quote(self.path_scripts),
                             quote(self.user_name),
-                            quote(self.Dataset.scan_folder),
+                            quote(self.preprocessing_folder),
                             quote(str(nb_keep_std)),
                         )
                     )
@@ -4107,10 +4132,10 @@ class Interface():
                             README_pynx_local_script.md &",
                             end="\n\n")
                         os.system(
-                            "cd {}preprocessing; {}/pynx-id01cdi.py \
+                            "cd {}; {}/pynx-id01cdi.py \
                             pynx_run_gui.txt 2>&1 | tee \
                             README_pynx_local_script.md &".format(
-                                quote(self.Dataset.scan_folder),
+                                quote(self.preprocessing_folder),
                                 quote(self.path_scripts),
                             )
                         )
@@ -4140,10 +4165,13 @@ class Interface():
 
                         # Change support threshold for supports update
                         if isinstance(self.Dataset.support_threshold, float):
-                            self.Dataset.threshold_relative = self.Dataset.support_threshold
+                            self.Dataset.threshold_relative \
+                                = self.Dataset.support_threshold
                         elif isinstance(self.Dataset.support_threshold, tuple):
                             self.Dataset.threshold_relative = np.random.uniform(
-                                self.Dataset.support_threshold[0], self.Dataset.support_threshold[1])
+                                self.Dataset.support_threshold[0],
+                                self.Dataset.support_threshold[1]
+                            )
                         print(f"Threshold: {self.Dataset.threshold_relative}")
 
                         # Create support object
@@ -4169,7 +4197,8 @@ class Interface():
                                         verbose=True) * cdi
 
                                 else:
-                                    cdi = ShowCDI() * ScaleObj() * AutoCorrelationSupport(
+                                    cdi = ShowCDI() * ScaleObj() \
+                                        * AutoCorrelationSupport(
                                         threshold=0.1,  # extra argument
                                         verbose=True) * cdi
 
@@ -4224,10 +4253,13 @@ class Interface():
                                     ) ** self.Dataset.nb_er * cdi
 
                                 else:
-                                    hio_power = self.Dataset.nb_hio // self.Dataset.support_update_period
+                                    hio_power = self.Dataset.nb_hio \
+                                        // self.Dataset.support_update_period
                                     raar_power = (
-                                        self.Dataset.nb_raar // 2) // self.Dataset.support_update_period
-                                    er_power = self.Dataset.nb_er // self.Dataset.support_update_period
+                                        self.Dataset.nb_raar // 2) \
+                                        // self.Dataset.support_update_period
+                                    er_power = self.Dataset.nb_er \
+                                        // self.Dataset.support_update_period
 
                                     cdi = (sup * HIO(
                                         beta=self.Dataset.beta,
@@ -4290,9 +4322,12 @@ class Interface():
                                     ) ** self.Dataset.nb_er * cdi
 
                                 else:
-                                    hio_power = self.Dataset.nb_hio // self.Dataset.support_update_period
-                                    raar_power = self.Dataset.nb_raar // self.Dataset.support_update_period
-                                    er_power = self.Dataset.nb_er // self.Dataset.support_update_period
+                                    hio_power = self.Dataset.nb_hio \
+                                        // self.Dataset.support_update_period
+                                    raar_power = self.Dataset.nb_raar \
+                                        // self.Dataset.support_update_period
+                                    er_power = self.Dataset.nb_er \
+                                        // self.Dataset.support_update_period
 
                                     cdi = (sup * HIO(
                                         beta=self.Dataset.beta,
@@ -4426,7 +4461,9 @@ class Interface():
                     filtering_criteria_value[filename] = np.std(np.abs(data))
 
             sorted_dict = sorted(
-                filtering_criteria_value.items(), key=operator_lib.itemgetter(1))
+                filtering_criteria_value.items(),
+                key=operator_lib.itemgetter(1)
+            )
 
             for f, filtering_criteria_value in sorted_dict[nb_keep:]:
                 print(f"Removed scan {f}")
@@ -4447,11 +4484,14 @@ class Interface():
                     "Extracting llk value for poisson statistics for ",
                     filename)
                 with tb.open_file(filename, "r") as f:
-                    llk = f.root.entry_1.image_1.process_1.results.llk_poisson[...]
+                    llk = f.root.entry_1.image_1.process_1.\
+                        results.llk_poisson[...]
                     filtering_criteria_value[filename] = llk
 
             sorted_dict = sorted(
-                filtering_criteria_value.items(), key=operator_lib.itemgetter(1))
+                filtering_criteria_value.items(),
+                key=operator_lib.itemgetter(1)
+            )
 
             for f, filtering_criteria_value in sorted_dict[nb_keep:]:
                 print(f"Removed scan {f}")
@@ -4485,7 +4525,8 @@ class Interface():
 
                     if cxi_files == []:
                         print(
-                            f"No *LLK*.cxi files remaining in {folder}/result_scan*LLK*.cxi")
+                            f"No *LLK*.cxi files remaining in \
+                            {folder}/result_scan*LLK*.cxi")
                     else:
                         filter_by_LLK(cxi_files, nb_keep)
 
@@ -4500,7 +4541,8 @@ class Interface():
 
                     if cxi_files == []:
                         print(
-                            f"No *LLK*.cxi files remaining in {folder}/result_scan*LLK*.cxi")
+                            f"No *LLK*.cxi files remaining in \
+                            {folder}/result_scan*LLK*.cxi")
                     else:
                         filter_by_std(cxi_files, nb_keep)
 
@@ -4588,21 +4630,28 @@ class Interface():
         self.params["output_format"] = "cxi"
         self.params["mask"] = self.Dataset.mask
         self.params["support"] = self.Dataset.support
-        # self.params["support_autocorrelation_threshold"] = self.Dataset.support_autocorrelation_threshold
+        # self.params["support_autocorrelation_threshold"]\
+        # = self.Dataset.support_autocorrelation_threshold
         self.params["support_only_shrink"] = self.Dataset.support_only_shrink
         self.params["object"] = self.Dataset.obj
-        self.params["support_update_period"] = self.Dataset.support_update_period
-        self.params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
-        self.params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
-        # self.params["support_smooth_width_relax_n"] = self.Dataset.support_smooth_width_relax_n
+        self.params["support_update_period"] = \
+            self.Dataset.support_update_period
+        self.params["support_smooth_width_begin"] = \
+            self.Dataset.support_smooth_width[0]
+        self.params["support_smooth_width_end"] = \
+            self.Dataset.support_smooth_width[1]
+        # self.params["support_smooth_width_relax_n"] = \
+        # self.Dataset.support_smooth_width_relax_n
         # self.params["support_size"] = self.Dataset.support_size
         self.params["support_threshold"] = self.Dataset.support_threshold
         self.params["positivity"] = self.Dataset.positivity
         self.params["beta"] = self.Dataset.beta
         self.params["crop_output"] = 0
         self.params["rebin"] = self.Dataset.rebin
-        # self.params["support_update_border_n"] = self.Dataset.support_update_border_n
-        # self.params["support_threshold_method"] = self.Dataset.support_threshold_method
+        # self.params["support_update_border_n"] \
+        # = self.Dataset.support_update_border_n
+        # self.params["support_threshold_method"] \
+        # = self.Dataset.support_threshold_method
         self.params["support_post_expand"] = self.Dataset.support_post_expand
         self.params["psf"] = self.Dataset.psf
         # self.params["note"] = self.Dataset.note
@@ -4626,13 +4675,19 @@ class Interface():
         # self.params["support_formula"] = self.Dataset.support_formula
         # self.params["mpi"] = "run"
         # self.params["mask_interp"] = self.Dataset.mask_interp
-        # self.params["confidence_interval_factor_mask_min"] = self.Dataset.confidence_interval_factor_mask_min
-        # self.params["confidence_interval_factor_mask_max"] = self.Dataset.confidence_interval_factor_mask_max
+        # self.params["confidence_interval_factor_mask_min"] \
+        # = self.Dataset.confidence_interval_factor_mask_min
+        # self.params["confidence_interval_factor_mask_max"] \
+        # = self.Dataset.confidence_interval_factor_mask_max
         # self.params["save_plot"] = self.Dataset.save_plot
-        # self.params["support_fraction_min"] = self.Dataset.support_fraction_min
-        # self.params["support_fraction_max"] = self.Dataset.support_fraction_max
-        # self.params["support_threshold_auto_tune_factor"] = self.Dataset.support_threshold_auto_tune_factor
-        # self.params["nb_run_keep_max_obj2_out"] = self.Dataset.nb_run_keep_max_obj2_out
+        # self.params["support_fraction_min"] \
+        # = self.Dataset.support_fraction_min
+        # self.params["support_fraction_max"] \
+        # = self.Dataset.support_fraction_max
+        # self.params["support_threshold_auto_tune_factor"] \
+        # = self.Dataset.support_threshold_auto_tune_factor
+        # self.params["nb_run_keep_max_obj2_out"] \
+        # = self.Dataset.nb_run_keep_max_obj2_out
         # self.params["flatfield"] = self.Dataset.flatfield
         # self.params["psf_filter"] = self.Dataset.psf_filter
         self.params["detwin"] = self.Dataset.detwin
@@ -4649,7 +4704,8 @@ class Interface():
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
 
-        print("\nSaving phase retrieval parameters selected in the PyNX tab...")
+        print("\nSaving phase retrieval parameters selected \
+            in the PyNX tab...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
             process_parameters=self.params,
@@ -4731,9 +4787,9 @@ class Interface():
 
         :param backend: e.g. "Qt5Agg"
          Backend used in script, change to "Agg" to make sure the figures are
-         saved, not compaticle with interactive masking. Other possibilities are
-         'module://matplotlib_inline.backend_inline'
-         default value is "Qt5Agg"
+         saved, not compatible with interactive masking. Other possibilities
+         are 'module://matplotlib_inline.backend_inline' default value is
+         "Qt5Agg"
 
         Parameters used when averaging several reconstruction:
 
@@ -4956,7 +5012,8 @@ class Interface():
             self.Dataset.optical_path_method = optical_path_method
             self.Dataset.dispersion = dispersion
             self.Dataset.absorption = absorption
-            self.Dataset.threshold_unwrap_refraction = threshold_unwrap_refraction
+            self.Dataset.threshold_unwrap_refraction \
+                = threshold_unwrap_refraction
             # options #
             self.Dataset.simulation = simulation
             self.Dataset.invert_phase = invert_phase
@@ -5042,8 +5099,8 @@ class Interface():
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
 
-                save_dir = f"{self.Dataset.root_folder}S{self.Dataset.scan}\
-                /postprocessing/result_{self.Dataset.save_frame}/"
+                save_dir = f"{self.postprocessing_folder}\
+                /result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
                     w.disabled = False
@@ -5071,9 +5128,10 @@ class Interface():
 
             try:
                 # Run strain.py script
-                # self.Dataset.strain_output_file, self.Dataset.voxel_size, self.Dataset.q_final
+                # self.Dataset.strain_output_file, self.Dataset.voxel_size,
+                # self.Dataset.q_final
                 self.create_yaml_file(
-                    fname=f"{self.Dataset.scan_folder}postprocessing\
+                    fname=f"{self.postprocessing_folder}\
                     /config_postprocessing.yml",
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
@@ -5176,7 +5234,7 @@ class Interface():
                 )
                 print(f"Running: {self.path_scripts}/bcdi_strain.py")
                 print(
-                    f"Config file: {self.Dataset.scan_folder}postprocessing\
+                    f"Config file: {self.postprocessing_folder}\
                     /config_postprocessing.yml")
                 print(
                     "\n#####################################\
@@ -5185,12 +5243,13 @@ class Interface():
                 )
 
                 os.system(f"{self.path_scripts}/bcdi_strain.py \
-                    --config {self.Dataset.scan_folder}postprocessing\
+                    --config {self.postprocessing_folder}\
                     /config_postprocessing.yml")
 
                 # Temporary fix, recompute the transformation matrix
                 # print("\nSaving transformation matrix ...")
-                # self.Dataset.transfer_matrix = transfer_matrix.compute_transformation_matrix(
+                # self.Dataset.transfer_matrix = \
+                # transfer_matrix.compute_transformation_matrix(
                 #     scan=self.Dataset.scan,
                 #     original_size=self.Dataset.original_size,
                 #     phasing_binning=self.Dataset.phasing_binning,
@@ -5232,8 +5291,7 @@ class Interface():
                 # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
-                self.tab_data.children[1].value = self.Dataset.scan_folder + \
-                    "preprocessing/"
+                self.tab_data.children[1].value = self.preprocessing_folder
                 self.folder_plot_handler(
                     change=self.tab_data.children[1].value)
 
@@ -5387,7 +5445,7 @@ class Interface():
                     elev,
                     azim,
                 ):
-                    """Function to interactively visualize the two facets tht
+                    """Function to interactively visualize the two facets that
                     will be chosen, to also help pick two vectors.
                     """
                     # Save parameters value
@@ -5505,31 +5563,41 @@ class Interface():
                                 # Create subfolder
                                 try:
                                     os.mkdir(
-                                        f"{self.Dataset.root_folder}S{self.Dataset.scan}\
-                                        /postprocessing/facets_analysis/")
+                                        f"{self.Dataset.root_folder}\
+                                        {self.scan_name}/postprocessing/\
+                                        facets_analysis/")
                                     print(
-                                        f"Created {self.Dataset.root_folder}S{self.Dataset.scan}\
-                                        /postprocessing/facets_analysis/")
+                                        f"Created {self.Dataset.root_folder}\
+                                        {self.scan_name}/postprocessing/\
+                                        facets_analysis/")
                                 except FileExistsError:
                                     print(
-                                        f"{self.Dataset.root_folder}S{self.Dataset.scan}\
-                                        /postprocessing/facets_analysis/ exists")
+                                        f"{self.Dataset.root_folder}\
+                                        {self.scan_name}/postprocessing/\
+                                        facets_analysis/ exists")
 
                                 # Save data
                                 self.Facets.save_data(
-                                    f"{self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}\
-                                    /postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
+                                    f"{self.Dataset.scan_folder}\
+                                    /postprocessing/facets_analysis/\
+                                    field_data_{self.Dataset.scan}.csv")
                                 print(
-                                    f"Saved field data as {self.Dataset.root_folder}{self.Dataset.sample_name}{self.Dataset.scan}\
-                                    /postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
+                                    f"Saved field data as \
+                                    {self.Dataset.scan_folder}/postprocessing\
+                                    /facets_analysis/\
+                                    field_data_{self.Dataset.scan}.csv")
 
                                 self.Facets.to_hdf5(
-                                    f"{self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
+                                    f"{self.Dataset.scan_folder}\
+                                    {self.scan_name}.cxi")
                                 print(
-                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.sample_name}{self.Dataset.scan}.cxi")
+                                    f"Saved Facets class attributes in \
+                                    {self.Dataset.scan_folder}\
+                                    {self.scan_name}.cxi")
                             except AttributeError:
                                 print(
-                                    "Initialize the directories first to save the figures and data ...")
+                                    "Initialize the directories first to save \
+                                    the figures and data ...")
 
             @button_view_particle.on_click
             def action_button_view_particle(selfbutton):
@@ -5589,8 +5657,7 @@ class Interface():
             for line in config_file:
                 v.write(line + "\n")
 
-    @staticmethod
-    def display_readme(contents):
+    def display_readme(self, contents):
         """Help text about different steps in data analysis workflow.
 
         :param contents: e.g. "Preprocessing"
@@ -5601,42 +5668,51 @@ class Interface():
             clear_output(True)
             print(help(self.initialize_preprocessing))
 
-        if contents == "Phase retrieval":
+        elif contents == "Phase retrieval":
             clear_output(True)
             print(help(self.initialize_phase_retrieval))
 
-        if contents == "Postprocessing":
+        elif contents == "Postprocessing":
             clear_output(True)
             print(help(self.initialize_postprocessing))
 
-        if contents == "Facet analysis":
+        elif contents == "Facet analysis":
             clear_output(True)
             display(Markdown("""
-                Import and stores data output of facet analyzer plugin for further analysis.
+                Import and stores data output of facet analyzer plugin for \
+                further analysis.
 
-                Extract the strain component and the displacement on the facets, and retrieves the
-                correct facet normals based on a user input (geometric transformation into the
-                crystal frame). It requries as input a VTK file extracted from the FacetAnalyser
-                plugin from ParaView. See: https://doi.org/10.1016/j.ultramic.2012.07.024
+                Extract the strain component and the displacement on the \
+                facets, and retrieves the correct facet normals based on a \
+                user input (geometric transformation into the crystal frame).
+                It requires as input a VTK file extracted from the \
+                FacetAnalyser plugin from ParaView.
+                See: https://doi.org/10.1016/j.ultramic.2012.07.024
 
                 Original tutorial on how to open vtk files:
-                http://forrestbao.blogspot.com/2011/12/reading-vtk-files-in-python-via-python.html
+                http://forrestbao.blogspot.com/2011/12/reading-vtk-files\
+                -in-python-via-python.html
 
                 Expected directory structure:
                  - vtk file should have been saved in in Sxxxx/postprocessing
-                 - the analysis output will be saved in Sxxxx/postprocessing/facet_analysis
+                 - the analysis output will be saved in Sxxxx/postprocessing\
+                 /facet_analysis
 
-                Several plotting options are attributes of this class, feel free to change them
-                (cmap, strain_range, disp_range_avg, disp_range, strain_range_avg, comment,
-                title_fontsize, axes_fontsize, legend_fontsize, ticks_fontsize)
+                Several plotting options are attributes of this class, feel \
+                free to change them (cmap, strain_range, disp_range_avg, \
+                disp_range, strain_range_avg, comment, title_fontsize, \
+                axes_fontsize, legend_fontsize, ticks_fontsize)
 
                 :param filename: str, name of the VTK file
                 :param pathdir: str, path to the VTK file
-                :param savedir: str, path where to save results. If None, they will be saved in
-                 pathdir/facets_analysis
-                :param lattice: float, atomic spacing of the material in angstroms
-                 (only cubic lattices are supported).
+                :param savedir: str, path where to save results. If None, \
+                they will be saved in pathdir/facets_analysis
+                :param lattice: float, atomic spacing of the material in \
+                angstroms (only cubic lattices are supported).
                      """))
+
+        elif contents is False:
+            clear_output(True)
 
     def display_logs(
         self,
@@ -5904,7 +5980,7 @@ class Interface():
                 plt.ylabel('Gamma')
                 plt.tight_layout()
                 plt.savefig(self.Dataset.root_folder
-                            + self.Dataset.sample_name + str(self.Dataset.scan)
+                            + self.scan_name
                             + "/data/data_before_rotation.png")
                 plt.close()
 
@@ -5914,7 +5990,7 @@ class Interface():
                 plt.ylabel('Delta')
                 plt.tight_layout()
                 plt.savefig(self.Dataset.root_folder
-                            + self.Dataset.sample_name + str(self.Dataset.scan)
+                            + self.scan_name
                             + "/data/data_after_rotation.png")
                 plt.close()
 
@@ -5938,7 +6014,7 @@ class Interface():
         """
         # Save rocking curve data
         np.savez(
-            f"{self.Dataset.scan_folder}postprocessing\
+            f"{self.postprocessing_folder}\
             /interpolated_rocking_curve.npz",
             tilt_values=self.Dataset.tilt_values,
             rocking_curve=self.Dataset.rocking_curve,
