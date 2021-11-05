@@ -78,12 +78,24 @@ class Interface():
         self.path_package = inspect.getfile(gwaihir).split("__")[0]
         self.path_scripts = self.path_package.split("/lib/python")[0] + "/bin"
         print(
-            f"Using `{self.path_scripts}` as absolute path to scripts \
-            containing folder.\n"
-            "This should be correct if gwaihir was installed in an \
-            environment.\n"
-            "Otherwise change self.path_scripts attribute to the correct \
-            folder.\n")
+            f"Using `{self.path_scripts}`\n"
+            "as absolute path to scripts containing folder.\n"
+            "This should be correct if gwaihir was installed in an environment.\n"
+            "Otherwise change self.path_scripts attribute to the correct folder.\n"
+        )
+
+        # Get user name
+        try:
+            self.user_name = getpass.getuser()
+
+            print(
+                f"Login used for batch jobs: {self.user_name}\n"
+                "If wrong login, please change self.user_name attribute")
+        except Exception as e:
+            print(
+                "Could not get user name, please create self.user_name \
+                attribute for jobs")
+            raise e
 
         # Initialize future attributes
         self.Dataset = None
@@ -98,19 +110,6 @@ class Interface():
 
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
-
-        # Get user name
-        try:
-            self.user_name = getpass.getuser()
-
-            print(
-                f"Login used for batch jobs: {self.user_name}\n"
-                "If wrong login, please change self.user_name attribute")
-        except Exception as e:
-            print(
-                "Could not get user name, please create self.user_name \
-                attribute for jobs")
-            raise e
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(
@@ -602,8 +601,9 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             roi_detector=widgets.Text(
-                placeholder="[low_y_bound, high_y_bound, low_x_bound, \
-                high_x_bound]",
+                placeholder="""
+                [low_y_bound, high_y_bound, low_x_bound, high_x_bound]
+                """,
                 description='Fix roi area, will overwrite cropping parameters',
                 disabled=True,
                 continuous_update=False,
@@ -2405,7 +2405,7 @@ class Interface():
             unused_facet_folder=widgets.Text(
                 value=os.getcwd() + "/postprocessing/",
                 placeholder=os.getcwd() + "/postprocessing/",
-                description='Facet data (.vtk) folder:',
+                description='Folder containing .vtk data:',
                 disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -2414,7 +2414,7 @@ class Interface():
             facet_filename=widgets.Dropdown(
                 options=sorted(
                     glob.glob(os.getcwd() + "/postprocessing/")) + [""],
-                description='Vtk data',
+                description='Choose a file:',
                 disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2555,7 +2555,7 @@ class Interface():
 
             # Create scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder \
-                + self.Dataset.scan_name + "/"
+                + self.scan_name + "/"
             print("Scan folder:", self.Dataset.scan_folder)
 
             # Create preprocessing folder
@@ -2637,8 +2637,8 @@ class Interface():
             try:
                 os.mkdir(
                     f"{self.preprocessing_folder}")
-                print(scan_name
-                      f"Created {self.preprocessing_folder}")
+                print(
+                    f"Created {self.preprocessing_folder}")
             except FileExistsError:
                 print(
                     f"{self.preprocessing_folder} exists")
@@ -5678,40 +5678,41 @@ class Interface():
 
         elif contents == "Facet analysis":
             clear_output(True)
-            display(Markdown("""
-                Import and stores data output of facet analyzer plugin for \
+            print("""
+                Import and stores data output of facet analyzer plugin for
                 further analysis.
 
-                Extract the strain component and the displacement on the \
-                facets, and retrieves the correct facet normals based on a \
+                Extract the strain component and the displacement on the
+                facets, and retrieves the correct facet normals based on a
                 user input (geometric transformation into the crystal frame).
-                It requires as input a VTK file extracted from the \
+                It requires as input a VTK file extracted from the
                 FacetAnalyser plugin from ParaView.
                 See: https://doi.org/10.1016/j.ultramic.2012.07.024
 
                 Original tutorial on how to open vtk files:
-                http://forrestbao.blogspot.com/2011/12/reading-vtk-files\
+                http://forrestbao.blogspot.com/2011/12/reading-vtk-files
                 -in-python-via-python.html
 
                 Expected directory structure:
                  - vtk file should have been saved in in Sxxxx/postprocessing
-                 - the analysis output will be saved in Sxxxx/postprocessing\
+                 - the analysis output will be saved in Sxxxx/postprocessing
                  /facet_analysis
 
-                Several plotting options are attributes of this class, feel \
-                free to change them (cmap, strain_range, disp_range_avg, \
-                disp_range, strain_range_avg, comment, title_fontsize, \
+                Several plotting options are attributes of this class, feel
+                free to change them (cmap, strain_range, disp_range_avg,
+                disp_range, strain_range_avg, comment, title_fontsize,
                 axes_fontsize, legend_fontsize, ticks_fontsize)
 
                 :param filename: str, name of the VTK file
                 :param pathdir: str, path to the VTK file
-                :param savedir: str, path where to save results. If None, \
+                :param savedir: str, path where to save results. If None,
                 they will be saved in pathdir/facets_analysis
-                :param lattice: float, atomic spacing of the material in \
+                :param lattice: float, atomic spacing of the material in
                 angstroms (only cubic lattices are supported).
-                     """))
+                     """)
 
         elif contents is False:
+            print("Cleared output")
             clear_output(True)
 
     def display_logs(

@@ -46,11 +46,12 @@ class Plotter():
         """
         # Path of file to be imported
         self.filename = filename
-        self.plot = None
+        self.plot = plot
         self.log = log
         self.figsize = (15, 15)
         self.fontsize = 15
         self.interact_scale = False
+        self.data_array = None
 
         # Get data array from any of the supported files
         self.get_data_array(plot=self.plot)
@@ -756,7 +757,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
     scale = "logarithmic" if log else "linear"
 
     try:
-        img = ax.imshow(
+        ax.imshow(
             two_d_array,
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
@@ -777,7 +778,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
         # plt.close()
         print("Using complex data, automatically switching to array module")
 
-        img = ax.imshow(
+        ax.imshow(
             np.abs(two_d_array),
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
