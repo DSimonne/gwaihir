@@ -18,7 +18,7 @@ import tables as tb
 # Widgets
 import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import display, Markdown, Latex, clear_output
+from IPython.display import display, Markdown, Latex, clear_output, Image
 
 # gwaihir package
 import gwaihir
@@ -52,17 +52,17 @@ except ModuleNotFoundError:
 
 
 class Interface():
-    """This class is a Graphical User Interface (gui).
+    """This class is a Graphical User Interface (GUI).
 
     It makes extensive use of the ipywidgets and is thus meant to be
     used with a jupyter notebook. Additional informations are provided
-    in the "ReadMe" tab of the gui.
+    in the "ReadMe" tab of the GUI.
     """
 
     def __init__(self):
         """All the widgets for the GUI are defined here. They are regrouped in
         a few tabs that design the GUI, the tabs are: tab_init tab_detector
-        tab_setup tab_preprocess tab_correct tab_logs tab_pynx tab_strain
+        tab_setup tab_preprocess tab_correct tab_data_frame tab_pynx tab_strain
         tab_data tab_facet tab_readme.
 
         Also defines:
@@ -105,8 +105,10 @@ class Interface():
         self.text_file = None
         self.params = None
         self.Facets = None
+        self.metadata_csv_file = None
         self.csv_file = None
         self.scan_name = None
+        self.cmap = "YlGnBu_r"
 
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
@@ -534,7 +536,7 @@ class Interface():
                 continuous_update=False,
                 indent=False,
                 layout=Layout(
-                    width="20%", height="50px"),
+                    width="15%", height="50px"),
                 tooltip='Save also the raw data when use_rawdata is False',
                 icon='check'),
 
@@ -545,7 +547,7 @@ class Interface():
                 continuous_update=False,
                 indent=False,
                 layout=Layout(
-                    width="20%", height="50px"),
+                    width="15%", height="50px"),
                 tooltip='True to save the processed data in npz format',
                 icon='check'),
 
@@ -556,7 +558,7 @@ class Interface():
                 continuous_update=False,
                 indent=False,
                 layout=Layout(
-                    width="20%", height="50px"),
+                    width="15%", height="50px"),
                 tooltip='True to save also in .mat format',
                 icon='check'),
 
@@ -567,18 +569,19 @@ class Interface():
                 disabled=True,
                 indent=False,
                 layout=Layout(
-                    width="20%", height="50px"),
+                    width="15%", height="50px"),
                 tooltip='Save the orthogonalized diffraction pattern to \
                 VTK file',
                 icon='check'),
 
             save_as_int=widgets.Checkbox(
                 value=False,
-                description='Save as integers',
+                description='Save as int',
                 continuous_update=False,
                 disabled=True,
+                indent=False,
                 layout=Layout(
-                    width="20%", height="50px"),
+                    width="15%", height="50px"),
                 tooltip='if True, the result will be saved as an array of \
                 integers (save space)',
                 icon='check'),
@@ -1078,17 +1081,15 @@ class Interface():
                     'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            csv_file=widgets.Text(
-                value=os.getcwd() + "/metadata.csv",
-                placeholder="Path to csv file",
-                description='Csv file',
-                disabled=True,
+            metadata_csv_file=widgets.Text(
+                value=os.getcwd()+"/metadata.csv",
+                description='.csv file to save metadata:',
+                disabled=False,
                 continuous_update=False,
-                layout=Layout(
-                    width='90%'),
+                layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            temp_bool=widgets.Checkbox(
+            get_temperature=widgets.Checkbox(
                 value=False,
                 description='Estimate the temperature (Pt only)',
                 disabled=True,
@@ -1186,24 +1187,27 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             iobs=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "*.npz")) + [""],
+                options=[""]
+                + sorted([os.path.basename(f) for f in
+                          glob.glob(os.getcwd() + "*.npz")]),
                 description='Dataset',
                 disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             mask=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "*.npz")) + [""],
+                options=[""]
+                + sorted([os.path.basename(f) for f in
+                          glob.glob(os.getcwd() + "*.npz")]),
                 description='Mask',
                 disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             support=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "*.npz")) + [""],
+                options=[""]
+                + sorted([os.path.basename(f) for f in
+                          glob.glob(os.getcwd() + "*.npz")]),
                 value="",
                 description='Support',
                 disabled=False,
@@ -1211,8 +1215,9 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             obj=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "*.npz")) + [""],
+                options=[""]
+                + sorted([os.path.basename(f) for f in
+                          glob.glob(os.getcwd() + "*.npz")]),
                 value="",
                 description='Object',
                 disabled=False,
@@ -1631,7 +1636,7 @@ class Interface():
                 icon='fast-forward')
         )
         self._list_widgets_pynx.children[1].observe(
-            self.folder_pynx_handler, names="value")
+            self.pynx_folder_handler, names="value")
         self._list_widgets_pynx.children[15].observe(
             self.pynx_psf_handler, names="value")
         self._list_widgets_pynx.children[16].observe(
@@ -1665,18 +1670,26 @@ class Interface():
         ])
 
         # Widgets for logs
-        self.tab_logs = interactive(
-            self.display_logs,
+        self.tab_data_frame = interactive(
+            self.display_data_frame,
             unused_label_logs=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
-                Loads csv file and displays it in the gui",
+                Loads csv file and displays it in the GUI",
                 style={'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            csv_file=widgets.Text(
-                value=os.getcwd() + "/metadata.csv",
-                placeholder="Path to csv file",
-                description='Csv file',
+            parent_folder=widgets.Text(
+                value=os.getcwd(),
+                placeholder=os.getcwd(),
+                description='Parent folder:',
+                disabled=False,
+                continuous_update=False,
+                layout=Layout(width='90%'),
+                style={'description_width': 'initial'}),
+
+            csv_file=widgets.Dropdown(
+                options=sorted(glob.glob(os.getcwd()+"*.csv")),
+                description='Csv file in subdirectories:',
                 disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -1684,17 +1697,11 @@ class Interface():
 
             show_logs=widgets.ToggleButtons(
                 options=[
-                    ("Clear output", False),
+                    ("Clear/ Reload folder", False),
                     ('Load .csv file', "load_csv"),
-                    ("Load facets data ",
-                     "load_field_data"),
+                    ("Load facets data ", "load_field_data"),
                 ],
                 value=False,
-                # tooltips=[
-                #     "Clear the output and unload data from gui, saves RAM",
-                #     "Load external csv file in the GUI",
-                #     "Load field data"
-                # ],
                 description='Load dataframe',
                 disabled=False,
                 button_style='',
@@ -1702,6 +1709,8 @@ class Interface():
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
         )
+        self.tab_data_frame.children[1].observe(
+            self.csv_file_handler, names="value")
 
         # Widgets for strain
         self._list_widgets_strain = interactive(
@@ -1778,11 +1787,6 @@ class Interface():
 
             keep_size=widgets.Checkbox(
                 value=False,
-                # True to keep the initial
-                # array size for
-                # orthogonalization
-                # (slower), it will be
-                # cropped otherwise
                 description='Keep the initial array size for orthogonalization\
                  (slower)',
                 disabled=False,
@@ -2265,7 +2269,7 @@ class Interface():
                     'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            unused_folder_strain=widgets.Text(
+            strain_folder=widgets.Text(
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Data folder:',
@@ -2275,27 +2279,32 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             reconstruction_file=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "/*.h5") \
-                    + glob.glob(os.getcwd() + "/*.cxi") \
-                    + glob.glob(os.getcwd() + "/*.npy") \
-                    + glob.glob(os.getcwd() + "/*.npz")),
+                options=[""]\
+                + [os.path.basename(f) for f in sorted(
+                    glob.glob(os.getcwd() + "/*.h5")
+                    + glob.glob(os.getcwd() + "/*.cxi")
+                    + glob.glob(os.getcwd() + "/*.npy")
+                    + glob.glob(os.getcwd() + "/*.npz"))],
                 description='Compatible file list',
                 disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            run_strain=widgets.ToggleButton(
+            run_strain=widgets.ToggleButtons(
+                options=[
+                    ("Clear/ Reload folder", False),
+                    ("Run postprocessing", "run"),
+                ],
                 value=False,
                 description='Run strain analysis',
                 disabled=False,
                 button_style='',
                 icon='fast-forward',
-                layout=Layout(width='40%'),
+                layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
         )
         self._list_widgets_strain.children[-4].observe(
-            self.folder_strain_handler, names="value")
+            self.strain_folder_handler, names="value")
         self.tab_strain = widgets.VBox([
             self._list_widgets_strain.children[0],
             widgets.HBox(self._list_widgets_strain.children[1:3]),
@@ -2331,16 +2340,15 @@ class Interface():
             self._list_widgets_strain.children[-1],
         ])
 
-        # Widgets for plotting
         self.tab_data = interactive(
             self.load_data,
             unused_label_plot=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
-                Loads data files (.cxi or npz/npy) and displays it in the gui",
+                Loads data files and displays it in the GUI",
                 style={'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            unused_folder=widgets.Text(
+            folder=widgets.Text(
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Data folder:',
@@ -2349,11 +2357,15 @@ class Interface():
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            path_to_data=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "/*.npz")
+            path_to_data=widgets.SelectMultiple(
+                options=[""]
+                + [os.path.basename(f) for f in sorted(
+                    glob.glob(os.getcwd() + "/*.npy")
+                    + glob.glob(os.getcwd() + "/*.npz")
                     + glob.glob(os.getcwd() + "/*.cxi")
-                    + glob.glob(os.getcwd() + "/*.h5")) + [""],
+                    + glob.glob(os.getcwd() + "/*.h5")
+                    + glob.glob(os.getcwd() + "/*.png"))],
+                rows=10,
                 description='Compatible file list',
                 disabled=False,
                 layout=Layout(width='90%'),
@@ -2361,18 +2373,20 @@ class Interface():
 
             data_use=widgets.ToggleButtons(
                 options=[
-                    ("Clear output", False),
+                    ("Clear/ Reload folder", False),
                     ('2D plot', "2D"),
                     ("Plot slices", "slices"),
                     ("3D plot", "3D"),
                     ("Create support", "create_support"),
                     ("Extract support", "extract_support"),
                     ("Smooth support", "smooth_support"),
+                    ("Display .png image", "show_image"),
+                    ("Delete selected files", "delete")
                 ],
                 value=False,
                 description='Load data',
                 tooltips=[
-                    "Clear the output and unload data from gui, saves RAM",
+                    "Clear the output and unload data from GUI, saves RAM",
                     "Load data and plot data slice interactively",
                     "Load data and plot data slices for each dimension in \
                     its middle",
@@ -2382,6 +2396,7 @@ class Interface():
                     "Load data and allow for the creation of a support \
                     automatically",
                     "Load support and smooth its boundaries",
+                    "Delete selected files, careful !!"
                 ],
                 disabled=False,
                 button_style='',
@@ -2390,7 +2405,7 @@ class Interface():
                 style={'description_width': 'initial'}),
         )
         self.tab_data.children[1].observe(
-            self.folder_plot_handler, names="value")
+            self.plot_folder_handler, names="value")
 
         # Widgets for facet analysis
         self.tab_facet = interactive(
@@ -2402,7 +2417,7 @@ class Interface():
                     'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            unused_facet_folder=widgets.Text(
+            facet_folder=widgets.Text(
                 value=os.getcwd() + "/postprocessing/",
                 placeholder=os.getcwd() + "/postprocessing/",
                 description='Folder containing .vtk data:',
@@ -2412,8 +2427,8 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             facet_filename=widgets.Dropdown(
-                options=sorted(
-                    glob.glob(os.getcwd() + "/postprocessing/")) + [""],
+                options=[""] + [os.path.basename(f) for f in sorted(
+                    glob.glob(os.getcwd() + "/postprocessing/*.vtk"))],
                 description='Choose a file:',
                 disabled=False,
                 layout=Layout(width='90%'),
@@ -2429,7 +2444,7 @@ class Interface():
                 style={'description_width': 'initial'}),
         )
         self.tab_facet.children[1].observe(
-            self.folder_facet_handler, names="value")
+            self.facet_folder_handler, names="value")
 
         # Widgets for readme tab
         self.tab_readme = interactive(
@@ -2461,7 +2476,7 @@ class Interface():
                     self.tab_setup,
                     self.tab_preprocess,
                     self.tab_correct,
-                    self.tab_logs,
+                    self.tab_data_frame,
                     self.tab_pynx,
                     self.tab_strain,
                     self.tab_data,
@@ -2474,9 +2489,9 @@ class Interface():
             self.window.set_title(3, "Preprocess")
             self.window.set_title(4, 'Correct')
             self.window.set_title(5, 'Logs')
-            self.window.set_title(6, 'PyNX')
-            self.window.set_title(7, 'Strain')
-            self.window.set_title(8, 'Plot data')
+            self.window.set_title(6, 'Phase retrieval')
+            self.window.set_title(7, 'Postprocess')
+            self.window.set_title(8, 'Handle data')
             self.window.set_title(9, 'Facets')
             self.window.set_title(10, 'Readme')
 
@@ -2488,7 +2503,7 @@ class Interface():
                     self.tab_setup,
                     self.tab_preprocess,
                     self.tab_correct,
-                    self.tab_logs,
+                    self.tab_data_frame,
                     self.tab_strain,
                     self.tab_data,
                     self.tab_facet,
@@ -2541,7 +2556,6 @@ class Interface():
          True to see plots
         """
         if run_dir_init:
-
             # Create Dataset attribute
             self.Dataset = gui_iterable.Dataset(
                 scan=scan, sample_name=sample_name,
@@ -2577,29 +2591,29 @@ class Interface():
             self._list_widgets_pynx.children[1].value = self.preprocessing_folder
 
             # Get template_imagefile from data in data_dir, based on sixs
-            # routine
+            # routine, depends on mu or omega scan at sixs
             try:
-                # Depends on mu or omega scan at sixs
+                self.Dataset.path_to_data = glob.glob(
+                    f"{self.Dataset.data_dir}*mu*{self.Dataset.scan}*")[0]
+            except IndexError:
                 try:
                     self.Dataset.path_to_data = glob.glob(
-                        f"{self.Dataset.data_dir}*mu*{self.Dataset.scan}*")[0]
-                except IndexError:
-                    self.Dataset.path_to_data = glob.glob(
                         f"{self.Dataset.data_dir}*omega*{self.Dataset.scan}*")[0]
-                finally:
-                    print("File path:", self.Dataset.path_to_data)
+                except IndexError:
+                    print("Could not find data, please specify template.")
 
+            try:
+                print("File path:", self.Dataset.path_to_data)
                 self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
                     "%05d" % self.Dataset.scan)[0] + "%05d.nxs"
                 print(
                     f"File template: {self.Dataset.template_imagefile}\n\n")
 
                 # Save file name
-                self._list_widgets_preprocessing.children[42].value \
-                    = self.Dataset.template_imagefile.split(
-                    "/")[-1]
+                self._list_widgets_preprocessing.children[42].value\
+                    = self.Dataset.template_imagefile.split("/")[-1]
 
-            except IndexError:
+            except AttributeError:
                 self.Dataset.template_imagefile = ""
                 self.Dataset.path_to_data = ""
 
@@ -2669,25 +2683,28 @@ class Interface():
             except (AttributeError, FileNotFoundError):
                 pass
 
+            # Data frame folder, refresh values
+            self.csv_file_handler(os.getcwd())
+
             # PyNX folder, refresh values
             self._list_widgets_pynx.children[1].value\
                 = self.preprocessing_folder
-            self.folder_pynx_handler(
+            self.pynx_folder_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
             # Plot folder, refresh values
             self.tab_data.children[1].value = self.preprocessing_folder
-            self.folder_plot_handler(change=self.tab_data.children[1].value)
+            self.plot_folder_handler(change=self.tab_data.children[1].value)
 
             # Strain folder, refresh values
             self._list_widgets_strain.children[-4].value\
                 = self.preprocessing_folder
-            self.folder_strain_handler(
+            self.strain_folder_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
             # Facet folder, refresh values
             self.tab_facet.children[1].value = self.postprocessing_folder
-            self.folder_facet_handler(change=self.tab_facet.children[1].value)
+            self.facet_folder_handler(change=self.tab_facet.children[1].value)
 
             # Only allow to save data if PyNX is imported to avoid errors
             # PyNX is needed to create the cxi file
@@ -2715,24 +2732,20 @@ class Interface():
                     [button_save_as_cxi, button_reload_previous_data])
                 display(buttons_init)
 
-                @button_save_as_cxi.on_click
+                @ button_save_as_cxi.on_click
                 def action_button_save_as_cxi(selfbutton):
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(buttons_init)
                     print(
-                        "\n#####################################\
-                        ########################################\
-                        ########################################\n"
+                        "\n###############################################################################\n"
                     )
                     print("Saving data, takes some time ...")
 
                     try:
                         # Reciprocal space data
                         print(
-                            "\n#####################################\
-                            ########################################\
-                            ########################################\n"
+                            "\n###############################################################################\n"
                         )
                         print(
                             "Saving diffraction data and mask selected in \
@@ -2742,9 +2755,7 @@ class Interface():
                         # Real space data
                         try:
                             print(
-                                "\n#####################################\
-                                ########################################\
-                                ########################################\n"
+                                "\n###############################################################################\n"
                             )
                             print("\nSaving parameters used in the GUI...")
                             print(
@@ -2769,9 +2780,7 @@ class Interface():
                     # Facets analysis output
                     try:
                         print(
-                            "\n#####################################\
-                            ########################################\
-                            ########################################\n"
+                            "\n###############################################################################\n"
                         )
                         print("Saving Facets class data")
                         self.Facets.to_hdf5(
@@ -2782,32 +2791,28 @@ class Interface():
                              in the `Facets` tab first...")
 
                     print(
-                        "\n#####################################\
-                        ########################################\
-                        ########################################\n"
+                        "\n###############################################################################\n"
                     )
 
-                @button_reload_previous_data.on_click
+                @ button_reload_previous_data.on_click
                 def action_reload_previous_data(selfbutton):
                     """Create button to reload Dataset object from .cxi
                     file."""
                     clear_output(True)
                     display(buttons_init)
                     print(
-                        "\n#####################################\
-                        ########################################\
-                        ########################################\n"
+                        "\n###############################################################################\n"
                     )
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all
                     # functions
                     print("Not created yet")
                     print(
-                        "\n#####################################\
-                        ########################################\
-                        ########################################\n"
+                        "\n###############################################################################\n"
                     )
+
         elif not run_dir_init:
+            print("Cleared window.")
             clear_output(True)
 
     # Preprocessing
@@ -3279,8 +3284,12 @@ class Interface():
                 icon='fast-forward')
             display(button_run_preprocess)
 
-            @button_run_preprocess.on_click
+            @ button_run_preprocess.on_click
             def action_button_run_preprocess(selfbutton):
+                """Run preprocessing script"""
+                # Clear output
+                clear_output(True)
+                display(button_run_preprocess)
 
                 # Check is SIXS data, in that case rotate
                 if self.Dataset.beamline == "SIXS_2019":
@@ -3292,8 +3301,7 @@ class Interface():
 
                 # Create config file
                 self.create_yaml_file(
-                    fname=f"{self.preprocessing_folder}\
-                    config_preprocessing.yml",
+                    fname=f"{self.preprocessing_folder}config_preprocessing.yml",
                     scans=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=self.preprocessing_folder,
@@ -3380,29 +3388,27 @@ class Interface():
 
                 # On lance bcdi_preprocess
                 print(
-                    "##########################################"
-                    "#############################")
+                    "\n###############################################################################\n"
+                )
                 print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
                 print(
-                    f"Config file: {self.preprocessing_folder}\
-                    config_preprocessing.yml")
+                    f"Config file: {self.preprocessing_folder}config_preprocessing.yml")
                 print(
-                    "############################################"
-                    "###########################")
+                    "\n###############################################################################\n"
+                )
 
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
-                    --config {self.preprocessing_folder}\
-                    config_preprocessing.yml")
+                    --config {self.preprocessing_folder}config_preprocessing.yml")
 
                 # PyNX folder, refresh
                 self._list_widgets_pynx.children[1].value\
                     = self.preprocessing_folder
-                self.folder_pynx_handler(
+                self.pynx_folder_handler(
                     change=self._list_widgets_pynx.children[1].value)
 
                 # Plot folder, refresh
                 self.tab_data.children[1].value = self.preprocessing_folder
-                self.folder_plot_handler(
+                self.plot_folder_handler(
                     change=self.tab_data.children[1].value)
 
         if not init_para:
@@ -3411,8 +3417,8 @@ class Interface():
     def correct_angles(
         self,
         unused_label_correct,
-        csv_file,
-        temp_bool,
+        metadata_csv_file,
+        get_temperature,
         reflection,
         reference_spacing,
         reference_temperature,
@@ -3424,7 +3430,9 @@ class Interface():
         peak, values used then to compute q_hkl.
 
         Parameters for temperature estimation:
-
+        :param metadata_csv_file: "metadata.csv"
+         full path to .csv file in which the scan metadata will be saved. If
+         the file does not exist, it will be created.
         :param get_temperature: e.g. False
          True to estimate the temperature, only available for platinum at the \
          moment
@@ -3451,9 +3459,9 @@ class Interface():
             #     w.disabled = True
 
             # Save parameter values as attributes
-            self.Dataset.csv_file = csv_file
+            self.Dataset.metadata_csv_file = metadata_csv_file
             self.Dataset.angles_bool = angles_bool
-            self.Dataset.temp_bool = temp_bool
+            self.Dataset.get_temperature = get_temperature
             self.Dataset.reference_spacing = reference_spacing
             self.Dataset.reference_temperature = reference_temperature
 
@@ -3493,7 +3501,7 @@ class Interface():
                 #     filename=self.Dataset.path_to_data,
                 #     direct_inplane=self.Dataset.direct_inplane,
                 #     direct_outofplane=self.Dataset.direct_outofplane,
-                #     get_temperature=self.Dataset.temp_bool,
+                #     get_temperature=self.Dataset.get_temperature,
                 #     reflection=self.Dataset.reflection,
                 #     reference_spacing=self.Dataset.reference_spacing,
                 #     reference_temperature=self.Dataset.reference_temperature,
@@ -3909,10 +3917,10 @@ class Interface():
         :param detector_distance: detector distance (meters)
         """
         self.Dataset.folder = folder
-        self.Dataset.iobs = iobs
-        self.Dataset.mask = mask
-        self.Dataset.support = support
-        self.Dataset.obj = obj
+        self.Dataset.iobs = folder + iobs
+        self.Dataset.mask = folder + mask
+        self.Dataset.support = folder + support
+        self.Dataset.obj = folder + obj
         self.Dataset.auto_center_resize = auto_center_resize
         self.Dataset.max_size = max_size
         self.Dataset.support_threshold = support_threshold
@@ -4133,8 +4141,8 @@ class Interface():
                             end="\n\n")
                         os.system(
                             "cd {}; {}/pynx-id01cdi.py \
-                            pynx_run_gui.txt 2>&1 | tee \
-                            README_pynx_local_script.md &".format(
+                            pynx_run_gui.txt \
+                            2>&1 | tee README_pynx_local_script.md &".format(
                                 quote(self.preprocessing_folder),
                                 quote(self.path_scripts),
                             )
@@ -4151,9 +4159,7 @@ class Interface():
                 cdi = self.initialize_cdi_operator()
 
                 print(
-                    "\n#####################################\
-                    ########################################\
-                    ########################################\n"
+                    "\n###############################################################################\n"
                 )
                 try:
                     # Run phase retrieval for nb_run
@@ -4165,7 +4171,7 @@ class Interface():
 
                         # Change support threshold for supports update
                         if isinstance(self.Dataset.support_threshold, float):
-                            self.Dataset.threshold_relative \
+                            self.Dataset.threshold_relative\
                                 = self.Dataset.support_threshold
                         elif isinstance(self.Dataset.support_threshold, tuple):
                             self.Dataset.threshold_relative = np.random.uniform(
@@ -4383,9 +4389,7 @@ class Interface():
                                 too large too continue")
 
                         print(
-                            "\n#####################################\
-                            ########################################\
-                            ########################################\n"
+                            "\n###############################################################################\n"
                         )
 
                     # If filter, filter data
@@ -4418,13 +4422,8 @@ class Interface():
         if not self.run_phase_retrieval and not self.run_pynx_tools:
             clear_output(True)
 
-    @staticmethod
-    def filter_reconstructions(
-        folder,
-        nb_run,
-        nb_keep,
-        filter_criteria,
-    ):
+    @ staticmethod
+    def filter_reconstructions(folder, nb_run, nb_keep, filter_criteria):
         """Filter the phase retrieval output depending on a given parameter,
         for now only LLK and standard deviation are available. This allows the
         user to run a lot of reconstructions but to then automatically keep the
@@ -4551,10 +4550,7 @@ class Interface():
         except KeyboardInterrupt:
             print("cxi files filtering stopped by user ...")
 
-    def run_modes_decomposition(
-        self,
-        folder,
-    ):
+    def run_modes_decomposition(self, folder,):
         """Decomposes several phase retrieval solutions into modes, saves only
         the first mode to save space.
 
@@ -4580,11 +4576,7 @@ class Interface():
         except KeyboardInterrupt:
             print("Decomposition into modes stopped by user...")
 
-    def save_as_cxi(
-        self,
-        cdi_operator,
-        path_to_cxi
-    ):
+    def save_as_cxi(self, cdi_operator, path_to_cxi):
         """We need to create a dictionnary with the parameters to save in the
         cxi file.
 
@@ -4634,12 +4626,9 @@ class Interface():
         # = self.Dataset.support_autocorrelation_threshold
         self.params["support_only_shrink"] = self.Dataset.support_only_shrink
         self.params["object"] = self.Dataset.obj
-        self.params["support_update_period"] = \
-            self.Dataset.support_update_period
-        self.params["support_smooth_width_begin"] = \
-            self.Dataset.support_smooth_width[0]
-        self.params["support_smooth_width_end"] = \
-            self.Dataset.support_smooth_width[1]
+        self.params["support_update_period"] = self.Dataset.support_update_period
+        self.params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
+        self.params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
         # self.params["support_smooth_width_relax_n"] = \
         # self.Dataset.support_smooth_width_relax_n
         # self.params["support_size"] = self.Dataset.support_size
@@ -4774,7 +4763,7 @@ class Interface():
         apodization_sigma,
         apodization_alpha,
         unused_label_strain,
-        unused_folder_strain,
+        strain_folder,
         reconstruction_file,
         run_strain,
     ):
@@ -5007,12 +4996,12 @@ class Interface():
             self.Dataset.offset_method = offset_method
             self.Dataset.centering_method = centering_method
             # pixel_size,
-            # parameters related to the refraction correction #
+            # parameters related to the refraction correction
             self.Dataset.correct_refraction = correct_refraction
             self.Dataset.optical_path_method = optical_path_method
             self.Dataset.dispersion = dispersion
             self.Dataset.absorption = absorption
-            self.Dataset.threshold_unwrap_refraction \
+            self.Dataset.threshold_unwrap_refraction\
                 = threshold_unwrap_refraction
             # options #
             self.Dataset.simulation = simulation
@@ -5046,7 +5035,7 @@ class Interface():
             self.Dataset.apodization_mu = apodization_mu
             self.Dataset.apodization_sigma = apodization_sigma
             self.Dataset.apodization_alpha = apodization_alpha
-            self.Dataset.reconstruction_file = reconstruction_file
+            self.Dataset.reconstruction_file = strain_folder + reconstruction_file
 
             # Extract dict, list and tuple from strings
             list_parameters = [
@@ -5131,8 +5120,7 @@ class Interface():
                 # self.Dataset.strain_output_file, self.Dataset.voxel_size,
                 # self.Dataset.q_final
                 self.create_yaml_file(
-                    fname=f"{self.postprocessing_folder}\
-                    /config_postprocessing.yml",
+                    fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
@@ -5205,7 +5193,7 @@ class Interface():
                     tick_length=self.Dataset.tick_length,
                     tick_width=self.Dataset.tick_width,
                     # parameters for temperature estimation #
-                    get_temperature=self.Dataset.temp_bool,
+                    get_temperature=self.Dataset.get_temperature,
                     reflection=self.Dataset.reflection,
                     reference_spacing=self.Dataset.reference_spacing,
                     reference_temperature=self.Dataset.reference_temperature,
@@ -5228,23 +5216,17 @@ class Interface():
                 )
                 # On lance bcdi_preprocess
                 print(
-                    "\n#####################################\
-                    ########################################\
-                    ########################################\n"
+                    "\n###############################################################################\n"
                 )
                 print(f"Running: {self.path_scripts}/bcdi_strain.py")
                 print(
-                    f"Config file: {self.postprocessing_folder}\
-                    /config_postprocessing.yml")
+                    f"Config file: {self.postprocessing_folder}/config_postprocessing.yml")
                 print(
-                    "\n#####################################\
-                    ########################################\
-                    ########################################\n"
+                    "\n###############################################################################\n"
                 )
 
                 os.system(f"{self.path_scripts}/bcdi_strain.py \
-                    --config {self.postprocessing_folder}\
-                    /config_postprocessing.yml")
+                    --config {self.postprocessing_folder}/config_postprocessing.yml")
 
                 # Temporary fix, recompute the transformation matrix
                 # print("\nSaving transformation matrix ...")
@@ -5292,7 +5274,7 @@ class Interface():
                 self._list_widgets_strain.children[-2].disabled = False
 
                 self.tab_data.children[1].value = self.preprocessing_folder
-                self.folder_plot_handler(
+                self.plot_folder_handler(
                     change=self.tab_data.children[1].value)
 
         if not run_strain:
@@ -5305,12 +5287,14 @@ class Interface():
             for w in self._list_widgets_correct.children[:-1]:
                 w.disabled = False
 
+            self.strain_folder_handler(change=strain_folder)
+            print("Cleared window.")
             clear_output(True)
 
     def init_facet_analysis(
         self,
         unused_label_facet,
-        unused_facet_folder,
+        facet_folder,
         facet_filename,
         load_data,
     ):
@@ -5327,12 +5311,10 @@ class Interface():
             # Disable text widget to avoid bugs
             self.tab_facet.children[1].disabled = True
 
-            self.Dataset.facet_filename = facet_filename
-            fn = self.Dataset.facet_filename.split("/")[-1]
-            pathdir = self.Dataset.facet_filename.replace(fn, "")
+            self.Dataset.facet_filename = facet_folder + facet_filename
 
             self.Facets = facet_analysis.Facets(
-                filename=fn, pathdir=pathdir)
+                filename=facet_filename, pathdir=facet_folder)
             print(
                 "Facets object saved as self.Facets, call help(self.Facets) \
                 for more details.")
@@ -5359,13 +5341,13 @@ class Interface():
             buttons_facets = widgets.HBox(
                 [button_rotate, button_view_particle])
 
-            @button_rotate.on_click
+            @ button_rotate.on_click
             def action_button_rotate(selfbutton):
                 clear_output(True)
                 display(buttons_facets)
 
                 # Run interactive function
-                @interact(
+                @ interact(
                     facet_a_id=widgets.Dropdown(
                         options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=1,
@@ -5491,7 +5473,7 @@ class Interface():
                         layout=Layout(width='50%', height='35px'))
                     display(button_fix_facets)
 
-                    @button_fix_facets.on_click
+                    @ button_fix_facets.on_click
                     def action_button_fix_facets(selfbutton):
                         """Fix facets to compute the new rotation matrix and
                         launch the data extraction.
@@ -5556,7 +5538,7 @@ class Interface():
                             layout=Layout(width='50%', height='35px'))
                         display(button_save_facet_data)
 
-                        @button_save_facet_data.on_click
+                        @ button_save_facet_data.on_click
                         def action_button_save_facet_data(selfbutton):
                             """Save data ..."""
                             try:
@@ -5599,7 +5581,7 @@ class Interface():
                                     "Initialize the directories first to save \
                                     the figures and data ...")
 
-            @button_view_particle.on_click
+            @ button_view_particle.on_click
             def action_button_view_particle(selfbutton):
                 clear_output(True)
                 display(buttons_facets)
@@ -5614,7 +5596,7 @@ class Interface():
             self.tab_facet.children[1].disabled = False
             clear_output(True)
 
-    @staticmethod
+    @ staticmethod
     def create_yaml_file(fname, **kwargs):
         """Create yaml file storing all keywords arguments given in input Used
         for bcdi scripts.
@@ -5656,6 +5638,8 @@ class Interface():
         with open(fname, "w") as v:
             for line in config_file:
                 v.write(line + "\n")
+
+    # Other methods
 
     def display_readme(self, contents):
         """Help text about different steps in data analysis workflow.
@@ -5712,17 +5696,20 @@ class Interface():
                      """)
 
         elif contents is False:
-            print("Cleared output")
+            print("Cleared window.")
             clear_output(True)
 
-    def display_logs(
+    def display_data_frame(
         self,
         unused_label_logs,
+        parent_folder,
         csv_file,
         show_logs
     ):
-        """Loads exterior .csv file and displays it in the gui.
+        """Loads exterior .csv file and displays it in the GUI.
 
+        :param parent_folder: all .csv files in the parent_folder subsirectories
+         will be shown in the dropdown list.
         :param csv_file: path to csv file
         :param show_logs: True to display dataframe
         """
@@ -5730,31 +5717,27 @@ class Interface():
 
         # Load data
         if show_logs in ("load_csv", "load_field_data"):
-            self.tab_logs.children[1].disabled = True
+            self.tab_data_frame.children[1].disabled = True
             try:
                 # csv data
                 if show_logs == "load_csv":
                     logs = pd.read_csv(self.csv_file)
                     print(
-                        "\n#####################################\
-                        ########################################\
-                        ########################################\n"
-                        "For a more detailed analysis, \
-                        please proceed as follows\n"
-                        "import pandas as pd\n"
-                        f"df = pd.read_csv({self.csv_file})\n"
-                        "You can then work on the `df` dataframe \
-                        as you please.\n"
-                        "\n#####################################\
-                        ########################################\
-                        ########################################\n"
+                        f"""
+                        ###############################################################################
+                        For a more detailed analysis, please proceed as follows
+                        import pandas as pd
+                        df = pd.read_csv({self.csv_file})
+                        You can then work on the `df` dataframe as you please.
+                        ###############################################################################
+                        """
                     )
 
                 # field data from facet analysis
                 elif show_logs == "load_field_data":
                     logs = self.Facets.field_data.copy()
 
-                @interact(
+                @ interact(
                     cols=widgets.SelectMultiple(
                         options=list(logs.columns),
                         value=list(logs.columns)[:],
@@ -5776,16 +5759,18 @@ class Interface():
             except FileNotFoundError:
                 print("Wrong path")
             except AttributeError:
-                print("You need to run the facet analysis in the \
-                    dedicated tab first")
+                print("You need to run the facet analysis in the dedicated tab first."
+                      "Then this function will load the resulting DataFrame.")
+
         else:
-            self.tab_logs.children[1].disabled = False
+            self.tab_data_frame.children[1].disabled = False
+            self.csv_file_handler(parent_folder)
             clear_output(True)
 
     def load_data(
         self,
         unused_label_plot,
-        unused_folder,
+        folder,
         path_to_data,
         data_use,
     ):
@@ -5797,21 +5782,42 @@ class Interface():
          Can be "2D", "3D", "slices", "create_support", "extract_support",
          "smooth_support"
         """
-        if data_use in ["2D", "3D", "slices"]:
+        if data_use in ["2D", "3D"] and len(path_to_data) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Plot data
-            plot.Plotter(path_to_data, plot=data_use, log="interact")
+            plot.Plotter(
+                folder + "/" + path_to_data[0],
+                plot=data_use,
+                log="interact",
+                cmap=self.cmap
+            )
 
-        elif data_use == "create_support":
+        if data_use == "slices":
+            # Disable widgets
+            for w in self.tab_data.children[:-2]:
+                w.disabled = True
+
+            # Plot data
+            for p in path_to_data:
+                print(f"Showing {p}")
+                plot.Plotter(
+                    folder + "/" + p,
+                    plot=data_use,
+                    log="interact",
+                    cmap=self.cmap
+                )
+
+        elif data_use == "create_support" and len(path_to_data) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(path_to_data=path_to_data)
+            sup = support.SupportTools(
+                path_to_data=folder + "/" + path_to_data[0])
 
             # Interactive function to loadt threshold value
             window_support = interactive(
@@ -5852,24 +5858,26 @@ class Interface():
 
             display(window_support)
 
-        elif data_use == "extract_support":
+        elif data_use == "extract_support" and len(path_to_data) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(path_to_data=path_to_data)
+            sup = support.SupportTools(
+                path_to_data=folder + "/" + path_to_data[0])
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
 
-        elif data_use == "smooth_support":
+        elif data_use == "smooth_support" and len(path_to_data) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(path_to_support=path_to_data)
+            sup = support.SupportTools(
+                path_to_support=folder + "/" + path_to_data[0])
 
             # Interactive function to loadt threshold value
             window_support = interactive(
@@ -5917,14 +5925,63 @@ class Interface():
 
             display(window_support)
 
-        # elif data_use == "plot_vtk":
-        #     # Disable widgets
-        #     for w in self.tab_data.children[:-2]:
-        #         w.disabled = True
+        elif data_use == "show_image":
+            # Disable widgets
+            for w in self.tab_data.children[:-2]:
+                w.disabled = True
+
+            try:
+                for p in path_to_data:
+                    print(f"Showing {p}")
+                    display(Image(filename=folder + "/" + p))
+
+            except (FileNotFoundError, ValueError):
+                print("Could not load image from file.")
+
+        elif data_use in ["2D", "3D", "create_support", "extract_support",
+                          "smooth_support"] and len(path_to_data) != 1:
+            print("Please select only one file.")
+
+        elif data_use == "delete":
+            # Disable widgets
+            for w in self.tab_data.children[:-2]:
+                w.disabled = True
+
+            # Create removal buttons in a function
+            def create_removal_button(folder, p):
+                button_delete_data = Button(
+                    description=f"Delete {p} ?",
+                    button_style='',
+                    layout=Layout(width='70%'),
+                    style={'description_width': 'initial'},
+                    icon='step-forward')
+
+                @button_delete_data.on_click
+                def action_button_delete_data(selfbutton):
+                    """Create button to delete files."""
+                    try:
+                        os.remove(folder + "/" + p)
+                        print(f"Removed {p}")
+
+                        # Refresh folder
+                        self.plot_folder_handler(change=folder)
+                    except FileNotFoundError:
+                        print("Could not remove data")
+                return button_delete_data
+
+            # Create a button for each file
+            button_list = [
+                create_removal_button(folder, p) for p in path_to_data]
+
+            # Display the buttons, one per file
+            for b in button_list:
+                display(b)
 
         elif data_use is False:
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
+            self.plot_folder_handler(change=folder)
+            print("Cleared window.")
             clear_output(True)
 
     # Non-Widgets interactive functions
@@ -6306,73 +6363,89 @@ class Interface():
                 self.temp_handler(
                     change=self._list_widgets_correct.children[2].value)
 
-    def folder_pynx_handler(self, change):
-        """Handles changes on the widget used to load a data file."""
+    def csv_file_handler(self, change):
+        """List all .csv files in change subdirectories"""
+        csv_files = []
+
         try:
-            list_all_npz = sorted(glob.glob(change.new + "/*.npz"))
-            list_probable_iobs_files = sorted(
-                glob.glob(change.new + "/*_pynx_align*.npz"))
-            list_probable_mask_files = sorted(
-                glob.glob(change.new + "/*maskpynx*.npz"))
-
-            for f in list_probable_iobs_files:
-                try:
-                    list_all_npz.remove(f)
-                except ValueError:
-                    # not in list
-                    pass
-            sorted_iobs_list = list_probable_iobs_files + list_all_npz + [""]
-
-            list_all_npz = sorted(glob.glob(change.new + "/*.npz"))
-            for f in list_probable_mask_files:
-                try:
-                    list_all_npz.remove(f)
-                except ValueError:
-                    # not in list
-                    pass
-            sorted_mask_list = list_probable_mask_files + list_all_npz + [""]
-
-            # iobs list
-            self._list_widgets_pynx.children[2].options = sorted_iobs_list
-            # mask list
-            self._list_widgets_pynx.children[3].options = sorted_mask_list
-            self._list_widgets_pynx.children[4].options = [
-                ""] + sorted(glob.glob(change.new + "/*.npz"))  # support list
-            self._list_widgets_pynx.children[5].options = [
-                ""] + sorted(glob.glob(change.new + "/*.npz"))  # obj list
+            for d in [x[0] for x in os.walk(change.new)]:
+                csv_files += sorted(glob.glob(f"{d}/*.csv"))
 
         except AttributeError:
-            list_all_npz = sorted(glob.glob(change + "/*.npz"))
-            list_probable_iobs_files = sorted(
-                glob.glob(change + "/*_pynx_align*.npz"))
-            list_probable_mask_files = sorted(
-                glob.glob(change + "/*maskpynx*.npz"))
+            for d in [x[0] for x in os.walk(change)]:
+                csv_files += sorted(glob.glob(f"{d}/*.csv"))
 
+        finally:
+            self.tab_data_frame.children[2].options = csv_files
+
+    def pynx_folder_handler(self, change):
+        """Handles changes on the widget used to load a data file."""
+        try:
+            list_all_npz = [os.path.basename(f) for f in sorted(
+                glob.glob(change.new + "/*.npz"))]
+
+            list_probable_iobs_files = [os.path.basename(f) for f in sorted(
+                glob.glob(change.new + "/*_pynx_align*.npz"))]
+
+            list_probable_mask_files = [os.path.basename(f) for f in sorted(
+                glob.glob(change.new + "/*maskpynx*.npz"))]
+
+            # support list
+            self._list_widgets_pynx.children[4].options = [""]\
+                + [os.path.basename(f) for f in sorted(
+                    glob.glob(change.new + "/*.npz"))]
+
+            # obj list
+            self._list_widgets_pynx.children[5].options = [""]\
+                + [os.path.basename(f) for f in sorted(
+                    glob.glob(change.new + "/*.npz"))]
+
+        except AttributeError:
+            list_all_npz = [os.path.basename(f) for f in sorted(
+                glob.glob(change + "/*.npz"))]
+
+            list_probable_iobs_files = [os.path.basename(f) for f in sorted(
+                glob.glob(change + "/*_pynx_align*.npz"))]
+
+            list_probable_mask_files = [os.path.basename(f) for f in sorted(
+                glob.glob(change + "/*maskpynx*.npz"))]
+
+            # support list
+            self._list_widgets_pynx.children[4].options = [""]\
+                + [os.path.basename(f) for f in sorted(
+                    glob.glob(change + "/*.npz"))]
+
+            # obj list
+            self._list_widgets_pynx.children[5].options = [""]\
+                + [os.path.basename(f) for f in sorted(
+                    glob.glob(change + "/*.npz"))]
+
+        finally:
+            # Find probable iobs file
+            temp_list = list_all_npz.copy()
             for f in list_probable_iobs_files:
                 try:
-                    list_all_npz.remove(f)
+                    temp_list.remove(f)
                 except ValueError:
-                    # not in list
+                    # Not in list
                     pass
-            sorted_iobs_list = list_probable_iobs_files + list_all_npz + [""]
+            sorted_iobs_list = list_probable_iobs_files + temp_list + [""]
 
-            list_all_npz = sorted(glob.glob(change + "/*.npz"))
+            # Find probable mask file
+            temp_list = list_all_npz.copy()
             for f in list_probable_mask_files:
                 try:
-                    list_all_npz.remove(f)
+                    temp_list.remove(f)
                 except ValueError:
                     # not in list
                     pass
-            sorted_mask_list = list_probable_mask_files + list_all_npz + [""]
+            sorted_mask_list = list_probable_mask_files + temp_list + [""]
 
             # iobs list
             self._list_widgets_pynx.children[2].options = sorted_iobs_list
+
             # mask list
             self._list_widgets_pynx.children[3].options = sorted_mask_list
-            self._list_widgets_pynx.children[4].options = [
-                ""] + sorted(glob.glob(change + "/*.npz"))  # support list
-            self._list_widgets_pynx.children[5].options = [
-                ""] + sorted(glob.glob(change + "/*.npz"))  # obj list
 
     def pynx_psf_handler(self, change):
         """Handles changes related to the psf."""
@@ -6427,41 +6500,62 @@ class Interface():
             self.pynx_psf_handler(
                 change=self._list_widgets_pynx.children[15].value)
 
-    def folder_strain_handler(self, change):
+    def strain_folder_handler(self, change):
         """Handles changes on the widget used to load a data file."""
         try:
-            self._list_widgets_strain.children[-3].options = [""]\
-                + sorted(glob.glob(change.new + "/*.h5"))\
-                + sorted(glob.glob(change.new + "/*.cxi"))\
-                + sorted(glob.glob(change.new + "/*.npy")
-                         + glob.glob(change.new + "/*.npz"))
-        except AttributeError:
-            self._list_widgets_strain.children[-3].options = [""]\
-                + sorted(glob.glob(change + "/*.h5"))\
-                + sorted(glob.glob(change + "/*.cxi"))\
-                + sorted(glob.glob(change + "/*.npy")
-                         + glob.glob(change + "/*.npz"))
-
-    def folder_plot_handler(self, change):
-        """Handles changes on the widget used to load a data file."""
-        try:
-            self.tab_data.children[2].options = sorted(
-                glob.glob(change.new + "/*.npz")
+            options = [""] + [os.path.basename(f) for f in sorted(
+                glob.glob(change.new + "/*.h5")
                 + glob.glob(change.new + "/*.cxi")
-                + glob.glob(change.new + "/*.h5")) + [""]
+                + glob.glob(change.new + "/*.npy")
+                + glob.glob(change.new + "/*.npz"))
+            ]
 
         except AttributeError:
-            self.tab_data.children[2].options = sorted(
-                glob.glob(change + "/*.npz")
+            options = [""] + [os.path.basename(f) for f in sorted(
+                glob.glob(change + "/*.h5")
                 + glob.glob(change + "/*.cxi")
-                + glob.glob(change + "/*.h5")) + [""]
+                + glob.glob(change + "/*.npy")
+                + glob.glob(change + "/*.npz"))
+            ]
 
-    def folder_facet_handler(self, change):
+        finally:
+            self._list_widgets_strain.children[-3].options = options
+
+    def plot_folder_handler(self, change):
         """Handles changes on the widget used to load a data file."""
         try:
-            self.tab_facet.children[2].options = sorted(
-                glob.glob(change.new + "/*.vtk")) + [""]
+            options = [""] + [os.path.basename(f) for f in sorted(
+                glob.glob(change.new + "/*.npy")
+                + glob.glob(change.new + "/*.npz")
+                + glob.glob(change.new + "/*.cxi")
+                + glob.glob(change.new + "/*.h5")
+                + glob.glob(change.new + "/*.png"))
+            ]
 
         except AttributeError:
-            self.tab_facet.children[2].options = sorted(
-                glob.glob(change + "/*.vtk")) + [""]
+            options = [""] + [os.path.basename(f) for f in sorted(
+                glob.glob(change + "/*.npy")
+                + glob.glob(change + "/*.npz")
+                + glob.glob(change + "/*.cxi")
+                + glob.glob(change + "/*.h5")
+                + glob.glob(change + "/*.png"))
+            ]
+
+        finally:
+            self.tab_data.children[2].options = [os.path.basename(f)
+                                                 for f in options]
+
+    def facet_folder_handler(self, change):
+        """Handles changes on the widget used to load a data file."""
+        try:
+            options = [""] + [os.path.basename(f) for f in sorted(
+                glob.glob(change.new + "/*.vtk"))
+            ]
+
+        except AttributeError:
+            options = [""] + [os.path.basename(f) for f in sorted(
+                glob.glob(change + "/*.vtk"))
+            ]
+
+        finally:
+            self.tab_facet.children[2].options = options

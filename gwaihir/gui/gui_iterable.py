@@ -7,28 +7,13 @@
 Interface class For now only Dataset.
 """
 
-try:
-    import numpy as np
-    import pandas as pd
-    import time
-    import h5py
+import numpy as np
+import pandas as pd
+import h5py
+import shutil
 
-    import glob
-    import os
-    import shutil
-
-    import ipywidgets as widgets
-    from ipywidgets import interact, Button, Layout, interactive, fixed
-    from IPython.display import display, Markdown, Latex, clear_output
-
-    from datetime import datetime
-
-    import tables as tb
-
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        """The following packages must be installed: numpy, pandas ipywidgets, \
-        iPython, thorondor and pytables.""")
+from IPython.display import display
+from datetime import datetime
 
 
 class Dataset():

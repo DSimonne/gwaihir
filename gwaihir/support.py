@@ -54,19 +54,22 @@ class SupportTools():
         # Work on cxi files
         if compute:
             if self.path_to_data.endswith(".cxi"):
-                with tb.open_file(self.path_to_data, "r") as f:
+                try:
+                    with tb.open_file(self.path_to_data, "r") as f:
 
-                    # Since .cxi files follow a specific architectture,
-                    # we know where the mask is.
-                    support = f.root.entry_1.image_1.mask[:]
+                        # Since .cxi files follow a specific architectture,
+                        # we know where the mask is.
+                        support = f.root.entry_1.image_1.mask[:]
 
-                    # Save support
-                    np.savez(self.saving_directory +
-                             "extracted_support.npz", support=support)
-                    print(
-                        f"Saved support in {self.saving_directory} as \
-                        extracted_support.npz")
-                    plot.plot_3d_slices(support, log=False)
+                        # Save support
+                        np.savez(self.saving_directory +
+                                 "extracted_support.npz", support=support)
+                        print(
+                            f"Saved support in {self.saving_directory} as \
+                            extracted_support.npz")
+                        plot.plot_3d_slices(support, log="interact")
+                except tb.NoSuchNodeError:
+                    print("Data type not supported")
 
             # elif self.self.path_to_data.endswith(".npz"):
 
@@ -95,19 +98,24 @@ class SupportTools():
                 except KeyError:
                     print("Could not load 'data' or 'support' array from \
                         file.")
+            except ValueError:
+                print("Data type not supported")
 
-            bigdata = 100 * old_support
-            conv_support = np.where(gaussian_filter(
-                bigdata, sigma) > threshold, 1, 0)
+            try:
+                bigdata = 100 * old_support
+                conv_support = np.where(gaussian_filter(
+                    bigdata, sigma) > threshold, 1, 0)
 
-            np.savez(
-                f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
-                oldsupport=old_support, support=conv_support)
+                np.savez(
+                    f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
+                    oldsupport=old_support, support=conv_support)
 
-            print(
-                f"Support saved in {self.saving_directory} as \
-                \nfilter_sig{sigma}_t{threshold}")
-            plot.plot_3d_slices(conv_support, log=False)
+                print(
+                    f"Support saved in {self.saving_directory} as \
+                    \nfilter_sig{sigma}_t{threshold}")
+                plot.plot_3d_slices(conv_support, log="interact")
+            except UnboundLocalError:
+                pass
 
         else:
             clear_output(True)
@@ -120,43 +128,46 @@ class SupportTools():
         :param compute: True to run function
         """
         if compute:
-            with tb.open_file(self.path_to_data, "r") as f:
-                # Since .cxi files follow a specific architecture,
-                # we know where our data is
-                if self.path_to_data.endswith(".cxi"):
-                    electronic_density = f.root.entry_1.data_1.data[:]
+            try:
+                with tb.open_file(self.path_to_data, "r") as f:
+                    # Since .cxi files follow a specific architecture,
+                    # we know where our data is
+                    if self.path_to_data.endswith(".cxi"):
+                        electronic_density = f.root.entry_1.data_1.data[:]
 
-                elif self.path_to_data.endswith(".h5"):
-                    # Take first mode
-                    electronic_density = f.root.entry_1.data_1.data[:][0]
+                    elif self.path_to_data.endswith(".h5"):
+                        # Take first mode
+                        electronic_density = f.root.entry_1.data_1.data[:][0]
 
-                print(
-                    f"Shape of real space complex electronic density array \
-                    {np.shape(electronic_density)}"
-                )
+                    print(
+                        f"Shape of real space complex electronic density array \
+                        {np.shape(electronic_density)}"
+                    )
 
-                # Find max value in image, we work with the module
-                amp = np.abs(electronic_density)
-                print(f"Maximum value in amplitude array: {amp.max()}")
+                    # Find max value in image, we work with the module
+                    amp = np.abs(electronic_density)
+                    print(f"Maximum value in amplitude array: {amp.max()}")
 
-                # Define support based on max value and threshold
-                support = np.where(amp < threshold * amp.max(), 0, 1)
+                    # Define support based on max value and threshold
+                    support = np.where(amp < threshold * amp.max(), 0, 1)
 
-                # Check % occupied by the support
-                rocc = np.where(support == 1)
-                rnocc = np.where(support == 0)
-                print(
-                    f"Percentage of 3D array occupied by support:\n\
-                    {np.shape(rocc)[1] / np.shape(rnocc)[1]}"
-                )
+                    # Check % occupied by the support
+                    rocc = np.where(support == 1)
+                    rnocc = np.where(support == 0)
+                    print(
+                        f"Percentage of 3D array occupied by support:\n\
+                        {np.shape(rocc)[1] / np.shape(rnocc)[1]}"
+                    )
 
-                # Save support
-                np.savez(self.saving_directory +
-                         "computed_support.npz", support=support)
-                print(
-                    f"Saved support in {self.saving_directory} as \
-                    computed_support.npz")
-                plot.plot_3d_slices(support, log=False)
+                    # Save support
+                    np.savez(self.saving_directory +
+                             "computed_support.npz", support=support)
+                    print(
+                        f"Saved support in {self.saving_directory} as \
+                        computed_support.npz")
+                    plot.plot_3d_slices(support, log="interact")
+            except tb.HDF5ExtError:
+                print("Data type not supported")
 
         else:
             clear_output(True)

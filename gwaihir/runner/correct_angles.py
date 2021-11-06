@@ -22,7 +22,7 @@ from bcdi.experiment.setup import Setup
 import bcdi.utils.utilities as util
 
 
-# Functions used in the gui
+# Functions used in the GUI
 
 def correct_angles_detector(
     filename,

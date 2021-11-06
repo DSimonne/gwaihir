@@ -1,7 +1,3 @@
-try:
-    from pynx.utils.plot_utils import complex2rgbalin
-except ModuleNotFoundError:
-    pass
 from tornado.ioloop import PeriodicCallback
 from skimage.measure import marching_cubes
 from scipy.spatial.transform import Rotation
@@ -11,7 +7,6 @@ import os
 import h5py as h5
 import tables as tb
 import glob
-import ast
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -32,9 +27,11 @@ warnings.filterwarnings("ignore")
 # Classes
 
 class Plotter():
-    """Class based on interactive functions for plotting."""
+    """Class based on interactive functions for plotting.
+    Gets data array from file and plot if specified
+    """
 
-    def __init__(self, filename, plot=False, log=False):
+    def __init__(self, filename, plot=False, log=False, cmap="YlGnBu_r", figsize=(10, 10), fontsize=15):
         """Create basic class attributes and run get_data_array() function from
         filename.
 
@@ -43,15 +40,19 @@ class Plotter():
         :param plot: either '2D', '3D' or False
         :param log: True to have a logarithmic scale
          False to have a linear scale
+        :param cmap: default "YlGnBu_r"
+         Other possible values are 'Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
+         'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'
         """
         # Path of file to be imported
         self.filename = filename
         self.plot = plot
         self.log = log
-        self.figsize = (15, 15)
-        self.fontsize = 15
+        self.figsize = figsize
+        self.fontsize = fontsize
         self.interact_scale = False
         self.data_array = None
+        self.cmap = cmap
 
         # Get data array from any of the supported files
         self.get_data_array(plot=self.plot)
@@ -61,7 +62,7 @@ class Plotter():
 
         :param plot: either '2D', '3D' or False
         """
-        self.plot = plot
+        self.plot = plot  # Because non attributes cannot pass interact
         # No need to select data array interactively
         if self.filename.endswith((".npy", ".h5", ".cxi")):
             if self.filename.endswith(".npy"):
@@ -105,12 +106,13 @@ class Plotter():
 
             # Plot data
             if self.plot == "2D":
-                self.plot_data()
+                self.plot_data(figsize=self.figsize,
+                               log=self.log, cmap=self.cmap)
 
-            elif self.plot == "slices":
-                self.plot_3d_slices(figsize=None, log=self.log)
+            elif self.plot == "slices" and self.data_array.ndim == 3:
+                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap)
 
-            elif self.plot == "3D" and np.ndim(self.data_array) == 3:
+            elif self.plot == "3D" and self.data_array.ndim == 3:
                 ThreeDViewer(self.data_array)
 
             else:
@@ -118,7 +120,7 @@ class Plotter():
                     "#########################################################"
                     "########################################################\n"
                     f"Loaded data array from {self.filename}\n"
-                    f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
+                    f"\tNb of dimensions: {self.data_array.ndim}\n"
                     f"\tShape: {self.data_array.shape}\n"
                     "#########################################################"
                     "########################################################"
@@ -143,53 +145,66 @@ class Plotter():
 
                     # Plot data
                     if self.plot == "2D":
-                        self.plot_data()
+                        self.plot_data(
+                            figsize=self.figsize, log=self.log, cmap=self.cmap)
 
-                    elif self.plot == "slices":
-                        self.plot_3d_slices(figsize=None, log=self.log)
+                    elif self.plot == "slices" and self.data_array.ndim == 3:
+                        self.plot_3d_slices(
+                            figsize=None, log=self.log, cmap=self.cmap)
 
-                    elif self.plot == "3D" and np.ndim(self.data_array) == 3:
+                    elif self.plot == "3D" and self.data_array.ndim == 3:
                         ThreeDViewer(self.data_array)
 
                     else:
                         print(
                             "###########################################\
-                            ############################################\
-                            ##########################\n"
+                            # \
+                            # \n"
                             f"Loaded data array from {self.filename}\n"
-                            f"\tNb of dimensions: {np.ndim(self.data_array)}\n"
+                            f"\tNb of dimensions: {self.data_array.ndim}\n"
                             f"\tShape: {self.data_array.shape}\n"
                             "############################################\
-                            #############################################\
-                            ########################"
+                            # \
+                            # "
                         )
 
             except ValueError:
                 print("Could not load data.")
+
+        else:
+            print("Data type not supported.")
 
     def plot_data(self, **kwargs):
         """Run plot_data function with class arguments."""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-        plot_data(data_array=self.data_array,
-                  figsize=self.figsize, fontsize=self.fontsize)
+        plot_data(
+            data_array=self.data_array,
+            figsize=self.figsize,
+            fontsize=self.fontsize,
+            cmap=self.cmap
+        )
 
     def plot_3d_slices(self, **kwargs):
         """Run plot_3d_slices function with class arguments."""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-        plot_3d_slices(data_array=self.data_array,
-                       figsize=self.figsize, log=self.log)
+        plot_3d_slices(
+            data_array=self.data_array,
+            figsize=self.figsize,
+            log=self.log,
+            cmap=self.cmap
+        )
 
 
 class ThreeDViewer(widgets.Box):
     """Widget to display 3D objects from CDI optimisation, loaded from a result
     CXI file or a mode file.
 
-    This is a quick & dirty implementation but should be useful. Quickly
-    adapted from @Vincent Favre Nicolin (ESRF)
+    This is a quick & dirty implementation but should be useful.
+    Quickly adapted from @Vincent Favre Nicolin (ESRF)
     """
 
     def __init__(self, input_file=None, html_width=None):
@@ -291,10 +306,10 @@ class ThreeDViewer(widgets.Box):
         self.toggle_rotate.observe(self.on_animate)
 
         # Future attributes
-        self.mesh = None
-        self.color = None
-        self.d0 = self.d
-        self.progress.value = None
+        # self.mesh = None
+        # self.color = None
+        # self.d0 = None
+        # self.progress.value = None
 
         # Create final box
         self.vbox = widgets.VBox([self.threshold,
@@ -308,7 +323,7 @@ class ThreeDViewer(widgets.Box):
                                   ])
 
         # Load data
-        if type(input_file) is np.ndarray:
+        if isinstance(input_file, np.ndarray):
             data_array = input_file
 
             self.output_view = widgets.Output()
@@ -406,8 +421,7 @@ class ThreeDViewer(widgets.Box):
                     norm=Normalize(
                         vmin=self.colormap_range.value[0],
                         vmax=self.colormap_range.value[1]),
-                    cmap=ast.literal_eval(
-                        'cm.%s' % (self.colormap.value.lower())))
+                    cmap=self.colormap.value.lower())
                 color = cs.to_rgba(abs(vals))[..., :3]
             else:
                 # TODO: Gradient
@@ -595,24 +609,82 @@ class ThreeDViewer(widgets.Box):
 
 # Methods
 
-def plot_data(data_array, figsize=(15, 15), fontsize=15):
+def plot_data(data_array, figsize=(10, 10), fontsize=15, log="interact", cmap="YlGnBu_r"):
     """Create figure based on the data dimensions.
 
     :param data_array: np.ndarray to plot
-    :param figsize: default (15, 15)
+    :param figsize: default (10, 10)
     :param fontsize: default 15
+    :param log: True, False or "interact"
     """
     # Get dimensions
-    data_dimensions = np.ndim(data_array)
+    data_dimensions = data_array.ndim
 
     if data_dimensions == 1:
         plt.close()
         fig, ax = plt.subplots(figsize=figsize)
-        ax.plot(data_array)
-        plt.show()
+        if log:
+            ax.plot(np.log(data_array))
+            plt.show()
+        elif log is False:
+            ax.plot(data_array)
+            plt.show()
+        elif log == "interact":
+            @interact(
+                scale=widgets.ToggleButtons(
+                    options=["linear", "logarithmic"],
+                    value="linear",
+                    description='Scale',
+                    disabled=False,
+                    style={'description_width': 'initial'}),
+                figsize=fixed(figsize)
+            )
+            def plot_with_interactive_scale(scale, figsize):
+                # Create figure
+                if not figsize:
+                    figsize = (data_array.ndim*5, 7)
+                    print("Figure size defaulted to", figsize)
+
+                fig, ax = plt.subplots(figsize=figsize)
+
+                # Get scale
+                log = scale == "logarithmic"
+
+                if log:
+                    ax.plot(np.log(data_array))
+                else:
+                    ax.plot(data_array)
+                plt.show()
 
     elif data_dimensions == 2:
-        plot_2d_image(data_array)
+        if isinstance(log, bool):
+            plot_2d_image(data_array, log=log, cmap=cmap)
+        elif log == "interact":
+            @interact(
+                scale=widgets.ToggleButtons(
+                    options=["linear", "logarithmic"],
+                    value="linear",
+                    description='Scale',
+                    disabled=False,
+                    style={'description_width': 'initial'}),
+                figsize=fixed(figsize)
+            )
+            def plot_with_interactive_scale(scale, figsize):
+                # Create figure
+                if not figsize:
+                    figsize = (10, 10)
+                    print("Figure size defaulted to", figsize)
+
+                fig, ax = plt.subplots(figsize=figsize)
+
+                # Get scale
+                log = scale == "logarithmic"
+
+                # Plot
+                plot_2d_image(data_array, log=log, fig=fig, ax=ax, cmap=cmap)
+
+                # Show figure
+                plt.show()
 
     elif data_dimensions == 3:
         @interact(
@@ -678,7 +750,6 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
                     continuous_update=False,
                     readout=True,
                     readout_format='d',
-                    # style = {'description_width': 'initial'}
                 ),
                 # PlottingOptions=widgets.ToggleButtons(
                 #     options=[("2D image", "2D"),
@@ -715,13 +786,15 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
 
                 # Create figure
                 plt.close()
-                fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+                print(figsize)
+                fig, ax = plt.subplots(1, 1, figsize=figsize)
 
                 # Get scale
                 log = scale == "logarithmic"
 
                 # Plot 2D image in interactive environment
-                plot_2d_image(two_d_array=dt, log=log, fig=fig, ax=ax)
+                plot_2d_image(two_d_array=dt, log=log,
+                              fig=fig, ax=ax, cmap=cmap)
                 plt.show()
 
                 # if PlottingOptions == "2D":
@@ -736,7 +809,7 @@ def plot_data(data_array, figsize=(15, 15), fontsize=15):
                 #     plt.show()
 
 
-def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
+def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r"):
     """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
@@ -746,6 +819,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
      will create axes
     :param log: True to have a logarithmic scale
      False to have a linear scale
+    :param cmap: default "YlGnBu_r"
     """
     # Find max and min
     # dmax = two_d_array.max()
@@ -761,7 +835,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             two_d_array,
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
-            cmap='YlGnBu_r',
+            cmap=cmap,
             # cmap="cividis",
             # extent=(0, 2, 0, 2),
             # vmin=dmin,
@@ -774,6 +848,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
 
         # Create colorbar
         # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+
     except TypeError:
         # plt.close()
         print("Using complex data, automatically switching to array module")
@@ -782,7 +857,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             np.abs(two_d_array),
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
-            cmap='YlGnBu_r',
+            cmap=cmap,
             # cmap="cividis",
             # extent=(0, 2, 0, 2),
             # vmin=dmin,
@@ -804,63 +879,15 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False):
             pass
 
 
-# def plot_2d_image_contour(two_d_array, fig=None, ax=None, log=False):
-#     """
-#     :param two_d_array: np.ndarray to plot, must be 2D
-#     :param fig: plt.figure to plot in, default is None and
-#      will create a figure
-#     :param ax: axes of figure, default is None and
-#      will create axes
-#     :param log: True to have a logarithmic scale
-#      False to have a linear scale
-#     """
-#     # Find max and min
-#     dmax = two_d_array.max()
-#     dmin = two_d_array.min()
-
-#     scale = "logarithmic" if log else "linear"
-
-#     ticks = [dmin + n * (dmax-dmin)/10 for n in range(0, 11)] if scale == "linear" else [
-#         pow(10, x) for x in range(0, len(str(dmax)))]
-
-#     if not fig:
-#         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-
-#     try:
-#         img = ax.contour(two_d_array,
-#                          ticks,
-#                          norm={"linear": None, "logarithmic": LogNorm()}[
-#                              scale],
-#                          cmap='YlGnBu_r',
-#                          # cmap="cividis",
-#                          # extent=(0, 2, 0, 2),
-#                          # vmin=dmin,
-#                          # vmax=dmax,
-#                          )
-
-#         # Create axis for colorbar
-#         cbar_ax = make_axes_locatable(ax).append_axes(
-#             position='right', size='5%', pad=0.1)
-
-#         # Create colorbar
-#         # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
-#     except TypeError:
-#         plt.close()
-#         if scale == "logarithmic":
-#             print("Log scale can not handle this kind of data ...")
-#         else:
-#             pass
-
-
-def plot_3d_slices(data_array, figsize=None, log=False):
+def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
     """Create figure for 3d data.
 
-    :param data_array: np.ndarray to plotn must be 3d
-    :param figsize: default (15, 15)
+    :param data_array: np.ndarray to plotn must be 3D
+    :param figsize: default (10, 10)
     :param log: boolean (True, False) or anything else which
      raises an interactive window
     """
-    if type(log) is bool:
+    if isinstance(log, bool):
         # Create figure
         if not figsize:
             figsize = (data_array.ndim*5, 7)
@@ -873,13 +900,13 @@ def plot_3d_slices(data_array, figsize=None, log=False):
         shape = data_array.shape
 
         two_d_array = data_array[shape[0]//2, :, :]
-        plot_2d_image(two_d_array, fig=fig, ax=axs[0], log=log)
+        plot_2d_image(two_d_array, fig=fig, ax=axs[0], log=log, cmap=cmap)
 
         two_d_array = data_array[:, shape[1]//2, :]
-        plot_2d_image(two_d_array, fig=fig, ax=axs[1], log=log)
+        plot_2d_image(two_d_array, fig=fig, ax=axs[1], log=log, cmap=cmap)
 
         two_d_array = data_array[:, :, shape[2]//2]
-        plot_2d_image(two_d_array, fig=fig, ax=axs[2], log=log)
+        plot_2d_image(two_d_array, fig=fig, ax=axs[2], log=log, cmap=cmap)
 
         # Show figure
         plt.show()
@@ -909,14 +936,65 @@ def plot_3d_slices(data_array, figsize=None, log=False):
             # Get scale
             log = scale == "logarithmic"
 
-            two_d_array = data_array[shape[0]//2, :, :]
-            plot_2d_image(two_d_array, fig=fig, ax=axs[0], log=log)
+            try:
+                two_d_array = data_array[shape[0]//2, :, :]
+                plot_2d_image(two_d_array, fig=fig,
+                              ax=axs[0], log=log, cmap=cmap)
 
-            two_d_array = data_array[:, shape[1]//2, :]
-            plot_2d_image(two_d_array, fig=fig, ax=axs[1], log=log)
+                two_d_array = data_array[:, shape[1]//2, :]
+                plot_2d_image(two_d_array, fig=fig,
+                              ax=axs[1], log=log, cmap=cmap)
 
-            two_d_array = data_array[:, :, shape[2]//2]
-            plot_2d_image(two_d_array, fig=fig, ax=axs[2], log=log)
+                two_d_array = data_array[:, :, shape[2]//2]
+                plot_2d_image(two_d_array, fig=fig,
+                              ax=axs[2], log=log, cmap=cmap)
 
-            # Show figure
-            plt.show()
+                # Show figure
+                plt.show()
+            except IndexError:
+                plt.close()
+                print("Is this a 3D array?")
+
+
+def complex2rgbalin(s, gamma=1.0, smax=None, smin=None, percentile=(None, None), alpha=(0, 1), type='uint8'):
+    """
+    Returns RGB image with with colour-coded phase and linear amplitude in brightness.
+    Optional exponent gamma is applied to the amplitude.
+
+    Args:
+        s: the complex data array (likely 2D, but can have higher dimensions)
+        gamma: gamma parameter to change the brightness curve
+        smax: maximum value (brightness = 1). If not supplied and percentile is not set,
+              the maximum amplitude of the array is used.
+        smin: minimum value(brightness = 0). If not supplied and percentile is not set,
+              the maximum amplitude of the array is used.
+        percentile: a tuple of two values (percent_min, percent_max) setting the percentile (between 0 and 100):
+                    the smax and smin values will be  set as the percentile value in the array (see numpy.percentile).
+                    These two values (when not None) supersede smax and smin.
+                    Example: percentile=(0,99) to scale the brightness to 0-1 between the 1% and 99% percentile of the data amplitude.
+        alpha: the minimum and maximum value for the alpha channel, normally (0,1). Useful to have different max/min
+               alpha when going through slices of one object
+        type: either 'float': values are in the [0..1] range, or 'uint8' (0..255) (new default)
+    Returns:
+        the RGBA array, with the same diemensions as the input array, plus one additional R/G/B/A dimension appended.
+    """
+    rgba = phase2rgb(s)
+    a = np.abs(s)
+    if percentile is not None:
+        if percentile[0] is not None:
+            smin = np.percentile(a, percentile[0])
+        if percentile[1] is not None:
+            smax = np.percentile(a, percentile[1])
+        if smax is not None and smin is not None:
+            if smin > smax:
+                smin, smax = smax, smin
+    if smax is not None:
+        a = (a - smax) * (a <= smax) + smax
+    if smin is not None:
+        a = (a - smin) * (a >= smin)
+    a /= a.max()
+    a = a ** gamma
+    rgba[..., 3] = alpha[0] + alpha[1] * a
+    if type == 'float':
+        return rgba
+    return (rgba * 255).astype(np.uint8)
