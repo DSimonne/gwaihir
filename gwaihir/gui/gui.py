@@ -24,6 +24,7 @@ from IPython.display import display, Markdown, Latex, clear_output, Image
 import gwaihir
 from gwaihir import plot, support
 from gwaihir.gui import gui_iterable
+from gwaihir.runner import correct_angles, transfer_matrix
 
 # bcdi package
 from bcdi.utils.utilities import bin_data
@@ -3495,73 +3496,74 @@ class Interface():
                     data preprocessing...")
                 return
 
-            # try:
-                # On lance la correction
-                # metadata = correct_angles.correct_angles_detector(
-                #     filename=self.Dataset.path_to_data,
-                #     direct_inplane=self.Dataset.direct_inplane,
-                #     direct_outofplane=self.Dataset.direct_outofplane,
-                #     get_temperature=self.Dataset.get_temperature,
-                #     reflection=self.Dataset.reflection,
-                #     reference_spacing=self.Dataset.reference_spacing,
-                #     reference_temperature=self.Dataset.reference_temperature,
-                #     high_threshold=1000000,
-                #     save_dir=save_dir,
-                #     scan=self.Dataset.scan,
-                #     root_folder=root_folder,
-                #     sample_name=self.Dataset.sample_name,
-                #     filtered_data=False,
-                #     peak_method=self.Dataset.centering_method,
-                #     normalize_flux=self.Dataset.normalize_flux,
-                #     debug=self.Dataset.debug,
-                #     beamline=self.Dataset.beamline,
-                #     actuators=self.Dataset.actuators,
-                #     is_series=self.Dataset.is_series,
-                #     custom_scan=self.Dataset.custom_scan,
-                #     custom_images=self.Dataset.custom_images,
-                #     custom_monitor=self.Dataset.custom_monitor,
-                #     custom_motors=self.Dataset.custom_motors,
-                #     rocking_angle=self.Dataset.rocking_angle,
-                #     specfile_name=self.Dataset.specfile_name,
-                #     detector=self.Dataset.detector,
-                #     roi_detector=self.Dataset.roi_detector,
-                #     hotpixels_file=self.Dataset.hotpixels_file,
-                #     flatfield_file=self.Dataset.flatfield_file,
-                #     template_imagefile=self.Dataset.template_imagefile,
-                #     beam_direction=self.Dataset.beam_direction,
-                #     sample_offsets=self.Dataset.sample_offsets,
-                #     directbeam_x=self.Dataset.cch1,
-                #     directbeam_y=self.Dataset.cch2,
-                #     sdd=self.Dataset.sdd,
-                #     energy=self.Dataset.energy,
-                #     GUI=True
-                # )
+            try:
+                # Possible to also use filtered_data True and
+                # a direct path to data
+                metadata = correct_angles_detector(
+                    # filename=self.Dataset.path_to_data,
+                    direct_inplane=self.Dataset.direct_inplane,
+                    direct_outofplane=self.Dataset.direct_outofplane,
+                    get_temperature=self.Dataset.get_temperature,
+                    reflection=self.Dataset.reflection,
+                    reference_spacing=self.Dataset.reference_spacing,
+                    reference_temperature=self.Dataset.reference_temperature,
+                    high_threshold=1000000,
+                    save_dir=save_dir,
+                    scan=self.Dataset.scan,
+                    root_folder=root_folder,
+                    sample_name=self.Dataset.sample_name,
+                    filtered_data=False,
+                    peak_method=self.Dataset.centering_method,
+                    normalize_flux=self.Dataset.normalize_flux,
+                    debug=self.Dataset.debug,
+                    beamline=self.Dataset.beamline,
+                    actuators=self.Dataset.actuators,
+                    is_series=self.Dataset.is_series,
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_images=self.Dataset.custom_images,
+                    custom_monitor=self.Dataset.custom_monitor,
+                    custom_motors=self.Dataset.custom_motors,
+                    rocking_angle=self.Dataset.rocking_angle,
+                    specfile_name=self.Dataset.specfile_name,
+                    detector=self.Dataset.detector,
+                    roi_detector=self.Dataset.roi_detector,
+                    hotpixels_file=self.Dataset.hotpixels_file,
+                    flatfield_file=self.Dataset.flatfield_file,
+                    template_imagefile=self.Dataset.template_imagefile,
+                    beam_direction=self.Dataset.beam_direction,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    directbeam_x=self.Dataset.cch1,
+                    directbeam_y=self.Dataset.cch2,
+                    sdd=self.Dataset.sdd,
+                    energy=self.Dataset.energy,
+                    GUI=True
+                )
 
                 # Save metadata
-                # for keys, values in metadata.items():
-                #     setattr(self.Dataset, keys, values)
+                for keys, values in metadata.items():
+                    setattr(self.Dataset, keys, values)
 
-                # self.extract_metadata()
+                self.extract_metadata()
 
-                # # Save corrected angles in the widgets
-                # print("Saving corrected angles values...")
-                # self._list_widgets_preprocessing.children[58].value\
-                #   = self.Dataset.bragg_outofplane
-                # self._list_widgets_preprocessing.children[59].value\
-                #   = self.Dataset.bragg_inplane
-                # self.Dataset.tilt_angle = np.round(
-                #     np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
-                # print("Corrected angles values saved in setup tab.")
+                # Save corrected angles in the widgets
+                print("Saving corrected angles values...")
+                self._list_widgets_preprocessing.children[58].value\
+                  = self.Dataset.bragg_outofplane
+                self._list_widgets_preprocessing.children[59].value\
+                  = self.Dataset.bragg_inplane
+                self.Dataset.tilt_angle = np.round(
+                    np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
+                print("Corrected angles values saved in setup tab.")
 
-            # except ValueError:
-            #     print("Inplane or outofplane ?")
+            except ValueError:
+                print("Inplane or outofplane ?")
 
-            # except TypeError:
-            #     print("Make sure you initialize the parameters by running \
-            #         the data preprocessing...")
+            except TypeError:
+                print("Make sure you initialize the parameters by running \
+                    the data preprocessing...")
 
-            # except Exception as e:
-            #     raise e
+            except Exception as e:
+                raise e
 
         if not angles_bool:
             clear_output(True)
