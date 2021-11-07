@@ -33,51 +33,75 @@ class Plotter():
 
     def __init__(
         self,
-        filename,
+        filename=None,
+        data_array=None,
         plot=False,
         log=False,
         cmap="YlGnBu_r",
         figsize=(10, 10),
         fontsize=15
     ):
-        """Create basic class attributes and run get_data_array() function from
-        filename.
+        """Either directly loads a data array from 'data_array' or extracts a
+        data array from 'filename'. Plots the data according to the value of
+        'plot'.
 
         :param filename: path to data, supported files extensions are .cxi,
          .npy or .npz
-        :param plot: either '2D', '3D' or False
+        :param data_array: a np.ndarray
+        :param plot: either '2D', 'slices', '3D' or False
         :param log: True to have a logarithmic scale
          False to have a linear scale
         :param cmap: default "YlGnBu_r"
          Other possible values are 'Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
          'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'
         """
-        # Path of file to be imported
         self.filename = filename
+        self.data_array = data_array
         self.plot = plot
         self.log = log
+        self.cmap = cmap
         self.figsize = figsize
         self.fontsize = fontsize
+
+        # Future attributes
         self.interact_scale = False
-        self.data_array = None
-        self.cmap = cmap
 
         # Get data array from any of the supported files
-        if isinstance(filename, str):
-            self.get_data_array(plot=self.plot)
-        elif isinstance(filename, np.ndarray):
-            print("If you want to work directly on the data array, use \
-                plot.plot_data() or plot.ThreeDViewer()")
-        else:
-            raise TypeError("This class is meant to work on .cxi, .npz or \
-            .npy files")
+        if isinstance(filename, str) and not data_array:
+            self.get_data_array()
 
-    def get_data_array(self, plot=False):
+        elif isinstance(filename, np.ndarray) and not filename:
+            # Plot data
+            if self.plot == "2D":
+                self.plot_data(figsize=self.figsize,
+                               log=self.log, cmap=self.cmap)
+
+            elif self.plot == "slices" and self.data_array.ndim == 3:
+                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap)
+
+            elif self.plot == "3D" and self.data_array.ndim == 3:
+                ThreeDViewer(self.data_array)
+
+            else:
+                print(
+                    "#########################################################"
+                    "########################################################\n"
+                    f"Loaded data array\n"
+                    f"\tNb of dimensions: {self.data_array.ndim}\n"
+                    f"\tShape: {self.data_array.shape}\n"
+                    "\t'plot' keyword accepted values: ('2D', 'slices', 3D')"
+                    "#########################################################"
+                    "########################################################"
+                )
+
+        else:
+            print("Please provide either a filename or directly an np.ndarray.")
+
+    def get_data_array(self):
         """Get numpy array from file.
 
-        :param plot: either '2D', '3D' or False
+        :param plot: either '2D', 'slices', '3D' or False
         """
-        self.plot = plot  # Because non attributes cannot pass interact
         # No need to select data array interactively
         if self.filename.endswith((".npy", ".h5", ".cxi")):
             if self.filename.endswith(".npy"):
@@ -111,12 +135,12 @@ class Plotter():
                     self.data_array = np.swapaxes(self.data_array, 0, 2)
 
                 except (KeyError, OSError):
-                    print("""
-                        The file could not be loaded, verify that you are
-                        loading a file with an hdf5 architecture (.nxs, .cxi,
-                        .h5, ...) and that the file exists. Otherwise, verify
-                        that the data is saved in f.root.entry_1.data_1.data[:],
-                        as it should be following csi conventions.
+                    raise KeyError("""
+                        The file could not be loaded, verify that you are\
+                        loading a file with an hdf5 architecture (.nxs, .cxi,\
+                        .h5, ...) and that the file exists. Otherwise, verify\
+                        that the data is saved in f.root.entry_1.data_1.data[:],\
+                        as it should be following csi conventions.\
                         """)
 
             # Plot data
@@ -137,6 +161,7 @@ class Plotter():
                     f"Loaded data array from {self.filename}\n"
                     f"\tNb of dimensions: {self.data_array.ndim}\n"
                     f"\tShape: {self.data_array.shape}\n"
+                    "\t'plot' keyword accepted values: ('2D', 'slices', 3D')"
                     "#########################################################"
                     "########################################################"
                 )
@@ -1013,3 +1038,25 @@ def complex2rgbalin(s, gamma=1.0, smax=None, smin=None, percentile=(None, None),
     if type == 'float':
         return rgba
     return (rgba * 255).astype(np.uint8)
+
+
+def phase2rgb(s):
+    """
+    Crates RGB image with colour-coded phase from a complex array.
+
+    Args:
+        s: a complex numpy array
+
+    Returns:
+        an RGBA numpy array, with one additional dimension added
+    """
+    ph = np.angle(s)
+    t = np.pi / 3
+    rgba = np.zeros(list(s.shape) + [4])
+    rgba[..., 0] = (ph < t) * (ph > -t) + (ph > t) * (ph < 2 * t) * (2 * t - ph) / t + (ph > -2 * t) * (ph < -t) * (
+        ph + 2 * t) / t
+    rgba[..., 1] = (ph > t) + (ph < -2 * t) * (-2 * t - ph) / \
+        t + (ph > 0) * (ph < t) * ph / t
+    rgba[..., 2] = (ph < -t) + (ph > -t) * (ph < 0) * (-ph) / \
+        t + (ph > 2 * t) * (ph - 2 * t) / t
+    return rgba

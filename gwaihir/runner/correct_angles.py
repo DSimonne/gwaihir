@@ -25,7 +25,6 @@ import bcdi.utils.utilities as util
 # Functions used in the GUI
 
 def correct_angles_detector(
-    # filename,
     save_dir,
     scan,
     root_folder,

@@ -200,7 +200,8 @@ class Interface():
         )
         self._list_widgets_init_dir.children[7].observe(
             self.init_handler, names="value")
-
+        self._list_widgets_init_dir.children[4].observe(
+            self.sub_directories_handler, names="value")
         # Organize into vertical and horizontal widgets boxes
         self.tab_init = widgets.VBox([
             self._list_widgets_init_dir.children[0],
@@ -1679,7 +1680,8 @@ class Interface():
                 style={'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            parent_folder=widgets.Text(
+            parent_folder=widgets.Dropdown(
+                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Parent folder:',
@@ -1690,7 +1692,7 @@ class Interface():
 
             csv_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.csv")),
-                description='Csv file in subdirectories:',
+                description='csv file in subdirectories:',
                 disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -1706,7 +1708,6 @@ class Interface():
                 description='Load dataframe',
                 disabled=False,
                 button_style='',
-                icon='fast-forward',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
         )
@@ -2270,7 +2271,8 @@ class Interface():
                     'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            strain_folder=widgets.Text(
+            strain_folder=widgets.Dropdown(
+                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Data folder:',
@@ -2349,7 +2351,8 @@ class Interface():
                 style={'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            folder=widgets.Text(
+            folder=widgets.Dropdown(
+                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Data folder:',
@@ -2418,34 +2421,37 @@ class Interface():
                     'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            facet_folder=widgets.Text(
-                value=os.getcwd() + "/postprocessing/",
-                placeholder=os.getcwd() + "/postprocessing/",
-                description='Folder containing .vtk data:',
+            parent_folder=widgets.Dropdown(
+                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
+                value=os.getcwd(),
+                placeholder=os.getcwd(),
+                description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            facet_filename=widgets.Dropdown(
-                options=[""] + [os.path.basename(f) for f in sorted(
-                    glob.glob(os.getcwd() + "/postprocessing/*.vtk"))],
-                description='Choose a file:',
+            vtk_file=widgets.Dropdown(
+                options=sorted(glob.glob(os.getcwd()+"*.vtk")),
+                description='vtk file in subdirectories:',
                 disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            load_data=widgets.ToggleButton(
+            load_data=widgets.ToggleButtons(
+                options=[
+                    ("Clear/ Reload folder", False),
+                    ('Load .vtk file', "load_csv"),
+                ],
                 value=False,
                 description='Load vtk data',
                 disabled=False,
                 button_style='',
-                icon='fast-forward',
-                layout=Layout(width='40%'),
+                layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
         )
         self.tab_facet.children[1].observe(
-            self.facet_folder_handler, names="value")
+            self.vtk_file_handler, names="value")
 
         # Widgets for readme tab
         self.tab_readme = interactive(
@@ -2568,28 +2574,21 @@ class Interface():
             self.Dataset.root_folder = root_folder
             self.scan_name = self.Dataset.sample_name + str(self.Dataset.scan)
 
-            # Create scan folder
+            # Assign scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder \
                 + self.scan_name + "/"
             print("Scan folder:", self.Dataset.scan_folder)
 
-            # Create preprocessing folder
+            # Assign preprocessing folder
             self.preprocessing_folder = self.Dataset.scan_folder \
                 + "preprocessing/"
 
-            # Create postprocessing folder
+            # Assign postprocessing folder
             self.postprocessing_folder = self.Dataset.scan_folder \
                 + "postprocessing/"
 
-            # Create data folder
+            # Assign data folder
             self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
-
-            # Update widgets values with scan folder
-            self.tab_facet.children[1].value = f"{self.preprocessing_folder}\
-            {self.Dataset.scan}_fa.vtk"
-            self.tab_data.children[1].value = self.preprocessing_folder
-            self._list_widgets_strain.children[-4].value = self.preprocessing_folder
-            self._list_widgets_pynx.children[1].value = self.preprocessing_folder
 
             # Get template_imagefile from data in data_dir, based on sixs
             # routine, depends on mu or omega scan at sixs
@@ -2685,27 +2684,28 @@ class Interface():
                 pass
 
             # Data frame folder, refresh values
+            self.sub_directories_handler(change=self.Dataset.scan_folder)
             self.csv_file_handler(os.getcwd())
 
             # PyNX folder, refresh values
             self._list_widgets_pynx.children[1].value\
-                = self.preprocessing_folder
+                = self.preprocessing_folder[:-1]
             self.pynx_folder_handler(
                 change=self._list_widgets_pynx.children[1].value)
 
             # Plot folder, refresh values
-            self.tab_data.children[1].value = self.preprocessing_folder
+            self.tab_data.children[1].value = self.preprocessing_folder[:-1]
             self.plot_folder_handler(change=self.tab_data.children[1].value)
 
             # Strain folder, refresh values
             self._list_widgets_strain.children[-4].value\
-                = self.preprocessing_folder
+                = self.preprocessing_folder[:-1]
             self.strain_folder_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
             # Facet folder, refresh values
-            self.tab_facet.children[1].value = self.postprocessing_folder
-            self.facet_folder_handler(change=self.tab_facet.children[1].value)
+            self.tab_facet.children[1].value = self.postprocessing_folder[:-1]
+            self.vtk_file_handler(change=self.tab_facet.children[1].value)
 
             # Only allow to save data if PyNX is imported to avoid errors
             # PyNX is needed to create the cxi file
@@ -3499,7 +3499,7 @@ class Interface():
             try:
                 # Possible to also use filtered_data True and
                 # a direct path to data
-                metadata = correct_angles_detector(
+                metadata = correct_angles.correct_angles_detector(
                     # filename=self.Dataset.path_to_data,
                     direct_inplane=self.Dataset.direct_inplane,
                     direct_outofplane=self.Dataset.direct_outofplane,
@@ -3547,10 +3547,10 @@ class Interface():
 
                 # Save corrected angles in the widgets
                 print("Saving corrected angles values...")
-                self._list_widgets_preprocessing.children[58].value\
-                  = self.Dataset.bragg_outofplane
-                self._list_widgets_preprocessing.children[59].value\
-                  = self.Dataset.bragg_inplane
+                self._list_widgets_preprocessing.children[55].value\
+                    = self.Dataset.bragg_outofplane
+                self._list_widgets_preprocessing.children[56].value\
+                    = self.Dataset.bragg_inplane
                 self.Dataset.tilt_angle = np.round(
                     np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
                 print("Corrected angles values saved in setup tab.")
@@ -5090,8 +5090,7 @@ class Interface():
                 if self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
 
-                save_dir = f"{self.postprocessing_folder}\
-                /result_{self.Dataset.save_frame}/"
+                save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
                     w.disabled = False
@@ -5233,41 +5232,41 @@ class Interface():
                 # Temporary fix, recompute the transformation matrix
                 # print("\nSaving transformation matrix ...")
                 # self.Dataset.transfer_matrix = \
-                # transfer_matrix.compute_transformation_matrix(
-                #     scan=self.Dataset.scan,
-                #     original_size=self.Dataset.original_size,
-                #     phasing_binning=self.Dataset.phasing_binning,
-                #     comment=self.Dataset.comment,
-                #     reconstruction_file=self.Dataset.reconstruction_file,
-                #     keep_size=self.Dataset.keep_size,
-                #     detector=self.Dataset.detector,
-                #     template_imagefile=self.Dataset.template_imagefile,
-                #     preprocessing_binning=self.Dataset.preprocessing_binning,
-                #     tilt_angle=self.Dataset.tilt_angle,
-                #     beamline=self.Dataset.beamline,
-                #     pixel_size=self.Dataset.pixel_size,
-                #     energy=self.Dataset.energy,
-                #     outofplane_angle=self.Dataset.outofplane_angle,
-                #     inplane_angle=self.Dataset.inplane_angle,
-                #     rocking_angle=self.Dataset.rocking_angle,
-                #     sdd=self.Dataset.sdd,
-                #     sample_offsets=self.Dataset.sample_offsets,
-                #     actuators=self.Dataset.actuators,
-                #     custom_scan=self.Dataset.custom_scan,
-                #     custom_motors=self.Dataset.custom_motors,
-                #     fix_voxel=self.Dataset.fix_voxel,
-                #     ref_axis_q=self.Dataset.ref_axis_q,
-                #     sample_name=self.Dataset.sample_name,
-                #     root_folder=self.Dataset.root_folder,
-                #     save_dir=save_dir,
-                #     specfile_name=self.Dataset.specfile_name,
-                #     centering_method=self.Dataset.centering_method
-                # )
-                print("End of script")
-            # except AttributeError:
-            #     print("Run angles correction first, the values of the \
-            # inplane and outofplane angles are the bragg peak center of mass \
-            # will be automatically computed.")
+                #     transfer_matrix.compute_transformation_matrix(
+                #         scan=self.Dataset.scan,
+                #         original_size=self.Dataset.original_size,
+                #         phasing_binning=self.Dataset.phasing_binning,
+                #         comment=self.Dataset.comment,
+                #         reconstruction_file=self.Dataset.reconstruction_file,
+                #         keep_size=self.Dataset.keep_size,
+                #         detector=self.Dataset.detector,
+                #         template_imagefile=self.Dataset.template_imagefile,
+                #         preprocessing_binning=self.Dataset.preprocessing_binning,
+                #         tilt_angle=self.Dataset.tilt_angle,
+                #         beamline=self.Dataset.beamline,
+                #         pixel_size=self.Dataset.pixel_size,
+                #         energy=self.Dataset.energy,
+                #         outofplane_angle=self.Dataset.outofplane_angle,
+                #         inplane_angle=self.Dataset.inplane_angle,
+                #         rocking_angle=self.Dataset.rocking_angle,
+                #         sdd=self.Dataset.sdd,
+                #         sample_offsets=self.Dataset.sample_offsets,
+                #         actuators=self.Dataset.actuators,
+                #         custom_scan=self.Dataset.custom_scan,
+                #         custom_motors=self.Dataset.custom_motors,
+                #         fix_voxel=self.Dataset.fix_voxel,
+                #         ref_axis_q=self.Dataset.ref_axis_q,
+                #         sample_name=self.Dataset.sample_name,
+                #         root_folder=self.Dataset.root_folder,
+                #         save_dir=save_dir,
+                #         specfile_name=self.Dataset.specfile_name,
+                #         centering_method=self.Dataset.centering_method
+                #     )
+                # print("End of script")
+            except AttributeError:
+                print("Run angles correction first, the values of the \
+            inplane and outofplane angles are the bragg peak center of mass \
+            will be automatically computed.")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
@@ -5296,8 +5295,8 @@ class Interface():
     def init_facet_analysis(
         self,
         unused_label_facet,
-        facet_folder,
-        facet_filename,
+        parent_folder,
+        vtk_file,
         load_data,
     ):
         """Allows one to:
@@ -5305,21 +5304,28 @@ class Interface():
         load a vtk file (previously created in paraview via
         theFacetAnalyser plugin) realign the particle by assigning a
         vector to 2 of its facets extract information from each facet
+        :param parent_folder: all .vtk files in the parent_folder subsirectories
+         will be shown in the dropdown list.
+        :param vtk_file: path to vtk file
+        :param load_data: True to load vtk file dataframe
         """
-        # plt.switch_backend(
-        #     'module://ipykernel.pylab.backend_inline'
-        # )
         if load_data:
             # Disable text widget to avoid bugs
             self.tab_facet.children[1].disabled = True
+            try:
+                self.Dataset.facet_filename = vtk_file
+            except AttributeError:
+                pass
 
-            self.Dataset.facet_filename = facet_folder + facet_filename
-
-            self.Facets = facet_analysis.Facets(
-                filename=facet_filename, pathdir=facet_folder)
-            print(
-                "Facets object saved as self.Facets, call help(self.Facets) \
-                for more details.")
+            try:
+                self.Facets = facet_analysis.Facets(
+                    filename=os.path.basename(vtk_file),
+                    pathdir=vtk_file.replace(os.path.basename(vtk_file), ""))
+                print(
+                    "Facets object saved as self.Facets, call help(self.Facets) \
+                    for more details.")
+            except TypeError:
+                print("Data type not supported.")
 
             # Button to rotate data
             button_rotate = Button(
@@ -5596,6 +5602,8 @@ class Interface():
 
         if not load_data:
             self.tab_facet.children[1].disabled = False
+            self.vtk_file_handler(parent_folder)
+            print("Cleared window.")
             clear_output(True)
 
     @ staticmethod
@@ -5723,17 +5731,21 @@ class Interface():
             try:
                 # csv data
                 if show_logs == "load_csv":
-                    logs = pd.read_csv(self.csv_file)
-                    print(
-                        f"""
-                        ###############################################################################
-                        For a more detailed analysis, please proceed as follows
-                        import pandas as pd
-                        df = pd.read_csv({self.csv_file})
-                        You can then work on the `df` dataframe as you please.
-                        ###############################################################################
-                        """
-                    )
+                    try:
+                        logs = pd.read_csv(self.csv_file)
+                    except ValueError:
+                        print("Data type not supported.")
+                    else:
+                        print(
+                            f"""
+                            ###############################################################################
+                            For a more detailed analysis, please proceed as follows
+                            import pandas as pd
+                            df = pd.read_csv({self.csv_file})
+                            You can then work on the `df` dataframe as you please.
+                            ###############################################################################
+                            """
+                        )
 
                 # field data from facet analysis
                 elif show_logs == "load_field_data":
@@ -6074,8 +6086,7 @@ class Interface():
         """
         # Save rocking curve data
         np.savez(
-            f"{self.postprocessing_folder}\
-            /interpolated_rocking_curve.npz",
+            f"{self.postprocessing_folder}/interpolated_rocking_curve.npz",
             tilt_values=self.Dataset.tilt_values,
             rocking_curve=self.Dataset.rocking_curve,
             interp_tilt=self.Dataset.interp_tilt,
@@ -6101,7 +6112,7 @@ class Interface():
                 len(data.mu), data.integration_time[0], len(
                     data.integration_time),
                 self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                data.ssl3hg[0], data.ssl3vg[0],
+                # data.ssl3hg[0], data.ssl3vg[0],
                 # data.ssl1hg[0], data.ssl1vg[0]
             ]],
                 columns=[
@@ -6115,8 +6126,8 @@ class Interface():
                     "gamma", 'gamma-mu',
                     "step size", "integration time", "steps",
                     "FWHM", "COM_rocking_curve",
-                    "ssl3hg", "ssl3vg",
-                #     "ssl1hg", "ssl1vg",
+                    # "ssl3hg", "ssl3vg",
+                    # "ssl1hg", "ssl1vg",
             ])
         else:
             # Add new data
@@ -6181,6 +6192,18 @@ class Interface():
                 change=self._list_widgets_preprocessing.children[25].value)
             self.interpolation_handler(
                 change=self._list_widgets_preprocessing.children[44].value)
+
+    def sub_directories_handler(self, change):
+        """Handles changes linked to root_folder subdirectories"""
+        try:
+            sub_dirs = [d for d in [x[0] for x in os.walk(change.new)]]
+        except AttributeError:
+            sub_dirs = [d for d in [x[0] for x in os.walk(change)]]
+        finally:
+            self.tab_data_frame.children[1].options = sub_dirs
+            self._list_widgets_strain.children[-4].options = sub_dirs
+            self.tab_data.children[1].options = sub_dirs
+            self.tab_facet.children[1].options = sub_dirs
 
     def beamline_handler(self, change):
         """Handles changes on the widget used for the beamline."""
@@ -6547,17 +6570,17 @@ class Interface():
             self.tab_data.children[2].options = [os.path.basename(f)
                                                  for f in options]
 
-    def facet_folder_handler(self, change):
-        """Handles changes on the widget used to load a data file."""
+    def vtk_file_handler(self, change):
+        """List all .vtk files in change subdirectories"""
+        vtk_files = []
+
         try:
-            options = [""] + [os.path.basename(f) for f in sorted(
-                glob.glob(change.new + "/*.vtk"))
-            ]
+            for d in [x[0] for x in os.walk(change.new)]:
+                vtk_files += sorted(glob.glob(f"{d}/*.vtk"))
 
         except AttributeError:
-            options = [""] + [os.path.basename(f) for f in sorted(
-                glob.glob(change + "/*.vtk"))
-            ]
+            for d in [x[0] for x in os.walk(change)]:
+                vtk_files += sorted(glob.glob(f"{d}/*.vtk"))
 
         finally:
-            self.tab_facet.children[2].options = options
+            self.tab_facet.children[2].options = vtk_files
