@@ -31,7 +31,15 @@ class Plotter():
     Gets data array from file and plot if specified
     """
 
-    def __init__(self, filename, plot=False, log=False, cmap="YlGnBu_r", figsize=(10, 10), fontsize=15):
+    def __init__(
+        self,
+        filename,
+        plot=False,
+        log=False,
+        cmap="YlGnBu_r",
+        figsize=(10, 10),
+        fontsize=15
+    ):
         """Create basic class attributes and run get_data_array() function from
         filename.
 
@@ -55,7 +63,14 @@ class Plotter():
         self.cmap = cmap
 
         # Get data array from any of the supported files
-        self.get_data_array(plot=self.plot)
+        if isinstance(filename, str):
+            self.get_data_array(plot=self.plot)
+        elif isinstance(filename, np.ndarray):
+            print("If you want to work directly on the data array, use \
+                plot.plot_data() or plot.ThreeDViewer()")
+        else:
+            raise TypeError("This class is meant to work on .cxi, .npz or \
+            .npy files")
 
     def get_data_array(self, plot=False):
         """Get numpy array from file.
