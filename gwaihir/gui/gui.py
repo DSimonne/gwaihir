@@ -1170,7 +1170,7 @@ class Interface():
         ])
 
         # Widgets for PyNX
-        self._list_widgets_pynx = interactive(
+        self._list_widgets_phase_retrieval = interactive(
             self.initialize_phase_retrieval,
             unused_label_data=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
@@ -1179,10 +1179,11 @@ class Interface():
                     'description_width': 'initial'},
                 layout=Layout(width='90%', height="35px")),
 
-            folder=widgets.Text(
+            parent_folder=widgets.Dropdown(
+                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
-                description='Data folder:',
+                description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -1637,38 +1638,38 @@ class Interface():
                     'description_width': 'initial'},
                 icon='fast-forward')
         )
-        self._list_widgets_pynx.children[1].observe(
+        self._list_widgets_phase_retrieval.children[1].observe(
             self.pynx_folder_handler, names="value")
-        self._list_widgets_pynx.children[15].observe(
+        self._list_widgets_phase_retrieval.children[15].observe(
             self.pynx_psf_handler, names="value")
-        self._list_widgets_pynx.children[16].observe(
+        self._list_widgets_phase_retrieval.children[16].observe(
             self.pynx_peak_shape_handler, names="value")
-        self._list_widgets_pynx.children[-4].observe(
+        self._list_widgets_phase_retrieval.children[-4].observe(
             self.run_pynx_handler, names="value")
-        self._list_widgets_pynx.children[-2].observe(
+        self._list_widgets_phase_retrieval.children[-2].observe(
             self.run_pynx_handler, names="value")
         self.tab_pynx = widgets.VBox([
-            widgets.VBox(self._list_widgets_pynx.children[:6]),
-            widgets.HBox(self._list_widgets_pynx.children[6:8]),
-            self._list_widgets_pynx.children[8],
-            widgets.HBox(self._list_widgets_pynx.children[9:11]),
-            widgets.HBox(self._list_widgets_pynx.children[11:14]),
-            self._list_widgets_pynx.children[14],
-            widgets.HBox(self._list_widgets_pynx.children[15:19]),
-            self._list_widgets_pynx.children[19],
-            self._list_widgets_pynx.children[20],
-            widgets.HBox(self._list_widgets_pynx.children[21:25]),
-            self._list_widgets_pynx.children[25],
-            self._list_widgets_pynx.children[29],
-            widgets.HBox(self._list_widgets_pynx.children[30:34]),
-            widgets.HBox(self._list_widgets_pynx.children[34:37]),
-            self._list_widgets_pynx.children[26],
-            widgets.HBox(self._list_widgets_pynx.children[27:29]),
-            self._list_widgets_pynx.children[-5],
-            self._list_widgets_pynx.children[-4],
-            self._list_widgets_pynx.children[-3],
-            self._list_widgets_pynx.children[-2],
-            self._list_widgets_pynx.children[-1],
+            widgets.VBox(self._list_widgets_phase_retrieval.children[:6]),
+            widgets.HBox(self._list_widgets_phase_retrieval.children[6:8]),
+            self._list_widgets_phase_retrieval.children[8],
+            widgets.HBox(self._list_widgets_phase_retrieval.children[9:11]),
+            widgets.HBox(self._list_widgets_phase_retrieval.children[11:14]),
+            self._list_widgets_phase_retrieval.children[14],
+            widgets.HBox(self._list_widgets_phase_retrieval.children[15:19]),
+            self._list_widgets_phase_retrieval.children[19],
+            self._list_widgets_phase_retrieval.children[20],
+            widgets.HBox(self._list_widgets_phase_retrieval.children[21:25]),
+            self._list_widgets_phase_retrieval.children[25],
+            self._list_widgets_phase_retrieval.children[29],
+            widgets.HBox(self._list_widgets_phase_retrieval.children[30:34]),
+            widgets.HBox(self._list_widgets_phase_retrieval.children[34:37]),
+            self._list_widgets_phase_retrieval.children[26],
+            widgets.HBox(self._list_widgets_phase_retrieval.children[27:29]),
+            self._list_widgets_phase_retrieval.children[-5],
+            self._list_widgets_phase_retrieval.children[-4],
+            self._list_widgets_phase_retrieval.children[-3],
+            self._list_widgets_phase_retrieval.children[-2],
+            self._list_widgets_phase_retrieval.children[-1],
         ])
 
         # Widgets for logs
@@ -2683,15 +2684,17 @@ class Interface():
             except (AttributeError, FileNotFoundError):
                 pass
 
-            # Data frame folder, refresh values
+            # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
+
+            # Refresh csv file
             self.csv_file_handler(os.getcwd())
 
             # PyNX folder, refresh values
-            self._list_widgets_pynx.children[1].value\
+            self._list_widgets_phase_retrieval.children[1].value\
                 = self.preprocessing_folder[:-1]
             self.pynx_folder_handler(
-                change=self._list_widgets_pynx.children[1].value)
+                change=self._list_widgets_phase_retrieval.children[1].value)
 
             # Plot folder, refresh values
             self.tab_data.children[1].value = self.preprocessing_folder[:-1]
@@ -3402,10 +3405,10 @@ class Interface():
                     --config {self.preprocessing_folder}config_preprocessing.yml")
 
                 # PyNX folder, refresh
-                self._list_widgets_pynx.children[1].value\
+                self._list_widgets_phase_retrieval.children[1].value\
                     = self.preprocessing_folder
                 self.pynx_folder_handler(
-                    change=self._list_widgets_pynx.children[1].value)
+                    change=self._list_widgets_phase_retrieval.children[1].value)
 
                 # Plot folder, refresh
                 self.tab_data.children[1].value = self.preprocessing_folder
@@ -3774,7 +3777,7 @@ class Interface():
     def initialize_phase_retrieval(
         self,
         unused_label_data,
-        folder,
+        parent_folder,
         iobs,
         mask,
         support,
@@ -3821,7 +3824,7 @@ class Interface():
         to run phase retrieval via the CLI (with ot without MPI) Or directly in
         python using the operators.
 
-        :param folder: folder in which the raw data files are, and where the
+        :param parent_folder: folder in which the raw data files are, and where the
          output will be saved
         :param iobs: 2D/3D observed diffraction data (intensity).
           Assumed to be corrected and following Poisson statistics, will be
@@ -3918,11 +3921,11 @@ class Interface():
         :param wavelength: experiment wavelength (meters)
         :param detector_distance: detector distance (meters)
         """
-        self.Dataset.folder = folder
-        self.Dataset.iobs = folder + iobs
-        self.Dataset.mask = folder + mask
-        self.Dataset.support = folder + support
-        self.Dataset.obj = folder + obj
+        self.Dataset.parent_folder = parent_folder
+        self.Dataset.iobs = parent_folder + iobs
+        self.Dataset.mask = parent_folder + mask
+        self.Dataset.support = parent_folder + support
+        self.Dataset.obj = parent_folder + obj
         self.Dataset.auto_center_resize = auto_center_resize
         self.Dataset.max_size = max_size
         self.Dataset.support_threshold = support_threshold
@@ -4359,7 +4362,7 @@ class Interface():
                                 "{}/result_scan_{}_run_{}_LLK_{:.4}_\
                                 support_threshold_{:.4}_shape_{}_{}_\
                                 {}_{}.cxi".format(
-                                    self.Dataset.folder,
+                                    self.Dataset.parent_folder,
                                     self.Dataset.scan,
                                     i,
                                     cdi.get_llk()[0],
@@ -4397,7 +4400,7 @@ class Interface():
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
                         self.filter_reconstructions(
-                            self.Dataset.folder,
+                            self.Dataset.parent_folder,
                             self.Dataset.nb_run,
                             self.Dataset.nb_run_keep,
                             self.Dataset.filter_criteria
@@ -4410,11 +4413,11 @@ class Interface():
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
             if self.run_pynx_tools == "modes":
-                self.run_modes_decomposition(self.Dataset.folder)
+                self.run_modes_decomposition(self.Dataset.parent_folder)
 
             elif self.run_pynx_tools == "filter":
                 self.filter_reconstructions(
-                    self.Dataset.folder,
+                    self.Dataset.parent_folder,
                     self.Dataset.nb_run,
                     self.Dataset.nb_run_keep,
                     self.Dataset.filter_criteria
@@ -6200,10 +6203,12 @@ class Interface():
         except AttributeError:
             sub_dirs = [d for d in [x[0] for x in os.walk(change)]]
         finally:
-            self.tab_data_frame.children[1].options = sub_dirs
-            self._list_widgets_strain.children[-4].options = sub_dirs
-            self.tab_data.children[1].options = sub_dirs
-            self.tab_facet.children[1].options = sub_dirs
+            if self._list_widgets_init_dir.children[-2].value:
+                self.tab_data_frame.children[1].options = sub_dirs
+                self._list_widgets_strain.children[-4].options = sub_dirs
+                self.tab_data.children[1].options = sub_dirs
+                self.tab_facet.children[1].options = sub_dirs
+                self._list_widgets_phase_retrieval.children[1].options = sub_dirs
 
     def beamline_handler(self, change):
         """Handles changes on the widget used for the beamline."""
@@ -6416,12 +6421,12 @@ class Interface():
                 glob.glob(change.new + "/*maskpynx*.npz"))]
 
             # support list
-            self._list_widgets_pynx.children[4].options = [""]\
+            self._list_widgets_phase_retrieval.children[4].options = [""]\
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(change.new + "/*.npz"))]
 
             # obj list
-            self._list_widgets_pynx.children[5].options = [""]\
+            self._list_widgets_phase_retrieval.children[5].options = [""]\
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(change.new + "/*.npz"))]
 
@@ -6436,12 +6441,12 @@ class Interface():
                 glob.glob(change + "/*maskpynx*.npz"))]
 
             # support list
-            self._list_widgets_pynx.children[4].options = [""]\
+            self._list_widgets_phase_retrieval.children[4].options = [""]\
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(change + "/*.npz"))]
 
             # obj list
-            self._list_widgets_pynx.children[5].options = [""]\
+            self._list_widgets_phase_retrieval.children[5].options = [""]\
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(change + "/*.npz"))]
 
@@ -6467,63 +6472,63 @@ class Interface():
             sorted_mask_list = list_probable_mask_files + temp_list + [""]
 
             # iobs list
-            self._list_widgets_pynx.children[2].options = sorted_iobs_list
+            self._list_widgets_phase_retrieval.children[2].options = sorted_iobs_list
 
             # mask list
-            self._list_widgets_pynx.children[3].options = sorted_mask_list
+            self._list_widgets_phase_retrieval.children[3].options = sorted_mask_list
 
     def pynx_psf_handler(self, change):
         """Handles changes related to the psf."""
         try:
             if change.new:
-                for w in self._list_widgets_pynx.children[16:20]:
+                for w in self._list_widgets_phase_retrieval.children[16:20]:
                     w.disabled = False
 
             if not change.new:
-                for w in self._list_widgets_pynx.children[16:20]:
+                for w in self._list_widgets_phase_retrieval.children[16:20]:
                     w.disabled = True
 
         except AttributeError:
             if change:
-                for w in self._list_widgets_pynx.children[16:20]:
+                for w in self._list_widgets_phase_retrieval.children[16:20]:
                     w.disabled = False
 
             if not change:
-                for w in self._list_widgets_pynx.children[16:20]:
+                for w in self._list_widgets_phase_retrieval.children[16:20]:
                     w.disabled = True
 
         self.pynx_peak_shape_handler(
-            change=self._list_widgets_pynx.children[16].value)
+            change=self._list_widgets_phase_retrieval.children[16].value)
 
     def pynx_peak_shape_handler(self, change):
         """Handles changes related to psf the peak shape."""
         try:
             if change.new != "pseudo-voigt":
-                self._list_widgets_pynx.children[18].disabled = True
+                self._list_widgets_phase_retrieval.children[18].disabled = True
 
             if change.new == "pseudo-voigt":
-                self._list_widgets_pynx.children[18].disabled = False
+                self._list_widgets_phase_retrieval.children[18].disabled = False
 
         except AttributeError:
             if change != "pseudo-voigt":
-                self._list_widgets_pynx.children[18].disabled = True
+                self._list_widgets_phase_retrieval.children[18].disabled = True
 
             if change == "pseudo-voigt":
-                self._list_widgets_pynx.children[18].disabled = False
+                self._list_widgets_phase_retrieval.children[18].disabled = False
 
     def run_pynx_handler(self, change):
         """Handles changes related to the phase retrieval."""
         if change.new:
-            for w in self._list_widgets_pynx.children[:-2]:
+            for w in self._list_widgets_phase_retrieval.children[:-2]:
                 w.disabled = True
-            self._list_widgets_pynx.children[-4].disabled = False
+            self._list_widgets_phase_retrieval.children[-4].disabled = False
 
         elif not change.new:
-            for w in self._list_widgets_pynx.children[:-2]:
+            for w in self._list_widgets_phase_retrieval.children[:-2]:
                 w.disabled = False
 
             self.pynx_psf_handler(
-                change=self._list_widgets_pynx.children[15].value)
+                change=self._list_widgets_phase_retrieval.children[15].value)
 
     def strain_folder_handler(self, change):
         """Handles changes on the widget used to load a data file."""
