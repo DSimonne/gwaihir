@@ -5556,37 +5556,24 @@ class Interface():
                                 # Create subfolder
                                 try:
                                     os.mkdir(
-                                        f"{self.Dataset.root_folder}\
-                                        {self.scan_name}/postprocessing/\
-                                        facets_analysis/")
+                                        f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
                                     print(
-                                        f"Created {self.Dataset.root_folder}\
-                                        {self.scan_name}/postprocessing/\
-                                        facets_analysis/")
+                                        f"Created {self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
                                 except FileExistsError:
                                     print(
-                                        f"{self.Dataset.root_folder}\
-                                        {self.scan_name}/postprocessing/\
-                                        facets_analysis/ exists")
+                                        f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/ exists")
 
                                 # Save data
                                 self.Facets.save_data(
-                                    f"{self.Dataset.scan_folder}\
-                                    /postprocessing/facets_analysis/\
-                                    field_data_{self.Dataset.scan}.csv")
+                                    f"{self.Dataset.scan_folder}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
                                 print(
-                                    f"Saved field data as \
-                                    {self.Dataset.scan_folder}/postprocessing\
-                                    /facets_analysis/\
+                                    f"Saved field data as {self.Dataset.scan_folder}/postprocessing/facets_analysis/\
                                     field_data_{self.Dataset.scan}.csv")
 
                                 self.Facets.to_hdf5(
-                                    f"{self.Dataset.scan_folder}\
-                                    {self.scan_name}.cxi")
+                                    f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
                                 print(
-                                    f"Saved Facets class attributes in \
-                                    {self.Dataset.scan_folder}\
-                                    {self.scan_name}.cxi")
+                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.scan_name}.cxi")
                             except AttributeError:
                                 print(
                                     "Initialize the directories first to save \
