@@ -110,6 +110,8 @@ class Interface():
         self.csv_file = None
         self.scan_name = None
         self.cmap = "YlGnBu_r"
+        self.preprocessing_folder = None
+        self.postprocessing_folder = None
 
         # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
         self.matplotlib_backend = "Agg"
@@ -1180,7 +1182,7 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             parent_folder=widgets.Dropdown(
-                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
+                options=[x[0] for x in os.walk(os.getcwd())],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Parent folder:',
@@ -1682,7 +1684,7 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             parent_folder=widgets.Dropdown(
-                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
+                options=[x[0] for x in os.walk(os.getcwd())],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Parent folder:',
@@ -2273,7 +2275,7 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             strain_folder=widgets.Dropdown(
-                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
+                options=[x[0] for x in os.walk(os.getcwd())],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Data folder:',
@@ -2353,7 +2355,7 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             folder=widgets.Dropdown(
-                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
+                options=[x[0] for x in os.walk(os.getcwd())],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Data folder:',
@@ -2423,7 +2425,7 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             parent_folder=widgets.Dropdown(
-                options=[d for d in [x[0] for x in os.walk(os.getcwd())]],
+                options=[x[0] for x in os.walk(os.getcwd())],
                 value=os.getcwd(),
                 placeholder=os.getcwd(),
                 description='Parent folder:',
@@ -2768,12 +2770,14 @@ class Interface():
                                 output ...")
                             self.Dataset.to_cxi(
                                 cxi_filename=self.cxi_filename,
-                                reconstruction_filename=self.Dataset.reconstruction_file)
+                                reconstruction_filename=self.Dataset.reconstruction_file,
+                                )
 
                         except AttributeError:
                             self.Dataset.to_cxi(
                                 cxi_filename=self.cxi_filename,
-                                reconstruction_filename=False)
+                                reconstruction_filename=False,
+                                )
 
                     except NameError:
                         # Could not load cdi object
@@ -2800,8 +2804,7 @@ class Interface():
 
                 @ button_reload_previous_data.on_click
                 def action_reload_previous_data(selfbutton):
-                    """Create button to reload Dataset object from .cxi
-                    file."""
+                    """Create button to reload Dataset object from .cxi file."""
                     clear_output(True)
                     display(buttons_init)
                     print(
@@ -3555,7 +3558,8 @@ class Interface():
                 self._list_widgets_preprocessing.children[56].value\
                     = self.Dataset.bragg_inplane
                 self.Dataset.tilt_angle = np.round(
-                    np.mean(self.Dataset.tilt_values[1:] - self.Dataset.tilt_values[:-1]), 4)
+                    np.mean(self.Dataset.tilt_values[1:]\
+                    - self.Dataset.tilt_values[:-1]), 4)
                 print("Corrected angles values saved in setup tab.")
 
             except ValueError:
@@ -6186,9 +6190,9 @@ class Interface():
     def sub_directories_handler(self, change):
         """Handles changes linked to root_folder subdirectories"""
         try:
-            sub_dirs = [d for d in [x[0] for x in os.walk(change.new)]]
+            sub_dirs = [x[0] for x in os.walk(change.new)]
         except AttributeError:
-            sub_dirs = [d for d in [x[0] for x in os.walk(change)]]
+            sub_dirs = [x[0] for x in os.walk(change)]
         finally:
             if self._list_widgets_init_dir.children[-2].value:
                 self.tab_data_frame.children[1].options = sub_dirs
@@ -6385,12 +6389,12 @@ class Interface():
         csv_files = []
 
         try:
-            for d in [x[0] for x in os.walk(change.new)]:
-                csv_files += sorted(glob.glob(f"{d}/*.csv"))
+            for x in os.walk(change.new):
+                csv_files += sorted(glob.glob(f"{x[0]}/*.csv"))
 
         except AttributeError:
-            for d in [x[0] for x in os.walk(change)]:
-                csv_files += sorted(glob.glob(f"{d}/*.csv"))
+            for x in os.walk(change):
+                csv_files += sorted(glob.glob(f"{x[0]}/*.csv"))
 
         finally:
             self.tab_data_frame.children[2].options = csv_files
@@ -6567,12 +6571,12 @@ class Interface():
         vtk_files = []
 
         try:
-            for d in [x[0] for x in os.walk(change.new)]:
-                vtk_files += sorted(glob.glob(f"{d}/*.vtk"))
+            for x in os.walk(change.new):
+                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"))
 
         except AttributeError:
-            for d in [x[0] for x in os.walk(change)]:
-                vtk_files += sorted(glob.glob(f"{d}/*.vtk"))
+            for x in os.walk(change):
+                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"))
 
         finally:
             self.tab_facet.children[2].options = vtk_files

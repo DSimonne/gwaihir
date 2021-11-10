@@ -51,9 +51,11 @@ class Plotter():
         :param plot: either '2D', 'slices', '3D' or False
         :param log: True to have a logarithmic scale
          False to have a linear scale
-        :param cmap: default "YlGnBu_r"
+        :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
          Other possible values are 'Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
          'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'
+        :param figsize: default (10, 10)
+        :param fontsize: default 15
         """
         self.filename = filename
         self.data_array = data_array
@@ -476,6 +478,7 @@ class ThreeDViewer(widgets.Box):
             x, y, z = verts.T
             self.mesh = ipv.plot_trisurf(x, y, z, triangles=faces, color=color)
             self.fig.meshes = [self.mesh]
+        # Keep general exception for debugging purposes
         except Exception as ex:
             print(ex)
 
@@ -549,6 +552,7 @@ class ThreeDViewer(widgets.Box):
     #               result CXI result or a modes file from a 3D CDI analysis ?")
 
     def on_change_type(self, v):
+        """Change scale"""
         if v['name'] == 'value':
             if isinstance(v['old'], str):
                 newv = v['new']
@@ -564,6 +568,7 @@ class ThreeDViewer(widgets.Box):
             self.on_update_plot()
 
     def set_data(self, d, threshold=None):
+        """Check if data is complex or not"""
         self.progress.value = 5
         self.d = d
         self.toggle_phase.unobserve(self.on_change_type)
@@ -649,13 +654,20 @@ class ThreeDViewer(widgets.Box):
 
 # Methods
 
-def plot_data(data_array, figsize=(10, 10), fontsize=15, log="interact", cmap="YlGnBu_r"):
+def plot_data(
+    data_array,
+    figsize=(10, 10),
+    fontsize=15,
+    log="interact",
+    cmap="YlGnBu_r"
+):
     """Create figure based on the data dimensions.
 
     :param data_array: np.ndarray to plot
     :param figsize: default (10, 10)
     :param fontsize: default 15
     :param log: True, False or "interact"
+    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     """
     # Get dimensions
     data_dimensions = data_array.ndim
@@ -685,7 +697,7 @@ def plot_data(data_array, figsize=(10, 10), fontsize=15, log="interact", cmap="Y
                     figsize = (data_array.ndim*5, 7)
                     print("Figure size defaulted to", figsize)
 
-                fig, ax = plt.subplots(figsize=figsize)
+                _, ax = plt.subplots(figsize=figsize)
 
                 # Get scale
                 log = scale == "logarithmic"
@@ -739,7 +751,6 @@ def plot_data(data_array, figsize=(10, 10), fontsize=15, log="interact", cmap="Y
                 value="Module",
                 description='Plotting options',
                 disabled=False,
-                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
                 tooltip=['Plot only contour or not', "", ""])
         )
         def plot_3d(
@@ -760,21 +771,24 @@ def plot_data(data_array, figsize=(10, 10), fontsize=15, log="interact", cmap="Y
             # Take the shape of that array along 2 axis
             if axplot == "xy":
                 print(
-                    f"The shape of this projection is {np.shape(data[:, :, 0])}")
+                    f"The shape of this projection \
+                    is {np.shape(data[:, :, 0])}")
 
                 r = np.shape(data[0, 0, :])
                 print(f"The range in the last axis is [0, {r[0]}]")
 
             elif axplot == "yz":
                 print(
-                    f"The shape of this projection is {np.shape(data[0, :, :])}")
+                    f"The shape of this projection \
+                    is {np.shape(data[0, :, :])}")
 
                 r = np.shape(data[:, 0, 0])
                 print(f"The range in the last axis is [0, {r[0]}]")
 
             elif axplot == "xz":
                 print(
-                    f"The shape of this projection is {np.shape(data[:, 0, :])}")
+                    f"The shape of this projection \
+                    is {np.shape(data[:, 0, :])}")
 
                 r = np.shape(data[0, :, 0])
                 print(f"The range in the last axis is [0, {r[0]}]")
@@ -855,11 +869,9 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r"):
     :param two_d_array: np.ndarray to plot, must be 2D
     :param fig: plt.figure to plot in, default is None and
      will create a figure
-    :param ax: axes of figure, default is None and
-     will create axes
-    :param log: True to have a logarithmic scale
-     False to have a linear scale
-    :param cmap: default "YlGnBu_r"
+    :param ax: axes of figure, default is None and will create axes
+    :param log: True to have a logarithmic scale, False to have a linear scale
+    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     """
     # Find max and min
     # dmax = two_d_array.max()
@@ -926,6 +938,7 @@ def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
     :param figsize: default (10, 10)
     :param log: boolean (True, False) or anything else which
      raises an interactive window
+    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     """
     if isinstance(log, bool):
         # Create figure
@@ -996,27 +1009,41 @@ def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
                 print("Is this a 3D array?")
 
 
-def complex2rgbalin(s, gamma=1.0, smax=None, smin=None, percentile=(None, None), alpha=(0, 1), type='uint8'):
+def complex2rgbalin(
+    s,
+    gamma=1.0,
+    smax=None,
+    smin=None,
+    percentile=(None, None),
+    alpha=(0, 1),
+    final_type='uint8'
+):
     """
-    Returns RGB image with with colour-coded phase and linear amplitude in brightness.
-    Optional exponent gamma is applied to the amplitude.
+    Returns RGB image with with colour-coded phase and linear amplitude
+    in brightness. Optional exponent gamma is applied to the amplitude.
+    Taken from PyNX
 
-    Args:
-        s: the complex data array (likely 2D, but can have higher dimensions)
-        gamma: gamma parameter to change the brightness curve
-        smax: maximum value (brightness = 1). If not supplied and percentile is not set,
-              the maximum amplitude of the array is used.
-        smin: minimum value(brightness = 0). If not supplied and percentile is not set,
-              the maximum amplitude of the array is used.
-        percentile: a tuple of two values (percent_min, percent_max) setting the percentile (between 0 and 100):
-                    the smax and smin values will be  set as the percentile value in the array (see numpy.percentile).
-                    These two values (when not None) supersede smax and smin.
-                    Example: percentile=(0,99) to scale the brightness to 0-1 between the 1% and 99% percentile of the data amplitude.
-        alpha: the minimum and maximum value for the alpha channel, normally (0,1). Useful to have different max/min
-               alpha when going through slices of one object
-        type: either 'float': values are in the [0..1] range, or 'uint8' (0..255) (new default)
+    :param s: the complex data array (likely 2D, but can have higher
+     dimensions)
+    :param gamma: gamma parameter to change the brightness curve
+    :param smax: maximum value (brightness = 1). If not supplied and
+     percentile is not set, the maximum amplitude of the array is used.
+    :param smin: minimum value(brightness = 0). If not supplied and
+     percentile is not set, the maximum amplitude of the array is used.
+    :param percentile: a tuple of two values (percent_min, percent_max)
+     setting the percentile (between 0 and 100): the smax and smin values
+     will be  set as the percentile value in the array (see numpy.percentile).
+     These two values (when not None) supersede smax and smin.
+     Example: percentile=(0,99) to scale the brightness to 0-1 between the 1%
+     and 99% percentile of the data amplitude.
+    :param alpha: the minimum and maximum value for the alpha channel,
+     normally (0,1). Useful to have different max/min alpha when going
+     through slices of one object
+    final_type: either 'float': values are in the [0..1] range,
+     or 'uint8' (0..255) (new default)
     Returns:
-        the RGBA array, with the same diemensions as the input array, plus one additional R/G/B/A dimension appended.
+     the RGBA array, with the same diemensions as the input array,
+     plus one additional R/G/B/A dimension appended.
     """
     rgba = phase2rgb(s)
     a = np.abs(s)
@@ -1025,9 +1052,8 @@ def complex2rgbalin(s, gamma=1.0, smax=None, smin=None, percentile=(None, None),
             smin = np.percentile(a, percentile[0])
         if percentile[1] is not None:
             smax = np.percentile(a, percentile[1])
-        if smax is not None and smin is not None:
-            if smin > smax:
-                smin, smax = smax, smin
+        if smax is not None and smin is not None and smin > smax:
+            smin, smax = smax, smin
     if smax is not None:
         a = (a - smax) * (a <= smax) + smax
     if smin is not None:
@@ -1035,7 +1061,7 @@ def complex2rgbalin(s, gamma=1.0, smax=None, smin=None, percentile=(None, None),
     a /= a.max()
     a = a ** gamma
     rgba[..., 3] = alpha[0] + alpha[1] * a
-    if type == 'float':
+    if final_type == 'float':
         return rgba
     return (rgba * 255).astype(np.uint8)
 
@@ -1044,16 +1070,15 @@ def phase2rgb(s):
     """
     Crates RGB image with colour-coded phase from a complex array.
 
-    Args:
-        s: a complex numpy array
+    :param s: a complex numpy array
 
-    Returns:
-        an RGBA numpy array, with one additional dimension added
+    Returns: an RGBA numpy array, with one additional dimension added
     """
     ph = np.angle(s)
     t = np.pi / 3
     rgba = np.zeros(list(s.shape) + [4])
-    rgba[..., 0] = (ph < t) * (ph > -t) + (ph > t) * (ph < 2 * t) * (2 * t - ph) / t + (ph > -2 * t) * (ph < -t) * (
+    rgba[..., 0] = (ph < t) * (ph > -t) + (ph > t) * (ph < 2 * t) * \
+        (2 * t - ph) / t + (ph > -2 * t) * (ph < -t) * (
         ph + 2 * t) / t
     rgba[..., 1] = (ph > t) + (ph < -2 * t) * (-2 * t - ph) / \
         t + (ph > 0) * (ph < t) * ph / t
