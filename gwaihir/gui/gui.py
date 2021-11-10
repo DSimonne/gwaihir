@@ -2771,13 +2771,13 @@ class Interface():
                             self.Dataset.to_cxi(
                                 cxi_filename=self.cxi_filename,
                                 reconstruction_filename=self.Dataset.reconstruction_file,
-                                )
+                            )
 
                         except AttributeError:
                             self.Dataset.to_cxi(
                                 cxi_filename=self.cxi_filename,
                                 reconstruction_filename=False,
-                                )
+                            )
 
                     except NameError:
                         # Could not load cdi object
@@ -3558,8 +3558,8 @@ class Interface():
                 self._list_widgets_preprocessing.children[56].value\
                     = self.Dataset.bragg_inplane
                 self.Dataset.tilt_angle = np.round(
-                    np.mean(self.Dataset.tilt_values[1:]\
-                    - self.Dataset.tilt_values[:-1]), 4)
+                    np.mean(self.Dataset.tilt_values[1:]
+                            - self.Dataset.tilt_values[:-1]), 4)
                 print("Corrected angles values saved in setup tab.")
 
             except ValueError:
