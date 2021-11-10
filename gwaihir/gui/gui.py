@@ -4111,22 +4111,16 @@ class Interface():
                         v.write(line)
 
                 print(
-                    f"Saved parameters in \
-                    {self.Dataset.pynx_parameter_gui_file}")
+                    f"Saved parameters in \n\
+                    \t{self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
                     # Runs modes directly and saves all data in an "all"
                     # subdir, filter based on LLK
                     print(
-                        f"\nRunning {self.path_scripts}/run_slurm_job.sh \
-                        --reconstruct gui \
-                        --username {self.user_name} \
-                        --path {self.preprocessing_folder} \
-                        --filtering {nb_keep_std} \
-                        --modes true")
+                        f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_keep_std} --modes true")
                     print(
-                        "\nSolution filtering and modes decomposition are \
-                        automatically applied at the end of the batch job.\n")
+                        "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
                     os.system(
                         "{}/run_slurm_job.sh \
                         --reconstruct gui \

@@ -116,9 +116,12 @@ path=${path/#=/}
 modes=${modes/#=/}
 filtering=${filtering/#=/}
 
+# to do
+# add environment as an option
+
 ssh $username@slurm-nice-devel << EOF
-    # echo "Running "sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
-    sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
+    # echo "Running "sbatch /data/id01/inhouse/david/py38-dev/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
+    sbatch /data/id01/inhouse/david/py38-dev/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
 
     echo "You may follow the evolution of the job by typing: 'tail -f job_esrf.slurm-XXXXX.out', replace XXXXX by the previous job number, the job file should be in your home directory."
 
