@@ -1182,9 +1182,9 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             parent_folder=widgets.Dropdown(
-                options=[x[0] for x in os.walk(os.getcwd())],
-                value=os.getcwd(),
-                placeholder=os.getcwd(),
+                options=[x[0] + "/" for x in os.walk(os.getcwd())],
+                value=os.getcwd() + "/" ,
+                placeholder=os.getcwd() + "/" ,
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -1684,9 +1684,9 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             parent_folder=widgets.Dropdown(
-                options=[x[0] for x in os.walk(os.getcwd())],
-                value=os.getcwd(),
-                placeholder=os.getcwd(),
+                options=[x[0] + "/" for x in os.walk(os.getcwd())],
+                value=os.getcwd() + "/" ,
+                placeholder=os.getcwd() + "/" ,
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2275,9 +2275,9 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             strain_folder=widgets.Dropdown(
-                options=[x[0] for x in os.walk(os.getcwd())],
-                value=os.getcwd(),
-                placeholder=os.getcwd(),
+                options=[x[0] + "/" for x in os.walk(os.getcwd())],
+                value=os.getcwd() + "/" ,
+                placeholder=os.getcwd() + "/" ,
                 description='Data folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2355,9 +2355,9 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             folder=widgets.Dropdown(
-                options=[x[0] for x in os.walk(os.getcwd())],
-                value=os.getcwd(),
-                placeholder=os.getcwd(),
+                options=[x[0] + "/" for x in os.walk(os.getcwd())],
+                value=os.getcwd() + "/" ,
+                placeholder=os.getcwd() + "/" ,
                 description='Data folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2425,9 +2425,9 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             parent_folder=widgets.Dropdown(
-                options=[x[0] for x in os.walk(os.getcwd())],
-                value=os.getcwd(),
-                placeholder=os.getcwd(),
+                options=[x[0] + "/" for x in os.walk(os.getcwd())],
+                value=os.getcwd() + "/" ,
+                placeholder=os.getcwd() + "/" ,
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2694,22 +2694,22 @@ class Interface():
 
             # PyNX folder, refresh values
             self._list_widgets_phase_retrieval.children[1].value\
-                = self.preprocessing_folder[:-1]
+                = self.preprocessing_folder
             self.pynx_folder_handler(
                 change=self._list_widgets_phase_retrieval.children[1].value)
 
             # Plot folder, refresh values
-            self.tab_data.children[1].value = self.preprocessing_folder[:-1]
+            self.tab_data.children[1].value = self.preprocessing_folder
             self.plot_folder_handler(change=self.tab_data.children[1].value)
 
             # Strain folder, refresh values
             self._list_widgets_strain.children[-4].value\
-                = self.preprocessing_folder[:-1]
+                = self.preprocessing_folder
             self.strain_folder_handler(
                 change=self._list_widgets_strain.children[-4].value)
 
             # Facet folder, refresh values
-            self.tab_facet.children[1].value = self.postprocessing_folder[:-1]
+            self.tab_facet.children[1].value = self.postprocessing_folder
             self.vtk_file_handler(change=self.tab_facet.children[1].value)
 
             # Only allow to save data if PyNX is imported to avoid errors
@@ -3303,8 +3303,9 @@ class Interface():
                     self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
 
-                if self.Dataset.beamline == "ID01":
+                else:
                     root_folder = self.Dataset.data_dir
+                # self.Dataset.beamline == "ID01":
 
                 # Create config file
                 self.create_yaml_file(
@@ -3482,7 +3483,7 @@ class Interface():
                 if self.Dataset.beamline == "SIXS_2019":
                     root_folder = self.Dataset.root_folder
 
-                elif self.Dataset.beamline == "ID01":
+                else:
                     root_folder = self.Dataset.data_dir
 
                 save_dir = f"{self.postprocessing_folder}/corrections/"
@@ -3607,7 +3608,7 @@ class Interface():
             self.Dataset.iobs = None
             iobs = None
 
-        if self.Dataset.mask not in ("", None):
+        if self.Dataset.mask not in ("", None, self.Dataset.parent_folder):
             if self.Dataset.mask.endswith(".npy"):
                 mask = np.load(self.Dataset.mask).astype(np.int8)
                 nb = mask.sum()
@@ -3633,7 +3634,7 @@ class Interface():
             self.Dataset.mask = None
             mask = None
 
-        if self.Dataset.support not in ("", None):
+        if self.Dataset.support not in ("", None, self.Dataset.parent_folder):
             if self.Dataset.support.endswith(".npy"):
                 support = np.load(self.Dataset.support)
                 print("CXI input: loading support")
@@ -3669,7 +3670,7 @@ class Interface():
             self.Dataset.support = None
             support = None
 
-        if self.Dataset.obj not in ("", None):
+        if self.Dataset.obj not in ("", None, self.Dataset.parent_folder):
             if self.Dataset.obj.endswith(".npy"):
                 obj = np.load(self.Dataset.obj)
                 print("CXI input: loading object")
@@ -3925,11 +3926,21 @@ class Interface():
         :param wavelength: experiment wavelength (meters)
         :param detector_distance: detector distance (meters)
         """
+
         self.Dataset.parent_folder = parent_folder
         self.Dataset.iobs = parent_folder + iobs
-        self.Dataset.mask = parent_folder + mask
-        self.Dataset.support = parent_folder + support
-        self.Dataset.obj = parent_folder + obj
+        if mask != "":
+            self.Dataset.mask = parent_folder + mask
+        else:
+            self.Dataset.mask = ""
+        if support != "":
+            self.Dataset.support = parent_folder + support
+        else:
+            self.Dataset.support = ""
+        if obj != "":
+            self.Dataset.obj = parent_folder + obj
+        else:
+            self.Dataset.obj = ""
         self.Dataset.auto_center_resize = auto_center_resize
         self.Dataset.max_size = max_size
         self.Dataset.support_threshold = support_threshold
@@ -4158,9 +4169,6 @@ class Interface():
                 print("Log likelihood is updated every 50 iterations.")
                 self.Dataset.calc_llk = 50  # for now
 
-                # Initialise the cdi operator
-                cdi = self.initialize_cdi_operator()
-
                 print(
                     "\n###############################################################################\n"
                 )
@@ -4168,6 +4176,10 @@ class Interface():
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
                         print(f"Run {i}")
+
+                        # Initialise the cdi operator
+                        cdi = self.initialize_cdi_operator()
+
                         if i > 4:
                             print("\nStopping liveplot to go faster\n")
                             self.Dataset.live_plot = False
@@ -4357,9 +4369,7 @@ class Interface():
                                     ) ** er_power * cdi
 
                             cdi.save_obj_cxi(
-                                "{}/result_scan_{}_run_{}_LLK_{:.4}_\
-                                support_threshold_{:.4}_shape_{}_{}_\
-                                {}_{}.cxi".format(
+                                "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                                     self.Dataset.parent_folder,
                                     self.Dataset.scan,
                                     i,
@@ -4373,9 +4383,7 @@ class Interface():
                             )
 
                             print(
-                                "Saved as result_scan_{}_run_{}_LLK_{:.4}\
-                                _support_threshold_{:.4}_shape_{}_{}_\
-                                {}_{}.cxi".format(
+                                "Saved as result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                                     self.Dataset.scan,
                                     i,
                                     cdi.get_llk()[0],
@@ -4386,6 +4394,7 @@ class Interface():
                                     sup_init,
                                 )
                             )
+
                         except SupportTooLarge:
                             print(
                                 "Threshold value probably too low, support \
@@ -5088,7 +5097,7 @@ class Interface():
                 if self.Dataset.beamline == "SIXS_2019":
                     root_folder = self.Dataset.root_folder
 
-                if self.Dataset.beamline == "ID01":
+                else:
                     root_folder = self.Dataset.data_dir
 
                 save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
@@ -6184,9 +6193,9 @@ class Interface():
     def sub_directories_handler(self, change):
         """Handles changes linked to root_folder subdirectories"""
         try:
-            sub_dirs = [x[0] for x in os.walk(change.new)]
+            sub_dirs = [x[0] + "/" for x in os.walk(change.new)]
         except AttributeError:
-            sub_dirs = [x[0] for x in os.walk(change)]
+            sub_dirs = [x[0] + "/" for x in os.walk(change)]
         finally:
             if self._list_widgets_init_dir.children[-2].value:
                 self.tab_data_frame.children[1].options = sub_dirs
