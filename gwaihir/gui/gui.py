@@ -1183,8 +1183,8 @@ class Interface():
 
             parent_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -1685,8 +1685,8 @@ class Interface():
 
             parent_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2276,8 +2276,8 @@ class Interface():
 
             strain_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Data folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2356,8 +2356,8 @@ class Interface():
 
             folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Data folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2426,8 +2426,8 @@ class Interface():
 
             parent_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
