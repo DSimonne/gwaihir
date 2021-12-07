@@ -1,6 +1,6 @@
 scans: 3116
-root_folder: "/home/david/Documents/PhDScripts/LocalTestBCDI/booty/"
-save_dir: "/home/david/Documents/PhDScripts/LocalTestBCDI/booty/S3116/preprocessing/"
+root_folder: "/home/david/Documents/PhDScripts/LocalTestBCDI/"
+save_dir: "/home/david/Documents/PhDScripts/LocalTestBCDI/S3116/preprocessing/"
 data_dir: "/home/david/Documents/PhDScripts/LocalTestBCDI/data_dir/"
 sample_name: "S"
 comment: ""

@@ -28,7 +28,7 @@ def correct_angles_detector(
     save_dir,
     scan,
     root_folder,
-    # data_dir,
+    data_dir,
     sample_name,
     filtered_data,
     peak_method,
@@ -113,9 +113,10 @@ def correct_angles_detector(
         sample_name=sample_name,
         scan_number=scan,
         root_folder=root_folder,
-        save_dir=None,
+        save_dir=save_dir,
         specfile_name=specfile_name,
         template_imagefile=template_imagefile,
+        data_dir=data_dir,
     )
 
     logfile = setup.create_logfile(
@@ -130,7 +131,6 @@ def correct_angles_detector(
 
     if not filtered_data:
         data, _, monitor, frames_logical = setup.diffractometer.load_check_dataset(
-            logfile=logfile,
             scan_number=scan,
             detector=detector,
             setup=setup,
@@ -167,18 +167,14 @@ def correct_angles_detector(
             masked")
 
     ###############################
-    # load releavant motor values #
+    # load relevant motor values #
     ###############################
     (
         tilt_values,
         setup.grazing_angle,
         setup.inplane_angle,
         setup.outofplane_angle,
-    ) = setup.diffractometer.goniometer_values(
-        logfile=logfile, scan_number=scan, setup=setup,
-        frames_logical=frames_logical
-    )
-    setup.tilt_angle = (tilt_values[1:] - tilt_values[0:-1]).mean()
+    ) = setup.read_logfile(scan_number=scan)
 
     nb_frames = len(tilt_values)
     if numz != nb_frames:

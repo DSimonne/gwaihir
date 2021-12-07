@@ -16,7 +16,9 @@ setuptools.setup(
                       "licence.txt",
                       "gwaihir/scripts/examples/config_postprocessing_sixs.yml",
                       "gwaihir/scripts/examples/config_preprocessing_sixs.yml",
-                      "gwaihir/scripts/examples/workflow_sixs.sh",
+                      "gwaihir/scripts/examples/config_postprocessing_P10.yml",
+                      "gwaihir/scripts/examples/config_preprocessing_P10.yml",
+                      "gwaihir/scripts/examples/workflow_cli.sh",
                       ])],
     url="https://github.com/DSimonne/gwaihir/tree/master",
     classifiers=[

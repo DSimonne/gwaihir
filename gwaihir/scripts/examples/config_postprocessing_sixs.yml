@@ -1,6 +1,6 @@
 scan: 3116
-root_folder: "/home/david/Documents/PhDScripts/LocalTestBCDI/booty/"
-save_dir: "/home/david/Documents/PhDScripts/LocalTestBCDI/booty/S3116/postprocessing/result_lab_flat_sample/"
+root_folder: "/home/david/Documents/PhDScripts/LocalTestBCDI/"
+save_dir: "/home/david/Documents/PhDScripts/LocalTestBCDI/S3116/postprocessing/result_lab_flat_sample/"
 data_dir: "/home/david/Documents/PhDScripts/LocalTestBCDI/data_dir/"
 sample_name: "S"
 comment: ""
@@ -71,7 +71,7 @@ apodization_window: "blackman"
 apodization_mu: [0.0, 0.0, 0.0]
 apodization_sigma: [0.3, 0.3, 0.3]
 apodization_alpha: [1.0, 1.0, 1.0]
-reconstruction_file: "/home/david/Documents/PhDScripts/LocalTestBCDI/booty/S3116/preprocessing/modes.h5"
+reconstruction_file: "/home/david/Documents/PhDScripts/LocalTestBCDI/S3116/preprocessing/modes.h5"
 save_rawdata: False
 save_support: False
 save: True

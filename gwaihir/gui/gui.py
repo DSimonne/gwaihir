@@ -107,7 +107,6 @@ class Interface():
         self.params = None
         self.Facets = None
         self.metadata_csv_file = None
-        self.csv_file = None
         self.scan_name = None
         self.cmap = "YlGnBu_r"
         self.preprocessing_folder = None
@@ -1183,8 +1182,8 @@ class Interface():
 
             parent_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -1350,7 +1349,7 @@ class Interface():
                 disabled=True),
 
             eta=widgets.FloatText(
-                value=0.05,
+                value=0.10,
                 step=0.01,
                 max=1,
                 min=0,
@@ -1685,8 +1684,8 @@ class Interface():
 
             parent_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2276,8 +2275,8 @@ class Interface():
 
             strain_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Data folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2356,8 +2355,8 @@ class Interface():
 
             folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Data folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2426,8 +2425,8 @@ class Interface():
 
             parent_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/" ,
-                placeholder=os.getcwd() + "/" ,
+                value=os.getcwd() + "/",
+                placeholder=os.getcwd() + "/",
                 description='Parent folder:',
                 disabled=False,
                 continuous_update=False,
@@ -2689,8 +2688,15 @@ class Interface():
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
 
+            # Correct angles csv file value
+            self.tab_correct.children[1].value = self.Dataset.root_folder + \
+                "metadata.csv"
+
             # Refresh csv file
-            self.csv_file_handler(os.getcwd())
+            self.tab_data_frame.children[1].options\
+                = [x[0] + "/" for x in os.walk(self.Dataset.root_folder)]
+            self.tab_data_frame.children[1].value = self.Dataset.root_folder+"/"
+            self.csv_file_handler(self.Dataset.root_folder)
 
             # PyNX folder, refresh values
             self._list_widgets_phase_retrieval.children[1].value\
@@ -3419,6 +3425,9 @@ class Interface():
                 self.plot_folder_handler(
                     change=self.tab_data.children[1].value)
 
+                # Change window view
+                self.window.selected_index = 8
+
         if not init_para:
             clear_output(True)
 
@@ -3467,7 +3476,7 @@ class Interface():
             #     w.disabled = True
 
             # Save parameter values as attributes
-            self.Dataset.metadata_csv_file = metadata_csv_file
+            self.metadata_csv_file = metadata_csv_file
             self.Dataset.angles_bool = angles_bool
             self.Dataset.get_temperature = get_temperature
             self.Dataset.reference_spacing = reference_spacing
@@ -3518,6 +3527,7 @@ class Interface():
                     save_dir=save_dir,
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
+                    data_dir=root_folder,
                     sample_name=self.Dataset.sample_name,
                     filtered_data=False,
                     peak_method=self.Dataset.centering_method,
@@ -3539,8 +3549,8 @@ class Interface():
                     template_imagefile=self.Dataset.template_imagefile,
                     beam_direction=self.Dataset.beam_direction,
                     sample_offsets=self.Dataset.sample_offsets,
-                    directbeam_x=self.Dataset.cch1,
-                    directbeam_y=self.Dataset.cch2,
+                    directbeam_x=self.Dataset.cch2,
+                    directbeam_y=self.Dataset.cch1,
                     sdd=self.Dataset.sdd,
                     energy=self.Dataset.energy,
                     GUI=True
@@ -3558,12 +3568,17 @@ class Interface():
                     = self.Dataset.bragg_outofplane
                 self._list_widgets_preprocessing.children[56].value\
                     = self.Dataset.bragg_inplane
+
                 self.Dataset.tilt_angle = np.round(
                     np.mean(self.Dataset.tilt_values[1:]
                             - self.Dataset.tilt_values[:-1]), 4)
+
+                self._list_widgets_preprocessing.children[57].value\
+                    = self.Dataset.tilt_angle
+
                 print("Corrected angles values saved in setup tab.")
 
-            except ValueError:
+            except (ValueError, AttributeError):
                 print("Inplane or outofplane ?")
 
             except TypeError:
@@ -3612,15 +3627,15 @@ class Interface():
             if self.Dataset.mask.endswith(".npy"):
                 mask = np.load(self.Dataset.mask).astype(np.int8)
                 nb = mask.sum()
-                print("CXI input: loading mask, with %d pixels masked \
-                    (%6.3f%%)" % (nb, nb * 100 / mask.size))
+                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                    nb, nb * 100 / mask.size))
             elif self.Dataset.mask.endswith(".npz"):
                 try:
                     mask = np.load(self.Dataset.mask)[
                         "mask"].astype(np.int8)
                     nb = mask.sum()
-                    print("CXI input: loading mask, with %d pixels masked \
-                        (%6.3f%%)" % (nb, nb * 100 / mask.size))
+                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                        nb, nb * 100 / mask.size))
                 except KeyError:
                     print("\"mask\" key does not exist.")
 
@@ -3996,8 +4011,7 @@ class Interface():
         print(f"CXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
         print("CXI input: detector distance = %8.2fm" % self.Dataset.sdd)
         print(
-            f"CXI input: detector pixel size \
-            = {self.Dataset.pixel_size_detector}")
+            f"CXI input: detector pixel size = {self.Dataset.pixel_size_detector}")
 
         # PyNX arguments text files
         self.Dataset.pynx_parameter_gui_file = self.preprocessing_folder\
@@ -4572,15 +4586,13 @@ class Interface():
         """
         try:
             print(
-                f"Using {self.path_scripts}/pynx-cdi-analysis.py \
-                (py38-stable environment)"
-                f"Using {folder}/*LLK* files."
-                "Running pynx-cdi-analysis.py *LLK* modes=1"
+                f"Using {self.path_scripts}/pynx-cdi-analysis.py (py38-stable environment)\n"
+                f"Using {folder}/*LLK* files.\n"
+                "Running pynx-cdi-analysis.py *LLK* modes=1\n"
                 f"Output in {folder}/modes_gui.h5")
             os.system(
-                "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 \
-                modes_output={}/modes_gui.h5".format(
-                    quote(self.path_script),
+                "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+                    quote(self.path_scripts),
                     quote(folder),
                     quote(folder),
                 )
@@ -4596,7 +4608,6 @@ class Interface():
          created with PyNX
         :param path_to_cxi: path to future
          cxi data
-
          Below are parameters that are saved in the cxi file
         :param filename: the file name to save the data to
         :param iobs: the observed intensity
@@ -4705,8 +4716,7 @@ class Interface():
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
 
-        print("\nSaving phase retrieval parameters selected \
-            in the PyNX tab...")
+        print("\nSaving phase retrieval parameters selected in the PyNX tab...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
             process_parameters=self.params,
@@ -5720,7 +5730,6 @@ class Interface():
         :param csv_file: path to csv file
         :param show_logs: True to display dataframe
         """
-        self.csv_file = csv_file
 
         # Load data
         if show_logs in ("load_csv", "load_field_data"):
@@ -5729,7 +5738,7 @@ class Interface():
                 # csv data
                 if show_logs == "load_csv":
                     try:
-                        logs = pd.read_csv(self.csv_file)
+                        logs = pd.read_csv(csv_file)
                     except ValueError:
                         print("Data type not supported.")
                     # else:
@@ -5755,10 +5764,7 @@ class Interface():
                         rows=10,
                         disabled=False,
                         style={'description_width': 'initial'},
-                        layout=Layout(
-                            #         display = "flex",
-                            #         flex_flow = 'column',
-                            width='90%'),
+                        layout=Layout(width='90%'),
                         description='Select multiple columns with \
                         Ctrl + click:',
                     )
@@ -5958,18 +5964,47 @@ class Interface():
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
-            # Create removal buttons in a function
-            def create_removal_button(folder, p):
-                button_delete_data = Button(
-                    description=f"Delete {p} ?",
-                    button_style='',
-                    layout=Layout(width='70%'),
-                    style={'description_width': 'initial'},
-                    icon='step-forward')
+            # # Create removal buttons in a function
+            # def create_removal_button(folder, p):
+            #     button_delete_data = Button(
+            #         description=f"Delete {p} ?",
+            #         button_style='',
+            #         layout=Layout(width='70%'),
+            #         style={'description_width': 'initial'},
+            #         icon='step-forward')
 
-                @button_delete_data.on_click
-                def action_button_delete_data(selfbutton):
-                    """Create button to delete files."""
+            #     @button_delete_data.on_click
+            #     def action_button_delete_data(selfbutton):
+            #         """Create button to delete files."""
+            #         try:
+            #             os.remove(folder + "/" + p)
+            #             print(f"Removed {p}")
+
+            #             # Refresh folder
+            #             self.plot_folder_handler(change=folder)
+            #         except FileNotFoundError:
+            #             print("Could not remove data")
+            #     return button_delete_data
+
+            # # Create a button for each file
+            # button_list = [
+            #     create_removal_button(folder, p) for p in path_to_data]
+
+            # # Display the buttons, one per file
+            # for b in button_list:
+            #     display(b)
+
+            button_delete_data = Button(
+                description=f"Delete files ?",
+                button_style='',
+                layout=Layout(width='70%'),
+                style={'description_width': 'initial'},
+                icon='step-forward')
+
+            @button_delete_data.on_click
+            def action_button_delete_data(selfbutton):
+                """Delete files."""
+                for p in path_to_data:
                     try:
                         os.remove(folder + "/" + p)
                         print(f"Removed {p}")
@@ -5977,16 +6012,9 @@ class Interface():
                         # Refresh folder
                         self.plot_folder_handler(change=folder)
                     except FileNotFoundError:
-                        print("Could not remove data")
-                return button_delete_data
+                        print(f"Could not remove {p}")
 
-            # Create a button for each file
-            button_list = [
-                create_removal_button(folder, p) for p in path_to_data]
-
-            # Display the buttons, one per file
-            for b in button_list:
-                display(b)
+            display(button_delete_data)
 
         elif data_use is False:
             for w in self.tab_data.children[:-2]:
@@ -6147,7 +6175,7 @@ class Interface():
 
         # Load all the logs
         try:
-            df = pd.read_csv(self.csv_file)
+            df = pd.read_csv(self.metadata_csv_file)
 
             # Replace old data linked to this scan, no problem if this row does
             # not exist yet
@@ -6156,12 +6184,17 @@ class Interface():
 
             result = pd.concat([df, temp_df])
 
-        except FileNotFoundError:
+        except (FileNotFoundError, ValueError):
             result = temp_df
 
         # Save
-        result.to_csv(self.csv_file, index=False)
-        print(f"Saved logs in {self.csv_file}")
+        try:
+            result.to_csv(self.metadata_csv_file, index=False)
+            print(f"Saved logs in {self.metadata_csv_file}")
+        except ValueError:
+            self.metadata_csv_file = self.root_folder + "metadata.csv"
+            result.to_csv(self.metadata_csv_file, index=False)
+            print(f"Saved logs in {self.metadata_csv_file}")
 
     # Below are handlers
 
@@ -6198,7 +6231,6 @@ class Interface():
             sub_dirs = [x[0] + "/" for x in os.walk(change)]
         finally:
             if self._list_widgets_init_dir.children[-2].value:
-                self.tab_data_frame.children[1].options = sub_dirs
                 self._list_widgets_strain.children[-4].options = sub_dirs
                 self.tab_data.children[1].options = sub_dirs
                 self.tab_facet.children[1].options = sub_dirs

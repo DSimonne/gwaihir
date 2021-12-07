@@ -23,8 +23,8 @@ import ipyvolume as ipv
 import warnings
 warnings.filterwarnings("ignore")
 
-
 # Classes
+
 
 class Plotter():
     """Class based on interactive functions for plotting.
