@@ -251,6 +251,7 @@ class ThreeDViewer(widgets.Box):
 
     def __init__(self, input_file=None, html_width=None):
         """
+        Initialize the output and widgets
 
         :param input_file: the data filename or directly the 3D data array.
         :param html_width: html width in %. If given, the width of the
@@ -267,72 +268,148 @@ class ThreeDViewer(widgets.Box):
 
         # focus_label = widgets.Label(value='Focal distance (cm):')
         self.threshold = widgets.FloatSlider(
-            value=5, min=0, max=20, step=0.02, description='Contour.',
-            disabled=False, continuous_update=False, orientation='horizontal',
-            readout=True, readout_format='.01f')
+            value=5,
+            min=0,
+            max=20,
+            step=0.02,
+            description='Contour.',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.01f',
+        )
         self.toggle_phase = widgets.ToggleButtons(
-            options=['Abs', 'Phase'], description='',
-            disabled=False, value='Phase', button_style='')
+            options=['Abs', 'Phase'],
+            description='',
+            disabled=False,
+            value='Phase',
+            button_style='',
+        )
         self.toggle_rotate = widgets.ToggleButton(
-            value=False, description='Rotate', tooltips='Rotate')
+            value=False,
+            description='Rotate',
+            tooltips='Rotate',
+        )
         self.pcb_rotate = None
         hbox1 = widgets.HBox([self.toggle_phase, self.toggle_rotate])
 
         self.toggle_dark = widgets.ToggleButton(
-            value=False, description='Dark', tooltips='Dark/Light theme')
+            value=False,
+            description='Dark',
+            tooltips='Dark/Light theme',
+        )
         self.toggle_box = widgets.ToggleButton(
-            value=True, description='Box', tooltips='Box ?')
+            value=True,
+            description='Box',
+            tooltips='Box ?',
+        )
         self.toggle_axes = widgets.ToggleButton(
-            value=True, description='Axes', tooltips='Axes ?')
+            value=True,
+            description='Axes',
+            tooltips='Axes ?',
+        )
         hbox_toggle = widgets.HBox(
             [self.toggle_dark, self.toggle_box, self.toggle_axes])
 
+        # Colormap widgets
         self.colormap = widgets.Dropdown(
             options=['Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
                      'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'],
-            value='Jet', description='Colors:', disabled=True)
-        self.colormap_range = widgets.FloatRangeSlider(value=[20, 80],
-                                                       min=0,
-                                                       max=100,
-                                                       step=1,
-                                                       description='Range:',
-                                                       disabled=False,
-                                                       continuous_update=False,
-                                                       orientation='horizontal',
-                                                       readout=True,
-                                                       # readout_format='.1f'
-                                                       )
+            value='Jet',
+            description='Colors:',
+            disabled=True,
+        )
+        self.colormap_range = widgets.FloatRangeSlider(
+            value=[20, 80],
+            min=0,
+            max=100,
+            step=1,
+            description='Range:',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True
+        )
+
+        # Plane widgets
         self.toggle_plane = widgets.ToggleButton(
-            value=False, description='Cut planes', tooltips='Cut plane')
+            value=False,
+            description='Cut planes',
+            tooltips='Cut plane'
+        )
         self.plane_text = widgets.Text(
-            value="", description="", tooltips='Plane equation')
+            value="",
+            description="",
+            tooltips='Plane equation')
         hbox_plane = widgets.HBox([self.toggle_plane, self.plane_text])
 
+        # Clip widgets
         self.clipx = widgets.FloatSlider(
-            value=1, min=-1, max=1, step=0.1, description='Plane Ux',
-            disabled=False, continuous_update=False, orientation='horizontal',
-            eadout=True, readout_format='.01f')
+            value=1,
+            min=-1,
+            max=1,
+            step=0.1,
+            description='Plane Ux',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.01f',
+        )
         self.clipy = widgets.FloatSlider(
-            value=1, min=-1, max=1, step=0.1, description='Plane Uy',
-            disabled=False, continuous_update=False, orientation='horizontal',
-            readout=True, readout_format='.01f')
+            value=1,
+            min=-1,
+            max=1,
+            step=0.1,
+            description='Plane Uy',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.01f',
+        )
         self.clipz = widgets.FloatSlider(
-            value=1, min=-1, max=1, step=0.1, description='Plane Uz',
-            disabled=False, continuous_update=False, orientation='horizontal',
-            readout=True, readout_format='.01f')
+            value=1,
+            min=-1,
+            max=1,
+            step=0.1,
+            description='Plane Uz',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.01f',
+        )
         self.clipdist = widgets.FloatRangeSlider(
-            value=[0, 100], min=0, max=100, step=0.5, description='Planes dist',
-            disabled=False, continuous_update=False, orientation='horizontal',
-            readout=True, readout_format='.1f')
+            value=[0, 100],
+            min=0,
+            max=100,
+            step=0.5,
+            description='Planes dist',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.1f',
+        )
 
         # self.toggle_mode = widgets.ToggleButtons(options=['Volume','X','Y','Z'])
+
+        # Progress bar
         self.progress = widgets.IntProgress(
-            value=10, min=0, max=10, description='Processing:',
-            bar_style='', style={'bar_color': 'green'}, orientation='horizontal')
+            value=10,
+            min=0,
+            max=10,
+            description='Processing:',
+            bar_style='',
+            style={'bar_color': 'green'},
+            orientation='horizontal'
+        )
 
         # Set observers
         self.threshold.observe(self.on_update_plot)
-        self.toggle_phase.observe(self.on_change_type)
+        self.toggle_phase.observe(self.on_change_scale)
         self.colormap.observe(self.on_update_plot)
         self.colormap_range.observe(self.on_update_plot)
         self.clipx.observe(self.on_update_plot)
@@ -353,13 +430,14 @@ class ThreeDViewer(widgets.Box):
         # self.d0 = None
         # self.progress.value = None
 
-        # Create final box
+        # Create final vertical box with all the widgets
         self.vbox = widgets.VBox([self.threshold,
                                   hbox1, hbox_toggle,
-                                  self.colormap, self.colormap_range,
-                                  hbox_plane,
-                                  self.clipx, self.clipy, self.clipz,
-                                  self.clipdist,
+                                  self.colormap,
+                                  # self.colormap_range,
+                                  # hbox_plane,
+                                  # self.clipx, self.clipy, self.clipz,
+                                  # self.clipdist,
                                   self.progress,
                                   # self.fc
                                   ])
@@ -368,10 +446,14 @@ class ThreeDViewer(widgets.Box):
         if isinstance(input_file, np.ndarray):
             data_array = input_file
 
+            # We create an output for ipyvolume
             self.output_view = widgets.Output()
             with self.output_view:
                 self.fig = ipv.figure(
-                    width=900, height=600, controls_light=True)
+                    # width=900,
+                    # height=600,
+                    # controls_light=True,
+                )
                 # if input_file is not None:
                 #     if isinstance(input_file, str):
                 #         if os.path.isfile(input_file):
@@ -387,13 +469,13 @@ class ThreeDViewer(widgets.Box):
         else:
             print("Could not load data")
 
-    def on_update_plot(self, v=None):
+    def on_update_plot(self, change=None):
         """Update the plot according to parameters. The points are re-computed.
 
-        :param k: ignored
+        :param change: used to update the values
         :return:
         """
-        if v is not None and v['name'] != 'value':
+        if change is not None and change['name'] != 'value':
             return
         self.progress.value = 7
 
@@ -401,62 +483,71 @@ class ThreeDViewer(widgets.Box):
         # to support using normals
 
         # Unobserve as we disable/enable buttons and that triggers events
-        try:
-            self.clipx.unobserve(self.on_update_plot)
-            self.clipy.unobserve(self.on_update_plot)
-            self.clipz.unobserve(self.on_update_plot)
-            self.clipdist.unobserve(self.on_update_plot)
-        except:
-            pass
+        # try:
+        #     self.clipx.unobserve(self.on_update_plot)
+        #     self.clipy.unobserve(self.on_update_plot)
+        #     self.clipz.unobserve(self.on_update_plot)
+        #     self.clipdist.unobserve(self.on_update_plot)
+        # except:
+        #     pass
 
-        if self.toggle_plane.value:
-            self.clipx.disabled = False
-            self.clipy.disabled = False
-            self.clipz.disabled = False
-            self.clipdist.disabled = False
-            # Cut volume with clipping plane
-            uz, uy, ux = self.clipz.value, self.clipy.value, self.clipx.value
-            u = np.sqrt(ux ** 2 + uy ** 2 + uz ** 2)
-            if np.isclose(u, 0):
-                ux = 1
-                u = 1
+        # if self.toggle_plane.value:
+        #     self.clipx.disabled = False
+        #     self.clipy.disabled = False
+        #     self.clipz.disabled = False
+        #     self.clipdist.disabled = False
+        #     # Cut volume with clipping plane
+        #     uz, uy, ux = self.clipz.value, self.clipy.value, self.clipx.value
+        #     u = np.sqrt(ux ** 2 + uy ** 2 + uz ** 2)
+        #     if np.isclose(u, 0):
+        #         ux = 1
+        #         u = 1
 
-            nz, ny, nx = self.d.shape
-            z, y, x = np.meshgrid(np.arange(nz), np.arange(
-                ny), np.arange(nx), indexing='ij')
+        #     nz, ny, nx = self.d.shape
+        #     z, y, x = np.meshgrid(np.arange(nz), np.arange(
+        #         ny), np.arange(nx), indexing='ij')
 
-            # Compute maximum range of clip planes & fix dist range
-            tmpz, tmpy, tmpx = np.where(abs(self.d) >= self.threshold.value)
-            tmp = (tmpx * ux + tmpy * uy + tmpz * uz) / u
-            tmpmin, tmpmax = tmp.min() - 1, tmp.max() + 1
-            if tmpmax > self.clipdist.min:  # will throw an exception if min>max
-                self.clipdist.max = tmpmax
-                self.clipdist.min = tmpmin
-            else:
-                self.clipdist.min = tmpmin
-                self.clipdist.max = tmpmax
+        #     # Compute maximum range of clip planes & fix dist range
+        #     tmpz, tmpy, tmpx = np.where(abs(self.d) >= self.threshold.value)
+        #     tmp = (tmpx * ux + tmpy * uy + tmpz * uz) / u
+        #     tmpmin, tmpmax = tmp.min() - 1, tmp.max() + 1
+        #     if tmpmax > self.clipdist.min:  # will throw an exception if min>max
+        #         self.clipdist.max = tmpmax
+        #         self.clipdist.min = tmpmin
+        #     else:
+        #         self.clipdist.min = tmpmin
+        #         self.clipdist.max = tmpmax
 
-            # Compute clipping mask
-            c = ((x * ux + y * uy + z * uz) / u > self.clipdist.value[0]) * (
-                ((x * ux + y * uy + z * uz) / u < self.clipdist.value[1]))
-            self.plane_text.value = "%6.1f < (%4.2f*x %+4.2f*y %+4.2f*z) < %6.1f" % (
-                self.clipdist.value[0], ux / u, uy / u,
-                uz / u, self.clipdist.value[1])
-        else:
-            self.clipx.disabled = True
-            self.clipy.disabled = True
-            self.clipz.disabled = True
-            self.clipdist.disabled = True
-            self.plane_text.value = ""
-            c = 1
+        #     # Compute clipping mask
+        #     c = ((x * ux + y * uy + z * uz) / u > self.clipdist.value[0]) * (
+        #         ((x * ux + y * uy + z * uz) / u < self.clipdist.value[1]))
+        #     self.plane_text.value = "%6.1f < (%4.2f*x %+4.2f*y %+4.2f*z) < %6.1f" % (
+        #         self.clipdist.value[0], ux / u, uy / u,
+        #         uz / u, self.clipdist.value[1])
+        # else:
+        #     self.clipx.disabled = True
+        #     self.clipy.disabled = True
+        #     self.clipz.disabled = True
+        #     self.clipdist.disabled = True
+        #     self.plane_text.value = ""
+        #     c = 1
+
+        c = 1
         try:
             verts, faces, _, _ = marching_cubes(
-                abs(self.d) * c, level=self.threshold.value, step_size=1)
+                abs(self.d) * c,
+                level=self.threshold.value,
+                step_size=1,
+            )
             vals = self.rgi(verts)
+
+            # Phase colouring
             if self.toggle_phase.value == "Phase":
                 self.colormap.disabled = True
                 rgba = complex2rgbalin(vals)
                 color = rgba[..., :3] / 256
+
+            # Linear or log colouring
             elif self.toggle_phase.value in ['Abs', 'log10(Abs)']:
                 self.colormap.disabled = False
                 cs = cm.ScalarMappable(
@@ -478,28 +569,32 @@ class ThreeDViewer(widgets.Box):
             x, y, z = verts.T
             self.mesh = ipv.plot_trisurf(x, y, z, triangles=faces, color=color)
             self.fig.meshes = [self.mesh]
-        # Keep general exception for debugging purposes
-        except Exception as ex:
-            print(ex)
 
-        try:
-            self.clipx.observe(self.on_update_plot)
-            self.clipy.observe(self.on_update_plot)
-            self.clipz.observe(self.on_update_plot)
-            self.clipdist.observe(self.on_update_plot)
-        except:
-            pass
+        # Keep general exception for debugging purposes
+        except Exception as E:
+            print(E)
+
+        # Observe again
+        # try:
+        #     self.clipx.observe(self.on_update_plot)
+        #     self.clipy.observe(self.on_update_plot)
+        #     self.clipz.observe(self.on_update_plot)
+        #     self.clipdist.observe(self.on_update_plot)
+        # except:
+        #     pass
+
+        # Update progress bar
         self.progress.value = 10
 
-    def on_update_style(self, v):
+    def on_update_style(self, change):
         """
         Update the plot style - for all parameters which
         do not involved recomputing
         the displayed object.
-        :param k: ignored
+        :param change: dict from widget
         :return:
         """
-        if v['name'] == 'value':
+        if change['name'] == 'value':
             if self.toggle_dark.value:
                 ipv.pylab.style.set_style_dark()
             else:
@@ -517,10 +612,10 @@ class ThreeDViewer(widgets.Box):
             else:
                 ipv.pylab.style.axes_off()
 
-    # def on_select_file(self, v):
+    # def on_select_file(self, change):
     #     """
     #     Called when a file selection has been done
-    #     :param v:
+    #     :param change:
     #     :return:
     #     """
     #     self.change_file(self.fc.selected)
@@ -551,15 +646,19 @@ class ThreeDViewer(widgets.Box):
     #         print("Failed to load file - is this a \
     #               result CXI result or a modes file from a 3D CDI analysis ?")
 
-    def on_change_type(self, v):
-        """Change scale"""
-        if v['name'] == 'value':
-            if isinstance(v['old'], str):
-                newv = v['new']
-                oldv = v['old']
+    def on_change_scale(self, change):
+        """Change scale between logarithmic and linear"""
+        if change['name'] == 'value':
+            if isinstance(change['old'], str):
+                newv = change['new']
+                oldv = change['old']
+
+                # linear scale
                 if 'log' in oldv and 'log' not in newv:
                     d = self.d0
                     self.set_data(d, threshold=10 ** self.threshold.value)
+
+                # log scale
                 elif 'log' in newv and 'log' not in oldv:
                     self.d0 = self.d
                     d = np.log10(np.maximum(0.1, abs(self.d0)))
@@ -568,10 +667,21 @@ class ThreeDViewer(widgets.Box):
             self.on_update_plot()
 
     def set_data(self, d, threshold=None):
-        """Check if data is complex or not"""
+        """Check if data is complex or not
+
+        :param d: data 3d array, complex ot not, to be plotted
+        :param threshold: threshold for contour, if None set to max/2
+        """
+
+        # Update progress bar
         self.progress.value = 5
+
+        # Save data
         self.d = d
-        self.toggle_phase.unobserve(self.on_change_type)
+
+        # Change scale options depending on data
+        self.toggle_phase.unobserve(self.on_change_scale)
+
         if np.iscomplexobj(d):
             if self.toggle_phase.value == 'log10(Abs)':
                 self.toggle_phase.value = 'Abs'
@@ -580,8 +690,9 @@ class ThreeDViewer(widgets.Box):
             if self.toggle_phase.value == 'Phase':
                 self.toggle_phase.value = 'Abs'
             self.toggle_phase.options = ('Abs', 'log10(Abs)')
-        self.toggle_phase.observe(self.on_change_type)
+        self.toggle_phase.observe(self.on_change_scale)
 
+        # Set threshold
         self.threshold.unobserve(self.on_update_plot)
         self.colormap_range.unobserve(self.on_update_plot)
         self.threshold.max = abs(self.d).max()
@@ -589,6 +700,8 @@ class ThreeDViewer(widgets.Box):
             self.threshold.value = self.threshold.max / 2
         else:
             self.threshold.value = threshold
+
+        # Set colormap
         self.colormap_range.max = abs(self.d).max()
         self.colormap_range.value = [0, abs(self.d).max()]
         self.threshold.observe(self.on_update_plot)
@@ -597,10 +710,15 @@ class ThreeDViewer(widgets.Box):
         # print(abs(self.d).max(), self.threshold.value)
         nz, ny, nx = self.d.shape
         z, y, x = np.arange(nz), np.arange(ny), np.arange(nx)
+
         # Interpolate probe to object grid
         self.rgi = RegularGridInterpolator(
-            (z, y, x), self.d, method='linear',
-            bounds_error=False, fill_value=0)
+            (z, y, x),
+            self.d,
+            method='linear',
+            bounds_error=False,
+            fill_value=0,
+        )
 
         # Also prepare the phase gradient
         gz, gy, gx = np.gradient(self.d)
@@ -617,7 +735,7 @@ class ThreeDViewer(widgets.Box):
             (z, y, x), ((gz - gaz * ph) / (ph * a)).real,
             method='linear', bounds_error=False, fill_value=0)
 
-        # Fix extent
+        # Fix extent otherwise weird things happen
         ipv.pylab.xlim(0, max(self.d.shape))
         ipv.pylab.ylim(0, max(self.d.shape))
         ipv.pylab.zlim(0, max(self.d.shape))
@@ -626,9 +744,6 @@ class ThreeDViewer(widgets.Box):
 
     def on_animate(self):
         """Trigger the animation (rotation around vertical axis)
-
-        :param v:
-        :return:
         """
         if self.pcb_rotate is None:
             self.pcb_rotate = PeriodicCallback(self.callback_rotate, 50.)
