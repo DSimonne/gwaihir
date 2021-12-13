@@ -348,7 +348,8 @@ def correct_angles_detector(
     plt.title(f'Central slice at frame {int(np.rint(z0))}')
     plt.colorbar()
 
-    plt.scatter(bragg_x-roi_detector[2], bragg_y-roi_detector[0], marker = "1", color='r', alpha=0.7, linewidth=1)
+    plt.scatter(bragg_x-roi_detector[2], bragg_y-roi_detector[0],
+                marker="1", color='r', alpha=0.7, linewidth=1)
     plt.savefig(save_dir + "central_slice.png")
     plt.show()
 

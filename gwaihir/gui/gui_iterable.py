@@ -47,7 +47,7 @@ class Dataset():
                     final_data_path,
                     )
 
-        if isinstance(reconstruction_filename, str) and reconstruction_filename!="":
+        if isinstance(reconstruction_filename, str) and reconstruction_filename != "":
             print("\nSaving phase retrieval output ...")
             try:
                 with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
@@ -183,7 +183,8 @@ class Dataset():
 
             # Preprocessing
             preprocessing = parameters.create_group("preprocessing")
-            print("\n###############################################################################\n")
+            print(
+                "\n###############################################################################\n")
             print("Saving parameters used in preprocessing ...")
 
             # Masking
@@ -273,7 +274,7 @@ class Dataset():
                     "specfile_name", data=str(self.specfile_name))
                 beamline.create_dataset(
                     "rocking_angle", data=self.rocking_angle)
-            except (AttributeError,TypeError):
+            except (AttributeError, TypeError):
                 print("Could not save beamline parameters")
 
             try:
@@ -282,7 +283,7 @@ class Dataset():
                     "custom_images", data=self.custom_images)
                 beamline.create_dataset(
                     "custom_monitor", data=self.custom_monitor)
-            except (AttributeError,TypeError):
+            except (AttributeError, TypeError):
                 print("Could not save custom parameters")
 
             # Detector
@@ -362,7 +363,8 @@ class Dataset():
                 print("Could not save angles_corrections parameters")
 
             # Orthogonalisation
-            print("\n###############################################################################\n")
+            print(
+                "\n###############################################################################\n")
             print("Saving orthogonalisation parameters ...")
             orthogonalisation = parameters.create_group("orthogonalisation")
 
@@ -418,7 +420,8 @@ class Dataset():
                 xrayutilities.create_dataset("detrot", data=self.detrot)
                 xrayutilities.create_dataset(
                     "tiltazimuth", data=self.tiltazimuth)
-                xrayutilities.create_dataset("tilt_detector", data=self.tilt_detector)
+                xrayutilities.create_dataset(
+                    "tilt_detector", data=self.tilt_detector)
             except AttributeError:
                 print("Could not save xrayutilities parameters")
 
@@ -431,7 +434,8 @@ class Dataset():
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
-            print("\n###############################################################################\n")
+            print(
+                "\n###############################################################################\n")
             print("Saving parameters used in postprocessing ...")
 
             # Averaging reconstructions
@@ -568,7 +572,8 @@ class Dataset():
                     "apodization_window", data=self.apodization_window)
                 phase_averaging_apodization.create_dataset(
                     "half_width_avg_phase", data=self.half_width_avg_phase)
-                phase_averaging_apodization.create_dataset("apodization_mu", data=self.apodization_mu)
+                phase_averaging_apodization.create_dataset(
+                    "apodization_mu", data=self.apodization_mu)
                 phase_averaging_apodization.create_dataset(
                     "apodization_sigma", data=self.apodization_sigma)
                 phase_averaging_apodization.create_dataset(
@@ -578,8 +583,8 @@ class Dataset():
 
             # Save strain output
 
-            image_3.create_dataset("strain_analysis_output_file", 
-                data=self.strain_output_file)
+            image_3.create_dataset("strain_analysis_output_file",
+                                   data=self.strain_output_file)
 
             try:
                 with h5py.File(self.strain_output_file, "r") as fi:
@@ -608,12 +613,10 @@ class Dataset():
                                            compression="gzip")
 
                     image_3.create_dataset("voxel_sizes",
-                                            data=fi["output"]["voxel_sizes"])
-
+                                           data=fi["output"]["voxel_sizes"])
 
                     image_3.create_dataset("q_com",
-                                            data=fi["output"]["q_com"])
-
+                                           data=fi["output"]["q_com"])
 
                 image_3.attrs['signal'] = 'phase'
 

@@ -2701,22 +2701,20 @@ class Interface():
             # PyNX folder, refresh values
             self._list_widgets_phase_retrieval.children[1].value\
                 = self.preprocessing_folder
-            self.pynx_folder_handler(
-                change=self._list_widgets_phase_retrieval.children[1].value)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
             # Plot folder, refresh values
             self.tab_data.children[1].value = self.preprocessing_folder
-            self.plot_folder_handler(change=self.tab_data.children[1].value)
+            self.plot_folder_handler(change=self.preprocessing_folder)
 
             # Strain folder, refresh values
             self._list_widgets_strain.children[-4].value\
                 = self.preprocessing_folder
-            self.strain_folder_handler(
-                change=self._list_widgets_strain.children[-4].value)
+            self.strain_folder_handler(change=self.preprocessing_folder)
 
             # Facet folder, refresh values
             self.tab_facet.children[1].value = self.postprocessing_folder
-            self.vtk_file_handler(change=self.tab_facet.children[1].value)
+            self.vtk_file_handler(change=self.postprocessing_folder)
 
             # Only allow to save data if PyNX is imported to avoid errors
             # PyNX is needed to create the cxi file
@@ -3409,13 +3407,11 @@ class Interface():
                 # PyNX folder, refresh
                 self._list_widgets_phase_retrieval.children[1].value\
                     = self.preprocessing_folder
-                self.pynx_folder_handler(
-                    change=self._list_widgets_phase_retrieval.children[1].value)
+                self.pynx_folder_handler(change=self.preprocessing_folder)
 
                 # Plot folder, refresh
                 self.tab_data.children[1].value = self.preprocessing_folder
-                self.plot_folder_handler(
-                    change=self.tab_data.children[1].value)
+                self.plot_folder_handler(change=self.preprocessing_folder)
 
                 # Change window view
                 self.window.selected_index = 8
@@ -4130,8 +4126,7 @@ class Interface():
                         v.write(line)
 
                 print(
-                    f"Saved parameters in \n\
-                    \t{self.Dataset.pynx_parameter_gui_file}")
+                    f"Saved parameters in\n\t{self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
                     # Runs modes directly and saves all data in an "all"
@@ -4441,6 +4436,20 @@ class Interface():
 
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
+
+            # PyNX folder, refresh values
+            self._list_widgets_phase_retrieval.children[1].value\
+                = self.preprocessing_folder
+            self.pynx_folder_handler(change=self.preprocessing_folder)
+
+            # Plot folder, refresh values
+            self.tab_data.children[1].value = self.preprocessing_folder
+            self.plot_folder_handler(change=self.preprocessing_folder)
+
+            # Strain folder, refresh values
+            self._list_widgets_strain.children[-4].value\
+                = self.preprocessing_folder
+            self.strain_folder_handler(change=self.preprocessing_folder)
 
     @ staticmethod
     def filter_reconstructions(folder, nb_run, nb_keep, filter_criteria):
@@ -5248,8 +5257,8 @@ class Interface():
 
                 files = glob.glob(
                     f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
-                    recursive = True,
-                    )
+                    recursive=True,
+                )
                 files.sort(key=os.path.getmtime)
                 self.Dataset.strain_output_file = files[0]
 
@@ -5263,12 +5272,17 @@ class Interface():
                 # At the end of the function
                 self._list_widgets_strain.children[-2].disabled = False
 
+                # Refresh folders
+                self.sub_directories_handler(change=self.Dataset.scan_folder)
+
+                # PyNX folder, refresh values
+                self._list_widgets_phase_retrieval.children[1].value\
+                    = self.preprocessing_folder
+                self.pynx_folder_handler(change=self.preprocessing_folder)
+
                 self.tab_data.children[1].value = self.preprocessing_folder
                 self.plot_folder_handler(
-                    change=self.tab_data.children[1].value)
-
-            # Refresh folders
-            self.sub_directories_handler(change=self.Dataset.scan_folder)
+                    change=self.preprocessing_folder)
 
         if not run_strain:
             for w in self._list_widgets_strain.children[:-1]:
@@ -5280,9 +5294,17 @@ class Interface():
             for w in self._list_widgets_correct.children[:-1]:
                 w.disabled = False
 
-            self.strain_folder_handler(change=strain_folder)
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
+
+            # PyNX folder, refresh values
+            self._list_widgets_phase_retrieval.children[1].value\
+                = self.preprocessing_folder
+            self.pynx_folder_handler(change=self.preprocessing_folder)
+
+            # Plot folder, refresh values
+            self.tab_data.children[1].value = self.preprocessing_folder
+            self.plot_folder_handler(change=self.preprocessing_folder)
 
             print("Cleared window.")
             clear_output(True)
@@ -5851,7 +5873,7 @@ class Interface():
             display(window_support)
 
             # Update PyNX folder values
-            self.pynx_folder_handler(change = self.preprocessing_folder)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
         elif data_use == "extract_support" and len(path_to_data) == 1:
             # Disable widgets
@@ -5866,7 +5888,7 @@ class Interface():
             sup.extract_support()
 
             # Update PyNX folder values
-            self.pynx_folder_handler(change = self.preprocessing_folder)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
         elif data_use == "smooth_support" and len(path_to_data) == 1:
             # Disable widgets
@@ -5924,7 +5946,7 @@ class Interface():
             display(window_support)
 
             # Update PyNX folder values
-            self.pynx_folder_handler(change = self.preprocessing_folder)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
         elif data_use == "show_image":
             # Disable widgets
@@ -5955,7 +5977,7 @@ class Interface():
                 style={'description_width': 'initial'},
                 icon='step-forward')
 
-            @button_delete_data.on_click
+            @ button_delete_data.on_click
             def action_button_delete_data(selfbutton):
                 """Delete files."""
                 for p in path_to_data:
