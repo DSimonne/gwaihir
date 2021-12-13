@@ -24,7 +24,7 @@ from IPython.display import display, Markdown, Latex, clear_output, Image
 import gwaihir
 from gwaihir import plot, support
 from gwaihir.gui import gui_iterable
-from gwaihir.runner import correct_angles, transfer_matrix
+from gwaihir.runner import correct_angles
 
 # bcdi package
 from bcdi.utils.utilities import bin_data
@@ -5250,39 +5250,6 @@ class Interface():
                     --config {self.postprocessing_folder}/config_postprocessing.yml")
 
                 # Temporary fix, recompute the transformation matrix
-                # print("\nSaving transformation matrix ...")
-                # self.Dataset.transfer_matrix = \
-                #     transfer_matrix.compute_transformation_matrix(
-                #         scan=self.Dataset.scan,
-                #         original_size=self.Dataset.original_size,
-                #         phasing_binning=self.Dataset.phasing_binning,
-                #         comment=self.Dataset.comment,
-                #         reconstruction_file=self.Dataset.reconstruction_file,
-                #         keep_size=self.Dataset.keep_size,
-                #         detector=self.Dataset.detector,
-                #         template_imagefile=self.Dataset.template_imagefile,
-                #         preprocessing_binning=self.Dataset.preprocessing_binning,
-                #         tilt_angle=self.Dataset.tilt_angle,
-                #         beamline=self.Dataset.beamline,
-                #         pixel_size=self.Dataset.pixel_size,
-                #         energy=self.Dataset.energy,
-                #         outofplane_angle=self.Dataset.outofplane_angle,
-                #         inplane_angle=self.Dataset.inplane_angle,
-                #         rocking_angle=self.Dataset.rocking_angle,
-                #         sdd=self.Dataset.sdd,
-                #         sample_offsets=self.Dataset.sample_offsets,
-                #         actuators=self.Dataset.actuators,
-                #         custom_scan=self.Dataset.custom_scan,
-                #         custom_motors=self.Dataset.custom_motors,
-                #         fix_voxel=self.Dataset.fix_voxel,
-                #         ref_axis_q=self.Dataset.ref_axis_q,
-                #         sample_name=self.Dataset.sample_name,
-                #         root_folder=self.Dataset.root_folder,
-                #         save_dir=save_dir,
-                #         specfile_name=self.Dataset.specfile_name,
-                #         centering_method=self.Dataset.centering_method
-                #     )
-                # print("End of script")
             except AttributeError:
                 print("Run angles correction first, the values of the \
             inplane and outofplane angles are the bragg peak center of mass \
