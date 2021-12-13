@@ -2750,62 +2750,54 @@ class Interface():
                     clear_output(True)
                     display(buttons_init)
                     print(
-                        "\n###############################################################################\n"
+                        "\n#########################################################################################\n"
                     )
                     print("Saving data, takes some time ...")
 
                     try:
                         # Reciprocal space data
                         print(
-                            "\n###############################################################################\n"
+                            "\n#########################################################################################\n"
                         )
                         print(
-                            "Saving diffraction data and mask selected in \
-                            the PyNX tab...")
+                            "Saving diffraction data and mask selected in the PyNX tab...")
                         self.initialize_cdi_operator()
 
                         # Real space data
-                        try:
-                            print(
-                                "\n###############################################################################\n"
-                            )
-                            print("\nSaving parameters used in the GUI...")
-                            print(
-                                "\nUsing reconstruction file selected in the \
-                                strain analysis tab for phase retrieval \
-                                output ...")
-                            self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename,
-                                reconstruction_filename=self.Dataset.reconstruction_file,
-                            )
-
-                        except AttributeError:
-                            self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename,
-                                reconstruction_filename=False,
-                            )
+                        print(
+                            "\n#########################################################################################\n"
+                        )
+                        print("Saving parameters used in the GUI...")
+                        print(
+                            "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output.")
+                        self.Dataset.to_cxi(
+                            cxi_filename=self.cxi_filename,
+                            reconstruction_filename=self.Dataset.reconstruction_file,
+                        )
 
                     except NameError:
                         # Could not load cdi object
                         print(
-                            "Could not save reciprocal space data, \
-                            needs PyNX package")
+                            "Could not save reciprocal space data, needs PyNX package")
+
+                    except AttributeError:
+                        print(
+                            "Could not save reciprocal space data, select the intensity and the mask in the phase retrieval tab first.")
 
                     # Facets analysis output
                     try:
                         print(
-                            "\n###############################################################################\n"
+                            "\n#########################################################################################\n"
                         )
                         print("Saving Facets class data")
                         self.Facets.to_hdf5(
                             f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
                     except AttributeError:
                         print(
-                            "Could not save facets' data, run the analysis \
-                             in the `Facets` tab first...")
+                            "Could not save facets' data, run the analysis in the `Facets` tab first.")
 
                     print(
-                        "\n###############################################################################\n"
+                        "\n#########################################################################################\n"
                     )
 
                 @ button_reload_previous_data.on_click
@@ -2814,14 +2806,14 @@ class Interface():
                     clear_output(True)
                     display(buttons_init)
                     print(
-                        "\n###############################################################################\n"
+                        "\n#########################################################################################\n"
                     )
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all
                     # functions
                     print("Not created yet")
                     print(
-                        "\n###############################################################################\n"
+                        "\n#########################################################################################\n"
                     )
 
         elif not run_dir_init:
@@ -3402,13 +3394,13 @@ class Interface():
 
                 # On lance bcdi_preprocess
                 print(
-                    "\n###############################################################################\n"
+                    "\n#########################################################################################\n"
                 )
                 print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
                 print(
                     f"Config file: {self.preprocessing_folder}config_preprocessing.yml")
                 print(
-                    "\n###############################################################################\n"
+                    "\n#########################################################################################\n"
                 )
 
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
@@ -3430,6 +3422,7 @@ class Interface():
 
         if not init_para:
             clear_output(True)
+            print("Cleared window.")
 
     def correct_angles(
         self,
@@ -3589,6 +3582,7 @@ class Interface():
                 raise e
 
         if not angles_bool:
+            print("Cleared window.")
             clear_output(True)
 
     # Phase retrieval
@@ -4022,6 +4016,16 @@ class Interface():
         # Phase retrieval
         if self.run_phase_retrieval and not self.run_pynx_tools:
             if self.run_phase_retrieval in ("batch", "local_script"):
+                # Create /gui_run/ directory
+                try:
+                    os.mkdir(
+                        f"{self.preprocessing_folder}/gui_run/")
+                    print(
+                        f"Created {self.preprocessing_folder}/gui_run/", end="\n\n")
+                except FileExistsError:
+                    print(
+                        f"{self.preprocessing_folder}/gui_run/ exists", end="\n\n")
+
                 self.text_file = []
                 self.Dataset.live_plot = False
 
@@ -4049,16 +4053,11 @@ class Interface():
                 # Other support parameters
                 self.text_file += [
                     f'support_threshold= {support_threshold}\n',
-                    f'support_only_shrink = \
-                    {self.Dataset.support_only_shrink}\n',
-                    f'support_update_period = \
-                    {self.Dataset.support_update_period}\n',
-                    f'support_smooth_width_begin = \
-                    {self.Dataset.support_smooth_width[0]}\n',
-                    f'support_smooth_width_end = \
-                    {self.Dataset.support_smooth_width[1]}\n',
-                    f'support_post_expand = \
-                    {self.Dataset.support_post_expand}\n'
+                    f'support_only_shrink = {self.Dataset.support_only_shrink}\n',
+                    f'support_update_period = {self.Dataset.support_update_period}\n',
+                    f'support_smooth_width_begin = {self.Dataset.support_smooth_width[0]}\n',
+                    f'support_smooth_width_end = {self.Dataset.support_smooth_width[1]}\n',
+                    f'support_post_expand = {self.Dataset.support_post_expand}\n'
                     '\n',
                 ]
 
@@ -4066,13 +4065,11 @@ class Interface():
                 if self.Dataset.psf:
                     if self.Dataset.psf_model != "pseudo-voigt":
                         self.text_file.append(
-                            f"psf = \"{self.Dataset.psf_model},\
-                            {self.Dataset.fwhm}\"\n")
+                            f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm}\"\n")
 
                     if self.Dataset.psf_model == "pseudo-voigt":
                         self.text_file.append(
-                            f"psf = \"{self.Dataset.psf_model},\
-                            {self.Dataset.fwhm},{self.Dataset.eta}\"\n")
+                            f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm},{self.Dataset.eta}\"\n")
                 # no PSF, just don't write anything
 
                 # Filtering the reconstructions
@@ -4108,10 +4105,8 @@ class Interface():
                     f'nb_run_keep = {nb_keep_LLK}\n',
                     '\n',
                     f'# max_size = {self.Dataset.max_size}\n',
-                    'zero_mask = auto # masked pixels will start from imposed \
-                    0 and then let free\n',
-                    'crop_output= 0 # set to 0 to avoid cropping the output in \
-                     the .cxi\n',
+                    'zero_mask = auto # masked pixels will start from imposed 0 and then let free\n',
+                    'crop_output= 0 # set to 0 to avoid cropping the output in the .cxi\n',
                     "mask_interp=8,2\n"
                     "confidence_interval_factor_mask=0.5,1.2\n"
                     '\n',
@@ -4122,8 +4117,7 @@ class Interface():
                     '\n',
                     '# Generic parameters\n',
                     f'detector_distance = {self.Dataset.sdd}\n',
-                    f'pixel_size_detector = \
-                    {self.Dataset.pixel_size_detector}\n',
+                    f'pixel_size_detector = {self.Dataset.pixel_size_detector}\n',
                     f'wavelength = {self.Dataset.wavelength}\n',
                     f'verbose = {self.Dataset.verbose}\n',
                     "output_format= 'cxi'\n",
@@ -4163,14 +4157,10 @@ class Interface():
                 elif self.run_phase_retrieval == "local_script":
                     try:
                         print(
-                            f"\nRunning {self.path_scripts}/pynx-id01cdi.py \
-                            pynx_run_gui.txt 2>&1 | tee \
-                            README_pynx_local_script.md &",
+                            f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
                             end="\n\n")
                         os.system(
-                            "cd {}; {}/pynx-id01cdi.py \
-                            pynx_run_gui.txt \
-                            2>&1 | tee README_pynx_local_script.md &".format(
+                            "cd {}; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
                                 quote(self.preprocessing_folder),
                                 quote(self.path_scripts),
                             )
@@ -4184,7 +4174,7 @@ class Interface():
                 self.Dataset.calc_llk = 50  # for now
 
                 print(
-                    "\n###############################################################################\n"
+                    "\n#########################################################################################\n"
                 )
                 try:
                     # Run phase retrieval for nb_run
@@ -4415,7 +4405,7 @@ class Interface():
                                 too large too continue")
 
                         print(
-                            "\n###############################################################################\n"
+                            "\n#########################################################################################\n"
                         )
 
                     # If filter, filter data
@@ -4446,7 +4436,11 @@ class Interface():
 
         # Clean output
         if not self.run_phase_retrieval and not self.run_pynx_tools:
+            print("Cleared output.")
             clear_output(True)
+
+            # Refresh folders
+            self.sub_directories_handler(change=self.Dataset.scan_folder)
 
     @ staticmethod
     def filter_reconstructions(folder, nb_run, nb_keep, filter_criteria):
@@ -4586,7 +4580,7 @@ class Interface():
         """
         try:
             print(
-                f"Using {self.path_scripts}/pynx-cdi-analysis.py (py38-stable environment)\n"
+                f"Using {self.path_scripts}/pynx-cdi-analysis.py\n"
                 f"Using {folder}/*LLK* files.\n"
                 "Running pynx-cdi-analysis.py *LLK* modes=1\n"
                 f"Output in {folder}/modes_gui.h5")
@@ -4985,6 +4979,70 @@ class Interface():
         :param save: e.g. True
          True to save amp.npz, phase.npz, strain.npz and vtk files
         """
+
+        # Save parameter values
+        # parameters used when averaging several reconstruction #
+        self.Dataset.sort_method = sort_method
+        self.Dataset.correlation_threshold = correlation_threshold
+        # parameters relative to the FFT window and voxel sizes #
+        self.Dataset.phasing_binning = phasing_binning
+        self.Dataset.original_size = original_size
+        self.Dataset.preprocessing_binning = preprocessing_binning
+        self.Dataset.output_size = output_size
+        self.Dataset.keep_size = keep_size
+        self.Dataset.fix_voxel = fix_voxel
+        # parameters related to displacement and strain calculation #
+        self.Dataset.data_frame = data_frame
+        self.Dataset.save_frame = save_frame
+        self.Dataset.ref_axis_q = ref_axis_q
+        self.Dataset.isosurface_strain = isosurface_strain
+        self.Dataset.strain_method = strain_method
+        self.Dataset.phase_offset = phase_offset
+        self.Dataset.phase_offset_origin = phase_offset_origin
+        self.Dataset.offset_method = offset_method
+        self.Dataset.centering_method = centering_method
+        # pixel_size,
+        # parameters related to the refraction correction
+        self.Dataset.correct_refraction = correct_refraction
+        self.Dataset.optical_path_method = optical_path_method
+        self.Dataset.dispersion = dispersion
+        self.Dataset.absorption = absorption
+        self.Dataset.threshold_unwrap_refraction\
+            = threshold_unwrap_refraction
+        # options #
+        self.Dataset.simulation = simulation
+        self.Dataset.invert_phase = invert_phase
+        self.Dataset.flip_reconstruction = flip_reconstruction
+        self.Dataset.phase_ramp_removal = phase_ramp_removal
+        self.Dataset.threshold_gradient = threshold_gradient
+        self.Dataset.save_raw = save_raw
+        self.Dataset.save_support = save_support
+        self.Dataset.save = save
+        self.Dataset.debug = debug
+        self.Dataset.roll_modes = roll_modes
+        # parameters related to data visualization #
+        self.Dataset.align_axis = align_axis
+        self.Dataset.ref_axis = ref_axis
+        self.Dataset.axis_to_align = axis_to_align
+        self.Dataset.strain_range = strain_range
+        self.Dataset.phase_range = phase_range
+        self.Dataset.grey_background = grey_background
+        self.Dataset.tick_spacing = tick_spacing
+        self.Dataset.tick_direction = tick_direction
+        self.Dataset.tick_length = tick_length
+        self.Dataset.tick_width = tick_width
+        # parameters for averaging several reconstructed objects #
+        self.Dataset.averaging_space = averaging_space
+        self.Dataset.threshold_avg = threshold_avg
+        # setup for phase averaging or apodization
+        self.Dataset.half_width_avg_phase = half_width_avg_phase
+        self.Dataset.apodize = apodize
+        self.Dataset.apodization_window = apodization_window
+        self.Dataset.apodization_mu = apodization_mu
+        self.Dataset.apodization_sigma = apodization_sigma
+        self.Dataset.apodization_alpha = apodization_alpha
+        self.Dataset.reconstruction_file = strain_folder + reconstruction_file
+
         if run_strain:
             # Disable all widgets until the end of the program, will update
             # automatticaly after
@@ -4996,68 +5054,6 @@ class Interface():
 
             for w in self._list_widgets_correct.children[:-1]:
                 w.disabled = True
-
-            # parameters used when averaging several reconstruction #
-            self.Dataset.sort_method = sort_method
-            self.Dataset.correlation_threshold = correlation_threshold
-            # parameters relative to the FFT window and voxel sizes #
-            self.Dataset.phasing_binning = phasing_binning
-            self.Dataset.original_size = original_size
-            self.Dataset.preprocessing_binning = preprocessing_binning
-            self.Dataset.output_size = output_size
-            self.Dataset.keep_size = keep_size
-            self.Dataset.fix_voxel = fix_voxel
-            # parameters related to displacement and strain calculation #
-            self.Dataset.data_frame = data_frame
-            self.Dataset.save_frame = save_frame
-            self.Dataset.ref_axis_q = ref_axis_q
-            self.Dataset.isosurface_strain = isosurface_strain
-            self.Dataset.strain_method = strain_method
-            self.Dataset.phase_offset = phase_offset
-            self.Dataset.phase_offset_origin = phase_offset_origin
-            self.Dataset.offset_method = offset_method
-            self.Dataset.centering_method = centering_method
-            # pixel_size,
-            # parameters related to the refraction correction
-            self.Dataset.correct_refraction = correct_refraction
-            self.Dataset.optical_path_method = optical_path_method
-            self.Dataset.dispersion = dispersion
-            self.Dataset.absorption = absorption
-            self.Dataset.threshold_unwrap_refraction\
-                = threshold_unwrap_refraction
-            # options #
-            self.Dataset.simulation = simulation
-            self.Dataset.invert_phase = invert_phase
-            self.Dataset.flip_reconstruction = flip_reconstruction
-            self.Dataset.phase_ramp_removal = phase_ramp_removal
-            self.Dataset.threshold_gradient = threshold_gradient
-            self.Dataset.save_raw = save_raw
-            self.Dataset.save_support = save_support
-            self.Dataset.save = save
-            self.Dataset.debug = debug
-            self.Dataset.roll_modes = roll_modes
-            # parameters related to data visualization #
-            self.Dataset.align_axis = align_axis
-            self.Dataset.ref_axis = ref_axis
-            self.Dataset.axis_to_align = axis_to_align
-            self.Dataset.strain_range = strain_range
-            self.Dataset.phase_range = phase_range
-            self.Dataset.grey_background = grey_background
-            self.Dataset.tick_spacing = tick_spacing
-            self.Dataset.tick_direction = tick_direction
-            self.Dataset.tick_length = tick_length
-            self.Dataset.tick_width = tick_width
-            # parameters for averaging several reconstructed objects #
-            self.Dataset.averaging_space = averaging_space
-            self.Dataset.threshold_avg = threshold_avg
-            # setup for phase averaging or apodization
-            self.Dataset.half_width_avg_phase = half_width_avg_phase
-            self.Dataset.apodize = apodize
-            self.Dataset.apodization_window = apodization_window
-            self.Dataset.apodization_mu = apodization_mu
-            self.Dataset.apodization_sigma = apodization_sigma
-            self.Dataset.apodization_alpha = apodization_alpha
-            self.Dataset.reconstruction_file = strain_folder + reconstruction_file
 
             # Extract dict, list and tuple from strings
             list_parameters = [
@@ -5138,8 +5134,6 @@ class Interface():
 
             try:
                 # Run strain.py script
-                # self.Dataset.strain_output_file, self.Dataset.voxel_size,
-                # self.Dataset.q_final
                 self.create_yaml_file(
                     fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
                     scan=self.Dataset.scan,
@@ -5235,19 +5229,29 @@ class Interface():
                     save=self.Dataset.save,
                     backend=self.matplotlib_backend,
                 )
-                # On lance bcdi_preprocess
+                # On lance bcdi_postprocessing (strain)
                 print(
-                    "\n###############################################################################\n"
+                    "\n#########################################################################################\n"
                 )
                 print(f"Running: {self.path_scripts}/bcdi_strain.py")
                 print(
                     f"Config file: {self.postprocessing_folder}/config_postprocessing.yml")
                 print(
-                    "\n###############################################################################\n"
+                    "\n#########################################################################################\n"
                 )
 
                 os.system(f"{self.path_scripts}/bcdi_strain.py \
                     --config {self.postprocessing_folder}/config_postprocessing.yml")
+
+                # Get data from saved file
+                phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
+
+                files = glob.glob(
+                    f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
+                    recursive = True,
+                    )
+                files.sort(key=os.path.getmtime)
+                self.Dataset.strain_output_file = files[0]
 
                 # Temporary fix, recompute the transformation matrix
                 # print("\nSaving transformation matrix ...")
@@ -5284,9 +5288,7 @@ class Interface():
                 #     )
                 # print("End of script")
             except AttributeError:
-                print("Run angles correction first, the values of the \
-            inplane and outofplane angles are the bragg peak center of mass \
-            will be automatically computed.")
+                print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
@@ -5297,6 +5299,9 @@ class Interface():
                 self.tab_data.children[1].value = self.preprocessing_folder
                 self.plot_folder_handler(
                     change=self.tab_data.children[1].value)
+
+            # Refresh folders
+            self.sub_directories_handler(change=self.Dataset.scan_folder)
 
         if not run_strain:
             for w in self._list_widgets_strain.children[:-1]:
@@ -5309,6 +5314,9 @@ class Interface():
                 w.disabled = False
 
             self.strain_folder_handler(change=strain_folder)
+            # Refresh folders
+            self.sub_directories_handler(change=self.Dataset.scan_folder)
+
             print("Cleared window.")
             clear_output(True)
 
@@ -5875,6 +5883,9 @@ class Interface():
 
             display(window_support)
 
+            # Update PyNX folder values
+            self.pynx_folder_handler(change = self.preprocessing_folder)
+
         elif data_use == "extract_support" and len(path_to_data) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
@@ -5886,6 +5897,9 @@ class Interface():
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
+
+            # Update PyNX folder values
+            self.pynx_folder_handler(change = self.preprocessing_folder)
 
         elif data_use == "smooth_support" and len(path_to_data) == 1:
             # Disable widgets
@@ -5942,6 +5956,9 @@ class Interface():
 
             display(window_support)
 
+            # Update PyNX folder values
+            self.pynx_folder_handler(change = self.preprocessing_folder)
+
         elif data_use == "show_image":
             # Disable widgets
             for w in self.tab_data.children[:-2]:
@@ -5963,36 +5980,6 @@ class Interface():
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
-
-            # # Create removal buttons in a function
-            # def create_removal_button(folder, p):
-            #     button_delete_data = Button(
-            #         description=f"Delete {p} ?",
-            #         button_style='',
-            #         layout=Layout(width='70%'),
-            #         style={'description_width': 'initial'},
-            #         icon='step-forward')
-
-            #     @button_delete_data.on_click
-            #     def action_button_delete_data(selfbutton):
-            #         """Create button to delete files."""
-            #         try:
-            #             os.remove(folder + "/" + p)
-            #             print(f"Removed {p}")
-
-            #             # Refresh folder
-            #             self.plot_folder_handler(change=folder)
-            #         except FileNotFoundError:
-            #             print("Could not remove data")
-            #     return button_delete_data
-
-            # # Create a button for each file
-            # button_list = [
-            #     create_removal_button(folder, p) for p in path_to_data]
-
-            # # Display the buttons, one per file
-            # for b in button_list:
-            #     display(b)
 
             button_delete_data = Button(
                 description=f"Delete files ?",

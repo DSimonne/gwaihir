@@ -47,7 +47,7 @@ class Dataset():
                     final_data_path,
                     )
 
-        if reconstruction_filename:
+        if isinstance(reconstruction_filename, str) and reconstruction_filename!="":
             print("\nSaving phase retrieval output ...")
             try:
                 with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
@@ -183,8 +183,7 @@ class Dataset():
 
             # Preprocessing
             preprocessing = parameters.create_group("preprocessing")
-            print("\n###################################################\
-                ##########################################################\n")
+            print("\n###############################################################################\n")
             print("Saving parameters used in preprocessing ...")
 
             # Masking
@@ -203,7 +202,7 @@ class Dataset():
                 "cropping_padding_centering")
             try:
                 cropping_padding_centering.create_dataset(
-                    "centering", data=self.centering)
+                    "centering_method", data=self.centering_method)
                 cropping_padding_centering.create_dataset(
                     "fix_bragg", data=self.fix_bragg)
                 cropping_padding_centering.create_dataset(
@@ -230,10 +229,9 @@ class Dataset():
                 data_filtering.create_dataset(
                     "mask_zero_event", data=self.mask_zero_event)
                 data_filtering.create_dataset(
-                    "flag_medianfilter", data=self.flag_medianfilter)
+                    "median_filter", data=self.median_filter)
                 data_filtering.create_dataset(
-                    "medfilt_order", data=self.medfilt_order)
-                data_filtering.create_dataset("binning", data=self.binning)
+                    "median_filter_order", data=self.median_filter_order)
             except AttributeError:
                 print("Could not save data filtering parameters")
 
@@ -249,7 +247,7 @@ class Dataset():
                 saving_options.create_dataset(
                     "save_to_vti", data=self.save_to_vti)
                 saving_options.create_dataset(
-                    "save_asint", data=self.save_asint)
+                    "save_as_int", data=self.save_as_int)
             except AttributeError:
                 print("Could not save saving options")
 
@@ -271,18 +269,21 @@ class Dataset():
                 beamline.create_dataset("beamline", data=self.beamline)
                 beamline.create_dataset("actuators", data=str(self.actuators))
                 beamline.create_dataset("is_series", data=self.is_series)
+                beamline.create_dataset(
+                    "specfile_name", data=str(self.specfile_name))
+                beamline.create_dataset(
+                    "rocking_angle", data=self.rocking_angle)
+            except (AttributeError,TypeError):
+                print("Could not save beamline parameters")
+
+            try:
                 beamline.create_dataset("custom_scan", data=self.custom_scan)
                 beamline.create_dataset(
                     "custom_images", data=self.custom_images)
                 beamline.create_dataset(
                     "custom_monitor", data=self.custom_monitor)
-                beamline.create_dataset(
-                    "specfile_name", data=str(self.specfile_name))
-                beamline.create_dataset(
-                    "rocking_angle", data=self.rocking_angle)
-                beamline.create_dataset("follow_bragg", data=self.follow_bragg)
-            except AttributeError:
-                print("Could not save beamline parameters")
+            except (AttributeError,TypeError):
+                print("Could not save custom parameters")
 
             # Detector
             detector = preprocessing.create_group("detector")
@@ -361,8 +362,7 @@ class Dataset():
                 print("Could not save angles_corrections parameters")
 
             # Orthogonalisation
-            print("\n##########################################################\
-                ###################################################\n")
+            print("\n###############################################################################\n")
             print("Saving orthogonalisation parameters ...")
             orthogonalisation = parameters.create_group("orthogonalisation")
 
@@ -373,7 +373,7 @@ class Dataset():
                 linearized_transformation_matrix.create_dataset(
                     "use_rawdata", data=self.use_rawdata)
                 linearized_transformation_matrix.create_dataset(
-                    "interp_method", data=self.interp_method)
+                    "interpolation_method", data=self.interpolation_method)
                 linearized_transformation_matrix.create_dataset(
                     "fill_value_mask", data=self.fill_value_mask)
                 linearized_transformation_matrix.create_dataset(
@@ -389,8 +389,7 @@ class Dataset():
                 linearized_transformation_matrix.create_dataset(
                     "custom_motors", data=str(self.custom_motors))
             except AttributeError:
-                print("Could not save linearized transformation matrix \
-                    parameters")
+                print("Could not save linearized transformation matrix parameters")
 
             # xrayutilities
             xrayutilities = orthogonalisation.create_group("xrayutilities")
@@ -419,7 +418,7 @@ class Dataset():
                 xrayutilities.create_dataset("detrot", data=self.detrot)
                 xrayutilities.create_dataset(
                     "tiltazimuth", data=self.tiltazimuth)
-                xrayutilities.create_dataset("tilt", data=self.tilt)
+                xrayutilities.create_dataset("tilt_detector", data=self.tilt_detector)
             except AttributeError:
                 print("Could not save xrayutilities parameters")
 
@@ -432,8 +431,7 @@ class Dataset():
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
-            print("\n##########################################################\
-                ###################################################\n")
+            print("\n###############################################################################\n")
             print("Saving parameters used in postprocessing ...")
 
             # Averaging reconstructions
@@ -488,8 +486,7 @@ class Dataset():
                 displacement_strain_calculation.create_dataset(
                     "centering_method", data=self.centering_method)
             except AttributeError:
-                print("Could not save displacement & strain calculation\
-                 parameters")
+                print("Could not save displacement & strain calculation parameters")
 
             # Refraction
             refraction = postprocessing.create_group("refraction")
@@ -509,7 +506,7 @@ class Dataset():
             # Options
             options = postprocessing.create_group("options")
             try:
-                options.create_dataset("simu_flag", data=self.simu_flag)
+                options.create_dataset("simulation", data=self.simulation)
                 options.create_dataset("invert_phase", data=self.invert_phase)
                 options.create_dataset(
                     "flip_reconstruction", data=self.flip_reconstruction)
@@ -557,37 +554,34 @@ class Dataset():
                 "averaging_reconstructed_objects")
             try:
                 averaging_reconstructed_objects.create_dataset(
-                    "avg_method", data=self.avg_method)
-                averaging_reconstructed_objects.create_dataset(
-                    "avg_threshold", data=self.avg_threshold)
+                    "averaging_space", data=self.averaging_space)
             except AttributeError:
-                print("Could not save averaging reconstructed objects\
-                 parameters")
+                print("Could not save averaging reconstructed objects parameters")
 
             # Phase averaging apodization
             phase_averaging_apodization = postprocessing.create_group(
                 "phase_averaging_apodization")
             try:
                 phase_averaging_apodization.create_dataset(
-                    "apodize_flag", data=self.apodize_flag)
+                    "apodize", data=self.apodize)
                 phase_averaging_apodization.create_dataset(
-                    "apodize_window", data=self.apodize_window)
+                    "apodization_window", data=self.apodization_window)
                 phase_averaging_apodization.create_dataset(
-                    "hwidth", data=self.hwidth)
-                phase_averaging_apodization.create_dataset("mu", data=self.mu)
+                    "half_width_avg_phase", data=self.half_width_avg_phase)
+                phase_averaging_apodization.create_dataset("apodization_mu", data=self.apodization_mu)
                 phase_averaging_apodization.create_dataset(
-                    "sigma", data=self.sigma)
+                    "apodization_sigma", data=self.apodization_sigma)
                 phase_averaging_apodization.create_dataset(
-                    "alpha", data=self.alpha)
+                    "apodization_alpha", data=self.apodization_alpha)
             except AttributeError:
                 print("Could not save phase averaging apodization parameters")
 
             # Save strain output
-            try:
-                image_3.create_dataset("voxel_size", data=self.voxel_size)
-                image_3.create_dataset(
-                    "strain_analysis_output_file", data=self.strain_output_file)
 
+            image_3.create_dataset("strain_analysis_output_file", 
+                data=self.strain_output_file)
+
+            try:
                 with h5py.File(self.strain_output_file, "r") as fi:
                     image_3.create_dataset("amplitude",
                                            data=fi["output"]["amp"][:],
@@ -612,6 +606,14 @@ class Dataset():
                                            chunks=True,
                                            shuffle=True,
                                            compression="gzip")
+
+                    image_3.create_dataset("voxel_sizes",
+                                            data=fi["output"]["voxel_sizes"])
+
+
+                    image_3.create_dataset("q_com",
+                                            data=fi["output"]["q_com"])
+
 
                 image_3.attrs['signal'] = 'phase'
 
