@@ -5248,8 +5248,8 @@ class Interface():
 
                 files = glob.glob(
                     f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
-                    recursive = True,
-                    )
+                    recursive=True,
+                )
                 files.sort(key=os.path.getmtime)
                 self.Dataset.strain_output_file = files[0]
 
@@ -5851,7 +5851,7 @@ class Interface():
             display(window_support)
 
             # Update PyNX folder values
-            self.pynx_folder_handler(change = self.preprocessing_folder)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
         elif data_use == "extract_support" and len(path_to_data) == 1:
             # Disable widgets
@@ -5866,7 +5866,7 @@ class Interface():
             sup.extract_support()
 
             # Update PyNX folder values
-            self.pynx_folder_handler(change = self.preprocessing_folder)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
         elif data_use == "smooth_support" and len(path_to_data) == 1:
             # Disable widgets
@@ -5924,7 +5924,7 @@ class Interface():
             display(window_support)
 
             # Update PyNX folder values
-            self.pynx_folder_handler(change = self.preprocessing_folder)
+            self.pynx_folder_handler(change=self.preprocessing_folder)
 
         elif data_use == "show_image":
             # Disable widgets
