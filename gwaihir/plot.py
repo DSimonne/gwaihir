@@ -72,7 +72,7 @@ class Plotter():
         if isinstance(filename, str) and not data_array:
             self.get_data_array()
 
-        elif isinstance(filename, np.ndarray) and not filename:
+        elif isinstance(data_array, np.ndarray) and not filename:
             # Plot data
             if self.plot == "2D":
                 self.plot_data(figsize=self.figsize,
