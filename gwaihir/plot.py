@@ -736,9 +736,9 @@ class ThreeDViewer(widgets.Box):
             method='linear', bounds_error=False, fill_value=0)
 
         # Fix extent otherwise weird things happen
-        ipv.pylab.xlim(0, max(self.d.shape))
-        ipv.pylab.ylim(0, max(self.d.shape))
-        ipv.pylab.zlim(0, max(self.d.shape))
+        ipv.pylab.xlim(0, self.d.shape[0])
+        ipv.pylab.ylim(0, self.d.shape[1])
+        ipv.pylab.zlim(0, self.d.shape[2])
         ipv.squarelim()
         self.on_update_plot()
 
