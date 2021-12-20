@@ -5262,7 +5262,6 @@ class Interface():
                 files.sort(key=os.path.getmtime)
                 self.Dataset.strain_output_file = files[0]
 
-                # Temporary fix, recompute the transformation matrix
             except AttributeError:
                 print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
             except KeyboardInterrupt:
