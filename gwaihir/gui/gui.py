@@ -1329,14 +1329,14 @@ class Interface():
             psf_model=widgets.Dropdown(
                 options=[
                     "gaussian", "lorentzian", "pseudo-voigt"],
-                value="gaussian",
+                value="pseudo-voigt",
                 description='PSF peak shape',
                 continuous_update=False,
                 disabled=True,
                 style={'description_width': 'initial'}),
 
             fwhm=widgets.FloatText(
-                value=1,
+                value=0.5,
                 step=0.01,
                 min=0,
                 continuous_update=False,
@@ -1349,7 +1349,7 @@ class Interface():
                 disabled=True),
 
             eta=widgets.FloatText(
-                value=0.10,
+                value=0.05,
                 step=0.01,
                 max=1,
                 min=0,
