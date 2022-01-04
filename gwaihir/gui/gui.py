@@ -4149,7 +4149,8 @@ class Interface():
                     )
 
                     # Copy Pynx parameter file in folder
-                    shutil.copyfile(self.Dataset.pynx_parameter_gui_file, f"{self.preprocessing_folder}/gui_run/pynx_run_gui.txt")
+                    shutil.copyfile(self.Dataset.pynx_parameter_gui_file,
+                                    f"{self.preprocessing_folder}/gui_run/pynx_run_gui.txt")
 
                 elif self.run_phase_retrieval == "local_script":
                     try:
@@ -4373,16 +4374,16 @@ class Interface():
                                     ) ** er_power * cdi
 
                             fn = "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                                    self.Dataset.parent_folder,
-                                    self.Dataset.scan,
-                                    i,
-                                    cdi.get_llk()[0],
-                                    self.Dataset.threshold_relative,
-                                    cdi.iobs.shape[0],
-                                    cdi.iobs.shape[1],
-                                    cdi.iobs.shape[2],
-                                    sup_init,
-                                )
+                                self.Dataset.parent_folder,
+                                self.Dataset.scan,
+                                i,
+                                cdi.get_llk()[0],
+                                self.Dataset.threshold_relative,
+                                cdi.iobs.shape[0],
+                                cdi.iobs.shape[1],
+                                cdi.iobs.shape[2],
+                                sup_init,
+                            )
 
                             self.reconstruction_file_list.append(fn)
                             cdi.save_obj_cxi(fn)
