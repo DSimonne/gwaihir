@@ -1318,7 +1318,7 @@ class Interface():
                 layout=Layout(width='90%', height="35px")),
 
             psf=widgets.Checkbox(
-                value=False,
+                value=True,
                 description='Use point spread function:',
                 continuous_update=False,
                 disabled=False,
