@@ -124,7 +124,7 @@ class Plotter():
                         loading a file with an hdf5 architecture (.nxs, .cxi,
                         .h5, ...) and that the file exists. Otherwise, verify
                         that the data is saved in f.root.entry_1.data_1.data[:],
-                        as it should be following csi conventions.
+                        as it should be following cxi conventions.
                         """)
 
             elif self.filename.endswith(".h5"):
@@ -137,13 +137,21 @@ class Plotter():
                     self.data_array = np.swapaxes(self.data_array, 0, 2)
 
                 except (KeyError, OSError):
-                    raise KeyError("""
-                        The file could not be loaded, verify that you are\
-                        loading a file with an hdf5 architecture (.nxs, .cxi,\
-                        .h5, ...) and that the file exists. Otherwise, verify\
-                        that the data is saved in f.root.entry_1.data_1.data[:],\
-                        as it should be following csi conventions.\
-                        """)
+                    try:
+                        self.data_array = h5.File(self.filename, mode='r')[
+                            'entry_1/image_1/data'][()]
+                        if self.data_array.ndim == 4:
+                            self.data_array = self.data_array[0]
+                        # Due to labelling of axes x,y,z and not z,y,x
+                        self.data_array = np.swapaxes(self.data_array, 0, 2)
+                    except (KeyError, OSError):
+                        raise KeyError("""
+                            The file could not be loaded, verify that you are\
+                            loading a file with an hdf5 architecture (.nxs, .cxi,\
+                            .h5, ...) and that the file exists. Otherwise, verify\
+                            that the data is saved in f.root.entry_1.data_1.data[:],\
+                            as it should be following cxi conventions.\
+                            """)
 
             # Plot data
             if self.plot == "2D":

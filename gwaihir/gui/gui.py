@@ -1343,7 +1343,6 @@ class Interface():
                 description="FWHM:",
                 layout=Layout(
                     width='15%', height="50px"),
-                readout=True,
                 style={
                     'description_width': 'initial'},
                 disabled=True),
@@ -4149,6 +4148,9 @@ class Interface():
                         )
                     )
 
+                    # Copy Pynx parameter file in folder
+                    shutil.copyfile(self.Dataset.pynx_parameter_gui_file, f"{self.preprocessing_folder}/gui_run/pynx_run_gui.txt")
+
                 elif self.run_phase_retrieval == "local_script":
                     try:
                         print(
@@ -4166,7 +4168,10 @@ class Interface():
             elif self.run_phase_retrieval == "operators":
                 # Extract data
                 print("Log likelihood is updated every 50 iterations.")
-                self.Dataset.calc_llk = 50  # for now
+                self.Dataset.calc_llk = 50  # TODO
+
+                # Keep a list of the resulting scans
+                self.reconstruction_file_list = []
 
                 print(
                     "\n#########################################################################################\n"
@@ -4367,8 +4372,7 @@ class Interface():
                                     )**self.Dataset.support_update_period
                                     ) ** er_power * cdi
 
-                            cdi.save_obj_cxi(
-                                "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
+                            fn = "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                                     self.Dataset.parent_folder,
                                     self.Dataset.scan,
                                     i,
@@ -4379,20 +4383,10 @@ class Interface():
                                     cdi.iobs.shape[2],
                                     sup_init,
                                 )
-                            )
 
-                            print(
-                                "Saved as result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                                    self.Dataset.scan,
-                                    i,
-                                    cdi.get_llk()[0],
-                                    self.Dataset.threshold_relative,
-                                    cdi.iobs.shape[0],
-                                    cdi.iobs.shape[1],
-                                    cdi.iobs.shape[2],
-                                    sup_init,
-                                )
-                            )
+                            self.reconstruction_file_list.append(fn)
+                            cdi.save_obj_cxi(fn)
+                            print(f"Saved as {fn}.")
 
                         except SupportTooLarge:
                             print(
@@ -4438,9 +4432,9 @@ class Interface():
             self.sub_directories_handler(change=self.Dataset.scan_folder)
 
             # PyNX folder, refresh values
-            self._list_widgets_phase_retrieval.children[1].value\
-                = self.preprocessing_folder
-            self.pynx_folder_handler(change=self.preprocessing_folder)
+            # self._list_widgets_phase_retrieval.children[1].value\
+            #     = self.preprocessing_folder
+            # self.pynx_folder_handler(change=self.preprocessing_folder)
 
             # Plot folder, refresh values
             self.tab_data.children[1].value = self.preprocessing_folder

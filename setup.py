@@ -53,6 +53,7 @@ setuptools.setup(
         "tables",
         "PyQt5",
         "h5py",
+        "jupyter",
         #         "bcdi",
         #         "PyNX",
     ]
