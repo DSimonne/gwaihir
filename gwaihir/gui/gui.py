@@ -1060,7 +1060,6 @@ class Interface():
             self._list_widgets_preprocessing.children[-1]
         ])
 
-
         # Widgets for PyNX
         self._list_widgets_phase_retrieval = interactive(
             self.initialize_phase_retrieval,
@@ -3342,7 +3341,6 @@ class Interface():
         if not init_para:
             clear_output(True)
             print("Cleared window.")
-
 
     # Phase retrieval
 
