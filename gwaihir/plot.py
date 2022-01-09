@@ -253,7 +253,6 @@ class ThreeDViewer(widgets.Box):
     """Widget to display 3D objects from CDI optimisation, loaded from a result
     CXI file or a mode file.
 
-    This is a quick & dirty implementation but should be useful.
     Quickly adapted from @Vincent Favre Nicolin (ESRF)
     """
 
@@ -829,6 +828,8 @@ def plot_data(
                     ax.plot(np.log(data_array))
                 else:
                     ax.plot(data_array)
+
+                plt.tight_layout()
                 plt.show()
 
     elif data_dimensions == 2:
@@ -859,6 +860,7 @@ def plot_data(
                 plot_2d_image(data_array, log=log, fig=fig, ax=ax, cmap=cmap)
 
                 # Show figure
+                plt.tight_layout()
                 plt.show()
 
     elif data_dimensions == 3:
@@ -972,6 +974,7 @@ def plot_data(
                 # Plot 2D image in interactive environment
                 plot_2d_image(two_d_array=dt, log=log,
                               fig=fig, ax=ax, cmap=cmap)
+                plt.tight_layout()
                 plt.show()
 
                 # if PlottingOptions == "2D":
@@ -986,7 +989,7 @@ def plot_data(
                 #     plt.show()
 
 
-def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r"):
+def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", title = False):
     """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
@@ -995,6 +998,8 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r"):
     :param ax: axes of figure, default is None and will create axes
     :param log: True to have a logarithmic scale, False to have a linear scale
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
+    :param title: str, title for this axe
+
     """
     # Find max and min
     # dmax = two_d_array.max()
@@ -1017,6 +1022,8 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r"):
             # vmax=dmax,
         )
 
+        if isinstance(title, str):
+            ax.set_title(title)
         # Create axis for colorbar
         # cbar_ax = make_axes_locatable(ax).append_axes(
         #     position='right', size='5%', pad=0.1)
@@ -1085,6 +1092,7 @@ def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
         plot_2d_image(two_d_array, fig=fig, ax=axs[2], log=log, cmap=cmap)
 
         # Show figure
+        plt.tight_layout()
         plt.show()
 
     else:
@@ -1126,6 +1134,7 @@ def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
                               ax=axs[2], log=log, cmap=cmap)
 
                 # Show figure
+                plt.tight_layout()
                 plt.show()
             except IndexError:
                 plt.close()
