@@ -366,11 +366,11 @@ class Interface():
                 layout=Layout(
                     width='45%'),
                 tooltip="Bragg peak determination: 'max' or 'com', 'max' is \
-                better usually. It will be overridden by 'fix_bragg' if \
+                better usually. It will be overridden by 'bragg_peak' if \
                 not empty",
                 style={'description_width': 'initial'}),
 
-            fix_bragg=widgets.Text(
+            bragg_peak=widgets.Text(
                 placeholder="[z_bragg, y_bragg, x_bragg]",
                 description='Bragg peak position',
                 disabled=True,
@@ -607,9 +607,7 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             roi_detector=widgets.Text(
-                placeholder="""
-                [low_y_bound, high_y_bound, low_x_bound, high_x_bound]
-                """,
+                placeholder="""[low_y_bound, high_y_bound, low_x_bound, high_x_bound]""",
                 description='Fix roi area, will overwrite cropping parameters',
                 disabled=True,
                 continuous_update=False,
@@ -813,6 +811,26 @@ class Interface():
                 tooltip="q will be aligned along that axis",
                 style={'description_width': 'initial'}),
 
+            direct_beam=widgets.Text(
+                value="[250, 250]",
+                placeholder="[250, 250]",
+                description='Direct beam position (px)',
+                disabled=True,
+                continuous_update=False,
+                layout=Layout(
+                    width='45%'),
+                style={'description_width': 'initial'}),
+
+            dirbeam_detector_angles=widgets.Text(
+                value="[0, 0]",
+                placeholder="[0, 0]",
+                description='Direct beam angles (°)',
+                disabled=True,
+                continuous_update=False,
+                layout=Layout(
+                    width='45%'),
+                style={'description_width': 'initial'}),
+
             outofplane_angle=widgets.FloatText(
                 value=0,
                 step=0.01,
@@ -833,7 +851,6 @@ class Interface():
                     width='25%'),
                 style={'description_width': 'initial'}),
 
-
             tilt_angle=widgets.FloatText(
                 value=0.003,
                 step=0.0001,
@@ -843,7 +860,6 @@ class Interface():
                 layout=Layout(
                     width='25%'),
                 style={'description_width': 'initial'}),
-
             sample_inplane=widgets.Text(
                 value="(1, 0, 0)",
                 placeholder="(1, 0, 0)",
@@ -903,34 +919,6 @@ class Interface():
                 tooltip="cch2 parameter from xrayutilities 2D detector \
                 calibration, horizontal",
                 style={'description_width': 'initial'}),
-
-            direct_inplane=widgets.FloatText(
-                value=0,
-                step=0.01,
-                min=0,
-                max=360,
-                continuous_update=False,
-                description='Direct inplane angle:',
-                layout=Layout(
-                    width='30%'),
-                readout=True,
-                style={
-                    'description_width': 'initial'},
-                disabled=True),
-
-            direct_outofplane=widgets.FloatText(
-                value=0,
-                step=0.01,
-                min=0,
-                max=360,
-                continuous_update=False,
-                description='Direct outofplane angle:',
-                layout=Layout(
-                    width='30%'),
-                readout=True,
-                style={
-                    'description_width': 'initial'},
-                disabled=True),
 
             detrot=widgets.FloatText(
                 value=0,
@@ -997,8 +985,8 @@ class Interface():
             self.bragg_peak_centering_handler, names="value")
         self._list_widgets_preprocessing.children[25].observe(
             self.reload_data_handler, names="value")
-        self._list_widgets_preprocessing.children[44].observe(
-            self.interpolation_handler, names="value")
+        # self._list_widgets_preprocessing.children[44].observe(
+        #     self.orthogonalisation_handler, names="value")
         self._list_widgets_preprocessing.children[-2].observe(
             self.preprocess_handler, names="value")
 
@@ -1056,10 +1044,10 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[50:52]),
             self._list_widgets_preprocessing.children[52],
             widgets.HBox(self._list_widgets_preprocessing.children[53:55]),
-            widgets.HBox(self._list_widgets_preprocessing.children[55:58]),
-            widgets.HBox(self._list_widgets_preprocessing.children[58:61]),
-            widgets.HBox(self._list_widgets_preprocessing.children[61:65]),
-            widgets.HBox(self._list_widgets_preprocessing.children[65:68]),
+            widgets.HBox(self._list_widgets_preprocessing.children[55:57]),
+            widgets.HBox(self._list_widgets_preprocessing.children[57:60]),
+            widgets.HBox(self._list_widgets_preprocessing.children[60:63]),
+            widgets.HBox(self._list_widgets_preprocessing.children[63:68]),
         ])
 
         # Group all preprocess tabs into a single one, besides detector and
@@ -2677,6 +2665,11 @@ class Interface():
                 print(
                     f"Copied {self.Dataset.path_to_data} to \
                     {self.Dataset.data_folder}")
+
+                # Change path_to_data
+                self.Dataset.path_to_data = self.Dataset.data_folder + \
+                    os.path.basename(self.Dataset.path_to_data)
+
             except (FileExistsError, shutil.SameFileError):
                 print(
                     f"{self.Dataset.data_folder}\
@@ -2835,7 +2828,7 @@ class Interface():
         background_plot,
         unused_label_centering,
         centering_method,
-        fix_bragg,
+        bragg_peak,
         fix_size,
         center_fft,
         pad_size,
@@ -2857,9 +2850,16 @@ class Interface():
         save_as_int,
         unused_label_detector,
         detector,
+        # phasing_binning,
+        # linearity_func
+        # center_roi_x
+        # center_roi_y
         roi_detector,
+        # normalize_flux
         photon_threshold,
         photon_filter,
+        # bin_during_loading todo
+        # frames_pattern todo
         background_file,
         hotpixels_file,
         flatfield_file,
@@ -2876,6 +2876,9 @@ class Interface():
         unused_label_xru,
         align_q,
         ref_axis_q,
+        direct_beam,
+        dirbeam_detector_angles,
+        # bragg_peak
         outofplane_angle,
         inplane_angle,
         tilt_angle,
@@ -2884,8 +2887,6 @@ class Interface():
         offset_inplane,
         cch1,
         cch2,
-        direct_inplane,  # correction
-        direct_outofplane,  # correction
         detrot,
         tiltazimuth,
         tilt_detector,
@@ -2919,10 +2920,6 @@ class Interface():
         :param centering_method: e.g. "max"
          Bragg peak determination: 'max' or 'com', 'max' is better usually.
          It will be overridden by 'fix_bragg' if not empty
-        :param fix_bragg: e.g. [121, 321, 256]
-         Bragg peak position [z_bragg, y_bragg, x_bragg] considering the
-         full detector. It is useful if hotpixels or intense aliens.
-        Leave None otherwise.
         :param fix_size: e.g. [0, 256, 10, 240, 50, 350]
          crop the array to that predefined size considering the full detector.
          [zstart, zstop, ystart, ystop, xstart, xstop], ROI will be defaulted
@@ -3019,6 +3016,12 @@ class Interface():
          axis, detector horizontal axis)
         :param linearity_func: name of the linearity correction for the
          detector, leave None otherwise.
+        :param center_roi_x: e.g. 1577
+         horizontal pixel number of the center of the ROI for data loading.
+         Leave None to use the full detector.
+        :param center_roi_y: e.g. 833
+         vertical pixel number of the center of the ROI for data loading.
+         Leave None to use the full detector.
         :param roi_detector: e.g.[0, 250, 10, 210]
          region of interest of the detector to load. If "x_bragg" or "y_bragg"
          are not None, it will consider that the current values in roi_detector
@@ -3096,6 +3099,19 @@ class Interface():
          if True it rotates the crystal to align q, along one axis of the
          array. It is used only when interp_method is 'linearization'
         :param ref_axis_q: e.g. "y"  # q will be aligned along that axis
+        :param direct_beam: e.g. [125, 362]
+         [vertical, horizontal], direct beam position on the unbinned, full detector
+         measured with detector angles given by `dirbeam_detector_angles`. It will be used
+         to calculate the real detector angles for the measured Bragg peak. Leave None for
+         no correction.
+        :param dirbeam_detector_angles: e.g. [1, 25]
+         [outofplane, inplane] detector angles in degrees for the direct beam measurement.
+         Leave None for no correction
+        :param bragg_peak: e.g. [121, 321, 256]
+         Bragg peak position [z_bragg, y_bragg, x_bragg] considering the unbinned full
+         detector. If 'outofplane_angle' and 'inplane_angle' are None and the direct beam
+         position is provided, it will be used to calculate the correct detector angles.
+         It is useful if there are hotpixels or intense aliens. Leave None otherwise.
         :param outofplane_angle: e.g. 42.6093
          detector angle in deg (rotation around x outboard, typically delta),
          corrected for the direct beam position. Leave None to use the
@@ -3143,18 +3159,24 @@ class Interface():
                 w.disabled = True
 
             # Save parameter values as attributes
-            self.Dataset.phasing_binning = phasing_binning
+            self.Dataset.beamline = beamline
+            self.Dataset.actuators = actuators
+            self.Dataset.is_series = is_series
+            self.Dataset.custom_scan = custom_scan
+            self.Dataset.custom_images = custom_images
+            self.Dataset.custom_monitor = custom_monitor
+            self.Dataset.specfile_name = specfile_name
+            self.Dataset.rocking_angle = rocking_angle
             self.Dataset.flag_interact = flag_interact
             self.Dataset.background_plot = str(background_plot)
             if centering_method == "manual":  # will be overridden
                 self.Dataset.centering_method = "max"
             else:
                 self.Dataset.centering_method = centering_method
-            self.Dataset.fix_bragg = fix_bragg
+            self.Dataset.bragg_peak = bragg_peak
             self.Dataset.fix_size = fix_size
             self.Dataset.center_fft = center_fft
             self.Dataset.pad_size = pad_size
-            self.Dataset.normalize_flux = normalize_flux
             self.Dataset.mask_zero_event = mask_zero_event
             self.Dataset.median_filter = median_filter
             self.Dataset.median_filter_order = median_filter_order
@@ -3166,18 +3188,15 @@ class Interface():
             self.Dataset.save_to_mat = save_to_mat
             self.Dataset.save_to_vti = save_to_vti
             self.Dataset.save_as_int = save_as_int
-            self.Dataset.beamline = beamline
-            self.Dataset.actuators = actuators
-            self.Dataset.is_series = is_series
-            self.Dataset.custom_scan = custom_scan
-            self.Dataset.custom_images = custom_images
-            self.Dataset.custom_monitor = custom_monitor
-            self.Dataset.rocking_angle = rocking_angle
-            self.Dataset.specfile_name = specfile_name
             self.Dataset.detector = detector
+            self.Dataset.phasing_binning = phasing_binning
+            self.Dataset.linearity_func = None  # TODO
             self.Dataset.roi_detector = roi_detector
+            self.Dataset.normalize_flux = normalize_flux
             self.Dataset.photon_threshold = photon_threshold
             self.Dataset.photon_filter = photon_filter
+            self.Dataset.bin_during_loading = True  # TODO
+            self.Dataset.frames_pattern = None  # TODO
             self.Dataset.background_file = background_file
             self.Dataset.hotpixels_file = hotpixels_file
             self.Dataset.flatfield_file = flatfield_file
@@ -3192,6 +3211,9 @@ class Interface():
             self.Dataset.custom_motors = custom_motors
             self.Dataset.align_q = align_q
             self.Dataset.ref_axis_q = ref_axis_q
+            self.Dataset.direct_beam = direct_beam
+            self.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
+            # bragg_peak
             self.Dataset.outofplane_angle = outofplane_angle
             self.Dataset.inplane_angle = inplane_angle
             self.Dataset.tilt_angle = tilt_angle
@@ -3200,19 +3222,14 @@ class Interface():
             self.Dataset.offset_inplane = offset_inplane
             self.Dataset.cch1 = cch1
             self.Dataset.cch2 = cch2
-            self.Dataset.direct_inplane = direct_inplane
-            self.Dataset.direct_outofplane = direct_outofplane
             self.Dataset.detrot = detrot
             self.Dataset.tiltazimuth = tiltazimuth
             self.Dataset.tilt_detector = tilt_detector
 
-            # Parameters to add to GUI
-            self.Dataset.bin_during_loading = True
-            self.Dataset.frames_pattern = None
-
             # Extract dict, list and tuple from strings
-            list_parameters = ["fix_bragg", "custom_images",
-                               "fix_size", "pad_size", "roi_detector"]
+            list_parameters = ["bragg_peak", "custom_images",
+                               "fix_size", "pad_size", "roi_detector",
+                               "direct_beam", "dirbeam_detector_angles"]
 
             tuple_parameters = [
                 "phasing_binning", "preprocessing_binning",  "beam_direction",
@@ -3274,7 +3291,6 @@ class Interface():
             if self.Dataset.specfile_name == "":
                 self.Dataset.specfile_name = None
 
-            self.Dataset.linearity_func = None
             print("Parameters initialized...")
 
             button_run_preprocess = Button(
@@ -3295,8 +3311,9 @@ class Interface():
 
                 # Check is SIXS data, in that case rotate
                 if self.Dataset.beamline == "SIXS_2019":
-                    self.rotate_sixs_data()
+                    # self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
+                    self.Dataset.data_dir = self.Dataset.data_folder  # TODO CONFUSING
 
                 else:
                     root_folder = self.Dataset.data_dir
@@ -3315,9 +3332,9 @@ class Interface():
                     # parameters used in masking
                     flag_interact=self.Dataset.flag_interact,
                     background_plot=self.Dataset.background_plot,
+                    backend=self.matplotlib_backend,
                     # parameters related to data cropping/padding/centering
                     centering_method=self.Dataset.centering_method,
-                    fix_bragg=self.Dataset.fix_bragg,
                     fix_size=self.Dataset.fix_size,
                     center_fft=self.Dataset.center_fft,
                     pad_size=self.Dataset.pad_size,
@@ -3349,6 +3366,8 @@ class Interface():
                     detector=self.Dataset.detector,
                     phasing_binning=self.Dataset.phasing_binning,
                     linearity_func=self.Dataset.linearity_func,
+                    # center_roi_x
+                    # center_roi_y
                     roi_detector=self.Dataset.roi_detector,
                     normalize_flux=self.Dataset.normalize_flux,
                     photon_threshold=self.Dataset.photon_threshold,
@@ -3373,6 +3392,9 @@ class Interface():
                     # phasing  using the linearized transformation matrix
                     align_q=self.Dataset.align_q,
                     ref_axis_q=self.Dataset.ref_axis_q,
+                    direct_beam=self.Dataset.direct_beam,
+                    dirbeam_detector_angles=self.Dataset.dirbeam_detector_angles,
+                    bragg_peak=self.Dataset.bragg_peak,
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
                     tilt_angle=self.Dataset.tilt_angle,
@@ -3386,7 +3408,6 @@ class Interface():
                     detrot=self.Dataset.detrot,
                     tiltazimuth=self.Dataset.tiltazimuth,
                     tilt_detector=self.Dataset.tilt_detector,
-                    backend=self.matplotlib_backend,
                 )
 
                 # On lance bcdi_preprocess
@@ -3552,16 +3573,16 @@ class Interface():
 
                 # Save corrected angles in the widgets
                 print("Saving corrected angles values...")
-                self._list_widgets_preprocessing.children[55].value\
+                self._list_widgets_preprocessing.children[57].value\
                     = self.Dataset.bragg_outofplane
-                self._list_widgets_preprocessing.children[56].value\
+                self._list_widgets_preprocessing.children[58].value\
                     = self.Dataset.bragg_inplane
 
                 self.Dataset.tilt_angle = np.round(
                     np.mean(self.Dataset.tilt_values[1:]
                             - self.Dataset.tilt_values[:-1]), 4)
 
-                self._list_widgets_preprocessing.children[57].value\
+                self._list_widgets_preprocessing.children[59].value\
                     = self.Dataset.tilt_angle
 
                 print("Corrected angles values saved in setup tab.")
@@ -6190,8 +6211,8 @@ class Interface():
                 change=self._list_widgets_preprocessing.children[13].value)
             self.reload_data_handler(
                 change=self._list_widgets_preprocessing.children[25].value)
-            self.interpolation_handler(
-                change=self._list_widgets_preprocessing.children[44].value)
+            # self.orthogonalisation_handler(
+            #     change=self._list_widgets_preprocessing.children[44].value)
 
     def sub_directories_handler(self, change):
         """Handles changes linked to root_folder subdirectories"""
@@ -6261,8 +6282,8 @@ class Interface():
                 for w in self._list_widgets_preprocessing.children[26:28]:
                     w.disabled = True
 
-    def interpolation_handler(self, change):
-        """Handles changes related to data interpolation."""
+    def orthogonalisation_handler(self, change):
+        """Handles changes related to data orthogonalisation."""
         try:
             if change.new:
                 for w in self._list_widgets_preprocessing.children[45:68]:
@@ -6298,8 +6319,8 @@ class Interface():
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
                     change=self._list_widgets_preprocessing.children[25].value)
-                self.interpolation_handler(
-                    change=self._list_widgets_preprocessing.children[44].value)
+                # self.orthogonalisation_handler(
+                #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change.new:
                 self._list_widgets_init_dir.children[7].disabled = True
@@ -6329,8 +6350,8 @@ class Interface():
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
                     change=self._list_widgets_preprocessing.children[25].value)
-                self.interpolation_handler(
-                    change=self._list_widgets_preprocessing.children[44].value)
+                # self.orthogonalisation_handler(
+                #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change:
                 self._list_widgets_init_dir.children[7].disabled = True
