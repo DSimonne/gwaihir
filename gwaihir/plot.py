@@ -989,7 +989,7 @@ def plot_data(
                 #     plt.show()
 
 
-def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", title = False):
+def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", title=False):
     """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
