@@ -5865,7 +5865,7 @@ class Interface():
                 print("Corrected angles values saved in setup tab.")
 
             # Save in a csv file
-            if self.Dataset.beamline == "SIXS_2019": # to improve
+            if self.Dataset.beamline == "SIXS_2019":
                 data = rd.DataSet(self.Dataset.path_to_data)
 
                 # Add new data
