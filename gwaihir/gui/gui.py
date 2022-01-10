@@ -3316,46 +3316,24 @@ class Interface():
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
                     --config {self.preprocessing_folder}config_preprocessing.yml")
 
-                # TODO Need to import corrected angles in the setup tab
                 # Save metadata
-                # for keys, values in metadata.items():
-                #     setattr(self.Dataset, keys, values)
+                self.extract_metadata()
 
-                # self.extract_metadata()
+                # Save corrected angles in the widgets
+                print("Saving corrected angles values...")
+                self._list_widgets_preprocessing.children[57].value\
+                    = self.Dataset.bragg_outofplane
+                self._list_widgets_preprocessing.children[58].value\
+                    = self.Dataset.bragg_inplane
 
-                # metadata = {
-                #     "tilt_values": tilt_values,
-                #     "rocking_curve": rocking_curve,
-                #     "interp_tilt": interp_tilt,
-                #     "interp_curve": interp_curve,
-                #     "COM_rocking_curve": tilt_values[z0],
-                #     "detector_data_COM": abs(data[int(round(z0)), :, :]),
-                #     "interp_fwhm": interp_fwhm,
-                #     "temperature": temperature,
-                #     "bragg_x": bragg_x,
-                #     "bragg_y": bragg_y,
-                #     "q": q,
-                #     "qnorm": qnorm,
-                #     "dist_plane": dist_plane,
-                #     "bragg_inplane": bragg_inplane,
-                #     "bragg_outofplane": bragg_outofplane,
-                # }
+                self.Dataset.tilt_angle = np.round(
+                    np.mean(self.Dataset.tilt_values[1:]
+                            - self.Dataset.tilt_values[:-1]), 4)
 
-                # # Save corrected angles in the widgets
-                # print("Saving corrected angles values...")
-                # self._list_widgets_preprocessing.children[57].value\
-                #     = self.Dataset.bragg_outofplane
-                # self._list_widgets_preprocessing.children[58].value\
-                #     = self.Dataset.bragg_inplane
+                self._list_widgets_preprocessing.children[59].value\
+                    = self.Dataset.tilt_angle
 
-                # self.Dataset.tilt_angle = np.round(
-                #     np.mean(self.Dataset.tilt_values[1:]
-                #             - self.Dataset.tilt_values[:-1]), 4)
-
-                # self._list_widgets_preprocessing.children[59].value\
-                #     = self.Dataset.tilt_angle
-
-                # print("Corrected angles values saved in setup tab.")
+                print("Corrected angles values saved in setup tab.")
 
                 # PyNX folder, refresh
                 self._list_widgets_phase_retrieval.children[1].value\
@@ -5045,7 +5023,8 @@ class Interface():
                 self.Dataset.strain_output_file = files[0]
 
             except AttributeError:
-                raise AttributeError("Bad values for inplane or outofplane angles")
+                raise AttributeError(
+                    "Bad values for inplane or outofplane angles")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
@@ -5860,10 +5839,28 @@ class Interface():
         else:
             print("Data already rotated ...")
 
-    def extract_metadata(self):
+    def extract_metadata(self, path_to_h5_file):
         """Needs Dataset to be corrected beforehand Extract meaningful data and
         saves them in a csv file to allow comparison.
         """
+        metadata = {
+            "tilt_values": tilt_values,
+            "rocking_curve": rocking_curve,
+            "interp_tilt": interp_tilt,
+            "interp_curve": interp_curve,
+            "COM_rocking_curve": tilt_values[z0],
+            "detector_data_COM": abs(data[int(round(z0)), :, :]),
+            "interp_fwhm": interp_fwhm,
+            "bragg_x": bragg_x,
+            "bragg_y": bragg_y,
+            "q": q,
+            "qnorm": qnorm,
+            "dist_plane": dist_plane,
+            "bragg_inplane": bragg_inplane,
+            "bragg_outofplane": bragg_outofplane,
+        }
+
+
         # Save rocking curve data
         np.savez(
             f"{self.postprocessing_folder}/interpolated_rocking_curve.npz",
