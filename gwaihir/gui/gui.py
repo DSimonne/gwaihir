@@ -5865,58 +5865,58 @@ class Interface():
                 print("Corrected angles values saved in setup tab.")
 
             # Save in a csv file
-            # if self.Dataset.beamline == "SIXS_2019": # to improve
-            #     data = rd.DataSet(self.Dataset.path_to_data)
+            if self.Dataset.beamline == "SIXS_2019": # to improve
+                data = rd.DataSet(self.Dataset.path_to_data)
 
-            #     # Add new data
-            #     temp_df = pd.DataFrame([[
-            #         self.Dataset.scan,
-            #         self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-            #         self.Dataset.qnorm, self.Dataset.dist_plane,
-            #         self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-            #         self.Dataset.bragg_peak,
-            #         data.x[0], data.y[0], data.z[0], data.mu[0],
-            #         data.delta[0], data.omega[0],
-            #         data.gamma[0], data.gamma[0] - data.mu[0],
-            #         (data.mu[-1] - data.mu[-0]) /
-            #         len(data.mu), data.integration_time[0], len(
-            #             data.integration_time),
-            #         self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-            #         # data.ssl3hg[0], data.ssl3vg[0],
-            #         # data.ssl1hg[0], data.ssl1vg[0]
-            #     ]],
-            #         columns=[
-            #             "scan",
-            #             "qx", "qy", "qz",
-            #             "q_norm", "d_hkl",
-            #             "inplane_angle", "out_of_plane_angle",
-            #             "bragg_peak",
-            #             "x", "y", "z", "mu",
-            #             "delta", "omega",
-            #             "gamma", 'gamma-mu',
-            #             "step size", "integration time", "steps",
-            #             "FWHM", "COM_rocking_curve",
-            #             # "ssl3hg", "ssl3vg",
-            #             # "ssl1hg", "ssl1vg",
-            #     ])
-            # else:
-            # Add new data
-            temp_df = pd.DataFrame([[
-                self.Dataset.scan,
-                self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-                self.Dataset.qnorm, self.Dataset.dist_plane,
-                self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                self.Dataset.bragg_peak,
-                self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-            ]],
-                columns=[
-                    "scan",
-                    "qx", "qy", "qz",
-                    "q_norm", "d_hkl",
-                    "inplane_angle", "out_of_plane_angle",
-                    "bragg_peak",
-                    "FWHM", "COM_rocking_curve",
-            ])
+                # Add new data
+                temp_df = pd.DataFrame([[
+                    self.Dataset.scan,
+                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
+                    self.Dataset.qnorm, self.Dataset.dist_plane,
+                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+                    self.Dataset.bragg_peak,
+                    data.x[0], data.y[0], data.z[0], data.mu[0],
+                    data.delta[0], data.omega[0],
+                    data.gamma[0], data.gamma[0] - data.mu[0],
+                    (data.mu[-1] - data.mu[-0]) /
+                    len(data.mu), data.integration_time[0], len(
+                        data.integration_time),
+                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+                    # data.ssl3hg[0], data.ssl3vg[0],
+                    # data.ssl1hg[0], data.ssl1vg[0]
+                ]],
+                    columns=[
+                        "scan",
+                        "qx", "qy", "qz",
+                        "q_norm", "d_hkl",
+                        "inplane_angle", "out_of_plane_angle",
+                        "bragg_peak",
+                        "x", "y", "z", "mu",
+                        "delta", "omega",
+                        "gamma", 'gamma-mu',
+                        "step size", "integration time", "steps",
+                        "FWHM", "COM_rocking_curve",
+                        # "ssl3hg", "ssl3vg",
+                        # "ssl1hg", "ssl1vg",
+                ])
+            else:
+                # Add new data
+                temp_df = pd.DataFrame([[
+                    self.Dataset.scan,
+                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
+                    self.Dataset.qnorm, self.Dataset.dist_plane,
+                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+                    self.Dataset.bragg_peak,
+                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+                ]],
+                    columns=[
+                        "scan",
+                        "qx", "qy", "qz",
+                        "q_norm", "d_hkl",
+                        "inplane_angle", "out_of_plane_angle",
+                        "bragg_peak",
+                        "FWHM", "COM_rocking_curve",
+                ])
 
             # Load all the logs
             try:
@@ -5935,11 +5935,11 @@ class Interface():
             display(result.head())
 
             # Save
-            try:
+            if isinstance(self.metadata_csv_file, str):
                 result.to_csv(self.metadata_csv_file, index=False)
                 print(f"Saved logs in {self.metadata_csv_file}")
-            except ValueError:
-                self.metadata_csv_file = self.root_folder + "/metadata.csv"
+            else:
+                self.metadata_csv_file = self.Dataset.root_folder + "/metadata.csv"
                 result.to_csv(self.metadata_csv_file, index=False)
                 print(f"Saved logs in {self.metadata_csv_file}")
 
