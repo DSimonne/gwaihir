@@ -62,7 +62,7 @@ class Interface():
     def __init__(self):
         """All the widgets for the GUI are defined here. They are regrouped in
         a few tabs that design the GUI, the tabs are: tab_init tab_detector
-        tab_setup tab_preprocess tab_correct tab_data_frame tab_pynx tab_strain
+        tab_setup tab_preprocess tab_data_frame tab_pynx tab_strain
         tab_data tab_facet tab_readme.
 
         Also defines:
@@ -1059,7 +1059,6 @@ class Interface():
             self._list_widgets_preprocessing.children[-2],
             self._list_widgets_preprocessing.children[-1]
         ])
-
 
         # Widgets for PyNX
         self._list_widgets_phase_retrieval = interactive(
@@ -2374,7 +2373,6 @@ class Interface():
                     self.tab_detector,
                     self.tab_setup,
                     self.tab_preprocess,
-                    self.tab_correct,
                     self.tab_data_frame,
                     self.tab_pynx,
                     self.tab_strain,
@@ -2386,13 +2384,12 @@ class Interface():
             self.window.set_title(1, 'Detector')
             self.window.set_title(2, 'Setup')
             self.window.set_title(3, "Preprocess")
-            self.window.set_title(4, 'Correct')
-            self.window.set_title(5, 'Logs')
-            self.window.set_title(6, 'Phase retrieval')
-            self.window.set_title(7, 'Postprocess')
-            self.window.set_title(8, 'Handle data')
-            self.window.set_title(9, 'Facets')
-            self.window.set_title(10, 'Readme')
+            self.window.set_title(4, 'Logs')
+            self.window.set_title(5, 'Phase retrieval')
+            self.window.set_title(6, 'Postprocess')
+            self.window.set_title(7, 'Handle data')
+            self.window.set_title(8, 'Facets')
+            self.window.set_title(9, 'Readme')
 
         elif not pynx_import:
             self.window = widgets.Tab(
@@ -2401,7 +2398,6 @@ class Interface():
                     self.tab_detector,
                     self.tab_setup,
                     self.tab_preprocess,
-                    self.tab_correct,
                     self.tab_data_frame,
                     self.tab_strain,
                     self.tab_data,
@@ -2412,12 +2408,11 @@ class Interface():
             self.window.set_title(1, 'Detector')
             self.window.set_title(2, 'Setup')
             self.window.set_title(3, "Preprocess")
-            self.window.set_title(4, 'Correct')
-            self.window.set_title(5, 'Logs')
-            self.window.set_title(6, 'Strain')
-            self.window.set_title(7, 'Plot data')
-            self.window.set_title(8, 'Facets')
-            self.window.set_title(9, 'Readme')
+            self.window.set_title(4, 'Logs')
+            self.window.set_title(5, 'Strain')
+            self.window.set_title(6, 'Plot data')
+            self.window.set_title(7, 'Facets')
+            self.window.set_title(8, 'Readme')
 
         # Display the final window
         display(self.window)
@@ -2569,9 +2564,11 @@ class Interface():
                     f"Copied {self.Dataset.path_to_data} to \
                     {self.Dataset.data_folder}")
 
-                # Change path_to_data
+                # Change path_to_data, only if copy successful
                 self.Dataset.path_to_data = self.Dataset.data_folder + \
                     os.path.basename(self.Dataset.path_to_data)
+
+                self.Dataset.data_dir = self.Dataset.data_folder  # TODO CONFUSING
 
             except (FileExistsError, shutil.SameFileError):
                 print(
@@ -2582,10 +2579,6 @@ class Interface():
 
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
-
-            # Correct angles csv file value
-            self.tab_correct.children[1].value = self.Dataset.root_folder + \
-                "metadata.csv"
 
             # Refresh csv file
             self.tab_data_frame.children[1].options\
@@ -3058,9 +3051,6 @@ class Interface():
             for w in self._list_widgets_preprocessing.children[:-2]:
                 w.disabled = True
 
-            for w in self._list_widgets_correct.children[:-2]:
-                w.disabled = True
-
             # Save parameter values as attributes
             self.Dataset.beamline = beamline
             self.Dataset.actuators = actuators
@@ -3214,9 +3204,8 @@ class Interface():
 
                 # Check is SIXS data, in that case rotate
                 if self.Dataset.beamline == "SIXS_2019":
-                    # self.rotate_sixs_data()
+                    self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
-                    self.Dataset.data_dir = self.Dataset.data_folder  # TODO CONFUSING
 
                 else:
                     root_folder = self.Dataset.data_dir
@@ -3327,6 +3316,47 @@ class Interface():
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
                     --config {self.preprocessing_folder}config_preprocessing.yml")
 
+                # TODO Need to import corrected angles in the setup tab
+                # Save metadata
+                # for keys, values in metadata.items():
+                #     setattr(self.Dataset, keys, values)
+
+                # self.extract_metadata()
+
+                # metadata = {
+                #     "tilt_values": tilt_values,
+                #     "rocking_curve": rocking_curve,
+                #     "interp_tilt": interp_tilt,
+                #     "interp_curve": interp_curve,
+                #     "COM_rocking_curve": tilt_values[z0],
+                #     "detector_data_COM": abs(data[int(round(z0)), :, :]),
+                #     "interp_fwhm": interp_fwhm,
+                #     "temperature": temperature,
+                #     "bragg_x": bragg_x,
+                #     "bragg_y": bragg_y,
+                #     "q": q,
+                #     "qnorm": qnorm,
+                #     "dist_plane": dist_plane,
+                #     "bragg_inplane": bragg_inplane,
+                #     "bragg_outofplane": bragg_outofplane,
+                # }
+
+                # # Save corrected angles in the widgets
+                # print("Saving corrected angles values...")
+                # self._list_widgets_preprocessing.children[57].value\
+                #     = self.Dataset.bragg_outofplane
+                # self._list_widgets_preprocessing.children[58].value\
+                #     = self.Dataset.bragg_inplane
+
+                # self.Dataset.tilt_angle = np.round(
+                #     np.mean(self.Dataset.tilt_values[1:]
+                #             - self.Dataset.tilt_values[:-1]), 4)
+
+                # self._list_widgets_preprocessing.children[59].value\
+                #     = self.Dataset.tilt_angle
+
+                # print("Corrected angles values saved in setup tab.")
+
                 # PyNX folder, refresh
                 self._list_widgets_phase_retrieval.children[1].value\
                     = self.preprocessing_folder
@@ -3342,7 +3372,6 @@ class Interface():
         if not init_para:
             clear_output(True)
             print("Cleared window.")
-
 
     # Phase retrieval
 
@@ -4820,9 +4849,6 @@ class Interface():
             for w in self._list_widgets_preprocessing.children[:-2]:
                 w.disabled = True
 
-            for w in self._list_widgets_correct.children[:-1]:
-                w.disabled = True
-
             # Extract dict, list and tuple from strings
             list_parameters = [
                 "original_size", "output_size", "axis_to_align",
@@ -4880,9 +4906,6 @@ class Interface():
                     w.disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
-                    w.disabled = False
-
-                for w in self._list_widgets_correct.children[:-1]:
                     w.disabled = False
 
                 print("You need to initialize all the parameters with the \
@@ -5022,7 +5045,7 @@ class Interface():
                 self.Dataset.strain_output_file = files[0]
 
             except AttributeError:
-                print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
+                raise AttributeError("Bad values for inplane or outofplane angles")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
@@ -5047,9 +5070,6 @@ class Interface():
                 w.disabled = False
 
             for w in self._list_widgets_preprocessing.children[:-2]:
-                w.disabled = False
-
-            for w in self._list_widgets_correct.children[:-1]:
                 w.disabled = False
 
             # Refresh folders
@@ -5762,6 +5782,7 @@ class Interface():
     def rotate_sixs_data(self):
         """Python script to rotate the data for vertical configuration Only for
         SIXS data in the vertical MED configuration.
+        self.Dataset.path_to_data must be a copy of the original data
         """
         # Check if already rotated
         with h5py.File(self.Dataset.path_to_data, "a") as f:
@@ -5797,7 +5818,7 @@ class Interface():
                 # Just an index for plotting schemes
                 half = int(data_og.shape[0] / 2)
 
-                # Rotate data
+                # Transpose and flip lr data
                 data = np.transpose(data_og, axes=(0, 2, 1))
                 for idx in range(data.shape[0]):
                     tmp = data[idx, :, :]
@@ -6053,9 +6074,6 @@ class Interface():
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
 
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = True
-
                 self.beamline_handler(
                     change=self._list_widgets_preprocessing.children[1].value)
                 self.bragg_peak_centering_handler(
@@ -6070,12 +6088,6 @@ class Interface():
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
-
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = False
-
-                self.temp_handler(
-                    change=self._list_widgets_correct.children[2].value)
 
         except AttributeError:
             if not change:
@@ -6084,9 +6096,6 @@ class Interface():
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
 
-                for w in self._list_widgets_correct.children[:3]:
-                    w.disabled = True
-
                 self.beamline_handler(
                     change=self._list_widgets_preprocessing.children[1].value)
                 self.bragg_peak_centering_handler(
@@ -6100,31 +6109,6 @@ class Interface():
                 self._list_widgets_init_dir.children[7].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
-                    w.disabled = True
-
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = False
-
-                self.temp_handler(
-                    change=self._list_widgets_correct.children[2].value)
-
-    def temp_handler(self, change):
-        """Handles changes related to the temperature estimation."""
-        try:
-            if change.new:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = False
-
-            if not change.new:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = True
-        except AttributeError:
-            if change:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = False
-
-            if not change:
-                for w in self._list_widgets_correct.children[3:6]:
                     w.disabled = True
 
     def csv_file_handler(self, change):
