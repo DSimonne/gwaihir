@@ -3319,22 +3319,6 @@ class Interface():
                 # Save metadata
                 self.extract_metadata()
 
-                # Save corrected angles in the widgets
-                print("Saving corrected angles values...")
-                self._list_widgets_preprocessing.children[57].value\
-                    = self.Dataset.bragg_outofplane
-                self._list_widgets_preprocessing.children[58].value\
-                    = self.Dataset.bragg_inplane
-
-                self.Dataset.tilt_angle = np.round(
-                    np.mean(self.Dataset.tilt_values[1:]
-                            - self.Dataset.tilt_values[:-1]), 4)
-
-                self._list_widgets_preprocessing.children[59].value\
-                    = self.Dataset.tilt_angle
-
-                print("Corrected angles values saved in setup tab.")
-
                 # PyNX folder, refresh
                 self._list_widgets_phase_retrieval.children[1].value\
                     = self.preprocessing_folder
@@ -3345,7 +3329,7 @@ class Interface():
                 self.plot_folder_handler(change=self.preprocessing_folder)
 
                 # Change window view
-                self.window.selected_index = 8
+                # self.window.selected_index = 8
 
         if not init_para:
             clear_output(True)
@@ -5527,7 +5511,7 @@ class Interface():
                         cols):
                     display(logs[list(cols)])
 
-            except FileNotFoundError:
+            except (FileNotFoundError, UnboundLocalError):
                 print("Wrong path")
             except AttributeError:
                 print("You need to run the facet analysis in the dedicated tab first."
@@ -5839,81 +5823,90 @@ class Interface():
         else:
             print("Data already rotated ...")
 
-    def extract_metadata(self, path_to_h5_file):
+    def extract_metadata(self):
         """Needs Dataset to be corrected beforehand Extract meaningful data and
         saves them in a csv file to allow comparison.
         """
-        metadata = {
-            "tilt_values": tilt_values,
-            "rocking_curve": rocking_curve,
-            "interp_tilt": interp_tilt,
-            "interp_curve": interp_curve,
-            "COM_rocking_curve": tilt_values[z0],
-            "detector_data_COM": abs(data[int(round(z0)), :, :]),
-            "interp_fwhm": interp_fwhm,
-            "bragg_x": bragg_x,
-            "bragg_y": bragg_y,
-            "q": q,
-            "qnorm": qnorm,
-            "dist_plane": dist_plane,
-            "bragg_inplane": bragg_inplane,
-            "bragg_outofplane": bragg_outofplane,
-        }
+        try:
+            metadata_file = glob.glob(f"{self.preprocessing_folder}*.h5")[0]
 
+            print(f"Using {metadata_file}")
+            with tb.open_file(metadata_file, "r") as f:
+                self.Dataset.tilt_values = f.root.output.tilt_values[...]
+                self.Dataset.rocking_curve = f.root.output.rocking_curve[...]
+                self.Dataset.interp_tilt = f.root.output.interp_tilt[...]
+                self.Dataset.interp_curve = f.root.output.interp_curve[...]
+                self.Dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
+                self.Dataset.detector_data_COM = f.root.output.detector_data_COM[...]
+                self.Dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+                self.Dataset.bragg_peak = f.root.output.bragg_peak[...]
+                self.Dataset.q = f.root.output.q[...]
+                self.Dataset.qnorm = f.root.output.qnorm[...]
+                self.Dataset.dist_plane = f.root.output.dist_plane[...]
+                self.Dataset.bragg_inplane = f.root.output.bragg_inplane[...]
+                self.Dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
 
-        # Save rocking curve data
-        np.savez(
-            f"{self.postprocessing_folder}/interpolated_rocking_curve.npz",
-            tilt_values=self.Dataset.tilt_values,
-            rocking_curve=self.Dataset.rocking_curve,
-            interp_tilt=self.Dataset.interp_tilt,
-            interp_curve=self.Dataset.interp_curve,
-        )
+                # Save corrected angles in the widgets
+                print("Saving corrected angles values...")
+                self._list_widgets_preprocessing.children[14].value\
+                    = str(list(self.Dataset.bragg_peak))
+                self._list_widgets_preprocessing.children[57].value\
+                    = self.Dataset.bragg_outofplane
+                self._list_widgets_preprocessing.children[58].value\
+                    = self.Dataset.bragg_inplane
 
-        # Save in a csv file
-        if self.Dataset.beamline == "SIXS_2019":
-            # Load Dataset, quite slow
-            data = rd.DataSet(self.Dataset.path_to_data)
+                self.Dataset.tilt_angle = np.round(
+                    np.mean(self.Dataset.tilt_values[1:]
+                            - self.Dataset.tilt_values[:-1]), 4)
 
+                self._list_widgets_preprocessing.children[59].value\
+                    = self.Dataset.tilt_angle
+
+                print("Corrected angles values saved in setup tab.")
+
+            # Save in a csv file
+            # if self.Dataset.beamline == "SIXS_2019": # to improve
+            #     data = rd.DataSet(self.Dataset.path_to_data)
+
+            #     # Add new data
+            #     temp_df = pd.DataFrame([[
+            #         self.Dataset.scan,
+            #         self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
+            #         self.Dataset.qnorm, self.Dataset.dist_plane,
+            #         self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+            #         self.Dataset.bragg_peak,
+            #         data.x[0], data.y[0], data.z[0], data.mu[0],
+            #         data.delta[0], data.omega[0],
+            #         data.gamma[0], data.gamma[0] - data.mu[0],
+            #         (data.mu[-1] - data.mu[-0]) /
+            #         len(data.mu), data.integration_time[0], len(
+            #             data.integration_time),
+            #         self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+            #         # data.ssl3hg[0], data.ssl3vg[0],
+            #         # data.ssl1hg[0], data.ssl1vg[0]
+            #     ]],
+            #         columns=[
+            #             "scan",
+            #             "qx", "qy", "qz",
+            #             "q_norm", "d_hkl",
+            #             "inplane_angle", "out_of_plane_angle",
+            #             "bragg_peak",
+            #             "x", "y", "z", "mu",
+            #             "delta", "omega",
+            #             "gamma", 'gamma-mu',
+            #             "step size", "integration time", "steps",
+            #             "FWHM", "COM_rocking_curve",
+            #             # "ssl3hg", "ssl3vg",
+            #             # "ssl1hg", "ssl1vg",
+            #     ])
+            # else:
             # Add new data
             temp_df = pd.DataFrame([[
                 self.Dataset.scan,
                 self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
                 self.Dataset.qnorm, self.Dataset.dist_plane,
                 self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                self.Dataset.bragg_x, self.Dataset.bragg_y,
-                data.x[0], data.y[0], data.z[0], data.mu[0],
-                data.delta[0], data.omega[0],
-                data.gamma[0], data.gamma[0] - data.mu[0],
-                (data.mu[-1] - data.mu[-0]) /
-                len(data.mu), data.integration_time[0], len(
-                    data.integration_time),
-                self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                # data.ssl3hg[0], data.ssl3vg[0],
-                # data.ssl1hg[0], data.ssl1vg[0]
-            ]],
-                columns=[
-                    "scan",
-                    "qx", "qy", "qz",
-                    "q_norm", "d_hkl",
-                    "inplane_angle", "out_of_plane_angle",
-                    "bragg_x", "bragg_y",
-                    "x", "y", "z", "mu",
-                    "delta", "omega",
-                    "gamma", 'gamma-mu',
-                    "step size", "integration time", "steps",
-                    "FWHM", "COM_rocking_curve",
-                    # "ssl3hg", "ssl3vg",
-                    # "ssl1hg", "ssl1vg",
-            ])
-        else:
-            # Add new data
-            temp_df = pd.DataFrame([[
-                self.Dataset.scan,
-                self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-                self.Dataset.qnorm, self.Dataset.dist_plane,
-                self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                self.Dataset.bragg_x, self.Dataset.bragg_y,
+                self.Dataset.bragg_peak,
                 self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
             ]],
                 columns=[
@@ -5921,32 +5914,39 @@ class Interface():
                     "qx", "qy", "qz",
                     "q_norm", "d_hkl",
                     "inplane_angle", "out_of_plane_angle",
-                    "bragg_x", "bragg_y",
+                    "bragg_peak",
                     "FWHM", "COM_rocking_curve",
             ])
 
-        # Load all the logs
-        try:
-            df = pd.read_csv(self.metadata_csv_file)
+            # Load all the logs
+            try:
+                df = pd.read_csv(self.metadata_csv_file)
 
-            # Replace old data linked to this scan, no problem if this row does
-            # not exist yet
-            indices = df[df['scan'] == self.Dataset.scan].index
-            df.drop(indices, inplace=True)
+                # Replace old data linked to this scan, no problem if this row does
+                # not exist yet
+                indices = df[df['scan'] == self.Dataset.scan].index
+                df.drop(indices, inplace=True)
 
-            result = pd.concat([df, temp_df])
+                result = pd.concat([df, temp_df])
 
-        except (FileNotFoundError, ValueError):
-            result = temp_df
+            except (FileNotFoundError, ValueError):
+                result = temp_df
 
-        # Save
-        try:
-            result.to_csv(self.metadata_csv_file, index=False)
-            print(f"Saved logs in {self.metadata_csv_file}")
-        except ValueError:
-            self.metadata_csv_file = self.root_folder + "metadata.csv"
-            result.to_csv(self.metadata_csv_file, index=False)
-            print(f"Saved logs in {self.metadata_csv_file}")
+            display(result.head())
+
+            # Save
+            try:
+                result.to_csv(self.metadata_csv_file, index=False)
+                print(f"Saved logs in {self.metadata_csv_file}")
+            except ValueError:
+                self.metadata_csv_file = self.root_folder + "/metadata.csv"
+                result.to_csv(self.metadata_csv_file, index=False)
+                print(f"Saved logs in {self.metadata_csv_file}")
+
+        except Exception as E:
+            raise E
+            print(
+                f"Could not find any .h5 file in {self.preprocessing_folder}")
 
     # Below are handlers
 
