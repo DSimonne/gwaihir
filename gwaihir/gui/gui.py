@@ -5045,7 +5045,8 @@ class Interface():
                 self.Dataset.strain_output_file = files[0]
 
             except AttributeError:
-                raise AttributeError("Bad values for inplane or outofplane angles")
+                raise AttributeError(
+                    "Bad values for inplane or outofplane angles")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
