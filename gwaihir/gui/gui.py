@@ -67,7 +67,6 @@ class Interface():
 
         Also defines:
             path_scripts: path to folder in which bcdi script are stored
-            matplotlib_backend: backend used in GUI (default "Qt5Agg")
             user_name: user_name used to login to slurm if working
                 on the ESRF cluster
         """
@@ -110,9 +109,6 @@ class Interface():
         self.cmap = "YlGnBu_r"
         self.preprocessing_folder = None
         self.postprocessing_folder = None
-
-        # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
-        self.matplotlib_backend = "Agg"
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(
@@ -188,6 +184,17 @@ class Interface():
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
+            matplotlib_backend=widgets.Dropdown(
+                options=[('Agg', 'Agg'), ('Qt5Agg', 'Qt5Agg'),
+                         ('module://matplotlib_inline.backend_inline', 'ipympl')],
+                value="Agg",
+                description='Matplotlib backend',
+                continuous_update=False,
+                disabled=False,
+                # tooltip="Name of the beamline, used for data loading and \
+                # normalization by monitor",
+                style={'description_width': 'initial'}),
+
             run_dir_init=widgets.ToggleButton(
                 value=False,
                 description='Initialize directories ...',
@@ -198,7 +205,7 @@ class Interface():
                     width='45%'),
                 style={'description_width': 'initial'}),
         )
-        self._list_widgets_init_dir.children[7].observe(
+        self._list_widgets_init_dir.children[8].observe(
             self.init_handler, names="value")
         self._list_widgets_init_dir.children[4].observe(
             self.sub_directories_handler, names="value")
@@ -211,6 +218,7 @@ class Interface():
             self._list_widgets_init_dir.children[5],
             self._list_widgets_init_dir.children[6],
             self._list_widgets_init_dir.children[7],
+            self._list_widgets_init_dir.children[8],
             self._list_widgets_init_dir.children[-1],
         ])
 
@@ -2428,6 +2436,7 @@ class Interface():
         root_folder,
         comment,
         debug,
+        matplotlib_backend,
         run_dir_init,
     ):
         """Function to move file from `data_dir` to `root_folder` where it will
@@ -2446,8 +2455,12 @@ class Interface():
         :param root_folder: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/"
          folder of the experiment, where all scans are stored
         :param comment: string use in filenames when saving
-        :param debug: e.g. False
-         True to see plots
+        :param debug: e.g. False. True to see plots
+        :param matplotlib_backend: e.g. "Qt5Agg"
+         Backend used in script, change to "Agg" to make sure the figures are
+         saved, not compatible with interactive masking. Other possibilities
+         are 'module://matplotlib_inline.backend_inline' default value is
+         "Qt5Agg"
         """
         if run_dir_init:
             # Create Dataset attribute
@@ -2460,6 +2473,9 @@ class Interface():
             self.Dataset.debug = debug
             self.Dataset.root_folder = root_folder
             self.scan_name = self.Dataset.sample_name + str(self.Dataset.scan)
+
+            # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
+            self.matplotlib_backend = matplotlib_backend
 
             # Assign scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder \
@@ -3316,17 +3332,29 @@ class Interface():
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
                     --config {self.preprocessing_folder}config_preprocessing.yml")
 
-                # Save metadata
-                self.extract_metadata()
+                # Button to save metadata
+                button_save_metadata = Button(
+                    description="Save metadata",
+                    continuous_update=False,
+                    button_style='',
+                    layout=Layout(width='40%'),
+                    style={'description_width': 'initial'},
+                    icon='fast-forward')
 
-                # PyNX folder, refresh
-                self._list_widgets_phase_retrieval.children[1].value\
-                    = self.preprocessing_folder
-                self.pynx_folder_handler(change=self.preprocessing_folder)
+                @ button_save_metadata.on_click
+                def action_button_save_metadata(selfbutton):
+                    self.extract_metadata()
 
-                # Plot folder, refresh
-                self.tab_data.children[1].value = self.preprocessing_folder
-                self.plot_folder_handler(change=self.preprocessing_folder)
+                    # PyNX folder, refresh
+                    self._list_widgets_phase_retrieval.children[1].value\
+                        = self.preprocessing_folder
+                    self.pynx_folder_handler(change=self.preprocessing_folder)
+
+                    # Plot folder, refresh
+                    self.tab_data.children[1].value = self.preprocessing_folder
+                    self.plot_folder_handler(change=self.preprocessing_folder)
+
+                display(button_save_metadata)
 
                 # Change window view
                 # self.window.selected_index = 8
@@ -4547,14 +4575,6 @@ class Interface():
         script from bcdi package to extract the strain from the reconstructed
         phase. Also plots images depending on the given isosurface.
 
-        Parameters used in the interactive masking GUI:
-
-        :param backend: e.g. "Qt5Agg"
-         Backend used in script, change to "Agg" to make sure the figures are
-         saved, not compatible with interactive masking. Other possibilities
-         are 'module://matplotlib_inline.backend_inline' default value is
-         "Qt5Agg"
-
         Parameters used when averaging several reconstruction:
 
         :param sort_method: e.g. "variance/mean"
@@ -4895,12 +4915,15 @@ class Interface():
                     data_dir=self.Dataset.data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
+                    reconstruction_file=self.Dataset.reconstruction_file,
+                    backend=self.matplotlib_backend,
                     # parameters used when averaging several reconstruction #
                     sort_method=self.Dataset.sort_method,
+                    averaging_space=self.Dataset.averaging_space,
                     correlation_threshold=self.Dataset.correlation_threshold,
                     # parameters related to centering #
-                    roll_modes=self.Dataset.roll_modes,
                     centering_method=self.Dataset.centering_method,
+                    roll_modes=self.Dataset.roll_modes,
                     # parameters relative to the FFT window and voxel sizes #
                     original_size=self.Dataset.original_size,
                     phasing_binning=self.Dataset.phasing_binning,
@@ -4916,22 +4939,28 @@ class Interface():
                     strain_method=self.Dataset.strain_method,
                     # define beamline related parameters #
                     beamline=self.Dataset.beamline,
+                    is_series=self.Dataset.is_series,
                     actuators=self.Dataset.actuators,
+                    # setup for custom scans #
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_images=self.Dataset.custom_images,
+                    custom_monitor=self.Dataset.custom_monitor,
                     rocking_angle=self.Dataset.rocking_angle,
                     sdd=self.Dataset.sdd,
                     energy=self.Dataset.energy,
                     beam_direction=self.Dataset.beam_direction,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    tilt_angle=self.Dataset.tilt_angle,
+                    direct_beam=self.Dataset.direct_beam,
+                    dirbeam_detector_angles=self.Dataset.dirbeam_detector_angles,
+                    bragg_peak=self.Dataset.bragg_peak,
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
-                    tilt_angle=self.Dataset.tilt_angle,
-                    sample_offsets=self.Dataset.sample_offsets,
                     specfile_name=self.Dataset.specfile_name,
-                    # setup for custom scans #
-                    custom_scan=self.Dataset.custom_scan,
-                    custom_motors=self.Dataset.custom_motors,
                     # detector related parameters #
                     detector=self.Dataset.detector,
                     pixel_size=self.Dataset.pixel_size,
+                    roi_detector=self.Dataset.roi_detector,
                     template_imagefile=self.Dataset.template_imagefile,
                     # parameters related to the refraction correction #
                     correct_refraction=self.Dataset.correct_refraction,
@@ -4961,13 +4990,10 @@ class Interface():
                     tick_length=self.Dataset.tick_length,
                     tick_width=self.Dataset.tick_width,
                     # parameters for temperature estimation #
-                    get_temperature=self.Dataset.get_temperature,
-                    reflection=self.Dataset.reflection,
-                    reference_spacing=self.Dataset.reference_spacing,
-                    reference_temperature=self.Dataset.reference_temperature,
-                    # parameters for averaging several reconstructed objects #
-                    averaging_space=self.Dataset.averaging_space,
-                    threshold_avg=self.Dataset.threshold_avg,
+                    # get_temperature=self.Dataset.get_temperature,
+                    # reflection=self.Dataset.reflection,
+                    # reference_spacing=self.Dataset.reference_spacing,
+                    # reference_temperature=self.Dataset.reference_temperature,
                     # parameters for phase averaging or apodization #
                     half_width_avg_phase=self.Dataset.half_width_avg_phase,
                     apodize=self.Dataset.apodize,
@@ -4975,12 +5001,10 @@ class Interface():
                     apodization_mu=self.Dataset.apodization_mu,
                     apodization_sigma=self.Dataset.apodization_sigma,
                     apodization_alpha=self.Dataset.apodization_alpha,
-                    reconstruction_file=self.Dataset.reconstruction_file,
                     # parameters related to saving #
                     save_rawdata=self.Dataset.save_rawdata,
                     save_support=self.Dataset.save_support,
                     save=self.Dataset.save,
-                    backend=self.matplotlib_backend,
                 )
                 # On lance bcdi_postprocessing (strain)
                 print(
@@ -5832,13 +5856,17 @@ class Interface():
 
             print(f"Using {metadata_file}")
             with tb.open_file(metadata_file, "r") as f:
-                self.Dataset.tilt_values = f.root.output.tilt_values[...]
-                self.Dataset.rocking_curve = f.root.output.rocking_curve[...]
-                self.Dataset.interp_tilt = f.root.output.interp_tilt[...]
-                self.Dataset.interp_curve = f.root.output.interp_curve[...]
-                self.Dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
-                self.Dataset.detector_data_COM = f.root.output.detector_data_COM[...]
-                self.Dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+                try:
+                    self.Dataset.tilt_values = f.root.output.tilt_values[...]
+                    self.Dataset.rocking_curve = f.root.output.rocking_curve[...]
+                    self.Dataset.interp_tilt = f.root.output.interp_tilt[...]
+                    self.Dataset.interp_curve = f.root.output.interp_curve[...]
+                    self.Dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
+                    self.Dataset.detector_data_COM = f.root.output.detector_data_COM[...]
+                    self.Dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+                except tb.NoSuchNodeError:
+                    # No angle correction during preprocess
+                    pass
                 self.Dataset.bragg_peak = f.root.output.bragg_peak[...]
                 self.Dataset.q = f.root.output.q[...]
                 self.Dataset.qnorm = f.root.output.qnorm[...]
@@ -5943,8 +5971,7 @@ class Interface():
                 result.to_csv(self.metadata_csv_file, index=False)
                 print(f"Saved logs in {self.metadata_csv_file}")
 
-        except Exception as E:
-            raise E
+        except IndexError:
             print(
                 f"Could not find any .h5 file in {self.preprocessing_folder}")
 
@@ -5953,14 +5980,14 @@ class Interface():
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization."""
         if not change.new:
-            for w in self._list_widgets_init_dir.children[:7]:
+            for w in self._list_widgets_init_dir.children[:8]:
                 w.disabled = False
 
             for w in self._list_widgets_preprocessing.children[:-1]:
                 w.disabled = True
 
         if change.new:
-            for w in self._list_widgets_init_dir.children[:7]:
+            for w in self._list_widgets_init_dir.children[:8]:
                 w.disabled = True
 
             for w in self._list_widgets_preprocessing.children[:-1]:
@@ -6066,7 +6093,7 @@ class Interface():
         """Handles changes on the widget used for the preprocessing."""
         try:
             if not change.new:
-                self._list_widgets_init_dir.children[7].disabled = False
+                self._list_widgets_init_dir.children[8].disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
@@ -6081,14 +6108,14 @@ class Interface():
                 #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change.new:
-                self._list_widgets_init_dir.children[7].disabled = True
+                self._list_widgets_init_dir.children[8].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
 
         except AttributeError:
             if not change:
-                self._list_widgets_init_dir.children[7].disabled = False
+                self._list_widgets_init_dir.children[8].disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
@@ -6103,7 +6130,7 @@ class Interface():
                 #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change:
-                self._list_widgets_init_dir.children[7].disabled = True
+                self._list_widgets_init_dir.children[8].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
