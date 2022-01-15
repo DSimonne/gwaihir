@@ -994,10 +994,16 @@ def plot_data(
                              ):
                 if axplot == "xy":
                     dt = data[:, :, i]
+                    x_label = "x"
+                    y_label = "y"
                 elif axplot == "yz":
                     dt = data[i, :, :]
+                    x_label = "y"
+                    y_label = "z"
                 elif axplot == "xz":
                     dt = data[:, i, :]
+                    x_label = "x"
+                    y_label = "z"
 
                 else:
                     raise TypeError("Choose xy, yz or xz as axplot.")
@@ -1012,7 +1018,8 @@ def plot_data(
 
                 # Plot 2D image in interactive environment
                 img = plot_2d_image(two_d_array=dt, log=log, fontsize=fontsize,
-                                    fig=fig, ax=ax, cmap=cmap, title=title)
+                                    fig=fig, ax=ax, cmap=cmap, title=title,
+                                    x_label=x_label, y_label=y_label)
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(ax).append_axes(
@@ -1037,7 +1044,7 @@ def plot_data(
                 #     plt.show()
 
 
-def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="YlGnBu_r", title=None):
+def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="YlGnBu_r", title=None, x_label="x", y_label="y"):
     """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
@@ -1051,9 +1058,6 @@ def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="
     :return: image
 
     """
-    # Find max and min
-    # dmax = two_d_array.max()
-    # dmin = two_d_array.min()
 
     if not fig and not ax:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
@@ -1071,7 +1075,8 @@ def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="
             # vmin=dmin,
             # vmax=dmax,
         )
-
+        ax.set_xlabel(x_label, fontsize=fontsize)
+        ax.set_ylabel(y_label, fontsize=fontsize)
         if isinstance(title, str):
             ax.set_title(title, fontsize=fontsize + 2)
 
@@ -1139,19 +1144,43 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
 
         two_d_array = data_array[shape[0]//2, :, :]
         img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
-                              ax=axs[0], log=log, cmap=cmap, fontsize=fontsize)
+                              ax=axs[0], log=log, cmap=cmap, fontsize=fontsize,
+                              x_label="y", y_label="z")
+
+        # Create axis for colorbar
+        cbar_ax = make_axes_locatable(axs[0]).append_axes(
+            position='right', size='5%', pad=0.1)
+
+        # Create colorbar
+        fig.colorbar(mappable=img_x, cax=cbar_ax)
 
         two_d_array = data_array[:, shape[1]//2, :]
         img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
-                              ax=axs[1], log=log, cmap=cmap, fontsize=fontsize)
+                              ax=axs[1], log=log, cmap=cmap, fontsize=fontsize,
+                              x_label="x", y_label="z")
+
+        # Create axis for colorbar
+        cbar_ax = make_axes_locatable(axs[1]).append_axes(
+            position='right', size='5%', pad=0.1)
+
+        # Create colorbar
+        fig.colorbar(mappable=img_y, cax=cbar_ax)
 
         two_d_array = data_array[:, :, shape[2]//2]
         img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
-                              ax=axs[2], log=log, cmap=cmap, fontsize=fontsize)
+                              ax=axs[2], log=log, cmap=cmap, fontsize=fontsize,
+                              x_label="x", y_label="y")
+
+        # Create axis for colorbar
+        cbar_ax = make_axes_locatable(axs[2]).append_axes(
+            position='right', size='5%', pad=0.1)
+
+        # Create colorbar
+        fig.colorbar(mappable=img_z, cax=cbar_ax)
 
         # Show figure
-        plt.tight_layout()
-        plt.show()
+        fig.tight_layout()
+        fig.show()
 
     else:
         @interact(
@@ -1186,21 +1215,48 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
             log = scale == "logarithmic"
 
             try:
+                # Create image slice along x
                 two_d_array = data_array[shape[0]//2, :, :]
                 img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
-                                      ax=axs[0], log=log, cmap=cmap, fontsize=fontsize)
+                                      ax=axs[0], log=log, cmap=cmap,
+                                      fontsize=fontsize, x_label="y", y_label="z")
 
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(axs[0]).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                fig.colorbar(mappable=img_x, cax=cbar_ax)
+
+                # Create image slice along y
                 two_d_array = data_array[:, shape[1]//2, :]
                 img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
-                                      ax=axs[1], log=log, cmap=cmap, fontsize=fontsize)
+                                      ax=axs[1], log=log, cmap=cmap,
+                                      fontsize=fontsize, x_label="x", y_label="z")
 
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(axs[1]).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                fig.colorbar(mappable=img_y, cax=cbar_ax)
+
+                # Create image slice along z
                 two_d_array = data_array[:, :, shape[2]//2]
                 img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
-                                      ax=axs[2], log=log, cmap=cmap, fontsize=fontsize)
+                                      ax=axs[2], log=log, cmap=cmap,
+                                      fontsize=fontsize, x_label="x", y_label="y")
+
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(axs[2]).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                fig.colorbar(mappable=img_z, cax=cbar_ax)
 
                 # Show figure
-                plt.tight_layout()
-                plt.show()
+                fig.tight_layout()
+                fig.show()
             except IndexError:
                 plt.close()
                 print("Is this a 3D array?")

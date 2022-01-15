@@ -106,7 +106,6 @@ class Interface():
         self.Facets = None
         self.metadata_csv_file = None
         self.scan_name = None
-        self.cmap = "YlGnBu_r"
         self.preprocessing_folder = None
         self.postprocessing_folder = None
 
@@ -126,7 +125,6 @@ class Interface():
                 value="S",
                 placeholder="",
                 description='Sample Name',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='45%'),
@@ -137,7 +135,6 @@ class Interface():
                 description='Scan nb:',
                 min=0,
                 max=9999999,
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='45%'),
@@ -147,7 +144,6 @@ class Interface():
                 value=os.getcwd() + "/data_dir/",
                 placeholder="Path to data directory",
                 description='Data directory',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -158,7 +154,6 @@ class Interface():
                 placeholder="Path to target directory (parent to all scan \
                 directories)",
                 description='Target directory',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -167,7 +162,6 @@ class Interface():
             comment=widgets.Text(
                 value="",
                 description='Comment',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -176,8 +170,7 @@ class Interface():
 
             debug=widgets.Checkbox(
                 value=False,
-                description='Debug',
-                disabled=False,
+                description='Debug scripts',
                 tooltip='True to interact with plots, False to close it \
                 automatically',
                 indent=False,
@@ -188,9 +181,8 @@ class Interface():
                 options=[('Agg', 'Agg'), ('Qt5Agg', 'Qt5Agg'),
                          ('module://matplotlib_inline.backend_inline', 'ipympl')],
                 value="Agg",
-                description='Matplotlib backend',
+                description='Matplotlib backend for scripts:',
                 continuous_update=False,
-                disabled=False,
                 # tooltip="Name of the beamline, used for data loading and \
                 # normalization by monitor",
                 style={'description_width': 'initial'}),
@@ -198,7 +190,6 @@ class Interface():
             run_dir_init=widgets.ToggleButton(
                 value=False,
                 description='Initialize directories ...',
-                disabled=False,
                 button_style='',
                 icon='step-forward',
                 layout=Layout(
@@ -1083,7 +1074,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Parent folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1093,7 +1083,6 @@ class Interface():
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")]),
                 description='Dataset',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1102,7 +1091,6 @@ class Interface():
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")]),
                 description='Mask',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1112,7 +1100,6 @@ class Interface():
                           glob.glob(os.getcwd() + "*.npz")]),
                 value="",
                 description='Support',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1122,7 +1109,6 @@ class Interface():
                           glob.glob(os.getcwd() + "*.npz")]),
                 value="",
                 description='Object',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1130,7 +1116,6 @@ class Interface():
                 value=False,
                 description='Auto center and resize',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 layout=Layout(height="50px"),
                 icon='check'),
@@ -1160,7 +1145,6 @@ class Interface():
                 value="(0.23, 0.30)",
                 placeholder="(0.23, 0.30)",
                 description='Support threshold',
-                disabled=False,
                 layout=Layout(
                     height="50px", width="40%"),
                 continuous_update=False,
@@ -1170,7 +1154,6 @@ class Interface():
                 value=False,
                 description='Support only shrink',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 layout=Layout(
                     height="50px", width="15%"),
@@ -1192,7 +1175,6 @@ class Interface():
                 value="(2, 1, 600)",
                 placeholder="(2, 1, 600)",
                 description='Support smooth width',
-                disabled=False,
                 layout=Layout(
                     height="50px", width="35%"),
                 continuous_update=False,
@@ -1202,7 +1184,6 @@ class Interface():
                 value="(1, -2, 1)",
                 placeholder="(1, -2, 1)",
                 description='Support post expand',
-                disabled=False,
                 layout=Layout(
                     height="50px", width="35%"),
                 continuous_update=False,
@@ -1219,7 +1200,6 @@ class Interface():
                 value=True,
                 description='Use point spread function:',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 layout=Layout(height="50px"),
                 icon='check'),
@@ -1362,7 +1342,6 @@ class Interface():
                 ],
                 value="LLK_standard_deviation",
                 description='Filtering criteria',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1401,7 +1380,6 @@ class Interface():
                 value=False,
                 description='Force positivity',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 style={
                     'description_width': 'initial'},
@@ -1427,7 +1405,6 @@ class Interface():
                 value=False,
                 description='Detwinning',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 style={
                     'description_width': 'initial'},
@@ -1440,7 +1417,6 @@ class Interface():
                 placeholder="(1, 1, 1)",
                 description='Rebin',
                 layout=Layout(height="50px"),
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -1495,7 +1471,6 @@ class Interface():
                     activated after 50\% of RAAR cycles"
                 ],
                 description='Run phase retrieval ...',
-                disabled=False,
                 continuous_update=False,
                 button_style='',
                 layout=Layout(
@@ -1527,7 +1502,6 @@ class Interface():
                     "Filter reconstructions"
                 ],
                 description="Choose analysis:",
-                disabled=False,
                 continuous_update=False,
                 button_style='',
                 layout=Layout(
@@ -1584,7 +1558,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Parent folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1592,7 +1565,6 @@ class Interface():
             csv_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.csv")),
                 description='csv file in subdirectories:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1605,7 +1577,6 @@ class Interface():
                 ],
                 value=False,
                 description='Load dataframe',
-                disabled=False,
                 button_style='',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1628,7 +1599,6 @@ class Interface():
                          'variance/mean', 'volume'],
                 value="variance/mean",
                 description='Sorting method',
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             correlation_threshold=widgets.FloatText(
@@ -1652,7 +1622,6 @@ class Interface():
             original_size=widgets.Text(
                 placeholder="[256, 512, 512]",
                 description='Size of the FFT array before binning',
-                disabled=False,
                 layout=Layout(width='45%'),
                 continuous_update=False,
                 style={'description_width': 'initial'}),
@@ -1661,7 +1630,6 @@ class Interface():
                 value="(1, 1, 1)",
                 placeholder="(1, 1, 1)",
                 description='Binning factor used in phase retrieval',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='45%'),
                 style={
@@ -1672,7 +1640,6 @@ class Interface():
                 value="(1, 1, 1)",
                 placeholder="(1, 1, 1)",
                 description='Binning factors used in preprocessing',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='45%'),
                 style={
@@ -1682,7 +1649,6 @@ class Interface():
             output_size=widgets.Text(
                 placeholder="[256, 512, 512]",
                 description='Output size',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -1690,7 +1656,6 @@ class Interface():
                 value=False,
                 description='Keep the initial array size for orthogonalization\
                  (slower)',
-                disabled=False,
                 layout=Layout(width='45%'),
                 # icon = 'check',
                 style={'description_width': 'initial'}),
@@ -1700,7 +1665,6 @@ class Interface():
                 description='Fix voxel size, put 0 to set free:',
                 min=0,
                 max=9999999,
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -1725,14 +1689,12 @@ class Interface():
                     "If the data was interpolated into the laboratory frame \
                     using the transformation matrix (align_q = False)"
                 ],
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             ref_axis_q=widgets.Dropdown(
                 options=["x", "y", "z"],
                 value="y",
                 description='Ref axis q',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='15%'),
                 tooltip="q will be aligned along that axis",
@@ -1750,7 +1712,6 @@ class Interface():
                     "Save the data in the laboratory frame, with all sample\
                      angles rotated back to 0"
                 ],
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             isosurface_strain=widgets.FloatText(
@@ -1779,7 +1740,6 @@ class Interface():
                     magnitude value for the strain. See: F. Hofmann et al. \
                     PhysRevMaterials 4, 013801 (2020)"
                 ],
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             phase_offset=widgets.FloatText(
@@ -1798,7 +1758,6 @@ class Interface():
             phase_offset_origin=widgets.Text(
                 placeholder="(x, y, z), leave None for automatic.",
                 description='Phase offset origin',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='40%'),
                 style={
@@ -1810,7 +1769,6 @@ class Interface():
                 value="mean",
                 description='Offset method:',
                 continuous_update=False,
-                disabled=False,
                 layout=Layout(width='20%'),
                 style={'description_width': 'initial'}),
 
@@ -1820,7 +1778,6 @@ class Interface():
                 value="max_com",
                 description='Centering method:',
                 continuous_update=False,
-                disabled=False,
                 layout=Layout(width='25%'),
                 style={'description_width': 'initial'}),
 
@@ -1834,7 +1791,6 @@ class Interface():
             correct_refraction=widgets.Checkbox(
                 value=False,
                 description='Correct refraction',
-                disabled=False,
                 # icon = 'check',
                 style={
                     'description_width': 'initial'}
@@ -1892,7 +1848,6 @@ class Interface():
             simulation=widgets.Checkbox(
                 value=False,
                 description='Simulated data',
-                disabled=False,
                 layout=Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
@@ -1901,7 +1856,6 @@ class Interface():
             invert_phase=widgets.Checkbox(
                 value=True,
                 description='Invert phase',
-                disabled=False,
                 layout=Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
@@ -1910,7 +1864,6 @@ class Interface():
             flip_reconstruction=widgets.Checkbox(
                 value=False,
                 description='Get conjugated object',
-                disabled=False,
                 layout=Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
@@ -1922,7 +1875,6 @@ class Interface():
                 value="gradient",
                 description='Phase ramp removal:',
                 continuous_update=False,
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             threshold_gradient=widgets.FloatText(
@@ -1938,7 +1890,6 @@ class Interface():
             save_raw=widgets.Checkbox(
                 value=False,
                 description='Save raw data',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -1946,7 +1897,6 @@ class Interface():
             save_support=widgets.Checkbox(
                 value=False,
                 description='Save support',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -1954,7 +1904,6 @@ class Interface():
             save=widgets.Checkbox(
                 value=True,
                 description='Save output',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -1962,7 +1911,6 @@ class Interface():
             debug=widgets.Checkbox(
                 value=False,
                 description='Debug',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -1971,7 +1919,6 @@ class Interface():
                 value="(0, 0, 0)",
                 placeholder="(0, 0, 0)",
                 description='Roll modes',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='30%'),
                 style={
@@ -1988,7 +1935,6 @@ class Interface():
             align_axis=widgets.Checkbox(
                 value=False,
                 description='Align axis',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -1997,7 +1943,6 @@ class Interface():
                 options=["x", "y", "z"],
                 value="y",
                 description='Ref axis for align axis',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='20%'),
                 tooltip="q will be aligned along that axis",
@@ -2007,7 +1952,6 @@ class Interface():
                 value="[0.0, 0.0, 0.0]",
                 placeholder="[0.0, 0.0, 0.0]",
                 description='Axis to align for ref axis',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2034,7 +1978,6 @@ class Interface():
             grey_background=widgets.Checkbox(
                 value=True,
                 description='Grey background in plots',
-                disabled=False,
                 layout=Layout(width='25%'),
                 style={
                     'description_width': 'initial'}
@@ -2046,7 +1989,6 @@ class Interface():
                 min=0,
                 max=5000,
                 layout=Layout(width='25%'),
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2057,7 +1999,6 @@ class Interface():
                 description='Tick direction:',
                 layout=Layout(width='25%'),
                 continuous_update=False,
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             tick_length=widgets.BoundedIntText(
@@ -2065,7 +2006,6 @@ class Interface():
                 description='Tick length:',
                 min=0,
                 max=50,
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='20%'),
                 style={'description_width': 'initial'}),
@@ -2075,7 +2015,6 @@ class Interface():
                 description='Tick width:',
                 min=0,
                 max=10,
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='45%'),
                 style={'description_width': 'initial'}),
@@ -2093,7 +2032,6 @@ class Interface():
                 value="reciprocal_space",
                 description='Average method:',
                 continuous_update=False,
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             threshold_avg=widgets.FloatText(
@@ -2116,7 +2054,6 @@ class Interface():
             apodize=widgets.Checkbox(
                 value=True,
                 description='Multiply diffraction pattern by filtering window',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2126,7 +2063,6 @@ class Interface():
                     "normal", "tukey", "blackman"],
                 value="blackman",
                 description='Filtering window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2143,7 +2079,6 @@ class Interface():
                 value="[0.0, 0.0, 0.0]",
                 placeholder="[0.0, 0.0, 0.0]",
                 description='Mu of gaussian window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2151,7 +2086,6 @@ class Interface():
                 value="[0.30, 0.30, 0.30]",
                 placeholder="[0.30, 0.30, 0.30]",
                 description='Sigma of gaussian window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2159,7 +2093,6 @@ class Interface():
                 value="[1.0, 1.0, 1.0]",
                 placeholder="[1.0, 1.0, 1.0]",
                 description='Alpha of gaussian window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2175,7 +2108,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Data folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2188,7 +2120,6 @@ class Interface():
                     + glob.glob(os.getcwd() + "/*.npy")
                     + glob.glob(os.getcwd() + "/*.npz"))],
                 description='Compatible file list',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -2199,7 +2130,6 @@ class Interface():
                 ],
                 value=False,
                 description='Run strain analysis',
-                disabled=False,
                 button_style='',
                 icon='fast-forward',
                 layout=Layout(width='90%'),
@@ -2255,12 +2185,11 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Data folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            path_to_data=widgets.SelectMultiple(
+            filename=widgets.SelectMultiple(
                 options=[""]
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(os.getcwd() + "/*.npy")
@@ -2270,7 +2199,14 @@ class Interface():
                     + glob.glob(os.getcwd() + "/*.png"))],
                 rows=10,
                 description='Compatible file list',
-                disabled=False,
+                layout=Layout(width='90%'),
+                style={'description_width': 'initial'}),
+
+            cmap=widgets.Dropdown(
+                options=plt.colormaps(),
+                value="YlGnBu_r",
+                description="Color map:",
+                continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -2301,7 +2237,6 @@ class Interface():
                     "Load support and smooth its boundaries",
                     "Delete selected files, careful !!"
                 ],
-                disabled=False,
                 button_style='',
                 icon='fast-forward',
                 layout=Layout(width='90%'),
@@ -2325,7 +2260,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Parent folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2333,7 +2267,6 @@ class Interface():
             vtk_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.vtk")),
                 description='vtk file in subdirectories:',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -2344,7 +2277,6 @@ class Interface():
                 ],
                 value=False,
                 description='Load vtk data',
-                disabled=False,
                 button_style='',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2362,7 +2294,6 @@ class Interface():
                     'Postprocessing', "Facet analysis"],
                 value=False,
                 description='Show info about:',
-                disabled=False,
                 tooltips=[
                     'Nothing is shown',
                     'Insight in the functions used for preprocessing',
@@ -5142,7 +5073,6 @@ class Interface():
                         options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=1,
                         description='Facet a id:',
-                        disabled=False,
                         continuous_update=True,
                         layout=Layout(width='45%'),
                         style={'description_width': 'initial'}),
@@ -5150,7 +5080,6 @@ class Interface():
                         options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=2,
                         description='Facet b id:',
-                        disabled=False,
                         continuous_update=True,
                         layout=Layout(width='45%'),
                         style={'description_width': 'initial'}),
@@ -5158,7 +5087,6 @@ class Interface():
                         value="[1, 1, 1]",
                         placeholder="[1, 1, 1]",
                         description='Vector perpendicular to facet a:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5166,7 +5094,6 @@ class Interface():
                         value="[1, -1, 0]",
                         placeholder="[1, -1, 0]",
                         description='Vector perpendicular to facet b:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5174,7 +5101,6 @@ class Interface():
                         value="[1, 1, -2]",
                         placeholder="[1, 1, -2]",
                         description='Cross product of u0 and v0:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5182,7 +5108,6 @@ class Interface():
                         value="[1, 1, 1]",
                         placeholder="[1, 1, 1]",
                         description='Reference for interplanar angles:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5192,7 +5117,6 @@ class Interface():
                         min=0,
                         max=360,
                         description='Elevation of the axes in degrees:',
-                        disabled=False,
                         continuous_update=False,
                         layout=Layout(width='70%'),
                         style={'description_width': 'initial'},),
@@ -5202,7 +5126,6 @@ class Interface():
                         min=0,
                         max=360,
                         description='Azimuth of the axes in degrees:',
-                        disabled=False,
                         continuous_update=False,
                         layout=Layout(width='70%'),
                         style={'description_width': 'initial'},),
@@ -5524,7 +5447,6 @@ class Interface():
                         options=list(logs.columns),
                         value=list(logs.columns)[:],
                         rows=10,
-                        disabled=False,
                         style={'description_width': 'initial'},
                         layout=Layout(width='90%'),
                         description='Select multiple columns with \
@@ -5550,28 +5472,32 @@ class Interface():
         self,
         unused_label_plot,
         folder,
-        path_to_data,
+        filename,
+        cmap,
         data_use,
     ):
         """Allows the user to plot an array (1D, 2D or 3D) from npz, npy or
         .cxi files.
 
-        :param path_to_data: path to file to be loaded in GUI
+        :param folder: folder in which the files are located
+        :param cmap: cmap used for plots
+        :param filename: file name, can be multiple
         :param data_use: e.g. "2D"
          Can be "2D", "3D", "slices", "create_support", "extract_support",
          "smooth_support"
         """
-        if data_use in ["2D", "3D"] and len(path_to_data) == 1:
+
+        if data_use in ["2D", "3D"] and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Plot data
             plot.Plotter(
-                folder + "/" + path_to_data[0],
+                folder + "/" + filename[0],
                 plot=data_use,
                 log="interact",
-                cmap=self.cmap
+                cmap=cmap
             )
 
         if data_use == "slices":
@@ -5580,23 +5506,23 @@ class Interface():
                 w.disabled = True
 
             # Plot data
-            for p in path_to_data:
+            for p in filename:
                 print(f"Showing {p}")
                 plot.Plotter(
                     folder + "/" + p,
                     plot=data_use,
                     log="interact",
-                    cmap=self.cmap
+                    cmap=cmap
                 )
 
-        elif data_use == "create_support" and len(path_to_data) == 1:
+        elif data_use == "create_support" and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
             sup = support.SupportTools(
-                path_to_data=folder + "/" + path_to_data[0])
+                path_to_data=folder + "/" + filename[0])
 
             # Interactive function to loadt threshold value
             window_support = interactive(
@@ -5616,7 +5542,6 @@ class Interface():
                 compute=widgets.ToggleButton(
                     value=False,
                     description='Compute support ...',
-                    disabled=False,
                     button_style='',
                     icon='step-forward',
                     layout=Layout(width='45%'),
@@ -5640,14 +5565,14 @@ class Interface():
             # Update PyNX folder values
             self.pynx_folder_handler(change=self.preprocessing_folder)
 
-        elif data_use == "extract_support" and len(path_to_data) == 1:
+        elif data_use == "extract_support" and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
             sup = support.SupportTools(
-                path_to_data=folder + "/" + path_to_data[0])
+                path_to_data=folder + "/" + filename[0])
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
@@ -5655,14 +5580,14 @@ class Interface():
             # Update PyNX folder values
             self.pynx_folder_handler(change=self.preprocessing_folder)
 
-        elif data_use == "smooth_support" and len(path_to_data) == 1:
+        elif data_use == "smooth_support" and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
             sup = support.SupportTools(
-                path_to_support=folder + "/" + path_to_data[0])
+                path_to_support=folder + "/" + filename[0])
 
             # Interactive function to loadt threshold value
             window_support = interactive(
@@ -5719,7 +5644,7 @@ class Interface():
                 w.disabled = True
 
             try:
-                for p in path_to_data:
+                for p in filename:
                     print(f"Showing {p}")
                     display(Image(filename=folder + "/" + p))
 
@@ -5727,7 +5652,7 @@ class Interface():
                 print("Could not load image from file.")
 
         elif data_use in ["2D", "3D", "create_support", "extract_support",
-                          "smooth_support"] and len(path_to_data) != 1:
+                          "smooth_support"] and len(filename) != 1:
             print("Please select only one file.")
 
         elif data_use == "delete":
@@ -5745,7 +5670,7 @@ class Interface():
             @ button_delete_data.on_click
             def action_button_delete_data(selfbutton):
                 """Delete files."""
-                for p in path_to_data:
+                for p in filename:
                     try:
                         os.remove(folder + "/" + p)
                         print(f"Removed {p}")
