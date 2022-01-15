@@ -5489,7 +5489,7 @@ class Interface():
 
         if data_use in ["2D", "3D"] and len(filename) == 1:
             # Disable widgets
-            for w in self.tab_data.children[:-2]:
+            for w in self.tab_data.children[:-3]:
                 w.disabled = True
 
             # Plot data
@@ -5502,7 +5502,7 @@ class Interface():
 
         if data_use == "slices":
             # Disable widgets
-            for w in self.tab_data.children[:-2]:
+            for w in self.tab_data.children[:-3]:
                 w.disabled = True
 
             # Plot data
