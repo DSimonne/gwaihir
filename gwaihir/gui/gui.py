@@ -24,7 +24,6 @@ from IPython.display import display, Markdown, Latex, clear_output, Image
 import gwaihir
 from gwaihir import plot, support
 from gwaihir.gui import gui_iterable
-from gwaihir.runner import correct_angles
 
 # bcdi package
 from bcdi.utils.utilities import bin_data
@@ -63,12 +62,11 @@ class Interface():
     def __init__(self):
         """All the widgets for the GUI are defined here. They are regrouped in
         a few tabs that design the GUI, the tabs are: tab_init tab_detector
-        tab_setup tab_preprocess tab_correct tab_data_frame tab_pynx tab_strain
+        tab_setup tab_preprocess tab_data_frame tab_pynx tab_strain
         tab_data tab_facet tab_readme.
 
         Also defines:
             path_scripts: path to folder in which bcdi script are stored
-            matplotlib_backend: backend used in GUI (default "Qt5Agg")
             user_name: user_name used to login to slurm if working
                 on the ESRF cluster
         """
@@ -108,12 +106,8 @@ class Interface():
         self.Facets = None
         self.metadata_csv_file = None
         self.scan_name = None
-        self.cmap = "YlGnBu_r"
         self.preprocessing_folder = None
         self.postprocessing_folder = None
-
-        # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
-        self.matplotlib_backend = "Agg"
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(
@@ -131,7 +125,6 @@ class Interface():
                 value="S",
                 placeholder="",
                 description='Sample Name',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='45%'),
@@ -142,7 +135,6 @@ class Interface():
                 description='Scan nb:',
                 min=0,
                 max=9999999,
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='45%'),
@@ -152,7 +144,6 @@ class Interface():
                 value=os.getcwd() + "/data_dir/",
                 placeholder="Path to data directory",
                 description='Data directory',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -163,7 +154,6 @@ class Interface():
                 placeholder="Path to target directory (parent to all scan \
                 directories)",
                 description='Target directory',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -172,7 +162,6 @@ class Interface():
             comment=widgets.Text(
                 value="",
                 description='Comment',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -181,25 +170,33 @@ class Interface():
 
             debug=widgets.Checkbox(
                 value=False,
-                description='Debug',
-                disabled=False,
+                description='Debug scripts',
                 tooltip='True to interact with plots, False to close it \
                 automatically',
                 indent=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
+            matplotlib_backend=widgets.Dropdown(
+                options=[('Agg', 'Agg'), ('Qt5Agg', 'Qt5Agg'),
+                         ('module://matplotlib_inline.backend_inline', 'ipympl')],
+                value="Agg",
+                description='Matplotlib backend for scripts:',
+                continuous_update=False,
+                # tooltip="Name of the beamline, used for data loading and \
+                # normalization by monitor",
+                style={'description_width': 'initial'}),
+
             run_dir_init=widgets.ToggleButton(
                 value=False,
                 description='Initialize directories ...',
-                disabled=False,
                 button_style='',
                 icon='step-forward',
                 layout=Layout(
                     width='45%'),
                 style={'description_width': 'initial'}),
         )
-        self._list_widgets_init_dir.children[7].observe(
+        self._list_widgets_init_dir.children[8].observe(
             self.init_handler, names="value")
         self._list_widgets_init_dir.children[4].observe(
             self.sub_directories_handler, names="value")
@@ -212,6 +209,7 @@ class Interface():
             self._list_widgets_init_dir.children[5],
             self._list_widgets_init_dir.children[6],
             self._list_widgets_init_dir.children[7],
+            self._list_widgets_init_dir.children[8],
             self._list_widgets_init_dir.children[-1],
         ])
 
@@ -366,11 +364,11 @@ class Interface():
                 layout=Layout(
                     width='45%'),
                 tooltip="Bragg peak determination: 'max' or 'com', 'max' is \
-                better usually. It will be overridden by 'fix_bragg' if \
+                better usually. It will be overridden by 'bragg_peak' if \
                 not empty",
                 style={'description_width': 'initial'}),
 
-            fix_bragg=widgets.Text(
+            bragg_peak=widgets.Text(
                 placeholder="[z_bragg, y_bragg, x_bragg]",
                 description='Bragg peak position',
                 disabled=True,
@@ -607,9 +605,7 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             roi_detector=widgets.Text(
-                placeholder="""
-                [low_y_bound, high_y_bound, low_x_bound, high_x_bound]
-                """,
+                placeholder="""[low_y_bound, high_y_bound, low_x_bound, high_x_bound]""",
                 description='Fix roi area, will overwrite cropping parameters',
                 disabled=True,
                 continuous_update=False,
@@ -813,6 +809,26 @@ class Interface():
                 tooltip="q will be aligned along that axis",
                 style={'description_width': 'initial'}),
 
+            direct_beam=widgets.Text(
+                value="[250, 250]",
+                placeholder="[250, 250]",
+                description='Direct beam position (px)',
+                disabled=True,
+                continuous_update=False,
+                layout=Layout(
+                    width='45%'),
+                style={'description_width': 'initial'}),
+
+            dirbeam_detector_angles=widgets.Text(
+                value="[0, 0]",
+                placeholder="[0, 0]",
+                description='Direct beam angles (°)',
+                disabled=True,
+                continuous_update=False,
+                layout=Layout(
+                    width='45%'),
+                style={'description_width': 'initial'}),
+
             outofplane_angle=widgets.FloatText(
                 value=0,
                 step=0.01,
@@ -833,7 +849,6 @@ class Interface():
                     width='25%'),
                 style={'description_width': 'initial'}),
 
-
             tilt_angle=widgets.FloatText(
                 value=0.003,
                 step=0.0001,
@@ -843,7 +858,6 @@ class Interface():
                 layout=Layout(
                     width='25%'),
                 style={'description_width': 'initial'}),
-
             sample_inplane=widgets.Text(
                 value="(1, 0, 0)",
                 placeholder="(1, 0, 0)",
@@ -903,34 +917,6 @@ class Interface():
                 tooltip="cch2 parameter from xrayutilities 2D detector \
                 calibration, horizontal",
                 style={'description_width': 'initial'}),
-
-            direct_inplane=widgets.FloatText(
-                value=0,
-                step=0.01,
-                min=0,
-                max=360,
-                continuous_update=False,
-                description='Direct inplane angle:',
-                layout=Layout(
-                    width='30%'),
-                readout=True,
-                style={
-                    'description_width': 'initial'},
-                disabled=True),
-
-            direct_outofplane=widgets.FloatText(
-                value=0,
-                step=0.01,
-                min=0,
-                max=360,
-                continuous_update=False,
-                description='Direct outofplane angle:',
-                layout=Layout(
-                    width='30%'),
-                readout=True,
-                style={
-                    'description_width': 'initial'},
-                disabled=True),
 
             detrot=widgets.FloatText(
                 value=0,
@@ -997,8 +983,8 @@ class Interface():
             self.bragg_peak_centering_handler, names="value")
         self._list_widgets_preprocessing.children[25].observe(
             self.reload_data_handler, names="value")
-        self._list_widgets_preprocessing.children[44].observe(
-            self.interpolation_handler, names="value")
+        # self._list_widgets_preprocessing.children[44].observe(
+        #     self.orthogonalisation_handler, names="value")
         self._list_widgets_preprocessing.children[-2].observe(
             self.preprocess_handler, names="value")
 
@@ -1056,10 +1042,10 @@ class Interface():
             widgets.HBox(self._list_widgets_preprocessing.children[50:52]),
             self._list_widgets_preprocessing.children[52],
             widgets.HBox(self._list_widgets_preprocessing.children[53:55]),
-            widgets.HBox(self._list_widgets_preprocessing.children[55:58]),
-            widgets.HBox(self._list_widgets_preprocessing.children[58:61]),
-            widgets.HBox(self._list_widgets_preprocessing.children[61:65]),
-            widgets.HBox(self._list_widgets_preprocessing.children[65:68]),
+            widgets.HBox(self._list_widgets_preprocessing.children[55:57]),
+            widgets.HBox(self._list_widgets_preprocessing.children[57:60]),
+            widgets.HBox(self._list_widgets_preprocessing.children[60:63]),
+            widgets.HBox(self._list_widgets_preprocessing.children[63:68]),
         ])
 
         # Group all preprocess tabs into a single one, besides detector and
@@ -1071,103 +1057,6 @@ class Interface():
             self._list_widgets_preprocessing.children[-3],
             self._list_widgets_preprocessing.children[-2],
             self._list_widgets_preprocessing.children[-1]
-        ])
-
-        # Widgets for angles correction
-        self._list_widgets_correct = interactive(
-            self.correct_angles,
-            unused_label_correct=widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>\
-                Find the real values for the Bragg peak angles, needs correct \
-                xru parameters.",
-                style={
-                    'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
-
-            metadata_csv_file=widgets.Text(
-                value=os.getcwd()+"/metadata.csv",
-                description='.csv file to save metadata:',
-                disabled=False,
-                continuous_update=False,
-                layout=Layout(width='90%'),
-                style={'description_width': 'initial'}),
-
-            get_temperature=widgets.Checkbox(
-                value=False,
-                description='Estimate the temperature (Pt only)',
-                disabled=True,
-                # button_style = '', #
-                # 'success', 'info',
-                # 'warning', 'danger' or
-                # ''
-                tooltip='Click to estimate the mean temperature of the sample \
-                from the Bragg peak angles',
-                # icon = 'check',
-                layout=Layout(
-                    width='40%'),
-                style={'description_width': 'initial'}),
-
-            reflection=widgets.Text(
-                value="[1, 1, 1]",
-                placeholder="[1, 1, 1]",
-                description='Reflection',
-                disabled=True,
-                continuous_update=False,
-                layout=Layout(
-                    width='30%'),
-                style={
-                    'description_width': 'initial'},
-                tooltip="Sample inplane reference direction along the beam at \
-                0 angles"),
-
-            reference_spacing=widgets.FloatText(
-                value=2.269545,
-                step=0.000001,
-                min=0,
-                max=100,
-                description='Interplanar distance (A):',
-                layout=Layout(
-                    width='30%'),
-                readout=True,
-                style={
-                    'description_width': 'initial'},
-                disabled=True),
-
-            reference_temperature=widgets.FloatText(
-                value=298.15,
-                step=0.01,
-                min=0,
-                max=2000,
-                description='Reference temperature:',
-                layout=Layout(
-                    width='30%'),
-                readout=True,
-                style={
-                    'description_width': 'initial'},
-                disabled=True),
-
-            angles_bool=widgets.ToggleButton(
-                value=False,
-                description='Correct angles',
-                disabled=True,
-                button_style='',
-                tooltip='Click to correct the Bragg peak angles',
-                icon='fast-forward',
-                layout=Layout(
-                     width='40%'),
-                style={'description_width': 'initial'}),
-        )
-        self._list_widgets_correct.children[2].observe(
-            self.temp_handler, names="value")
-        self._list_widgets_correct.children[-2].observe(
-            self.correct_angles_handler, names="value")
-        self.tab_correct = widgets.VBox([
-            self._list_widgets_correct.children[0],
-            self._list_widgets_correct.children[1],
-            self._list_widgets_correct.children[2],
-            widgets.HBox(self._list_widgets_correct.children[3:6]),
-            self._list_widgets_correct.children[6],
-            self._list_widgets_correct.children[-1],
         ])
 
         # Widgets for PyNX
@@ -1185,7 +1074,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Parent folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1195,7 +1083,6 @@ class Interface():
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")]),
                 description='Dataset',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1204,7 +1091,6 @@ class Interface():
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")]),
                 description='Mask',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1214,7 +1100,6 @@ class Interface():
                           glob.glob(os.getcwd() + "*.npz")]),
                 value="",
                 description='Support',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1224,7 +1109,6 @@ class Interface():
                           glob.glob(os.getcwd() + "*.npz")]),
                 value="",
                 description='Object',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1232,7 +1116,6 @@ class Interface():
                 value=False,
                 description='Auto center and resize',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 layout=Layout(height="50px"),
                 icon='check'),
@@ -1262,7 +1145,6 @@ class Interface():
                 value="(0.23, 0.30)",
                 placeholder="(0.23, 0.30)",
                 description='Support threshold',
-                disabled=False,
                 layout=Layout(
                     height="50px", width="40%"),
                 continuous_update=False,
@@ -1272,7 +1154,6 @@ class Interface():
                 value=False,
                 description='Support only shrink',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 layout=Layout(
                     height="50px", width="15%"),
@@ -1294,7 +1175,6 @@ class Interface():
                 value="(2, 1, 600)",
                 placeholder="(2, 1, 600)",
                 description='Support smooth width',
-                disabled=False,
                 layout=Layout(
                     height="50px", width="35%"),
                 continuous_update=False,
@@ -1304,7 +1184,6 @@ class Interface():
                 value="(1, -2, 1)",
                 placeholder="(1, -2, 1)",
                 description='Support post expand',
-                disabled=False,
                 layout=Layout(
                     height="50px", width="35%"),
                 continuous_update=False,
@@ -1321,7 +1200,6 @@ class Interface():
                 value=True,
                 description='Use point spread function:',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 layout=Layout(height="50px"),
                 icon='check'),
@@ -1464,7 +1342,6 @@ class Interface():
                 ],
                 value="LLK_standard_deviation",
                 description='Filtering criteria',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -1503,7 +1380,6 @@ class Interface():
                 value=False,
                 description='Force positivity',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 style={
                     'description_width': 'initial'},
@@ -1529,7 +1405,6 @@ class Interface():
                 value=False,
                 description='Detwinning',
                 continuous_update=False,
-                disabled=False,
                 indent=False,
                 style={
                     'description_width': 'initial'},
@@ -1542,7 +1417,6 @@ class Interface():
                 placeholder="(1, 1, 1)",
                 description='Rebin',
                 layout=Layout(height="50px"),
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -1597,7 +1471,6 @@ class Interface():
                     activated after 50\% of RAAR cycles"
                 ],
                 description='Run phase retrieval ...',
-                disabled=False,
                 continuous_update=False,
                 button_style='',
                 layout=Layout(
@@ -1629,7 +1502,6 @@ class Interface():
                     "Filter reconstructions"
                 ],
                 description="Choose analysis:",
-                disabled=False,
                 continuous_update=False,
                 button_style='',
                 layout=Layout(
@@ -1686,7 +1558,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Parent folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1694,7 +1565,6 @@ class Interface():
             csv_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.csv")),
                 description='csv file in subdirectories:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1707,7 +1577,6 @@ class Interface():
                 ],
                 value=False,
                 description='Load dataframe',
-                disabled=False,
                 button_style='',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1730,7 +1599,6 @@ class Interface():
                          'variance/mean', 'volume'],
                 value="variance/mean",
                 description='Sorting method',
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             correlation_threshold=widgets.FloatText(
@@ -1754,7 +1622,6 @@ class Interface():
             original_size=widgets.Text(
                 placeholder="[256, 512, 512]",
                 description='Size of the FFT array before binning',
-                disabled=False,
                 layout=Layout(width='45%'),
                 continuous_update=False,
                 style={'description_width': 'initial'}),
@@ -1763,7 +1630,6 @@ class Interface():
                 value="(1, 1, 1)",
                 placeholder="(1, 1, 1)",
                 description='Binning factor used in phase retrieval',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='45%'),
                 style={
@@ -1774,7 +1640,6 @@ class Interface():
                 value="(1, 1, 1)",
                 placeholder="(1, 1, 1)",
                 description='Binning factors used in preprocessing',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='45%'),
                 style={
@@ -1784,7 +1649,6 @@ class Interface():
             output_size=widgets.Text(
                 placeholder="[256, 512, 512]",
                 description='Output size',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -1792,7 +1656,6 @@ class Interface():
                 value=False,
                 description='Keep the initial array size for orthogonalization\
                  (slower)',
-                disabled=False,
                 layout=Layout(width='45%'),
                 # icon = 'check',
                 style={'description_width': 'initial'}),
@@ -1802,7 +1665,6 @@ class Interface():
                 description='Fix voxel size, put 0 to set free:',
                 min=0,
                 max=9999999,
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -1827,14 +1689,12 @@ class Interface():
                     "If the data was interpolated into the laboratory frame \
                     using the transformation matrix (align_q = False)"
                 ],
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             ref_axis_q=widgets.Dropdown(
                 options=["x", "y", "z"],
                 value="y",
                 description='Ref axis q',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='15%'),
                 tooltip="q will be aligned along that axis",
@@ -1852,7 +1712,6 @@ class Interface():
                     "Save the data in the laboratory frame, with all sample\
                      angles rotated back to 0"
                 ],
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             isosurface_strain=widgets.FloatText(
@@ -1881,7 +1740,6 @@ class Interface():
                     magnitude value for the strain. See: F. Hofmann et al. \
                     PhysRevMaterials 4, 013801 (2020)"
                 ],
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             phase_offset=widgets.FloatText(
@@ -1900,7 +1758,6 @@ class Interface():
             phase_offset_origin=widgets.Text(
                 placeholder="(x, y, z), leave None for automatic.",
                 description='Phase offset origin',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='40%'),
                 style={
@@ -1912,7 +1769,6 @@ class Interface():
                 value="mean",
                 description='Offset method:',
                 continuous_update=False,
-                disabled=False,
                 layout=Layout(width='20%'),
                 style={'description_width': 'initial'}),
 
@@ -1922,7 +1778,6 @@ class Interface():
                 value="max_com",
                 description='Centering method:',
                 continuous_update=False,
-                disabled=False,
                 layout=Layout(width='25%'),
                 style={'description_width': 'initial'}),
 
@@ -1936,7 +1791,6 @@ class Interface():
             correct_refraction=widgets.Checkbox(
                 value=False,
                 description='Correct refraction',
-                disabled=False,
                 # icon = 'check',
                 style={
                     'description_width': 'initial'}
@@ -1994,7 +1848,6 @@ class Interface():
             simulation=widgets.Checkbox(
                 value=False,
                 description='Simulated data',
-                disabled=False,
                 layout=Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
@@ -2003,7 +1856,6 @@ class Interface():
             invert_phase=widgets.Checkbox(
                 value=True,
                 description='Invert phase',
-                disabled=False,
                 layout=Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
@@ -2012,7 +1864,6 @@ class Interface():
             flip_reconstruction=widgets.Checkbox(
                 value=False,
                 description='Get conjugated object',
-                disabled=False,
                 layout=Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
@@ -2024,7 +1875,6 @@ class Interface():
                 value="gradient",
                 description='Phase ramp removal:',
                 continuous_update=False,
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             threshold_gradient=widgets.FloatText(
@@ -2040,7 +1890,6 @@ class Interface():
             save_raw=widgets.Checkbox(
                 value=False,
                 description='Save raw data',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2048,7 +1897,6 @@ class Interface():
             save_support=widgets.Checkbox(
                 value=False,
                 description='Save support',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2056,7 +1904,6 @@ class Interface():
             save=widgets.Checkbox(
                 value=True,
                 description='Save output',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2064,7 +1911,6 @@ class Interface():
             debug=widgets.Checkbox(
                 value=False,
                 description='Debug',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2073,7 +1919,6 @@ class Interface():
                 value="(0, 0, 0)",
                 placeholder="(0, 0, 0)",
                 description='Roll modes',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='30%'),
                 style={
@@ -2090,7 +1935,6 @@ class Interface():
             align_axis=widgets.Checkbox(
                 value=False,
                 description='Align axis',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2099,7 +1943,6 @@ class Interface():
                 options=["x", "y", "z"],
                 value="y",
                 description='Ref axis for align axis',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='20%'),
                 tooltip="q will be aligned along that axis",
@@ -2109,7 +1952,6 @@ class Interface():
                 value="[0.0, 0.0, 0.0]",
                 placeholder="[0.0, 0.0, 0.0]",
                 description='Axis to align for ref axis',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2136,7 +1978,6 @@ class Interface():
             grey_background=widgets.Checkbox(
                 value=True,
                 description='Grey background in plots',
-                disabled=False,
                 layout=Layout(width='25%'),
                 style={
                     'description_width': 'initial'}
@@ -2148,7 +1989,6 @@ class Interface():
                 min=0,
                 max=5000,
                 layout=Layout(width='25%'),
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2159,7 +1999,6 @@ class Interface():
                 description='Tick direction:',
                 layout=Layout(width='25%'),
                 continuous_update=False,
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             tick_length=widgets.BoundedIntText(
@@ -2167,7 +2006,6 @@ class Interface():
                 description='Tick length:',
                 min=0,
                 max=50,
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='20%'),
                 style={'description_width': 'initial'}),
@@ -2177,7 +2015,6 @@ class Interface():
                 description='Tick width:',
                 min=0,
                 max=10,
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='45%'),
                 style={'description_width': 'initial'}),
@@ -2195,7 +2032,6 @@ class Interface():
                 value="reciprocal_space",
                 description='Average method:',
                 continuous_update=False,
-                disabled=False,
                 style={'description_width': 'initial'}),
 
             threshold_avg=widgets.FloatText(
@@ -2218,7 +2054,6 @@ class Interface():
             apodize=widgets.Checkbox(
                 value=True,
                 description='Multiply diffraction pattern by filtering window',
-                disabled=False,
                 style={
                     'description_width': 'initial'}
             ),
@@ -2228,7 +2063,6 @@ class Interface():
                     "normal", "tukey", "blackman"],
                 value="blackman",
                 description='Filtering window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2245,7 +2079,6 @@ class Interface():
                 value="[0.0, 0.0, 0.0]",
                 placeholder="[0.0, 0.0, 0.0]",
                 description='Mu of gaussian window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2253,7 +2086,6 @@ class Interface():
                 value="[0.30, 0.30, 0.30]",
                 placeholder="[0.30, 0.30, 0.30]",
                 description='Sigma of gaussian window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2261,7 +2093,6 @@ class Interface():
                 value="[1.0, 1.0, 1.0]",
                 placeholder="[1.0, 1.0, 1.0]",
                 description='Alpha of gaussian window',
-                disabled=False,
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -2277,7 +2108,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Data folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2290,7 +2120,6 @@ class Interface():
                     + glob.glob(os.getcwd() + "/*.npy")
                     + glob.glob(os.getcwd() + "/*.npz"))],
                 description='Compatible file list',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -2301,7 +2130,6 @@ class Interface():
                 ],
                 value=False,
                 description='Run strain analysis',
-                disabled=False,
                 button_style='',
                 icon='fast-forward',
                 layout=Layout(width='90%'),
@@ -2357,12 +2185,11 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Data folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            path_to_data=widgets.SelectMultiple(
+            filename=widgets.SelectMultiple(
                 options=[""]
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(os.getcwd() + "/*.npy")
@@ -2372,7 +2199,14 @@ class Interface():
                     + glob.glob(os.getcwd() + "/*.png"))],
                 rows=10,
                 description='Compatible file list',
-                disabled=False,
+                layout=Layout(width='90%'),
+                style={'description_width': 'initial'}),
+
+            cmap=widgets.Dropdown(
+                options=plt.colormaps(),
+                value="YlGnBu_r",
+                description="Color map:",
+                continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -2403,7 +2237,6 @@ class Interface():
                     "Load support and smooth its boundaries",
                     "Delete selected files, careful !!"
                 ],
-                disabled=False,
                 button_style='',
                 icon='fast-forward',
                 layout=Layout(width='90%'),
@@ -2427,7 +2260,6 @@ class Interface():
                 value=os.getcwd() + "/",
                 placeholder=os.getcwd() + "/",
                 description='Parent folder:',
-                disabled=False,
                 continuous_update=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2435,7 +2267,6 @@ class Interface():
             vtk_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.vtk")),
                 description='vtk file in subdirectories:',
-                disabled=False,
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -2446,7 +2277,6 @@ class Interface():
                 ],
                 value=False,
                 description='Load vtk data',
-                disabled=False,
                 button_style='',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2464,7 +2294,6 @@ class Interface():
                     'Postprocessing', "Facet analysis"],
                 value=False,
                 description='Show info about:',
-                disabled=False,
                 tooltips=[
                     'Nothing is shown',
                     'Insight in the functions used for preprocessing',
@@ -2483,7 +2312,6 @@ class Interface():
                     self.tab_detector,
                     self.tab_setup,
                     self.tab_preprocess,
-                    self.tab_correct,
                     self.tab_data_frame,
                     self.tab_pynx,
                     self.tab_strain,
@@ -2495,13 +2323,12 @@ class Interface():
             self.window.set_title(1, 'Detector')
             self.window.set_title(2, 'Setup')
             self.window.set_title(3, "Preprocess")
-            self.window.set_title(4, 'Correct')
-            self.window.set_title(5, 'Logs')
-            self.window.set_title(6, 'Phase retrieval')
-            self.window.set_title(7, 'Postprocess')
-            self.window.set_title(8, 'Handle data')
-            self.window.set_title(9, 'Facets')
-            self.window.set_title(10, 'Readme')
+            self.window.set_title(4, 'Logs')
+            self.window.set_title(5, 'Phase retrieval')
+            self.window.set_title(6, 'Postprocess')
+            self.window.set_title(7, 'Handle data')
+            self.window.set_title(8, 'Facets')
+            self.window.set_title(9, 'Readme')
 
         elif not pynx_import:
             self.window = widgets.Tab(
@@ -2510,7 +2337,6 @@ class Interface():
                     self.tab_detector,
                     self.tab_setup,
                     self.tab_preprocess,
-                    self.tab_correct,
                     self.tab_data_frame,
                     self.tab_strain,
                     self.tab_data,
@@ -2521,12 +2347,11 @@ class Interface():
             self.window.set_title(1, 'Detector')
             self.window.set_title(2, 'Setup')
             self.window.set_title(3, "Preprocess")
-            self.window.set_title(4, 'Correct')
-            self.window.set_title(5, 'Logs')
-            self.window.set_title(6, 'Strain')
-            self.window.set_title(7, 'Plot data')
-            self.window.set_title(8, 'Facets')
-            self.window.set_title(9, 'Readme')
+            self.window.set_title(4, 'Logs')
+            self.window.set_title(5, 'Strain')
+            self.window.set_title(6, 'Plot data')
+            self.window.set_title(7, 'Facets')
+            self.window.set_title(8, 'Readme')
 
         # Display the final window
         display(self.window)
@@ -2542,6 +2367,7 @@ class Interface():
         root_folder,
         comment,
         debug,
+        matplotlib_backend,
         run_dir_init,
     ):
         """Function to move file from `data_dir` to `root_folder` where it will
@@ -2560,8 +2386,12 @@ class Interface():
         :param root_folder: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/"
          folder of the experiment, where all scans are stored
         :param comment: string use in filenames when saving
-        :param debug: e.g. False
-         True to see plots
+        :param debug: e.g. False. True to see plots
+        :param matplotlib_backend: e.g. "Qt5Agg"
+         Backend used in script, change to "Agg" to make sure the figures are
+         saved, not compatible with interactive masking. Other possibilities
+         are 'module://matplotlib_inline.backend_inline' default value is
+         "Qt5Agg"
         """
         if run_dir_init:
             # Create Dataset attribute
@@ -2574,6 +2404,9 @@ class Interface():
             self.Dataset.debug = debug
             self.Dataset.root_folder = root_folder
             self.scan_name = self.Dataset.sample_name + str(self.Dataset.scan)
+
+            # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
+            self.matplotlib_backend = matplotlib_backend
 
             # Assign scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder \
@@ -2677,6 +2510,13 @@ class Interface():
                 print(
                     f"Copied {self.Dataset.path_to_data} to \
                     {self.Dataset.data_folder}")
+
+                # Change path_to_data, only if copy successful
+                self.Dataset.path_to_data = self.Dataset.data_folder + \
+                    os.path.basename(self.Dataset.path_to_data)
+
+                self.Dataset.data_dir = self.Dataset.data_folder  # TODO CONFUSING
+
             except (FileExistsError, shutil.SameFileError):
                 print(
                     f"{self.Dataset.data_folder}\
@@ -2686,10 +2526,6 @@ class Interface():
 
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
-
-            # Correct angles csv file value
-            self.tab_correct.children[1].value = self.Dataset.root_folder + \
-                "metadata.csv"
 
             # Refresh csv file
             self.tab_data_frame.children[1].options\
@@ -2835,7 +2671,7 @@ class Interface():
         background_plot,
         unused_label_centering,
         centering_method,
-        fix_bragg,
+        bragg_peak,
         fix_size,
         center_fft,
         pad_size,
@@ -2857,9 +2693,16 @@ class Interface():
         save_as_int,
         unused_label_detector,
         detector,
+        # phasing_binning,
+        # linearity_func
+        # center_roi_x
+        # center_roi_y
         roi_detector,
+        # normalize_flux
         photon_threshold,
         photon_filter,
+        # bin_during_loading todo
+        # frames_pattern todo
         background_file,
         hotpixels_file,
         flatfield_file,
@@ -2876,6 +2719,9 @@ class Interface():
         unused_label_xru,
         align_q,
         ref_axis_q,
+        direct_beam,
+        dirbeam_detector_angles,
+        # bragg_peak
         outofplane_angle,
         inplane_angle,
         tilt_angle,
@@ -2884,8 +2730,6 @@ class Interface():
         offset_inplane,
         cch1,
         cch2,
-        direct_inplane,  # correction
-        direct_outofplane,  # correction
         detrot,
         tiltazimuth,
         tilt_detector,
@@ -2919,10 +2763,6 @@ class Interface():
         :param centering_method: e.g. "max"
          Bragg peak determination: 'max' or 'com', 'max' is better usually.
          It will be overridden by 'fix_bragg' if not empty
-        :param fix_bragg: e.g. [121, 321, 256]
-         Bragg peak position [z_bragg, y_bragg, x_bragg] considering the
-         full detector. It is useful if hotpixels or intense aliens.
-        Leave None otherwise.
         :param fix_size: e.g. [0, 256, 10, 240, 50, 350]
          crop the array to that predefined size considering the full detector.
          [zstart, zstop, ystart, ystop, xstart, xstop], ROI will be defaulted
@@ -3019,6 +2859,12 @@ class Interface():
          axis, detector horizontal axis)
         :param linearity_func: name of the linearity correction for the
          detector, leave None otherwise.
+        :param center_roi_x: e.g. 1577
+         horizontal pixel number of the center of the ROI for data loading.
+         Leave None to use the full detector.
+        :param center_roi_y: e.g. 833
+         vertical pixel number of the center of the ROI for data loading.
+         Leave None to use the full detector.
         :param roi_detector: e.g.[0, 250, 10, 210]
          region of interest of the detector to load. If "x_bragg" or "y_bragg"
          are not None, it will consider that the current values in roi_detector
@@ -3096,6 +2942,19 @@ class Interface():
          if True it rotates the crystal to align q, along one axis of the
          array. It is used only when interp_method is 'linearization'
         :param ref_axis_q: e.g. "y"  # q will be aligned along that axis
+        :param direct_beam: e.g. [125, 362]
+         [vertical, horizontal], direct beam position on the unbinned, full detector
+         measured with detector angles given by `dirbeam_detector_angles`. It will be used
+         to calculate the real detector angles for the measured Bragg peak. Leave None for
+         no correction.
+        :param dirbeam_detector_angles: e.g. [1, 25]
+         [outofplane, inplane] detector angles in degrees for the direct beam measurement.
+         Leave None for no correction
+        :param bragg_peak: e.g. [121, 321, 256]
+         Bragg peak position [z_bragg, y_bragg, x_bragg] considering the unbinned full
+         detector. If 'outofplane_angle' and 'inplane_angle' are None and the direct beam
+         position is provided, it will be used to calculate the correct detector angles.
+         It is useful if there are hotpixels or intense aliens. Leave None otherwise.
         :param outofplane_angle: e.g. 42.6093
          detector angle in deg (rotation around x outboard, typically delta),
          corrected for the direct beam position. Leave None to use the
@@ -3139,22 +2998,25 @@ class Interface():
             for w in self._list_widgets_preprocessing.children[:-2]:
                 w.disabled = True
 
-            for w in self._list_widgets_correct.children[:-2]:
-                w.disabled = True
-
             # Save parameter values as attributes
-            self.Dataset.phasing_binning = phasing_binning
+            self.Dataset.beamline = beamline
+            self.Dataset.actuators = actuators
+            self.Dataset.is_series = is_series
+            self.Dataset.custom_scan = custom_scan
+            self.Dataset.custom_images = custom_images
+            self.Dataset.custom_monitor = custom_monitor
+            self.Dataset.specfile_name = specfile_name
+            self.Dataset.rocking_angle = rocking_angle
             self.Dataset.flag_interact = flag_interact
             self.Dataset.background_plot = str(background_plot)
             if centering_method == "manual":  # will be overridden
                 self.Dataset.centering_method = "max"
             else:
                 self.Dataset.centering_method = centering_method
-            self.Dataset.fix_bragg = fix_bragg
+            self.Dataset.bragg_peak = bragg_peak
             self.Dataset.fix_size = fix_size
             self.Dataset.center_fft = center_fft
             self.Dataset.pad_size = pad_size
-            self.Dataset.normalize_flux = normalize_flux
             self.Dataset.mask_zero_event = mask_zero_event
             self.Dataset.median_filter = median_filter
             self.Dataset.median_filter_order = median_filter_order
@@ -3166,18 +3028,15 @@ class Interface():
             self.Dataset.save_to_mat = save_to_mat
             self.Dataset.save_to_vti = save_to_vti
             self.Dataset.save_as_int = save_as_int
-            self.Dataset.beamline = beamline
-            self.Dataset.actuators = actuators
-            self.Dataset.is_series = is_series
-            self.Dataset.custom_scan = custom_scan
-            self.Dataset.custom_images = custom_images
-            self.Dataset.custom_monitor = custom_monitor
-            self.Dataset.rocking_angle = rocking_angle
-            self.Dataset.specfile_name = specfile_name
             self.Dataset.detector = detector
+            self.Dataset.phasing_binning = phasing_binning
+            self.Dataset.linearity_func = None  # TODO
             self.Dataset.roi_detector = roi_detector
+            self.Dataset.normalize_flux = normalize_flux
             self.Dataset.photon_threshold = photon_threshold
             self.Dataset.photon_filter = photon_filter
+            self.Dataset.bin_during_loading = True  # TODO
+            self.Dataset.frames_pattern = None  # TODO
             self.Dataset.background_file = background_file
             self.Dataset.hotpixels_file = hotpixels_file
             self.Dataset.flatfield_file = flatfield_file
@@ -3192,6 +3051,9 @@ class Interface():
             self.Dataset.custom_motors = custom_motors
             self.Dataset.align_q = align_q
             self.Dataset.ref_axis_q = ref_axis_q
+            self.Dataset.direct_beam = direct_beam
+            self.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
+            # bragg_peak
             self.Dataset.outofplane_angle = outofplane_angle
             self.Dataset.inplane_angle = inplane_angle
             self.Dataset.tilt_angle = tilt_angle
@@ -3200,19 +3062,14 @@ class Interface():
             self.Dataset.offset_inplane = offset_inplane
             self.Dataset.cch1 = cch1
             self.Dataset.cch2 = cch2
-            self.Dataset.direct_inplane = direct_inplane
-            self.Dataset.direct_outofplane = direct_outofplane
             self.Dataset.detrot = detrot
             self.Dataset.tiltazimuth = tiltazimuth
             self.Dataset.tilt_detector = tilt_detector
 
-            # Parameters to add to GUI
-            self.Dataset.bin_during_loading = True
-            self.Dataset.frames_pattern = None
-
             # Extract dict, list and tuple from strings
-            list_parameters = ["fix_bragg", "custom_images",
-                               "fix_size", "pad_size", "roi_detector"]
+            list_parameters = ["bragg_peak", "custom_images",
+                               "fix_size", "pad_size", "roi_detector",
+                               "direct_beam", "dirbeam_detector_angles"]
 
             tuple_parameters = [
                 "phasing_binning", "preprocessing_binning",  "beam_direction",
@@ -3274,7 +3131,6 @@ class Interface():
             if self.Dataset.specfile_name == "":
                 self.Dataset.specfile_name = None
 
-            self.Dataset.linearity_func = None
             print("Parameters initialized...")
 
             button_run_preprocess = Button(
@@ -3315,9 +3171,9 @@ class Interface():
                     # parameters used in masking
                     flag_interact=self.Dataset.flag_interact,
                     background_plot=self.Dataset.background_plot,
+                    backend=self.matplotlib_backend,
                     # parameters related to data cropping/padding/centering
                     centering_method=self.Dataset.centering_method,
-                    fix_bragg=self.Dataset.fix_bragg,
                     fix_size=self.Dataset.fix_size,
                     center_fft=self.Dataset.center_fft,
                     pad_size=self.Dataset.pad_size,
@@ -3349,6 +3205,8 @@ class Interface():
                     detector=self.Dataset.detector,
                     phasing_binning=self.Dataset.phasing_binning,
                     linearity_func=self.Dataset.linearity_func,
+                    # center_roi_x
+                    # center_roi_y
                     roi_detector=self.Dataset.roi_detector,
                     normalize_flux=self.Dataset.normalize_flux,
                     photon_threshold=self.Dataset.photon_threshold,
@@ -3373,6 +3231,9 @@ class Interface():
                     # phasing  using the linearized transformation matrix
                     align_q=self.Dataset.align_q,
                     ref_axis_q=self.Dataset.ref_axis_q,
+                    direct_beam=self.Dataset.direct_beam,
+                    dirbeam_detector_angles=self.Dataset.dirbeam_detector_angles,
+                    bragg_peak=self.Dataset.bragg_peak,
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
                     tilt_angle=self.Dataset.tilt_angle,
@@ -3386,7 +3247,6 @@ class Interface():
                     detrot=self.Dataset.detrot,
                     tiltazimuth=self.Dataset.tiltazimuth,
                     tilt_detector=self.Dataset.tilt_detector,
-                    backend=self.matplotlib_backend,
                 )
 
                 # On lance bcdi_preprocess
@@ -3403,182 +3263,36 @@ class Interface():
                 os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
                     --config {self.preprocessing_folder}config_preprocessing.yml")
 
-                # PyNX folder, refresh
-                self._list_widgets_phase_retrieval.children[1].value\
-                    = self.preprocessing_folder
-                self.pynx_folder_handler(change=self.preprocessing_folder)
+                # Button to save metadata
+                button_save_metadata = Button(
+                    description="Save metadata",
+                    continuous_update=False,
+                    button_style='',
+                    layout=Layout(width='40%'),
+                    style={'description_width': 'initial'},
+                    icon='fast-forward')
 
-                # Plot folder, refresh
-                self.tab_data.children[1].value = self.preprocessing_folder
-                self.plot_folder_handler(change=self.preprocessing_folder)
+                @ button_save_metadata.on_click
+                def action_button_save_metadata(selfbutton):
+                    self.extract_metadata()
+
+                    # PyNX folder, refresh
+                    self._list_widgets_phase_retrieval.children[1].value\
+                        = self.preprocessing_folder
+                    self.pynx_folder_handler(change=self.preprocessing_folder)
+
+                    # Plot folder, refresh
+                    self.tab_data.children[1].value = self.preprocessing_folder
+                    self.plot_folder_handler(change=self.preprocessing_folder)
+
+                display(button_save_metadata)
 
                 # Change window view
-                self.window.selected_index = 8
+                # self.window.selected_index = 8
 
         if not init_para:
             clear_output(True)
             print("Cleared window.")
-
-    def correct_angles(
-        self,
-        unused_label_correct,
-        metadata_csv_file,
-        get_temperature,
-        reflection,
-        reference_spacing,
-        reference_temperature,
-        angles_bool,
-    ):
-        """Use this script to extract and save the rocking curve as well as the
-        detector image at the rocking curve's COM. Will correct the values of
-        the inplane and outofplane angles corresponding to the COM of the Bragg
-        peak, values used then to compute q_hkl.
-
-        Parameters for temperature estimation:
-        :param metadata_csv_file: "metadata.csv"
-         full path to .csv file in which the scan metadata will be saved. If
-         the file does not exist, it will be created.
-        :param get_temperature: e.g. False
-         True to estimate the temperature, only available for platinum at the \
-         moment
-        :param reflection: e.g. [1, 1, 1]
-        measured reflection, use for estimating the temperature from the \
-        lattice parameter
-        :param reference_spacing: 3.9236
-         for calibrating the thermal expansion, if None it is fixed to the one \
-         of Platinum 3.9236/norm(reflection)
-        :param reference_temperature: 325
-         temperature in Kelvins used to calibrate the thermal expansion, if \
-         None it is fixed to 293.15K (room temperature)
-        """
-        if angles_bool:
-            # # Disable all widgets until the end of the program, will update
-            # # automatticaly after, no need here because quite fast
-            # for w in self._list_widgets_init_dir.children[:-1]:
-            #     w.disabled = True
-
-            # for w in self._list_widgets_preprocessing.children[:-1]:
-            #     w.disabled = True
-
-            # for w in self._list_widgets_correct.children[:-2]:
-            #     w.disabled = True
-
-            # Save parameter values as attributes
-            self.metadata_csv_file = metadata_csv_file
-            self.Dataset.angles_bool = angles_bool
-            self.Dataset.get_temperature = get_temperature
-            self.Dataset.reference_spacing = reference_spacing
-            self.Dataset.reference_temperature = reference_temperature
-
-            try:
-                self.Dataset.reflection = np.array(literal_eval(reflection))
-            except ValueError:
-                print("Wrong list syntax for reflection")
-
-            try:
-                # Check beamline for save folder
-                if self.Dataset.beamline == "SIXS_2019":
-                    root_folder = self.Dataset.root_folder
-
-                else:
-                    root_folder = self.Dataset.data_dir
-
-                save_dir = f"{self.postprocessing_folder}/corrections/"
-
-                # Create final directory is not yet existing
-                if not os.path.isdir(save_dir):
-                    full_path = ""
-                    for d in save_dir.split("/"):
-                        full_path += d + "/"
-                        try:
-                            os.mkdir(full_path)
-                        except FileExistsError:
-                            pass
-            except AttributeError:
-                print(
-                    "Make sure you initialize the parameters by running the \
-                    data preprocessing...")
-                return
-
-            try:
-                # Possible to also use filtered_data True and
-                # a direct path to data
-                metadata = correct_angles.correct_angles_detector(
-                    # filename=self.Dataset.path_to_data,
-                    direct_inplane=self.Dataset.direct_inplane,
-                    direct_outofplane=self.Dataset.direct_outofplane,
-                    get_temperature=self.Dataset.get_temperature,
-                    reflection=self.Dataset.reflection,
-                    reference_spacing=self.Dataset.reference_spacing,
-                    reference_temperature=self.Dataset.reference_temperature,
-                    high_threshold=1000000,
-                    save_dir=save_dir,
-                    scan=self.Dataset.scan,
-                    root_folder=root_folder,
-                    data_dir=root_folder,
-                    sample_name=self.Dataset.sample_name,
-                    filtered_data=False,
-                    peak_method=self.Dataset.centering_method,
-                    normalize_flux=self.Dataset.normalize_flux,
-                    debug=self.Dataset.debug,
-                    beamline=self.Dataset.beamline,
-                    actuators=self.Dataset.actuators,
-                    is_series=self.Dataset.is_series,
-                    custom_scan=self.Dataset.custom_scan,
-                    custom_images=self.Dataset.custom_images,
-                    custom_monitor=self.Dataset.custom_monitor,
-                    custom_motors=self.Dataset.custom_motors,
-                    rocking_angle=self.Dataset.rocking_angle,
-                    specfile_name=self.Dataset.specfile_name,
-                    detector=self.Dataset.detector,
-                    roi_detector=self.Dataset.roi_detector,
-                    hotpixels_file=self.Dataset.hotpixels_file,
-                    flatfield_file=self.Dataset.flatfield_file,
-                    template_imagefile=self.Dataset.template_imagefile,
-                    beam_direction=self.Dataset.beam_direction,
-                    sample_offsets=self.Dataset.sample_offsets,
-                    directbeam_x=self.Dataset.cch2,
-                    directbeam_y=self.Dataset.cch1,
-                    sdd=self.Dataset.sdd,
-                    energy=self.Dataset.energy,
-                    GUI=True
-                )
-
-                # Save metadata
-                for keys, values in metadata.items():
-                    setattr(self.Dataset, keys, values)
-
-                self.extract_metadata()
-
-                # Save corrected angles in the widgets
-                print("Saving corrected angles values...")
-                self._list_widgets_preprocessing.children[55].value\
-                    = self.Dataset.bragg_outofplane
-                self._list_widgets_preprocessing.children[56].value\
-                    = self.Dataset.bragg_inplane
-
-                self.Dataset.tilt_angle = np.round(
-                    np.mean(self.Dataset.tilt_values[1:]
-                            - self.Dataset.tilt_values[:-1]), 4)
-
-                self._list_widgets_preprocessing.children[57].value\
-                    = self.Dataset.tilt_angle
-
-                print("Corrected angles values saved in setup tab.")
-
-            except (ValueError, AttributeError):
-                print("Inplane or outofplane ?")
-
-            except TypeError:
-                print("Make sure you initialize the parameters by running \
-                    the data preprocessing...")
-
-            except Exception as e:
-                raise e
-
-        if not angles_bool:
-            print("Cleared window.")
-            clear_output(True)
 
     # Phase retrieval
 
@@ -4792,14 +4506,6 @@ class Interface():
         script from bcdi package to extract the strain from the reconstructed
         phase. Also plots images depending on the given isosurface.
 
-        Parameters used in the interactive masking GUI:
-
-        :param backend: e.g. "Qt5Agg"
-         Backend used in script, change to "Agg" to make sure the figures are
-         saved, not compatible with interactive masking. Other possibilities
-         are 'module://matplotlib_inline.backend_inline' default value is
-         "Qt5Agg"
-
         Parameters used when averaging several reconstruction:
 
         :param sort_method: e.g. "variance/mean"
@@ -5056,9 +4762,6 @@ class Interface():
             for w in self._list_widgets_preprocessing.children[:-2]:
                 w.disabled = True
 
-            for w in self._list_widgets_correct.children[:-1]:
-                w.disabled = True
-
             # Extract dict, list and tuple from strings
             list_parameters = [
                 "original_size", "output_size", "axis_to_align",
@@ -5118,9 +4821,6 @@ class Interface():
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
 
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = False
-
                 print("You need to initialize all the parameters with the \
                     preprocess tab first, some parameters are used here such \
                     as the energy, detector distance, ...""")
@@ -5146,12 +4846,15 @@ class Interface():
                     data_dir=self.Dataset.data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
+                    reconstruction_file=self.Dataset.reconstruction_file,
+                    backend=self.matplotlib_backend,
                     # parameters used when averaging several reconstruction #
                     sort_method=self.Dataset.sort_method,
+                    averaging_space=self.Dataset.averaging_space,
                     correlation_threshold=self.Dataset.correlation_threshold,
                     # parameters related to centering #
-                    roll_modes=self.Dataset.roll_modes,
                     centering_method=self.Dataset.centering_method,
+                    roll_modes=self.Dataset.roll_modes,
                     # parameters relative to the FFT window and voxel sizes #
                     original_size=self.Dataset.original_size,
                     phasing_binning=self.Dataset.phasing_binning,
@@ -5167,22 +4870,28 @@ class Interface():
                     strain_method=self.Dataset.strain_method,
                     # define beamline related parameters #
                     beamline=self.Dataset.beamline,
+                    is_series=self.Dataset.is_series,
                     actuators=self.Dataset.actuators,
+                    # setup for custom scans #
+                    custom_scan=self.Dataset.custom_scan,
+                    custom_images=self.Dataset.custom_images,
+                    custom_monitor=self.Dataset.custom_monitor,
                     rocking_angle=self.Dataset.rocking_angle,
                     sdd=self.Dataset.sdd,
                     energy=self.Dataset.energy,
                     beam_direction=self.Dataset.beam_direction,
+                    sample_offsets=self.Dataset.sample_offsets,
+                    tilt_angle=self.Dataset.tilt_angle,
+                    direct_beam=self.Dataset.direct_beam,
+                    dirbeam_detector_angles=self.Dataset.dirbeam_detector_angles,
+                    bragg_peak=self.Dataset.bragg_peak,
                     outofplane_angle=self.Dataset.outofplane_angle,
                     inplane_angle=self.Dataset.inplane_angle,
-                    tilt_angle=self.Dataset.tilt_angle,
-                    sample_offsets=self.Dataset.sample_offsets,
                     specfile_name=self.Dataset.specfile_name,
-                    # setup for custom scans #
-                    custom_scan=self.Dataset.custom_scan,
-                    custom_motors=self.Dataset.custom_motors,
                     # detector related parameters #
                     detector=self.Dataset.detector,
                     pixel_size=self.Dataset.pixel_size,
+                    roi_detector=self.Dataset.roi_detector,
                     template_imagefile=self.Dataset.template_imagefile,
                     # parameters related to the refraction correction #
                     correct_refraction=self.Dataset.correct_refraction,
@@ -5212,13 +4921,10 @@ class Interface():
                     tick_length=self.Dataset.tick_length,
                     tick_width=self.Dataset.tick_width,
                     # parameters for temperature estimation #
-                    get_temperature=self.Dataset.get_temperature,
-                    reflection=self.Dataset.reflection,
-                    reference_spacing=self.Dataset.reference_spacing,
-                    reference_temperature=self.Dataset.reference_temperature,
-                    # parameters for averaging several reconstructed objects #
-                    averaging_space=self.Dataset.averaging_space,
-                    threshold_avg=self.Dataset.threshold_avg,
+                    # get_temperature=self.Dataset.get_temperature,
+                    # reflection=self.Dataset.reflection,
+                    # reference_spacing=self.Dataset.reference_spacing,
+                    # reference_temperature=self.Dataset.reference_temperature,
                     # parameters for phase averaging or apodization #
                     half_width_avg_phase=self.Dataset.half_width_avg_phase,
                     apodize=self.Dataset.apodize,
@@ -5226,12 +4932,10 @@ class Interface():
                     apodization_mu=self.Dataset.apodization_mu,
                     apodization_sigma=self.Dataset.apodization_sigma,
                     apodization_alpha=self.Dataset.apodization_alpha,
-                    reconstruction_file=self.Dataset.reconstruction_file,
                     # parameters related to saving #
                     save_rawdata=self.Dataset.save_rawdata,
                     save_support=self.Dataset.save_support,
                     save=self.Dataset.save,
-                    backend=self.matplotlib_backend,
                 )
                 # On lance bcdi_postprocessing (strain)
                 print(
@@ -5258,7 +4962,8 @@ class Interface():
                 self.Dataset.strain_output_file = files[0]
 
             except AttributeError:
-                print("Run angles correction first, the values of the inplane and outofplane angles are the bragg peak center of mass will be automatically computed.")
+                raise AttributeError(
+                    "Bad values for inplane or outofplane angles")
             except KeyboardInterrupt:
                 print("Strain analysis stopped by user ...")
 
@@ -5283,9 +4988,6 @@ class Interface():
                 w.disabled = False
 
             for w in self._list_widgets_preprocessing.children[:-2]:
-                w.disabled = False
-
-            for w in self._list_widgets_correct.children[:-1]:
                 w.disabled = False
 
             # Refresh folders
@@ -5371,7 +5073,6 @@ class Interface():
                         options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=1,
                         description='Facet a id:',
-                        disabled=False,
                         continuous_update=True,
                         layout=Layout(width='45%'),
                         style={'description_width': 'initial'}),
@@ -5379,7 +5080,6 @@ class Interface():
                         options=[i + 1 for i in range(self.Facets.nb_facets)],
                         value=2,
                         description='Facet b id:',
-                        disabled=False,
                         continuous_update=True,
                         layout=Layout(width='45%'),
                         style={'description_width': 'initial'}),
@@ -5387,7 +5087,6 @@ class Interface():
                         value="[1, 1, 1]",
                         placeholder="[1, 1, 1]",
                         description='Vector perpendicular to facet a:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5395,7 +5094,6 @@ class Interface():
                         value="[1, -1, 0]",
                         placeholder="[1, -1, 0]",
                         description='Vector perpendicular to facet b:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5403,7 +5101,6 @@ class Interface():
                         value="[1, 1, -2]",
                         placeholder="[1, 1, -2]",
                         description='Cross product of u0 and v0:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5411,7 +5108,6 @@ class Interface():
                         value="[1, 1, 1]",
                         placeholder="[1, 1, 1]",
                         description='Reference for interplanar angles:',
-                        disabled=False,
                         continuous_update=False,
                         # layout = Layout(width='20%'),
                         style={'description_width': 'initial'},),
@@ -5421,7 +5117,6 @@ class Interface():
                         min=0,
                         max=360,
                         description='Elevation of the axes in degrees:',
-                        disabled=False,
                         continuous_update=False,
                         layout=Layout(width='70%'),
                         style={'description_width': 'initial'},),
@@ -5431,7 +5126,6 @@ class Interface():
                         min=0,
                         max=360,
                         description='Azimuth of the axes in degrees:',
-                        disabled=False,
                         continuous_update=False,
                         layout=Layout(width='70%'),
                         style={'description_width': 'initial'},),
@@ -5753,7 +5447,6 @@ class Interface():
                         options=list(logs.columns),
                         value=list(logs.columns)[:],
                         rows=10,
-                        disabled=False,
                         style={'description_width': 'initial'},
                         layout=Layout(width='90%'),
                         description='Select multiple columns with \
@@ -5764,7 +5457,7 @@ class Interface():
                         cols):
                     display(logs[list(cols)])
 
-            except FileNotFoundError:
+            except (FileNotFoundError, UnboundLocalError):
                 print("Wrong path")
             except AttributeError:
                 print("You need to run the facet analysis in the dedicated tab first."
@@ -5779,53 +5472,57 @@ class Interface():
         self,
         unused_label_plot,
         folder,
-        path_to_data,
+        filename,
+        cmap,
         data_use,
     ):
         """Allows the user to plot an array (1D, 2D or 3D) from npz, npy or
         .cxi files.
 
-        :param path_to_data: path to file to be loaded in GUI
+        :param folder: folder in which the files are located
+        :param cmap: cmap used for plots
+        :param filename: file name, can be multiple
         :param data_use: e.g. "2D"
          Can be "2D", "3D", "slices", "create_support", "extract_support",
          "smooth_support"
         """
-        if data_use in ["2D", "3D"] and len(path_to_data) == 1:
+
+        if data_use in ["2D", "3D"] and len(filename) == 1:
             # Disable widgets
-            for w in self.tab_data.children[:-2]:
+            for w in self.tab_data.children[:-3]:
                 w.disabled = True
 
             # Plot data
             plot.Plotter(
-                folder + "/" + path_to_data[0],
+                folder + "/" + filename[0],
                 plot=data_use,
                 log="interact",
-                cmap=self.cmap
+                cmap=cmap
             )
 
         if data_use == "slices":
             # Disable widgets
-            for w in self.tab_data.children[:-2]:
+            for w in self.tab_data.children[:-3]:
                 w.disabled = True
 
             # Plot data
-            for p in path_to_data:
+            for p in filename:
                 print(f"Showing {p}")
                 plot.Plotter(
                     folder + "/" + p,
                     plot=data_use,
                     log="interact",
-                    cmap=self.cmap
+                    cmap=cmap
                 )
 
-        elif data_use == "create_support" and len(path_to_data) == 1:
+        elif data_use == "create_support" and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
             sup = support.SupportTools(
-                path_to_data=folder + "/" + path_to_data[0])
+                path_to_data=folder + "/" + filename[0])
 
             # Interactive function to loadt threshold value
             window_support = interactive(
@@ -5845,7 +5542,6 @@ class Interface():
                 compute=widgets.ToggleButton(
                     value=False,
                     description='Compute support ...',
-                    disabled=False,
                     button_style='',
                     icon='step-forward',
                     layout=Layout(width='45%'),
@@ -5869,14 +5565,14 @@ class Interface():
             # Update PyNX folder values
             self.pynx_folder_handler(change=self.preprocessing_folder)
 
-        elif data_use == "extract_support" and len(path_to_data) == 1:
+        elif data_use == "extract_support" and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
             sup = support.SupportTools(
-                path_to_data=folder + "/" + path_to_data[0])
+                path_to_data=folder + "/" + filename[0])
 
             # Extract the support from the data file and save it as npz
             sup.extract_support()
@@ -5884,14 +5580,14 @@ class Interface():
             # Update PyNX folder values
             self.pynx_folder_handler(change=self.preprocessing_folder)
 
-        elif data_use == "smooth_support" and len(path_to_data) == 1:
+        elif data_use == "smooth_support" and len(filename) == 1:
             # Disable widgets
             for w in self.tab_data.children[:-2]:
                 w.disabled = True
 
             # Initialize class
             sup = support.SupportTools(
-                path_to_support=folder + "/" + path_to_data[0])
+                path_to_support=folder + "/" + filename[0])
 
             # Interactive function to loadt threshold value
             window_support = interactive(
@@ -5948,7 +5644,7 @@ class Interface():
                 w.disabled = True
 
             try:
-                for p in path_to_data:
+                for p in filename:
                     print(f"Showing {p}")
                     display(Image(filename=folder + "/" + p))
 
@@ -5956,7 +5652,7 @@ class Interface():
                 print("Could not load image from file.")
 
         elif data_use in ["2D", "3D", "create_support", "extract_support",
-                          "smooth_support"] and len(path_to_data) != 1:
+                          "smooth_support"] and len(filename) != 1:
             print("Please select only one file.")
 
         elif data_use == "delete":
@@ -5974,7 +5670,7 @@ class Interface():
             @ button_delete_data.on_click
             def action_button_delete_data(selfbutton):
                 """Delete files."""
-                for p in path_to_data:
+                for p in filename:
                     try:
                         os.remove(folder + "/" + p)
                         print(f"Removed {p}")
@@ -5998,6 +5694,7 @@ class Interface():
     def rotate_sixs_data(self):
         """Python script to rotate the data for vertical configuration Only for
         SIXS data in the vertical MED configuration.
+        self.Dataset.path_to_data must be a copy of the original data
         """
         # Check if already rotated
         with h5py.File(self.Dataset.path_to_data, "a") as f:
@@ -6033,7 +5730,7 @@ class Interface():
                 # Just an index for plotting schemes
                 half = int(data_og.shape[0] / 2)
 
-                # Rotate data
+                # Transpose and flip lr data
                 data = np.transpose(data_og, axes=(0, 2, 1))
                 for idx in range(data.shape[0]):
                     tmp = data[idx, :, :]
@@ -6079,106 +5776,143 @@ class Interface():
         """Needs Dataset to be corrected beforehand Extract meaningful data and
         saves them in a csv file to allow comparison.
         """
-        # Save rocking curve data
-        np.savez(
-            f"{self.postprocessing_folder}/interpolated_rocking_curve.npz",
-            tilt_values=self.Dataset.tilt_values,
-            rocking_curve=self.Dataset.rocking_curve,
-            interp_tilt=self.Dataset.interp_tilt,
-            interp_curve=self.Dataset.interp_curve,
-        )
-
-        # Save in a csv file
-        if self.Dataset.beamline == "SIXS_2019":
-            # Load Dataset, quite slow
-            data = rd.DataSet(self.Dataset.path_to_data)
-
-            # Add new data
-            temp_df = pd.DataFrame([[
-                self.Dataset.scan,
-                self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-                self.Dataset.qnorm, self.Dataset.dist_plane,
-                self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                self.Dataset.bragg_x, self.Dataset.bragg_y,
-                data.x[0], data.y[0], data.z[0], data.mu[0],
-                data.delta[0], data.omega[0],
-                data.gamma[0], data.gamma[0] - data.mu[0],
-                (data.mu[-1] - data.mu[-0]) /
-                len(data.mu), data.integration_time[0], len(
-                    data.integration_time),
-                self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                # data.ssl3hg[0], data.ssl3vg[0],
-                # data.ssl1hg[0], data.ssl1vg[0]
-            ]],
-                columns=[
-                    "scan",
-                    "qx", "qy", "qz",
-                    "q_norm", "d_hkl",
-                    "inplane_angle", "out_of_plane_angle",
-                    "bragg_x", "bragg_y",
-                    "x", "y", "z", "mu",
-                    "delta", "omega",
-                    "gamma", 'gamma-mu',
-                    "step size", "integration time", "steps",
-                    "FWHM", "COM_rocking_curve",
-                    # "ssl3hg", "ssl3vg",
-                    # "ssl1hg", "ssl1vg",
-            ])
-        else:
-            # Add new data
-            temp_df = pd.DataFrame([[
-                self.Dataset.scan,
-                self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-                self.Dataset.qnorm, self.Dataset.dist_plane,
-                self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                self.Dataset.bragg_x, self.Dataset.bragg_y,
-                self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-            ]],
-                columns=[
-                    "scan",
-                    "qx", "qy", "qz",
-                    "q_norm", "d_hkl",
-                    "inplane_angle", "out_of_plane_angle",
-                    "bragg_x", "bragg_y",
-                    "FWHM", "COM_rocking_curve",
-            ])
-
-        # Load all the logs
         try:
-            df = pd.read_csv(self.metadata_csv_file)
+            metadata_file = glob.glob(f"{self.preprocessing_folder}*.h5")[0]
 
-            # Replace old data linked to this scan, no problem if this row does
-            # not exist yet
-            indices = df[df['scan'] == self.Dataset.scan].index
-            df.drop(indices, inplace=True)
+            print(f"Using {metadata_file}")
+            with tb.open_file(metadata_file, "r") as f:
+                try:
+                    self.Dataset.tilt_values = f.root.output.tilt_values[...]
+                    self.Dataset.rocking_curve = f.root.output.rocking_curve[...]
+                    self.Dataset.interp_tilt = f.root.output.interp_tilt[...]
+                    self.Dataset.interp_curve = f.root.output.interp_curve[...]
+                    self.Dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
+                    self.Dataset.detector_data_COM = f.root.output.detector_data_COM[...]
+                    self.Dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+                except tb.NoSuchNodeError:
+                    # No angle correction during preprocess
+                    pass
+                self.Dataset.bragg_peak = f.root.output.bragg_peak[...]
+                self.Dataset.q = f.root.output.q[...]
+                self.Dataset.qnorm = f.root.output.qnorm[...]
+                self.Dataset.dist_plane = f.root.output.dist_plane[...]
+                self.Dataset.bragg_inplane = f.root.output.bragg_inplane[...]
+                self.Dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
 
-            result = pd.concat([df, temp_df])
+                # Save corrected angles in the widgets
+                print("Saving corrected angles values...")
+                self._list_widgets_preprocessing.children[14].value\
+                    = str(list(self.Dataset.bragg_peak))
+                self._list_widgets_preprocessing.children[57].value\
+                    = self.Dataset.bragg_outofplane
+                self._list_widgets_preprocessing.children[58].value\
+                    = self.Dataset.bragg_inplane
 
-        except (FileNotFoundError, ValueError):
-            result = temp_df
+                self.Dataset.tilt_angle = np.round(
+                    np.mean(self.Dataset.tilt_values[1:]
+                            - self.Dataset.tilt_values[:-1]), 4)
 
-        # Save
-        try:
-            result.to_csv(self.metadata_csv_file, index=False)
-            print(f"Saved logs in {self.metadata_csv_file}")
-        except ValueError:
-            self.metadata_csv_file = self.root_folder + "metadata.csv"
-            result.to_csv(self.metadata_csv_file, index=False)
-            print(f"Saved logs in {self.metadata_csv_file}")
+                self._list_widgets_preprocessing.children[59].value\
+                    = self.Dataset.tilt_angle
+
+                print("Corrected angles values saved in setup tab.")
+
+            # Save in a csv file
+            if self.Dataset.beamline == "SIXS_2019":
+                data = rd.DataSet(self.Dataset.path_to_data)
+
+                # Add new data
+                temp_df = pd.DataFrame([[
+                    self.Dataset.scan,
+                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
+                    self.Dataset.qnorm, self.Dataset.dist_plane,
+                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+                    self.Dataset.bragg_peak,
+                    data.x[0], data.y[0], data.z[0], data.mu[0],
+                    data.delta[0], data.omega[0],
+                    data.gamma[0], data.gamma[0] - data.mu[0],
+                    (data.mu[-1] - data.mu[-0]) /
+                    len(data.mu), data.integration_time[0], len(
+                        data.integration_time),
+                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+                    # data.ssl3hg[0], data.ssl3vg[0],
+                    # data.ssl1hg[0], data.ssl1vg[0]
+                ]],
+                    columns=[
+                        "scan",
+                        "qx", "qy", "qz",
+                        "q_norm", "d_hkl",
+                        "inplane_angle", "out_of_plane_angle",
+                        "bragg_peak",
+                        "x", "y", "z", "mu",
+                        "delta", "omega",
+                        "gamma", 'gamma-mu',
+                        "step size", "integration time", "steps",
+                        "FWHM", "COM_rocking_curve",
+                        # "ssl3hg", "ssl3vg",
+                        # "ssl1hg", "ssl1vg",
+                ])
+            else:
+                # Add new data
+                temp_df = pd.DataFrame([[
+                    self.Dataset.scan,
+                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
+                    self.Dataset.qnorm, self.Dataset.dist_plane,
+                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
+                    self.Dataset.bragg_peak,
+                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
+                ]],
+                    columns=[
+                        "scan",
+                        "qx", "qy", "qz",
+                        "q_norm", "d_hkl",
+                        "inplane_angle", "out_of_plane_angle",
+                        "bragg_peak",
+                        "FWHM", "COM_rocking_curve",
+                ])
+
+            # Load all the logs
+            try:
+                df = pd.read_csv(self.metadata_csv_file)
+
+                # Replace old data linked to this scan, no problem if this row does
+                # not exist yet
+                indices = df[df['scan'] == self.Dataset.scan].index
+                df.drop(indices, inplace=True)
+
+                result = pd.concat([df, temp_df])
+
+            except (FileNotFoundError, ValueError):
+                result = temp_df
+
+            display(result.head())
+
+            # Save
+            if isinstance(self.metadata_csv_file, str):
+                result.to_csv(self.metadata_csv_file, index=False)
+                print(f"Saved logs in {self.metadata_csv_file}")
+            else:
+                self.metadata_csv_file = self.Dataset.root_folder + "/metadata.csv"
+                result.to_csv(self.metadata_csv_file, index=False)
+                print(f"Saved logs in {self.metadata_csv_file}")
+
+        except IndexError:
+            print(
+                f"Could not find any .h5 file in {self.preprocessing_folder}")
 
     # Below are handlers
 
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization."""
         if not change.new:
-            for w in self._list_widgets_init_dir.children[:7]:
+            for w in self._list_widgets_init_dir.children[:8]:
                 w.disabled = False
 
             for w in self._list_widgets_preprocessing.children[:-1]:
                 w.disabled = True
 
         if change.new:
-            for w in self._list_widgets_init_dir.children[:7]:
+            for w in self._list_widgets_init_dir.children[:8]:
                 w.disabled = True
 
             for w in self._list_widgets_preprocessing.children[:-1]:
@@ -6190,8 +5924,8 @@ class Interface():
                 change=self._list_widgets_preprocessing.children[13].value)
             self.reload_data_handler(
                 change=self._list_widgets_preprocessing.children[25].value)
-            self.interpolation_handler(
-                change=self._list_widgets_preprocessing.children[44].value)
+            # self.orthogonalisation_handler(
+            #     change=self._list_widgets_preprocessing.children[44].value)
 
     def sub_directories_handler(self, change):
         """Handles changes linked to root_folder subdirectories"""
@@ -6261,8 +5995,8 @@ class Interface():
                 for w in self._list_widgets_preprocessing.children[26:28]:
                     w.disabled = True
 
-    def interpolation_handler(self, change):
-        """Handles changes related to data interpolation."""
+    def orthogonalisation_handler(self, change):
+        """Handles changes related to data orthogonalisation."""
         try:
             if change.new:
                 for w in self._list_widgets_preprocessing.children[45:68]:
@@ -6284,13 +6018,10 @@ class Interface():
         """Handles changes on the widget used for the preprocessing."""
         try:
             if not change.new:
-                self._list_widgets_init_dir.children[7].disabled = False
+                self._list_widgets_init_dir.children[8].disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
-
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = True
 
                 self.beamline_handler(
                     change=self._list_widgets_preprocessing.children[1].value)
@@ -6298,30 +6029,21 @@ class Interface():
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
                     change=self._list_widgets_preprocessing.children[25].value)
-                self.interpolation_handler(
-                    change=self._list_widgets_preprocessing.children[44].value)
+                # self.orthogonalisation_handler(
+                #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change.new:
-                self._list_widgets_init_dir.children[7].disabled = True
+                self._list_widgets_init_dir.children[8].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
-
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = False
-
-                self.temp_handler(
-                    change=self._list_widgets_correct.children[2].value)
 
         except AttributeError:
             if not change:
-                self._list_widgets_init_dir.children[7].disabled = False
+                self._list_widgets_init_dir.children[8].disabled = False
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = False
-
-                for w in self._list_widgets_correct.children[:3]:
-                    w.disabled = True
 
                 self.beamline_handler(
                     change=self._list_widgets_preprocessing.children[1].value)
@@ -6329,65 +6051,14 @@ class Interface():
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
                     change=self._list_widgets_preprocessing.children[25].value)
-                self.interpolation_handler(
-                    change=self._list_widgets_preprocessing.children[44].value)
+                # self.orthogonalisation_handler(
+                #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change:
-                self._list_widgets_init_dir.children[7].disabled = True
+                self._list_widgets_init_dir.children[8].disabled = True
 
                 for w in self._list_widgets_preprocessing.children[:-2]:
                     w.disabled = True
-
-                for w in self._list_widgets_correct.children[:-1]:
-                    w.disabled = False
-
-                self.temp_handler(
-                    change=self._list_widgets_correct.children[2].value)
-
-    def temp_handler(self, change):
-        """Handles changes related to the temperature estimation."""
-        try:
-            if change.new:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = False
-
-            if not change.new:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = True
-        except AttributeError:
-            if change:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = False
-
-            if not change:
-                for w in self._list_widgets_correct.children[3:6]:
-                    w.disabled = True
-
-    def correct_angles_handler(self, change):
-        """Handles changes related to data correction."""
-        try:
-            if change.new:
-                for w in self._list_widgets_correct.children[:-2]:
-                    w.disabled = True
-
-            if not change.new:
-                for w in self._list_widgets_correct.children[:-2]:
-                    w.disabled = False
-
-                self.temp_handler(
-                    change=self._list_widgets_correct.children[2].value)
-
-        except AttributeError:
-            if change:
-                for w in self._list_widgets_correct.children[:-2]:
-                    w.disabled = True
-
-            if not change:
-                for w in self._list_widgets_correct.children[:-2]:
-                    w.disabled = False
-
-                self.temp_handler(
-                    change=self._list_widgets_correct.children[2].value)
 
     def csv_file_handler(self, change):
         """List all .csv files in change subdirectories"""

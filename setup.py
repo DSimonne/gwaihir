@@ -28,7 +28,6 @@ setuptools.setup(
     ],
     scripts=[
         "gwaihir/scripts/job_esrf.slurm",
-        "gwaihir/scripts/run_correct_angles_detector.py",
         "gwaihir/scripts/run_movetodir.py",
         "gwaihir/scripts/run_rotate.py",
         "gwaihir/scripts/run_slurm_job.sh",

@@ -39,7 +39,8 @@ class Plotter():
         log=False,
         cmap="YlGnBu_r",
         figsize=(10, 10),
-        fontsize=15
+        fontsize=15,
+        title=None,
     ):
         """Either directly loads a data array from 'data_array' or extracts a
         data array from 'filename'. Plots the data according to the value of
@@ -64,6 +65,7 @@ class Plotter():
         self.cmap = cmap
         self.figsize = figsize
         self.fontsize = fontsize
+        self.title = title
 
         # Future attributes
         self.interact_scale = False
@@ -75,11 +77,12 @@ class Plotter():
         elif isinstance(data_array, np.ndarray) and not filename:
             # Plot data
             if self.plot == "2D":
-                self.plot_data(figsize=self.figsize,
-                               log=self.log, cmap=self.cmap)
+                self.plot_data(figsize=self.figsize, fontsize=self.fontsize,
+                               log=self.log, cmap=self.cmap, title=self.title)
 
             elif self.plot == "slices" and self.data_array.ndim == 3:
-                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap)
+                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap,
+                                    fontsize=self.fontsize, title=self.title)
 
             elif self.plot == "3D" and self.data_array.ndim == 3:
                 ThreeDViewer(self.data_array)
@@ -97,7 +100,8 @@ class Plotter():
                 )
 
         else:
-            print("Please provide either a filename or directly an np.ndarray.")
+            print(
+                "Please provide either a filename (arg filename) or directly an np.ndarray (arg data_array).")
 
     def get_data_array(self):
         """Get numpy array from file.
@@ -155,11 +159,12 @@ class Plotter():
 
             # Plot data
             if self.plot == "2D":
-                self.plot_data(figsize=self.figsize,
-                               log=self.log, cmap=self.cmap)
+                self.plot_data(figsize=self.figsize, fontsize=self.fontsize,
+                               log=self.log, cmap=self.cmap, title=self.title)
 
             elif self.plot == "slices" and self.data_array.ndim == 3:
-                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap)
+                self.plot_3d_slices(figsize=None, log=self.log, fontsize=self.fontsize,
+                                    cmap=self.cmap, title=self.title)
 
             elif self.plot == "3D" and self.data_array.ndim == 3:
                 ThreeDViewer(self.data_array)
@@ -195,12 +200,12 @@ class Plotter():
 
                     # Plot data
                     if self.plot == "2D":
-                        self.plot_data(
-                            figsize=self.figsize, log=self.log, cmap=self.cmap)
+                        self.plot_data(fontsize=self.fontsize, title=self.title,
+                                       figsize=self.figsize, log=self.log, cmap=self.cmap)
 
                     elif self.plot == "slices" and self.data_array.ndim == 3:
-                        self.plot_3d_slices(
-                            figsize=None, log=self.log, cmap=self.cmap)
+                        self.plot_3d_slices(fontsize=self.fontsize, title=self.title,
+                                            figsize=None, log=self.log, cmap=self.cmap)
 
                     elif self.plot == "3D" and self.data_array.ndim == 3:
                         ThreeDViewer(self.data_array)
@@ -233,7 +238,8 @@ class Plotter():
             data_array=self.data_array,
             figsize=self.figsize,
             fontsize=self.fontsize,
-            cmap=self.cmap
+            cmap=self.cmap,
+            title=self.title,
         )
 
     def plot_3d_slices(self, **kwargs):
@@ -245,7 +251,8 @@ class Plotter():
             data_array=self.data_array,
             figsize=self.figsize,
             log=self.log,
-            cmap=self.cmap
+            cmap=self.cmap,
+            title=self.title,
         )
 
 
@@ -781,7 +788,8 @@ def plot_data(
     figsize=(10, 10),
     fontsize=15,
     log="interact",
-    cmap="YlGnBu_r"
+    cmap="YlGnBu_r",
+    title=None,
 ):
     """Create figure based on the data dimensions.
 
@@ -790,6 +798,7 @@ def plot_data(
     :param fontsize: default 15
     :param log: True, False or "interact"
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
+    :param title: title for plot, string or list of 3 strings if 3d data
     """
     # Get dimensions
     data_dimensions = data_array.ndim
@@ -797,12 +806,20 @@ def plot_data(
     if data_dimensions == 1:
         plt.close()
         fig, ax = plt.subplots(figsize=figsize)
+
+        # Depends on log scale
         if log:
             ax.plot(np.log(data_array))
+            plt.title(title, fontsize=fontsize+2)
+            plt.tight_layout()
             plt.show()
+
         elif log is False:
             ax.plot(data_array)
+            plt.title(title, fontsize=fontsize+2)
+            plt.tight_layout()
             plt.show()
+
         elif log == "interact":
             @interact(
                 scale=widgets.ToggleButtons(
@@ -811,12 +828,11 @@ def plot_data(
                     description='Scale',
                     disabled=False,
                     style={'description_width': 'initial'}),
-                figsize=fixed(figsize)
             )
             def plot_with_interactive_scale(scale, figsize):
                 # Create figure
                 if not figsize:
-                    figsize = (data_array.ndim*5, 7)
+                    figsize = (7, 7)
                     print("Figure size defaulted to", figsize)
 
                 _, ax = plt.subplots(figsize=figsize)
@@ -829,12 +845,27 @@ def plot_data(
                 else:
                     ax.plot(data_array)
 
+                plt.title(title, fontsize=fontsize+2)
                 plt.tight_layout()
                 plt.show()
 
     elif data_dimensions == 2:
+        # Depends on log scale
         if isinstance(log, bool):
-            plot_2d_image(data_array, log=log, cmap=cmap)
+            img = plot_2d_image(data_array, log=log, cmap=cmap,
+                                title=title, fontsize=fontsize)
+
+            # Create axis for colorbar
+            cbar_ax = make_axes_locatable(ax).append_axes(
+                position='right', size='5%', pad=0.1)
+
+            # Create colorbar
+            cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+
+            # Show figure
+            plt.tight_layout()
+            plt.show()
+
         elif log == "interact":
             @interact(
                 scale=widgets.ToggleButtons(
@@ -857,7 +888,15 @@ def plot_data(
                 log = scale == "logarithmic"
 
                 # Plot
-                plot_2d_image(data_array, log=log, fig=fig, ax=ax, cmap=cmap)
+                img = plot_2d_image(data_array, log=log,
+                                    fig=fig, ax=ax, cmap=cmap)
+
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(ax).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                cbar = fig.colorbar(mappable=img, cax=cbar_ax)
 
                 # Show figure
                 plt.tight_layout()
@@ -955,25 +994,41 @@ def plot_data(
                              ):
                 if axplot == "xy":
                     dt = data[:, :, i]
+                    x_label = "x"
+                    y_label = "y"
                 elif axplot == "yz":
                     dt = data[i, :, :]
+                    x_label = "y"
+                    y_label = "z"
                 elif axplot == "xz":
                     dt = data[:, i, :]
+                    x_label = "x"
+                    y_label = "z"
 
                 else:
                     raise TypeError("Choose xy, yz or xz as axplot.")
 
                 # Create figure
                 plt.close()
-                print(figsize)
+                print("Figure size defaulted to", figsize)
                 fig, ax = plt.subplots(1, 1, figsize=figsize)
 
                 # Get scale
                 log = scale == "logarithmic"
 
                 # Plot 2D image in interactive environment
-                plot_2d_image(two_d_array=dt, log=log,
-                              fig=fig, ax=ax, cmap=cmap)
+                img = plot_2d_image(two_d_array=dt, log=log, fontsize=fontsize,
+                                    fig=fig, ax=ax, cmap=cmap, title=title,
+                                    x_label=x_label, y_label=y_label)
+
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(ax).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+
+                # Show figure
                 plt.tight_layout()
                 plt.show()
 
@@ -984,26 +1039,25 @@ def plot_data(
                 #     plt.close()
 
                 #     log = True if scale == "logarithmic"  else False
-                #     plot_2d_image_contour(two_d_array=dt, log=log)
+                #     img = plot_2d_image_contour(two_d_array=dt, log=log)
 
                 #     plt.show()
 
 
-def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", title=False):
+def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="YlGnBu_r", title=None, x_label="x", y_label="y"):
     """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
+    :param fontsize: default to 15
     :param fig: plt.figure to plot in, default is None and
      will create a figure
     :param ax: axes of figure, default is None and will create axes
     :param log: True to have a logarithmic scale, False to have a linear scale
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     :param title: str, title for this axe
+    :return: image
 
     """
-    # Find max and min
-    # dmax = two_d_array.max()
-    # dmin = two_d_array.min()
 
     if not fig and not ax:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
@@ -1011,7 +1065,7 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", ti
     scale = "logarithmic" if log else "linear"
 
     try:
-        ax.imshow(
+        img = ax.imshow(
             two_d_array,
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
@@ -1021,21 +1075,18 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", ti
             # vmin=dmin,
             # vmax=dmax,
         )
-
+        ax.set_xlabel(x_label, fontsize=fontsize)
+        ax.set_ylabel(y_label, fontsize=fontsize)
         if isinstance(title, str):
-            ax.set_title(title)
-        # Create axis for colorbar
-        # cbar_ax = make_axes_locatable(ax).append_axes(
-        #     position='right', size='5%', pad=0.1)
+            ax.set_title(title, fontsize=fontsize + 2)
 
-        # Create colorbar
-        # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+        return img
 
     except TypeError:
         # plt.close()
         print("Using complex data, automatically switching to array module")
 
-        ax.imshow(
+        img = ax.imshow(
             np.abs(two_d_array),
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
@@ -1046,12 +1097,10 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", ti
             # vmax=dmax,
         )
 
-        # # Create axis for colorbar
-        # cbar_ax = make_axes_locatable(ax).append_axes(
-        #     position='right', size='5%', pad=0.1)
+        if isinstance(title, str):
+            ax.set_title(title, fontsize=fontsize + 2)
 
-        # Create colorbar
-        # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+        return img
 
     except ValueError:
         plt.close()
@@ -1059,41 +1108,79 @@ def plot_2d_image(two_d_array, fig=None, ax=None, log=False, cmap="YlGnBu_r", ti
             print("Log scale can not handle this kind of data ...")
         else:
             pass
+        return None
 
 
-def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
+def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnBu_r", title=None):
     """Create figure for 3d data.
 
     :param data_array: np.ndarray to plotn must be 3D
+    :param fontsize: default 15
     :param figsize: default (10, 10)
     :param log: boolean (True, False) or anything else which
      raises an interactive window
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
+    :param title: string to set as title for main plot or list of
+     strings of length 3 for sub axes
     """
     if isinstance(log, bool):
         # Create figure
         if not figsize:
-            figsize = (data_array.ndim*5, 7)
+            figsize = (15, 7)
             print("Figure size defaulted to", figsize)
 
-        fig, axs = plt.subplots(
-            1, data_array.ndim, figsize=figsize)
+        fig, axs = plt.subplots(1, 3, figsize=figsize)
+
+        if isinstance(title, str):
+            fig.suptitle(title, fontsize=fontsize + 2)
+            titles = [None, None, None]
+        elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
+            titles = title
+        else:
+            titles = [None, None, None]
 
         # Each axis has a dimension
         shape = data_array.shape
 
         two_d_array = data_array[shape[0]//2, :, :]
-        plot_2d_image(two_d_array, fig=fig, ax=axs[0], log=log, cmap=cmap)
+        img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
+                              ax=axs[0], log=log, cmap=cmap, fontsize=fontsize,
+                              x_label="y", y_label="z")
+
+        # Create axis for colorbar
+        cbar_ax = make_axes_locatable(axs[0]).append_axes(
+            position='right', size='5%', pad=0.1)
+
+        # Create colorbar
+        fig.colorbar(mappable=img_x, cax=cbar_ax)
 
         two_d_array = data_array[:, shape[1]//2, :]
-        plot_2d_image(two_d_array, fig=fig, ax=axs[1], log=log, cmap=cmap)
+        img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
+                              ax=axs[1], log=log, cmap=cmap, fontsize=fontsize,
+                              x_label="x", y_label="z")
+
+        # Create axis for colorbar
+        cbar_ax = make_axes_locatable(axs[1]).append_axes(
+            position='right', size='5%', pad=0.1)
+
+        # Create colorbar
+        fig.colorbar(mappable=img_y, cax=cbar_ax)
 
         two_d_array = data_array[:, :, shape[2]//2]
-        plot_2d_image(two_d_array, fig=fig, ax=axs[2], log=log, cmap=cmap)
+        img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
+                              ax=axs[2], log=log, cmap=cmap, fontsize=fontsize,
+                              x_label="x", y_label="y")
+
+        # Create axis for colorbar
+        cbar_ax = make_axes_locatable(axs[2]).append_axes(
+            position='right', size='5%', pad=0.1)
+
+        # Create colorbar
+        fig.colorbar(mappable=img_z, cax=cbar_ax)
 
         # Show figure
-        plt.tight_layout()
-        plt.show()
+        fig.tight_layout()
+        fig.show()
 
     else:
         @interact(
@@ -1108,11 +1195,18 @@ def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
         def plot_with_interactive_scale(scale, figsize):
             # Create figure
             if not figsize:
-                figsize = (data_array.ndim*5, 7)
+                figsize = (15, 7)
                 print("Figure size defaulted to", figsize)
 
-            fig, axs = plt.subplots(
-                1, data_array.ndim, figsize=figsize)
+            fig, axs = plt.subplots(1, 3, figsize=figsize)
+
+            if isinstance(title, str):
+                fig.suptitle(title, fontsize=fontsize + 2)
+                titles = [None, None, None]
+            elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
+                titles = title
+            else:
+                titles = [None, None, None]
 
             # Each axis has a dimension
             shape = data_array.shape
@@ -1121,21 +1215,48 @@ def plot_3d_slices(data_array, figsize=None, log=False, cmap="YlGnBu_r"):
             log = scale == "logarithmic"
 
             try:
+                # Create image slice along x
                 two_d_array = data_array[shape[0]//2, :, :]
-                plot_2d_image(two_d_array, fig=fig,
-                              ax=axs[0], log=log, cmap=cmap)
+                img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
+                                      ax=axs[0], log=log, cmap=cmap,
+                                      fontsize=fontsize, x_label="y", y_label="z")
 
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(axs[0]).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                fig.colorbar(mappable=img_x, cax=cbar_ax)
+
+                # Create image slice along y
                 two_d_array = data_array[:, shape[1]//2, :]
-                plot_2d_image(two_d_array, fig=fig,
-                              ax=axs[1], log=log, cmap=cmap)
+                img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
+                                      ax=axs[1], log=log, cmap=cmap,
+                                      fontsize=fontsize, x_label="x", y_label="z")
 
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(axs[1]).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                fig.colorbar(mappable=img_y, cax=cbar_ax)
+
+                # Create image slice along z
                 two_d_array = data_array[:, :, shape[2]//2]
-                plot_2d_image(two_d_array, fig=fig,
-                              ax=axs[2], log=log, cmap=cmap)
+                img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
+                                      ax=axs[2], log=log, cmap=cmap,
+                                      fontsize=fontsize, x_label="x", y_label="y")
+
+                # Create axis for colorbar
+                cbar_ax = make_axes_locatable(axs[2]).append_axes(
+                    position='right', size='5%', pad=0.1)
+
+                # Create colorbar
+                fig.colorbar(mappable=img_z, cax=cbar_ax)
 
                 # Show figure
-                plt.tight_layout()
-                plt.show()
+                fig.tight_layout()
+                fig.show()
             except IndexError:
                 plt.close()
                 print("Is this a 3D array?")
@@ -1201,6 +1322,7 @@ def complex2rgbalin(
 def phase2rgb(s):
     """
     Crates RGB image with colour-coded phase from a complex array.
+    Taken from PyNX
 
     :param s: a complex numpy array
 
