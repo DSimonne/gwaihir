@@ -3153,14 +3153,18 @@ class Interface():
                 clear_output(True)
                 display(button_run_preprocess)
 
-                # Check is SIXS data, in that case rotate
+                # Change data_dir and root folder
+                # depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
                     self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
 
-                else:
+                elif self.Dataset.beamline == "P10":
                     root_folder = self.Dataset.data_dir
-                # self.Dataset.beamline == "ID01":
+                    self.Dataset.data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}{self.Dataset.scan:04d}/e4m/"
+
+                elif self.Dataset.beamline == "ID01"::
+                    root_folder = self.Dataset.data_dir
 
                 # Create config file
                 self.create_yaml_file(
