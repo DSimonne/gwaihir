@@ -3163,7 +3163,7 @@ class Interface():
                     root_folder = self.Dataset.data_dir
                     self.Dataset.data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}{self.Dataset.scan:04d}/e4m/"
 
-                elif self.Dataset.beamline == "ID01"::
+                elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
 
                 # Create config file
