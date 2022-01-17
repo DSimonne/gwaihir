@@ -29,6 +29,10 @@ from gwaihir.gui import gui_iterable
 from bcdi.utils.utilities import bin_data
 from bcdi.postprocessing import facet_analysis
 from bcdi.preprocessing import ReadNxs3 as rd
+from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
+from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
+from bcdi.utils.parser import add_cli_parameters, ConfigParser
+import argparse
 
 # PyNX package
 import h5py
@@ -178,9 +182,9 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             matplotlib_backend=widgets.Dropdown(
-                options=[('Agg', 'Agg'), ('Qt5Agg', 'Qt5Agg'),
-                         ('module://matplotlib_inline.backend_inline', 'ipympl')],
-                value="Agg",
+                options=[('Agg', 'Agg - No plots (faster)'), ('Qt5Agg', 'Qt5Agg - Interactive plots'),
+                         ("ipympl- Plots in notebook output", "module://matplotlib_inline.backend_inline")],
+                value="module://matplotlib_inline.backend_inline",
                 description='Matplotlib backend for scripts:',
                 continuous_update=False,
                 # tooltip="Name of the beamline, used for data loading and \
@@ -3260,8 +3264,24 @@ class Interface():
                     "\n#########################################################################################\n"
                 )
 
-                os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
-                    --config {self.preprocessing_folder}config_preprocessing.yml")
+                # os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
+                #     --config {self.preprocessing_folder}config_preprocessing.yml")
+
+                # Construct the argument parser and parse the command-line arguments
+                ap = argparse.ArgumentParser()
+                ap = add_cli_parameters(ap)
+                cli_args = vars(ap.parse_args())
+
+                # Load the config file
+                config_file = self.preprocessing_folder + "/config_preprocessing.yml"
+                parser = ConfigParser(config_file, cli_args)
+                args = parser.load_arguments()
+                args["time"] = f"{datetime.now()}"
+                run_preprocessing(prm=args)
+
+                print("\nEnd of script")
+                # plt.ioff()
+                # plt.show()
 
                 # Button to save metadata
                 button_save_metadata = Button(
@@ -4948,8 +4968,24 @@ class Interface():
                     "\n#########################################################################################\n"
                 )
 
-                os.system(f"{self.path_scripts}/bcdi_strain.py \
-                    --config {self.postprocessing_folder}/config_postprocessing.yml")
+                # os.system(f"{self.path_scripts}/bcdi_strain.py \
+                #     --config {self.postprocessing_folder}/config_postprocessing.yml")
+
+                # Construct the argument parser and parse the command-line arguments
+                ap = argparse.ArgumentParser()
+                ap = add_cli_parameters(ap)
+                cli_args = vars(ap.parse_args())
+
+                # Load the config file
+                config_file = self.postprocessing_folder + "/config_postprocessing.yml"
+                parser = ConfigParser(config_file, cli_args)
+                args = parser.load_arguments()
+                args["time"] = f"{datetime.now()}"
+                run_postprocessing(prm=args)
+
+                print("\nEnd of script")
+                # plt.ioff()
+                # plt.show()
 
                 # Get data from saved file
                 phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
