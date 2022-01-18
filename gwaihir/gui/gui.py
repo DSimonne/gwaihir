@@ -3160,13 +3160,15 @@ class Interface():
                 if self.Dataset.beamline == "SIXS_2019":
                     self.rotate_sixs_data()
                     root_folder = self.Dataset.root_folder
+                    data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
                     root_folder = self.Dataset.data_dir
-                    self.Dataset.data_dir = f"{GUI.Dataset.data_dir}{GUI.Dataset.sample_name}_{GUI.Dataset.scan:05d}/e4m/"
+                    data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
 
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
+                    data_dir = self.Dataset.data_dir
 
                 # Create config file
                 self.create_yaml_file(
@@ -3174,7 +3176,7 @@ class Interface():
                     scans=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=self.preprocessing_folder,
-                    data_dir=self.Dataset.data_dir,
+                    data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
                     debug=self.Dataset.debug,
@@ -4837,13 +4839,15 @@ class Interface():
                 # depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
                     root_folder = self.Dataset.root_folder
+                    data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
                     root_folder = self.Dataset.data_dir
-                    self.Dataset.data_dir = f"{GUI.Dataset.data_dir}{GUI.Dataset.sample_name}_{GUI.Dataset.scan:05d}/e4m/"
+                    data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
 
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
+                    data_dir = self.Dataset.data_dir
 
                 save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
             except AttributeError:
@@ -4875,7 +4879,7 @@ class Interface():
                     scan=self.Dataset.scan,
                     root_folder=root_folder,
                     save_dir=save_dir,
-                    data_dir=self.Dataset.data_dir,
+                    data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
                     reconstruction_file=self.Dataset.reconstruction_file,
