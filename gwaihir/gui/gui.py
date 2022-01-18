@@ -4833,10 +4833,16 @@ class Interface():
 
             # Check beamline for save folder
             try:
+                # Change data_dir and root folder
+                # depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
                     root_folder = self.Dataset.root_folder
 
-                else:
+                elif self.Dataset.beamline == "P10":
+                    root_folder = self.Dataset.data_dir
+                    self.Dataset.data_dir = f"{GUI.Dataset.data_dir}{GUI.Dataset.sample_name}_{GUI.Dataset.scan:05d}/e4m/"
+
+                elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
 
                 save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
