@@ -187,6 +187,8 @@ class Interface():
                 value="module://matplotlib_inline.backend_inline",
                 description='Matplotlib backend for scripts:',
                 continuous_update=False,
+                layout=Layout(
+                    width='60%'),
                 # tooltip="Name of the beamline, used for data loading and \
                 # normalization by monitor",
                 style={'description_width': 'initial'}),
@@ -3161,7 +3163,7 @@ class Interface():
 
                 elif self.Dataset.beamline == "P10":
                     root_folder = self.Dataset.data_dir
-                    self.Dataset.data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}{self.Dataset.scan:04d}/e4m/"
+                    self.Dataset.data_dir = f"{GUI.Dataset.data_dir}{GUI.Dataset.sample_name}_{GUI.Dataset.scan:05d}/e4m/"
 
                 elif self.Dataset.beamline == "ID01":
                     root_folder = self.Dataset.data_dir
