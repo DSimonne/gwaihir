@@ -182,7 +182,7 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             matplotlib_backend=widgets.Dropdown(
-                options=[('Agg', 'Agg - No plots (faster)'), ('Qt5Agg', 'Qt5Agg - Interactive plots'),
+                options=[('Agg - No plots (faster)', 'Agg'), ('Qt5Agg - Interactive plots', 'Qt5Agg'),
                          ("ipympl- Plots in notebook output", "module://matplotlib_inline.backend_inline")],
                 value="module://matplotlib_inline.backend_inline",
                 description='Matplotlib backend for scripts:',
