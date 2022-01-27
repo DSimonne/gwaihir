@@ -47,14 +47,13 @@ class Dataset():
                     final_data_path,
                     )
 
-        if isinstance(reconstruction_filename, str) and reconstruction_filename != "":
-            print("\nSaving phase retrieval output ...")
-            try:
+        try:
+            if isinstance(reconstruction_filename, str):
                 with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
                         h5py.File(final_data_path, "a") as final_file:
                     # Real space data is already here
-
                     # Reciprocal space data
+                    print("\nSaving phase retrieval output ...")
 
                     # Copy image_1 from reconstruction to entry_1.image_2
                     try:
@@ -150,9 +149,8 @@ class Dataset():
                                 final_file["entry_1"]["image_2"],
                                 name="modes_percentage")
 
-            except OSError:
-                # No reconstruction file yet
-                print("Could not save diffraction data, does the .cxi file exist?")
+        except Exception as E:
+            raise E
 
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
@@ -204,8 +202,6 @@ class Dataset():
             try:
                 cropping_padding_centering.create_dataset(
                     "centering_method", data=self.centering_method)
-                cropping_padding_centering.create_dataset(
-                    "fix_bragg", data=self.fix_bragg)
                 cropping_padding_centering.create_dataset(
                     "fix_size", data=self.fix_size)
                 cropping_padding_centering.create_dataset(
@@ -283,6 +279,8 @@ class Dataset():
                     "custom_images", data=self.custom_images)
                 beamline.create_dataset(
                     "custom_monitor", data=self.custom_monitor)
+                beamline.create_dataset(
+                    "custom_monitor", data=self.custom_motors)
             except (AttributeError, TypeError):
                 print("Could not save custom parameters")
 
@@ -311,26 +309,26 @@ class Dataset():
             except (TypeError, AttributeError):
                 pass
 
-            # Temperature estimation
-            temperature_estimation = parameters.create_group(
-                "temperature_estimation")
-            try:
-                temperature_estimation.create_dataset(
-                    "reflection", data=self.reflection)
-                temperature_estimation.create_dataset(
-                    "reference_spacing", data=self.reference_spacing)
-                temperature_estimation.create_dataset(
-                    "reference_temperature", data=self.reference_temperature)
-                temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
+            # Temperature estimation, not really used
+            # temperature_estimation = parameters.create_group(
+            #     "temperature_estimation")
+            # try:
+            #     temperature_estimation.create_dataset(
+            #         "reflection", data=self.reflection)
+            #     temperature_estimation.create_dataset(
+            #         "reference_spacing", data=self.reference_spacing)
+            #     temperature_estimation.create_dataset(
+            #         "reference_temperature", data=self.reference_temperature)
+            #     temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
 
-            except AttributeError:
-                print("Could not save temperature_estimation parameters")
+            # except AttributeError:
+            #     print("Could not save temperature_estimation parameters")
 
-            try:
-                temperature_estimation.create_dataset(
-                    "estimated_temperature", data=self.temperature)
-            except AttributeError:
-                print("No estimated temperature")
+            # try:
+            #     temperature_estimation.create_dataset(
+            #         "estimated_temperature", data=self.temperature)
+            # except AttributeError:
+            #     print("No estimated temperature")
 
             # Angles correction
             angles_corrections = parameters.create_group("angles_corrections")
@@ -349,8 +347,6 @@ class Dataset():
                     "detector_data_COM", data=self.detector_data_COM)
                 angles_corrections.create_dataset(
                     "interp_fwhm", data=self.interp_fwhm)
-                angles_corrections.create_dataset("bragg_x", data=self.bragg_x)
-                angles_corrections.create_dataset("bragg_y", data=self.bragg_y)
                 angles_corrections.create_dataset("q", data=self.q)
                 angles_corrections.create_dataset("qnorm", data=self.qnorm)
                 angles_corrections.create_dataset(
@@ -360,7 +356,7 @@ class Dataset():
                 angles_corrections.create_dataset(
                     "bragg_outofplane", data=self.bragg_outofplane)
             except AttributeError:
-                print("Could not save angles_corrections parameters")
+                print("Could not save setup parameters")
 
             # Orthogonalisation
             print(
@@ -406,6 +402,9 @@ class Dataset():
                     "inplane_angle", data=self.inplane_angle)
                 xrayutilities["inplane_angle"].attrs['units'] = 'degrees'
                 xrayutilities.create_dataset(
+                    "tilt_angle", data=self.tilt_angle)
+                xrayutilities["tilt_angle"].attrs['units'] = 'degrees'
+                xrayutilities.create_dataset(
                     "sample_inplane", data=self.sample_inplane)
                 xrayutilities.create_dataset(
                     "sample_outofplane", data=self.sample_outofplane)
@@ -414,9 +413,9 @@ class Dataset():
                 xrayutilities.create_dataset("cch1", data=self.cch1)
                 xrayutilities.create_dataset("cch2", data=self.cch2)
                 xrayutilities.create_dataset(
-                    "direct_inplane", data=self.direct_inplane)
+                    "dirbeam_detector_angles", data=self.dirbeam_detector_angles)
                 xrayutilities.create_dataset(
-                    "direct_outofplane", data=self.direct_outofplane)
+                    "direct_beam", data=self.direct_beam)
                 xrayutilities.create_dataset("detrot", data=self.detrot)
                 xrayutilities.create_dataset(
                     "tiltazimuth", data=self.tiltazimuth)
@@ -582,11 +581,10 @@ class Dataset():
                 print("Could not save phase averaging apodization parameters")
 
             # Save strain output
-
-            image_3.create_dataset("strain_analysis_output_file",
-                                   data=self.strain_output_file)
-
             try:
+                image_3.create_dataset("strain_analysis_output_file",
+                                        data=self.strain_output_file)
+
                 with h5py.File(self.strain_output_file, "r") as fi:
                     image_3.create_dataset("amplitude",
                                            data=fi["output"]["amp"][:],

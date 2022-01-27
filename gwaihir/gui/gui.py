@@ -2606,22 +2606,29 @@ class Interface():
                         print(
                             "\n#########################################################################################\n"
                         )
-                        print("Saving parameters used in the GUI...")
+                        if os.path.isfile(self.Dataset.reconstruction_file):
+                            self.Dataset.to_cxi(
+                                cxi_filename=self.cxi_filename, # Defined earlier so no error
+                                reconstruction_filename=self.Dataset.reconstruction_file,
+                            )
+                        else:
+                            self.Dataset.to_cxi(
+                                cxi_filename=self.cxi_filename, # Defined earlier so no error
+                                reconstruction_filename=False,
+                            )
+
                         print(
-                            "\nUsing reconstruction file selected in the strain analysis tab for phase retrieval output.")
-                        self.Dataset.to_cxi(
-                            cxi_filename=self.cxi_filename,
-                            reconstruction_filename=self.Dataset.reconstruction_file,
+                            "\n#########################################################################################\n"
                         )
 
-                    except NameError:
-                        # Could not load cdi object
-                        print(
-                            "Could not save reciprocal space data, needs PyNX package")
-
-                    except AttributeError:
+                    except (AttributeError, UnboundLocalError):
                         print(
                             "Could not save reciprocal space data, select the intensity and the mask in the phase retrieval tab first.")
+
+                    finally:
+                        print(
+                            "\n#########################################################################################\n"
+                        )
 
                     # Facets analysis output
                     try:
