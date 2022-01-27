@@ -2608,12 +2608,12 @@ class Interface():
                         )
                         if os.path.isfile(self.Dataset.reconstruction_file):
                             self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename, # Defined earlier so no error
+                                cxi_filename=self.cxi_filename,  # Defined earlier so no error
                                 reconstruction_filename=self.Dataset.reconstruction_file,
                             )
                         else:
                             self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename, # Defined earlier so no error
+                                cxi_filename=self.cxi_filename,  # Defined earlier so no error
                                 reconstruction_filename=False,
                             )
 

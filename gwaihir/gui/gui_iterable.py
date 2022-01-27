@@ -583,7 +583,7 @@ class Dataset():
             # Save strain output
             try:
                 image_3.create_dataset("strain_analysis_output_file",
-                                        data=self.strain_output_file)
+                                       data=self.strain_output_file)
 
                 with h5py.File(self.strain_output_file, "r") as fi:
                     image_3.create_dataset("amplitude",
