@@ -753,7 +753,7 @@ class Interface():
             sdd=widgets.FloatText(
                 value=1.18,
                 step=0.01,
-                description='Sample Detector Dist. (m):',
+                description='Sample detector distance (m):',
                 continuous_update=False,
                 disabled=True,
                 tooltip="sample to detector distance in m",
@@ -4456,7 +4456,7 @@ class Interface():
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
 
-        print("\nSaving phase retrieval parameters selected in the PyNX tab...")
+        print("\nSaving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
             process_parameters=self.params,
