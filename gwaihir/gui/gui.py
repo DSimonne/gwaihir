@@ -1216,7 +1216,6 @@ class Interface():
                 value="pseudo-voigt",
                 description='PSF peak shape',
                 continuous_update=False,
-                disabled=True,
                 style={'description_width': 'initial'}),
 
             fwhm=widgets.FloatText(
@@ -1228,8 +1227,7 @@ class Interface():
                 layout=Layout(
                     width='15%', height="50px"),
                 style={
-                    'description_width': 'initial'},
-                disabled=True),
+                    'description_width': 'initial'}),
 
             eta=widgets.FloatText(
                 value=0.05,
@@ -1242,8 +1240,7 @@ class Interface():
                     width='15%', height="50px"),
                 readout=True,
                 style={
-                    'description_width': 'initial'},
-                disabled=True),
+                    'description_width': 'initial'}),
 
             update_psf=widgets.BoundedIntText(
                 value=20,
@@ -1252,8 +1249,7 @@ class Interface():
                 description='Update PSF every:',
                 readout=True,
                 style={
-                    'description_width': 'initial'},
-                disabled=True),
+                    'description_width': 'initial'}),
 
             unused_label_algo=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
