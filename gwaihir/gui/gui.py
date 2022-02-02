@@ -1623,7 +1623,7 @@ class Interface():
 
             original_size=widgets.Text(
                 placeholder="[256, 512, 512]",
-                description='Size of the FFT array before binning',
+                description='FFT shape before PyNX binning in PyNX',
                 layout=Layout(width='45%'),
                 continuous_update=False,
                 style={'description_width': 'initial'}),
@@ -2291,13 +2291,13 @@ class Interface():
             self.display_readme,
             contents=widgets.ToggleButtons(
                 options=[
-                    False,
+                    "GUI",
                     'Preprocessing', 'Phase retrieval',
                     'Postprocessing', "Facet analysis"],
-                value=False,
+                value="GUI",
                 description='Show info about:',
                 tooltips=[
-                    'Nothing is shown',
+                    'Basic informations',
                     'Insight in the functions used for preprocessing',
                     'Insight in the functions used for phase retrieval',
                     'Insight in the functions used for postprocessing'
@@ -5092,260 +5092,267 @@ class Interface():
                 print(
                     "Facets object saved as self.Facets, call help(self.Facets) \
                     for more details.")
-            except TypeError:
-                print("Data type not supported.")
 
-            # Button to rotate data
-            button_rotate = Button(
-                description="Work on facet data",
-                continuous_update=False,
-                button_style='',
-                layout=Layout(width='40%'),
-                style={'description_width': 'initial'},
-                icon='fast-forward')
+                # Button to rotate data
+                button_rotate = Button(
+                    description="Work on facet data",
+                    continuous_update=False,
+                    button_style='',
+                    layout=Layout(width='40%'),
+                    style={'description_width': 'initial'},
+                    icon='fast-forward')
 
-            # Button to view data
-            button_view_particle = Button(
-                description="View particle",
-                continuous_update=False,
-                button_style='',
-                layout=Layout(width='40%'),
-                style={'description_width': 'initial'},
-                icon='fast-forward')
+                # Button to view data
+                button_view_particle = Button(
+                    description="View particle",
+                    continuous_update=False,
+                    button_style='',
+                    layout=Layout(width='40%'),
+                    style={'description_width': 'initial'},
+                    icon='fast-forward')
 
-            # Common button as widget
-            buttons_facets = widgets.HBox(
-                [button_rotate, button_view_particle])
+                # Common button as widget
+                buttons_facets = widgets.HBox(
+                    [button_rotate, button_view_particle])
 
-            @ button_rotate.on_click
-            def action_button_rotate(selfbutton):
-                clear_output(True)
-                display(buttons_facets)
+                @ button_rotate.on_click
+                def action_button_rotate(selfbutton):
+                    clear_output(True)
+                    display(buttons_facets)
 
-                # Run interactive function
-                @ interact(
-                    facet_a_id=widgets.Dropdown(
-                        options=[i + 1 for i in range(self.Facets.nb_facets)],
-                        value=1,
-                        description='Facet a id:',
-                        continuous_update=True,
-                        layout=Layout(width='45%'),
-                        style={'description_width': 'initial'}),
-                    facet_b_id=widgets.Dropdown(
-                        options=[i + 1 for i in range(self.Facets.nb_facets)],
-                        value=2,
-                        description='Facet b id:',
-                        continuous_update=True,
-                        layout=Layout(width='45%'),
-                        style={'description_width': 'initial'}),
-                    u0=widgets.Text(
-                        value="[1, 1, 1]",
-                        placeholder="[1, 1, 1]",
-                        description='Vector perpendicular to facet a:',
-                        continuous_update=False,
-                        # layout = Layout(width='20%'),
-                        style={'description_width': 'initial'},),
-                    v0=widgets.Text(
-                        value="[1, -1, 0]",
-                        placeholder="[1, -1, 0]",
-                        description='Vector perpendicular to facet b:',
-                        continuous_update=False,
-                        # layout = Layout(width='20%'),
-                        style={'description_width': 'initial'},),
-                    w0=widgets.Text(
-                        value="[1, 1, -2]",
-                        placeholder="[1, 1, -2]",
-                        description='Cross product of u0 and v0:',
-                        continuous_update=False,
-                        # layout = Layout(width='20%'),
-                        style={'description_width': 'initial'},),
-                    hkl_reference=widgets.Text(
-                        value="[1, 1, 1]",
-                        placeholder="[1, 1, 1]",
-                        description='Reference for interplanar angles:',
-                        continuous_update=False,
-                        # layout = Layout(width='20%'),
-                        style={'description_width': 'initial'},),
-                    elev=widgets.BoundedIntText(
-                        value=90,
-                        placeholder=90,
-                        min=0,
-                        max=360,
-                        description='Elevation of the axes in degrees:',
-                        continuous_update=False,
-                        layout=Layout(width='70%'),
-                        style={'description_width': 'initial'},),
-                    azim=widgets.BoundedIntText(
-                        value=0,
-                        placeholder=0,
-                        min=0,
-                        max=360,
-                        description='Azimuth of the axes in degrees:',
-                        continuous_update=False,
-                        layout=Layout(width='70%'),
-                        style={'description_width': 'initial'},),
-                )
-                def fix_facets(
-                    facet_a_id,
-                    facet_b_id,
-                    u0,
-                    v0,
-                    w0,
-                    hkl_reference,
-                    elev,
-                    azim,
-                ):
-                    """Function to interactively visualize the two facets that
-                    will be chosen, to also help pick two vectors.
-                    """
-                    # Save parameters value
-                    self.Facets.facet_a_id = facet_a_id
-                    self.Facets.facet_b_id = facet_b_id
-                    self.Facets.u0 = u0
-                    self.Facets.v0 = v0
-                    self.Facets.w0 = w0
-                    self.Facets.hkl_reference = hkl_reference
-                    self.Facets.elev = elev
-                    self.Facets.azim = azim
-
-                    # Extract list from strings
-                    list_parameters = ["u0", "v0",
-                                       "w0", "hkl_reference"]
-                    try:
-                        for p in list_parameters:
-                            if getattr(self.Facets, p) == "":
-                                setattr(self.Facets, p, [])
-                            else:
-                                setattr(self.Facets, p, literal_eval(
-                                    getattr(self.Facets, p)))
-                            # print(f"{p}:", getattr(self.Dataset, p))
-                    except ValueError:
-                        print(f"Wrong list syntax for {p}")
-
-                    # Plot the chosen facet to help the user to pick the facets
-                    # he wants to use to orient the particule
-                    self.Facets.extract_facet(
-                        facet_id=self.Facets.facet_a_id, plot=True,
-                        elev=self.Facets.elev, azim=self.Facets.azim,
-                        output=False, save=False)
-                    self.Facets.extract_facet(
-                        facet_id=self.Facets.facet_b_id, plot=True,
-                        elev=self.Facets.elev, azim=self.Facets.azim,
-                        output=False, save=False)
-
-                    display(Markdown("""# Field data"""))
-                    display(self.Facets.field_data)
-
-                    button_fix_facets = Button(
-                        description="Fix parameters and extract data.",
-                        layout=Layout(width='50%', height='35px'))
-                    display(button_fix_facets)
-
-                    @ button_fix_facets.on_click
-                    def action_button_fix_facets(selfbutton):
-                        """Fix facets to compute the new rotation matrix and
-                        launch the data extraction.
+                    # Run interactive function
+                    @ interact(
+                        facet_a_id=widgets.Dropdown(
+                            options=[
+                                i + 1 for i in range(self.Facets.nb_facets)],
+                            value=1,
+                            description='Facet a id:',
+                            continuous_update=True,
+                            layout=Layout(width='45%'),
+                            style={'description_width': 'initial'}),
+                        facet_b_id=widgets.Dropdown(
+                            options=[
+                                i + 1 for i in range(self.Facets.nb_facets)],
+                            value=2,
+                            description='Facet b id:',
+                            continuous_update=True,
+                            layout=Layout(width='45%'),
+                            style={'description_width': 'initial'}),
+                        u0=widgets.Text(
+                            value="[1, 1, 1]",
+                            placeholder="[1, 1, 1]",
+                            description='Vector perpendicular to facet a:',
+                            continuous_update=False,
+                            # layout = Layout(width='20%'),
+                            style={'description_width': 'initial'},),
+                        v0=widgets.Text(
+                            value="[1, -1, 0]",
+                            placeholder="[1, -1, 0]",
+                            description='Vector perpendicular to facet b:',
+                            continuous_update=False,
+                            # layout = Layout(width='20%'),
+                            style={'description_width': 'initial'},),
+                        w0=widgets.Text(
+                            value="[1, 1, -2]",
+                            placeholder="[1, 1, -2]",
+                            description='Cross product of u0 and v0:',
+                            continuous_update=False,
+                            # layout = Layout(width='20%'),
+                            style={'description_width': 'initial'},),
+                        hkl_reference=widgets.Text(
+                            value="[1, 1, 1]",
+                            placeholder="[1, 1, 1]",
+                            description='Reference for interplanar angles:',
+                            continuous_update=False,
+                            # layout = Layout(width='20%'),
+                            style={'description_width': 'initial'},),
+                        elev=widgets.BoundedIntText(
+                            value=90,
+                            placeholder=90,
+                            min=0,
+                            max=360,
+                            description='Elevation of the axes in degrees:',
+                            continuous_update=False,
+                            layout=Layout(width='70%'),
+                            style={'description_width': 'initial'},),
+                        azim=widgets.BoundedIntText(
+                            value=0,
+                            placeholder=0,
+                            min=0,
+                            max=360,
+                            description='Azimuth of the axes in degrees:',
+                            continuous_update=False,
+                            layout=Layout(width='70%'),
+                            style={'description_width': 'initial'},),
+                    )
+                    def fix_facets(
+                        facet_a_id,
+                        facet_b_id,
+                        u0,
+                        v0,
+                        w0,
+                        hkl_reference,
+                        elev,
+                        azim,
+                    ):
+                        """Function to interactively visualize the two facets that
+                        will be chosen, to also help pick two vectors.
                         """
-                        clear_output(True)
+                        # Save parameters value
+                        self.Facets.facet_a_id = facet_a_id
+                        self.Facets.facet_b_id = facet_b_id
+                        self.Facets.u0 = u0
+                        self.Facets.v0 = v0
+                        self.Facets.w0 = w0
+                        self.Facets.hkl_reference = hkl_reference
+                        self.Facets.elev = elev
+                        self.Facets.azim = azim
 
-                        display(button_fix_facets)
+                        # Extract list from strings
+                        list_parameters = ["u0", "v0",
+                                           "w0", "hkl_reference"]
+                        try:
+                            for p in list_parameters:
+                                if getattr(self.Facets, p) == "":
+                                    setattr(self.Facets, p, [])
+                                else:
+                                    setattr(self.Facets, p, literal_eval(
+                                        getattr(self.Facets, p)))
+                                # print(f"{p}:", getattr(self.Dataset, p))
+                        except ValueError:
+                            print(f"Wrong list syntax for {p}")
 
-                        display(
-                            Markdown("""# Computing the rotation matrix"""))
-
-                        # Take those facets' vectors
-                        u = np.array([
-                            self.Facets.field_data.n0[self.Facets.facet_a_id],
-                            self.Facets.field_data.n1[self.Facets.facet_a_id],
-                            self.Facets.field_data.n2[self.Facets.facet_a_id]])
-                        v = np.array([
-                            self.Facets.field_data.n0[self.Facets.facet_b_id],
-                            self.Facets.field_data.n1[self.Facets.facet_b_id],
-                            self.Facets.field_data.n2[self.Facets.facet_b_id]])
-
-                        self.Facets.set_rotation_matrix(
-                            u0=self.Facets.u0 / np.linalg.norm(self.Facets.u0),
-                            v0=self.Facets.v0 / np.linalg.norm(self.Facets.v0),
-                            w0=self.Facets.w0 / np.linalg.norm(self.Facets.w0),
-                            u=u,
-                            v=v,
-                        )
-
-                        self.Facets.rotate_particle()
-
-                        display(
-                            Markdown("""# Computing interplanar angles from \
-                                reference"""))
-                        print(f"Used reference: {self.Facets.hkl_reference}")
-                        self.Facets.fixed_reference(
-                            hkl_reference=self.Facets.hkl_reference)
-
-                        display(
-                            Markdown("""# Strain values for each surface voxel \
-                            and averaged per facet"""))
-                        self.Facets.plot_strain(
-                            elev=self.Facets.elev, azim=self.Facets.azim)
-
-                        display(Markdown(
-                            """# Displacement values for each surface voxel \
-                            and averaged per facet"""))
-                        self.Facets.plot_displacement(
-                            elev=self.Facets.elev, azim=self.Facets.azim)
-
-                        display(Markdown("""# Evolution curves"""))
-                        self.Facets.evolution_curves()
-
-                        # Also save edges and corners data
-                        self.Facets.save_edges_corners_data()
+                        # Plot the chosen facet to help the user to pick the facets
+                        # he wants to use to orient the particule
+                        self.Facets.extract_facet(
+                            facet_id=self.Facets.facet_a_id, plot=True,
+                            elev=self.Facets.elev, azim=self.Facets.azim,
+                            output=False, save=False)
+                        self.Facets.extract_facet(
+                            facet_id=self.Facets.facet_b_id, plot=True,
+                            elev=self.Facets.elev, azim=self.Facets.azim,
+                            output=False, save=False)
 
                         display(Markdown("""# Field data"""))
                         display(self.Facets.field_data)
 
-                        button_save_facet_data = Button(
-                            description="Save data",
+                        button_fix_facets = Button(
+                            description="Fix parameters and extract data.",
                             layout=Layout(width='50%', height='35px'))
-                        display(button_save_facet_data)
+                        display(button_fix_facets)
 
-                        @ button_save_facet_data.on_click
-                        def action_button_save_facet_data(selfbutton):
-                            """Save data ..."""
-                            try:
-                                # Create subfolder
+                        @ button_fix_facets.on_click
+                        def action_button_fix_facets(selfbutton):
+                            """Fix facets to compute the new rotation matrix and
+                            launch the data extraction.
+                            """
+                            clear_output(True)
+
+                            display(button_fix_facets)
+
+                            display(
+                                Markdown("""# Computing the rotation matrix"""))
+
+                            # Take those facets' vectors
+                            u = np.array([
+                                self.Facets.field_data.n0[self.Facets.facet_a_id],
+                                self.Facets.field_data.n1[self.Facets.facet_a_id],
+                                self.Facets.field_data.n2[self.Facets.facet_a_id]])
+                            v = np.array([
+                                self.Facets.field_data.n0[self.Facets.facet_b_id],
+                                self.Facets.field_data.n1[self.Facets.facet_b_id],
+                                self.Facets.field_data.n2[self.Facets.facet_b_id]])
+
+                            self.Facets.set_rotation_matrix(
+                                u0=self.Facets.u0 /
+                                np.linalg.norm(self.Facets.u0),
+                                v0=self.Facets.v0 /
+                                np.linalg.norm(self.Facets.v0),
+                                w0=self.Facets.w0 /
+                                np.linalg.norm(self.Facets.w0),
+                                u=u,
+                                v=v,
+                            )
+
+                            self.Facets.rotate_particle()
+
+                            display(
+                                Markdown("""# Computing interplanar angles from \
+                                    reference"""))
+                            print(
+                                f"Used reference: {self.Facets.hkl_reference}")
+                            self.Facets.fixed_reference(
+                                hkl_reference=self.Facets.hkl_reference)
+
+                            display(
+                                Markdown("""# Strain values for each surface voxel \
+                                and averaged per facet"""))
+                            self.Facets.plot_strain(
+                                elev=self.Facets.elev, azim=self.Facets.azim)
+
+                            display(Markdown(
+                                """# Displacement values for each surface voxel \
+                                and averaged per facet"""))
+                            self.Facets.plot_displacement(
+                                elev=self.Facets.elev, azim=self.Facets.azim)
+
+                            display(Markdown("""# Evolution curves"""))
+                            self.Facets.evolution_curves()
+
+                            # Also save edges and corners data
+                            self.Facets.save_edges_corners_data()
+
+                            display(Markdown("""# Field data"""))
+                            display(self.Facets.field_data)
+
+                            button_save_facet_data = Button(
+                                description="Save data",
+                                layout=Layout(width='50%', height='35px'))
+                            display(button_save_facet_data)
+
+                            @ button_save_facet_data.on_click
+                            def action_button_save_facet_data(selfbutton):
+                                """Save data ..."""
                                 try:
-                                    os.mkdir(
-                                        f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
+                                    # Create subfolder
+                                    try:
+                                        os.mkdir(
+                                            f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
+                                        print(
+                                            f"Created {self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
+                                    except FileExistsError:
+                                        print(
+                                            f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/ exists")
+
+                                    # Save data
+                                    self.Facets.save_data(
+                                        f"{self.Dataset.scan_folder}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
                                     print(
-                                        f"Created {self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
-                                except FileExistsError:
+                                        f"Saved field data as {self.Dataset.scan_folder}/postprocessing/facets_analysis/\
+                                        field_data_{self.Dataset.scan}.csv")
+
+                                    self.Facets.to_hdf5(
+                                        f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
                                     print(
-                                        f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/ exists")
+                                        f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.scan_name}.cxi")
+                                except AttributeError:
+                                    print(
+                                        "Initialize the directories first to save \
+                                        the figures and data ...")
 
-                                # Save data
-                                self.Facets.save_data(
-                                    f"{self.Dataset.scan_folder}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
-                                print(
-                                    f"Saved field data as {self.Dataset.scan_folder}/postprocessing/facets_analysis/\
-                                    field_data_{self.Dataset.scan}.csv")
+                @ button_view_particle.on_click
+                def action_button_view_particle(selfbutton):
+                    clear_output(True)
+                    display(buttons_facets)
 
-                                self.Facets.to_hdf5(
-                                    f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
-                                print(
-                                    f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.scan_name}.cxi")
-                            except AttributeError:
-                                print(
-                                    "Initialize the directories first to save \
-                                    the figures and data ...")
+                    # Display visualisation window of facet class
+                    display(self.Facets.window)
 
-            @ button_view_particle.on_click
-            def action_button_view_particle(selfbutton):
-                clear_output(True)
+                # Display button
                 display(buttons_facets)
 
-                # Display visualisation window of facet class
-                display(self.Facets.window)
-
-            # Display button
-            display(buttons_facets)
+            except TypeError:
+                print("Data type not supported.")
 
         if not load_data:
             self.tab_facet.children[1].disabled = False
@@ -5419,42 +5426,89 @@ class Interface():
 
         elif contents == "Facet analysis":
             clear_output(True)
+            print(help(facet_analysis.Facets))
             print("""
-                Import and stores data output of facet analyzer plugin for
-                further analysis.
+                The output DataFrame can be opened in the `Logs` tab.
+                The "View particle" tool helps you visualizing the particle
+                facets.
+                """)
 
-                Extract the strain component and the displacement on the
-                facets, and retrieves the correct facet normals based on a
-                user input (geometric transformation into the crystal frame).
-                It requires as input a VTK file extracted from the
-                FacetAnalyser plugin from ParaView.
-                See: https://doi.org/10.1016/j.ultramic.2012.07.024
-
-                Original tutorial on how to open vtk files:
-                http://forrestbao.blogspot.com/2011/12/reading-vtk-files
-                -in-python-via-python.html
-
-                Expected directory structure:
-                 - vtk file should have been saved in in Sxxxx/postprocessing
-                 - the analysis output will be saved in Sxxxx/postprocessing
-                 /facet_analysis
-
-                Several plotting options are attributes of this class, feel
-                free to change them (cmap, strain_range, disp_range_avg,
-                disp_range, strain_range_avg, comment, title_fontsize,
-                axes_fontsize, legend_fontsize, ticks_fontsize)
-
-                :param filename: str, name of the VTK file
-                :param pathdir: str, path to the VTK file
-                :param savedir: str, path where to save results. If None,
-                they will be saved in pathdir/facets_analysis
-                :param lattice: float, atomic spacing of the material in
-                angstroms (only cubic lattices are supported).
-                     """)
-
-        elif contents is False:
-            print("Cleared window.")
+        elif contents == "Tutorial":
             clear_output(True)
+            print("""
+
+                """)
+
+        elif contents is "GUI":
+            display(Markdown("# Welcome to `Gwaihir`"))
+            display(Markdown("Remember that a detailed tutorial on the installation of each package is "
+                             " available on the [Github](https://github.com/DSimonne/gwaihir#welcome),"
+                             " together with a video that presents the data analysis workflow."
+                             ))
+            display(Markdown("On the other tabs of this README are presented the main functions used for"
+                             " data analysis and their parameters."))
+            display(Markdown(""))
+
+            display(Markdown("# Example of parameter values"))
+            display(Markdown("## SixS data (SOLEIL)"))
+            display(Markdown(
+                "Most of the initial guesses are valid. Be careful about the energy, scan number, central pixel and detector."
+                " If you are working with the vertical configuration, make sure that the mask is correct."))
+
+            display(Markdown("## ID01 data (ESRF)"))
+            display(Markdown("* Scan number: `11`"))
+            display(Markdown(
+                "* Data directory: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/`"))
+            display(Markdown("* Detector: `Maxipix`"))
+            display(Markdown("* Template imagefile: `S11/data_mpx4_%05d.edf.gz`"))
+            display(Markdown("* Sample offsets: `(90, 0, 0)`"))
+            display(Markdown("* Sample detector distance (m): `0.50678`"))
+            display(Markdown("* X-ray energy (eV): `9000`"))
+            display(Markdown("* Beamline: `ID01`"))
+            display(Markdown(
+                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
+            display(Markdown("* Rocking angle: `outofplane`"))
+
+            display(Markdown("## P10 data (PETRA)"))
+            display(Markdown("* Sample name: `align_03`"))
+            display(Markdown("* Scan number: `11`"))
+            display(
+                Markdown("* Data directory: `/data/id01/inhouse/david/UM2022/Petra/raw/`"))
+            display(Markdown("* Detector: `Eiger4M`"))
+            display(Markdown("* Template imagefile: `_master.h5`"))
+            display(Markdown("* Sample offsets: `(0, 0, 0, 0)`"))
+            display(Markdown("* Sample detector distance (m): `0.50678`"))
+            display(Markdown("* X-ray energy (eV): `9000`"))
+            display(Markdown("* Beamline: `P10`"))
+            display(Markdown(
+                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
+            display(Markdown("* Rocking angle: `inplane`"))
+            display(Markdown("* Pixel size (in phase retrieval): `75`"))
+
+            display(Markdown("# To go further ..."))
+            display(Markdown("* All the plotting functions are accessible in `gwaihir.plot`, try to use the `Plotter` Class"
+                             " that reads all kind of numpy arrays."
+                             " e.g. `Plotter(filename=\"TestGui/S11/preprocessing/S11_maskpynx_align-q-y_norm_252_420_392_1_1_1.npz\", plot=\"2D\")`"
+                             ))
+            display(Markdown("* I highly recommend the use of [Paraview](https://www.paraview.org/) for 3D contouring."
+                             " Many tutorials can be found online: <https://www.bu.edu/tech/support/research/training-consulting/online-tutorials/paraview/>"))
+            display(Markdown(
+                "* If you saved your data in the cxi format, you can visualize it with JupyterLab !"))
+            display(Markdown("* `Qt5Agg` is a backend that does not work on remote servers, if you install `Gwaihir` on"
+                             " your local computer, you can use this backend for masking. "
+                             " We are currently working on implementing a solution in Jupyter Notebook with Bokeh."))
+            display(Markdown("* If you saved your data in the `.cxi` format, you can visualize it with JupyterLab !"
+                             " Otherwise you can use [`silx`](http://www.silx.org/doc/silx/0.7.0/applications/view.html) from the terminal"))
+
+            display(Markdown(
+                "## Type the following code to stop the scrolling in the output cell, then reload the cell."))
+            display(Markdown("`%%javascript`"))
+            display(
+                Markdown("`IPython.OutputArea.prototype._should_scroll = function(lines) {`"))
+            display(Markdown("`return false;`"))
+            display(Markdown("`}`"))
+
+            display(Markdown("To contact me <david.simonne@synchrotron-soleil.fr>"))
 
     def display_data_frame(
         self,
