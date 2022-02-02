@@ -7,6 +7,13 @@ You can install gwaihir via the setup.py script, so that you can use via a packa
 Gwaihir is also avaible on pypi.org, each new version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
 On the contrary, if you follow the github changes on the you will have the latest updates.
 
+# GUI Preview:
+## Pre-processing data
+https://user-images.githubusercontent.com/51970962/152252719-038c7b0e-9e5c-46f4-989f-b0f0ae551e6f.mp4
+
+## Phase retrieval
+https://user-images.githubusercontent.com/51970962/152252779-b69ea526-9786-4fde-93eb-2d354676094e.mp4
+
 # Installing different packages
 
 First, I advise you to create a Packages directory to keep these.
