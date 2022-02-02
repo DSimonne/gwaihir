@@ -2653,7 +2653,7 @@ class Interface():
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all
                     # functions
-                    print("Not created yet")
+                    print("Not implemented yet")
                     print(
                         "\n#########################################################################################\n"
                     )
@@ -3870,7 +3870,7 @@ class Interface():
                         v.write(line)
 
                 print(
-                    f"Saved parameters in\n\t{self.Dataset.pynx_parameter_gui_file}")
+                    f"Saved parameters in:\n{self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
                     # Runs modes directly and saves all data in an "all"

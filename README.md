@@ -86,6 +86,13 @@ To do so:
 * `source_p9`
 * `ipython kernel install --name "p9_gwaihir --user`
 
+## Connect with ssh without using password (mandatory for batch jobs)
+* go to your root folder (`cd`)
+* `ssh-keygen -t rsa` (press enter when prompted)
+* `ssh username@slurm-nice-devel mkdir -p .ssh`
+* `cat .ssh/id_rsa.pub | ssh username@slurm-nice-devel 'cat >> .ssh/authorized_keys'`
+* You should not need a password anymore when typing `ssh username@slurm-nice-devel`
+
 # Clusters at SOLEIL
 
 ## GRADES
