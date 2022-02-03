@@ -4741,7 +4741,6 @@ class Interface():
         self.Dataset.phase_offset_origin = phase_offset_origin
         self.Dataset.offset_method = offset_method
         self.Dataset.centering_method = centering_method
-        # pixel_size,
         # parameters related to the refraction correction
         self.Dataset.correct_refraction = correct_refraction
         self.Dataset.optical_path_method = optical_path_method
@@ -4832,8 +4831,6 @@ class Interface():
 
             if self.Dataset.phase_offset_origin == ():
                 self.Dataset.phase_offset_origin = (None)
-
-            self.Dataset.pixel_size = None
 
             # Check beamline for save folder
             try:
@@ -4928,7 +4925,6 @@ class Interface():
                     specfile_name=self.Dataset.specfile_name,
                     # detector related parameters #
                     detector=self.Dataset.detector,
-                    pixel_size=self.Dataset.pixel_size,
                     roi_detector=self.Dataset.roi_detector,
                     template_imagefile=self.Dataset.template_imagefile,
                     # parameters related to the refraction correction #
