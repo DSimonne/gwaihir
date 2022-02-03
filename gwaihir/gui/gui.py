@@ -155,8 +155,7 @@ class Interface():
 
             root_folder=widgets.Text(
                 value=os.getcwd() + "/TestGui/",
-                placeholder="Path to target directory (parent to all scan \
-                directories)",
+                placeholder="Root folder (parent to all scan directories)",
                 description='Target directory',
                 continuous_update=False,
                 layout=Layout(
@@ -818,7 +817,7 @@ class Interface():
             direct_beam=widgets.Text(
                 value="[250, 250]",
                 placeholder="[250, 250]",
-                description='Direct beam position (px)',
+                description='Direct beam position (V, H)',
                 disabled=True,
                 continuous_update=False,
                 layout=Layout(
@@ -3161,7 +3160,7 @@ class Interface():
                 # Change data_dir and root folder
                 # depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    self.rotate_sixs_data()
+                    self.rotate_sixs_data() #todo ADD ANOTHER BEAMLINE ? -V
                     root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
