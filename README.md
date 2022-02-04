@@ -62,7 +62,9 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `cd facet-analyser`
 * `git checkout`
 * `sudo mk-build-deps -i`
+* Make sure that you have qt installed, for me I had to install `libqt5opengl5-dev` (debian-testing)
 * `debuild -b`
+* if the package creation fail, try to ignore the test in /debian/rules (line 19)
 * `sudo debi`
 * The package is now installed. You can check the locations of its files with the command `dpkg -L facet-analyser`
 * You should see a file named `/usr/lib/x86_64-linux-gnu/paraview-5.9/plugins/FacetAnalyser/FacetAnalyser.so`
