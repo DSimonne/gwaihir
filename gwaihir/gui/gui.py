@@ -3160,7 +3160,7 @@ class Interface():
                 # Change data_dir and root folder
                 # depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    self.rotate_sixs_data() #todo ADD ANOTHER BEAMLINE ? -V
+                    self.rotate_sixs_data()  # todo ADD ANOTHER BEAMLINE ? -V
                     root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
@@ -3287,11 +3287,10 @@ class Interface():
                 parser = ConfigParser(config_file, cli_args)
                 args = parser.load_arguments()
                 args["time"] = f"{datetime.now()}"
-                run_preprocessing(prm=args)
 
+                # Run function
+                run_preprocessing(prm=args)
                 print("\nEnd of script")
-                # plt.ioff()
-                # plt.show()
 
                 # Button to save metadata
                 button_save_metadata = Button(
@@ -4995,11 +4994,10 @@ class Interface():
                 parser = ConfigParser(config_file, cli_args)
                 args = parser.load_arguments()
                 args["time"] = f"{datetime.now()}"
-                run_postprocessing(prm=args)
 
+                # Run function
+                run_postprocessing(prm=args)
                 print("\nEnd of script")
-                # plt.ioff()
-                # plt.show()
 
                 # Get data from saved file
                 phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
@@ -5881,9 +5879,10 @@ class Interface():
         saves them in a csv file to allow comparison.
         """
         try:
-            metadata_file = glob.glob(f"{self.preprocessing_folder}*preprocessing*.h5")[0]
+            files = glob.glob(f"{self.preprocessing_folder}*preprocessing*.h5")
+            # Get latest one
+            metadata_file = files.sort(key=os.path.getmtime)[-1]
 
-            print(f"Using {metadata_file}")
             with tb.open_file(metadata_file, "r") as f:
                 try:
                     self.Dataset.tilt_values = f.root.output.tilt_values[...]
@@ -5913,14 +5912,14 @@ class Interface():
                 self.Dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
 
                 # Save corrected angles in the widgets
-                print("Saving corrected angles values...")
+                # will clear output
                 self._list_widgets_preprocessing.children[14].value\
                     = str(list(self.Dataset.bragg_peak))
                 self._list_widgets_preprocessing.children[57].value\
                     = self.Dataset.bragg_outofplane
                 self._list_widgets_preprocessing.children[58].value\
                     = self.Dataset.bragg_inplane
-
+                print(f"Using {metadata_file}")
                 print("Corrected angles values saved in setup tab.")
 
             # Save in a csv file
@@ -5966,7 +5965,6 @@ class Interface():
                     self.Dataset.qnorm, self.Dataset.dist_plane,
                     self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
                     self.Dataset.bragg_peak,
-                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
                 ]],
                     columns=[
                         "scan",
@@ -5974,7 +5972,6 @@ class Interface():
                         "q_norm", "d_hkl",
                         "inplane_angle", "out_of_plane_angle",
                         "bragg_peak",
-                        "FWHM", "COM_rocking_curve",
                 ])
 
             # Load all the logs
