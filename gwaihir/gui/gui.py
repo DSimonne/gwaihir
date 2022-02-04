@@ -5881,7 +5881,7 @@ class Interface():
         saves them in a csv file to allow comparison.
         """
         try:
-            metadata_file = glob.glob(f"{self.preprocessing_folder}*.h5")[0]
+            metadata_file = glob.glob(f"{self.preprocessing_folder}*preprocessing*.h5")[0]
 
             print(f"Using {metadata_file}")
             with tb.open_file(metadata_file, "r") as f:
@@ -5893,9 +5893,18 @@ class Interface():
                     self.Dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
                     self.Dataset.detector_data_COM = f.root.output.detector_data_COM[...]
                     self.Dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+
+                    self.Dataset.tilt_angle = np.round(
+                        np.mean(self.Dataset.tilt_values[1:]
+                                - self.Dataset.tilt_values[:-1]), 4)
+
+                    self._list_widgets_preprocessing.children[59].value\
+                        = self.Dataset.tilt_angle
+
                 except tb.NoSuchNodeError:
                     # No angle correction during preprocess
                     pass
+                # Other metadata
                 self.Dataset.bragg_peak = f.root.output.bragg_peak[...]
                 self.Dataset.q = f.root.output.q[...]
                 self.Dataset.qnorm = f.root.output.qnorm[...]
@@ -5911,13 +5920,6 @@ class Interface():
                     = self.Dataset.bragg_outofplane
                 self._list_widgets_preprocessing.children[58].value\
                     = self.Dataset.bragg_inplane
-
-                self.Dataset.tilt_angle = np.round(
-                    np.mean(self.Dataset.tilt_values[1:]
-                            - self.Dataset.tilt_values[:-1]), 4)
-
-                self._list_widgets_preprocessing.children[59].value\
-                    = self.Dataset.tilt_angle
 
                 print("Corrected angles values saved in setup tab.")
 

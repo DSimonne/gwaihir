@@ -96,11 +96,17 @@ To do so:
 * `ipython kernel install --name "p9_gwaihir --user`
 
 ## Connect with ssh without using password (mandatory for batch jobs)
-* go to your root folder (`cd`)
-* `ssh-keygen -t rsa` (press enter when prompted)
-* `ssh username@slurm-nice-devel mkdir -p .ssh`
-* `cat .ssh/id_rsa.pub | ssh username@slurm-nice-devel 'cat >> .ssh/authorized_keys'`
-* You should not need a password anymore when typing `ssh username@slurm-nice-devel`
+* Login into slurm (make sure that you asked for a GPU)
+* Open a terminal (new -> terminal)
+
+Enter the following commands (replace `<username>` with your username, for me it is simonne)
+* `cd`
+* `ssh-keygen -t rsa` (press enter when prompted, ~ 3 times)
+* `ssh <username>@slurm-nice-devel mkdir -p .ssh`
+* `cat .ssh/id_rsa.pub | ssh <username>@slurm-nice-devel 'cat >> .ssh/authorized_keys'`
+
+You should not need a password anymore when login into slurm, make sure it is the case by typing
+* `ssh <username>@slurm-nice-devel`
 
 # Clusters at SOLEIL
 
