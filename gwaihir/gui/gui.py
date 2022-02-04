@@ -3139,8 +3139,6 @@ class Interface():
             if self.Dataset.specfile_name == "":
                 self.Dataset.specfile_name = None
 
-            print("Parameters initialized...")
-
             button_run_preprocess = Button(
                 description="Run data preprocessing...",
                 continuous_update=False,
@@ -3149,6 +3147,7 @@ class Interface():
                 style={'description_width': 'initial'},
                 icon='fast-forward')
             display(button_run_preprocess)
+            print("Parameters initialized...")
 
             @ button_run_preprocess.on_click
             def action_button_run_preprocess(selfbutton):
@@ -5002,11 +5001,11 @@ class Interface():
                 # Get data from saved file
                 phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
 
-                files = glob.glob(
-                    f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
-                    recursive=True,
-                )
-                files.sort(key=os.path.getmtime)
+                files = sorted(
+                    glob.glob(
+                        f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
+                        recursive=True),
+                    key=os.path.getmtime)
                 self.Dataset.strain_output_file = files[0]
 
             except AttributeError:
@@ -5879,9 +5878,11 @@ class Interface():
         saves them in a csv file to allow comparison.
         """
         try:
-            files = glob.glob(f"{self.preprocessing_folder}*preprocessing*.h5")
             # Get latest one
-            metadata_file = files.sort(key=os.path.getmtime)[-1]
+            metadata_file = sorted(
+                glob.glob(
+                    f"{GUI_ID01.preprocessing_folder}*preprocessing*.h5"),
+                key=os.path.getmtime)[-1]
 
             with tb.open_file(metadata_file, "r") as f:
                 try:
@@ -5999,7 +6000,7 @@ class Interface():
                 result.to_csv(self.metadata_csv_file, index=False)
                 print(f"Saved logs in {self.metadata_csv_file}")
 
-        except IndexError:
+        except (IndexError, TypeError):
             print(
                 f"Could not find any .h5 file in {self.preprocessing_folder}")
 
