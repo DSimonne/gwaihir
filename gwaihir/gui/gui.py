@@ -5881,7 +5881,7 @@ class Interface():
             # Get latest one
             metadata_file = sorted(
                 glob.glob(
-                    f"{GUI_ID01.preprocessing_folder}*preprocessing*.h5"),
+                    f"{self.preprocessing_folder}*preprocessing*.h5"),
                 key=os.path.getmtime)[-1]
 
             with tb.open_file(metadata_file, "r") as f:
