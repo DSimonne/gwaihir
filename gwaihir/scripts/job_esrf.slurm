@@ -8,6 +8,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4G
 #SBATCH --output=%x-%j.out
+#SBATCH --export=NONE
 
 # Arguments needed
 reconstruct=$1         # if launched via the gui or terminal
@@ -16,11 +17,13 @@ path=$3      # pynxraw directory with npz files and pynx_run.txt file
 modes=$4       # if running modes analysis or not, in that case, run strain
 filtering=$5   # if applying standard deviation filter, should be an integer number, less than n_run
 
+echo "################################################################################################################"
 echo "Reconstruct data via: " $reconstruct
 echo "Username: " $username
 echo "Working directory: " $path
 echo "Running modes decomposition: " $modes
 echo "Filtering reconstructions: " $filtering
+echo "################################################################################################################"
 
 env | grep CUDA
 scontrol --details show jobs \$SLURM_JOBID |grep RES
@@ -48,8 +51,7 @@ if [[ $reconstruct = "gui" ]]; then
     mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/py38-stable/bin/pynx-id01cdi.py pynx_run_gui.txt |& tee README_pynx_gui.md
 
     # Moving the results in gui_run/ sub-directory
-    echo "Creating a subdirector gui_run/ and moving all the .cxi files there..."
-    mkdir gui_run/
+    echo "Moving all the .cxi files in /gui_run subdirectory..."
     mv S*LLK*.cxi gui_run/
     mv README_pynx*.md gui_run/
     cd gui_run/

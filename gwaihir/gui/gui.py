@@ -3870,7 +3870,7 @@ class Interface():
                     f"Saved parameters in:\n{self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
-                    # Runs modes directly and saves all data in an "all"
+                    # Runs modes directly and saves all data in a "gui_run"
                     # subdir, filter based on LLK
                     print(
                         f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_keep_std} --modes true")
