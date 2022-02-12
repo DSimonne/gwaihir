@@ -2501,6 +2501,14 @@ class Interface():
             except FileExistsError:
                 print(
                     f"{self.postprocessing_folder} exists", end="\n\n")
+            
+            # subfolders to avoid bog
+            for d in ["result_crystal", "result_lab_flat_sample", "result_laboratory"]:
+                try:
+                    os.mkdir(
+                        f"{self.postprocessing_folder}{d}")
+                except FileExistsError:
+                    pass
 
             # Move data file
             try:
@@ -4858,16 +4866,6 @@ class Interface():
                     preprocess tab first, some parameters are used here such \
                     as the energy, detector distance, ...""")
                 return
-
-            # Create final directory is not yet existing
-            if not os.path.isdir(save_dir):
-                full_path = ""
-                for d in save_dir.split("/"):
-                    full_path += d + "/"
-                    try:
-                        os.mkdir(full_path)
-                    except FileExistsError:
-                        pass
 
             try:
                 # Run strain.py script

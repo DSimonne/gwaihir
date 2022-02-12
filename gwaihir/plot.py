@@ -938,24 +938,21 @@ def plot_data(
             # Take the shape of that array along 2 axis
             if axplot == "xy":
                 print(
-                    f"The shape of this projection \
-                    is {np.shape(data[:, :, 0])}")
+                    f"Projection shape: {np.shape(data[:, :, 0])}")
 
                 r = np.shape(data[0, 0, :])
                 print(f"The range in the last axis is [0, {r[0]}]")
 
             elif axplot == "yz":
                 print(
-                    f"The shape of this projection \
-                    is {np.shape(data[0, :, :])}")
+                    f"Projection shape: {np.shape(data[0, :, :])}")
 
                 r = np.shape(data[:, 0, 0])
                 print(f"The range in the last axis is [0, {r[0]}]")
 
             elif axplot == "xz":
                 print(
-                    f"The shape of this projection \
-                    is {np.shape(data[:, 0, :])}")
+                    f"Projection shape: {np.shape(data[:, 0, :])}")
 
                 r = np.shape(data[0, :, 0])
                 print(f"The range in the last axis is [0, {r[0]}]")
@@ -1100,7 +1097,8 @@ def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="
             # vmin=dmin,
             # vmax=dmax,
         )
-
+        ax.set_xlabel(x_label, fontsize=fontsize)
+        ax.set_ylabel(y_label, fontsize=fontsize)
         if isinstance(title, str):
             ax.set_title(title, fontsize=fontsize + 2)
 
@@ -1185,7 +1183,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
         # Show figure
         fig.tight_layout()
         fig.show()
-        plt.close()
+        # plt.close()
 
     else:
         @interact(
