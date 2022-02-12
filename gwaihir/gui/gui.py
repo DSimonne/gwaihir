@@ -5774,6 +5774,7 @@ class Interface():
             display(button_delete_data)
 
         elif data_use is False:
+            plt.close()
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
             self.plot_folder_handler(change=folder)

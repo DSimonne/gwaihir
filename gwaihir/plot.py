@@ -196,7 +196,10 @@ class Plotter():
                         style={'description_width': 'initial'}))
                 def open_npz(file):
                     # Pick an array
-                    self.data_array = rawdata[file]
+                    try:
+                        self.data_array = rawdata[file]
+                    except ValueError:
+                        print("Key not valid, is this an array ?")
 
                     # Plot data
                     if self.plot == "2D":
@@ -1031,6 +1034,7 @@ def plot_data(
                 # Show figure
                 plt.tight_layout()
                 plt.show()
+                plt.close()
 
                 # if PlottingOptions == "2D":
                 # elif PlottingOptions == "2DC":
@@ -1181,6 +1185,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
         # Show figure
         fig.tight_layout()
         fig.show()
+        plt.close()
 
     else:
         @interact(
@@ -1255,8 +1260,9 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
                 fig.colorbar(mappable=img_z, cax=cbar_ax)
 
                 # Show figure
-                fig.tight_layout()
-                fig.show()
+                plt.tight_layout()
+                plt.show()
+                plt.close()
             except IndexError:
                 plt.close()
                 print("Is this a 3D array?")

@@ -85,8 +85,8 @@ Demande GPU
 
 ### Environments on slurm
 * python3: your personal environemnt
-* p9_3.8_dev : optimised for BCDI, gwaihir and PyNX, development version
-* p9_3.8_stable : optimised for BCDI, gwaihir and PyNX, stable version
+* p9_3.8_dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/py38-dev/bin/activate`
+* p9_3.8_stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/py38-stable/bin/activate`
 * p9.pynx-devel : fonctionne pour pynx, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
 
 You are not allowed to modify these environments but you should link a kernel if you wish to use them in jupyter.
