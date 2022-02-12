@@ -3273,14 +3273,12 @@ class Interface():
                     "\n#########################################################################################\n"
                 )
 
-                # Construct the argument parser and parse the command-line arguments
+                # Construct the argument parser
                 ap = argparse.ArgumentParser()
-                ap = add_cli_parameters(ap)
-                cli_args = vars(ap.parse_args())
 
                 # Load the config file
                 config_file = self.preprocessing_folder + "/config_preprocessing.yml"
-                parser = ConfigParser(config_file, cli_args)
+                parser = ConfigParser(config_file)
                 args = parser.load_arguments()
                 args["time"] = f"{datetime.now()}"
 
@@ -4977,14 +4975,12 @@ class Interface():
                     "\n#########################################################################################\n"
                 )
 
-                # Construct the argument parser and parse the command-line arguments
+                # Construct the argument parser
                 ap = argparse.ArgumentParser()
-                ap = add_cli_parameters(ap)
-                cli_args = vars(ap.parse_args())
 
                 # Load the config file
                 config_file = self.postprocessing_folder + "/config_postprocessing.yml"
-                parser = ConfigParser(config_file, cli_args)
+                parser = ConfigParser(config_file)
                 args = parser.load_arguments()
                 args["time"] = f"{datetime.now()}"
 
