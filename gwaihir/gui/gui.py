@@ -2460,7 +2460,7 @@ class Interface():
                     full_path += d + "/"
                     try:
                         os.mkdir(full_path)
-                    except FileExistsError:
+                    except (FileExistsError, PermissionError):
                         pass
 
             print("Updating directories ...")
@@ -2470,7 +2470,7 @@ class Interface():
                 os.mkdir(f"{self.Dataset.scan_folder}")
                 print(
                     f"Created {self.Dataset.scan_folder}")
-            except FileExistsError:
+            except (FileExistsError, PermissionError):
                 print(f"{self.Dataset.scan_folder} exists")
 
             # /data directory
@@ -2479,7 +2479,7 @@ class Interface():
                     f"{self.Dataset.data_folder}")
                 print(
                     f"Created {self.Dataset.data_folder}")
-            except FileExistsError:
+            except (FileExistsError, PermissionError):
                 print(f"{self.Dataset.data_folder} exists")
 
             # /preprocessing directory
@@ -2488,7 +2488,7 @@ class Interface():
                     f"{self.preprocessing_folder}")
                 print(
                     f"Created {self.preprocessing_folder}")
-            except FileExistsError:
+            except (FileExistsError, PermissionError):
                 print(
                     f"{self.preprocessing_folder} exists")
 
@@ -2498,7 +2498,7 @@ class Interface():
                     f"{self.postprocessing_folder}")
                 print(
                     f"Created {self.postprocessing_folder}", end="\n\n")
-            except FileExistsError:
+            except (FileExistsError, PermissionError):
                 print(
                     f"{self.postprocessing_folder} exists", end="\n\n")
 
@@ -2518,7 +2518,7 @@ class Interface():
 
                 self.Dataset.data_dir = self.Dataset.data_folder  # TODO CONFUSING
 
-            except (FileExistsError, shutil.SameFileError):
+            except (FileExistsError, PermissionError, shutil.SameFileError):
                 print(
                     f"{self.Dataset.data_folder}\
                     {self.Dataset.path_to_data} exists")
@@ -3756,7 +3756,7 @@ class Interface():
                         f"{self.preprocessing_folder}/gui_run/")
                     print(
                         f"Created {self.preprocessing_folder}/gui_run/", end="\n\n")
-                except FileExistsError:
+                except (FileExistsError, PermissionError):
                     print(
                         f"{self.preprocessing_folder}/gui_run/ exists", end="\n\n")
 
@@ -4863,7 +4863,7 @@ class Interface():
                     full_path += d + "/"
                     try:
                         os.mkdir(full_path)
-                    except FileExistsError:
+                    except (FileExistsError, PermissionError):
                         pass
 
             try:
@@ -5306,7 +5306,7 @@ class Interface():
                                             f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
                                         print(
                                             f"Created {self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
-                                    except FileExistsError:
+                                    except (FileExistsError, PermissionError):
                                         print(
                                             f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/ exists")
 
@@ -5382,7 +5382,7 @@ class Interface():
                 full_path += d + "/"
                 try:
                     os.mkdir(full_path)
-                except FileExistsError:
+                except (FileExistsError, PermissionError):
                     pass
 
         with open(fname, "w") as v:
