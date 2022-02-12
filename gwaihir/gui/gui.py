@@ -3273,9 +3273,6 @@ class Interface():
                     "\n#########################################################################################\n"
                 )
 
-                # os.system(f"{self.path_scripts}/bcdi_preprocess_BCDI.py \
-                #     --config {self.preprocessing_folder}config_preprocessing.yml")
-
                 # Construct the argument parser and parse the command-line arguments
                 ap = argparse.ArgumentParser()
                 ap = add_cli_parameters(ap)
@@ -4979,9 +4976,6 @@ class Interface():
                 print(
                     "\n#########################################################################################\n"
                 )
-
-                # os.system(f"{self.path_scripts}/bcdi_strain.py \
-                #     --config {self.postprocessing_folder}/config_postprocessing.yml")
 
                 # Construct the argument parser and parse the command-line arguments
                 ap = argparse.ArgumentParser()
