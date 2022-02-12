@@ -4862,8 +4862,6 @@ class Interface():
                     as the energy, detector distance, ...""")
                 return
 
-<<<<<<< HEAD
-=======
             # Create final directory is not yet existing
             if not os.path.isdir(save_dir):
                 full_path = ""
@@ -4874,7 +4872,6 @@ class Interface():
                     except (FileExistsError, PermissionError):
                         pass
 
->>>>>>> origin/master
             try:
                 # Run strain.py script
                 self.create_yaml_file(
