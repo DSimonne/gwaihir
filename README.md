@@ -9,10 +9,19 @@ On the contrary, if you follow the github changes on the you will have the lates
 
 # GUI Preview:
 ## Pre-processing data
-https://user-images.githubusercontent.com/51970962/152252719-038c7b0e-9e5c-46f4-989f-b0f0ae551e6f.mp4
+https://user-images.githubusercontent.com/51970962/154160601-f3e7878a-d2c6-4560-95e5-adf7087f59ab.mp4
 
 ## Phase retrieval
-https://user-images.githubusercontent.com/51970962/152252779-b69ea526-9786-4fde-93eb-2d354676094e.mp4
+https://user-images.githubusercontent.com/51970962/154160830-f3c6460b-14e5-4bcc-99f5-e8691278a4e9.mp4
+
+## Data plotting
+https://user-images.githubusercontent.com/51970962/154160549-c5caea1b-afa0-4a29-a5a8-aff8a1a5158b.mp4
+
+## Post-processing
+https://user-images.githubusercontent.com/51970962/154236802-24643473-1ee9-4d01-823c-beca07ea1c58.mp4
+
+## Facet analysis
+No video yet.
 
 # Installing different packages
 
