@@ -23,6 +23,9 @@ https://user-images.githubusercontent.com/51970962/154236802-24643473-1ee9-4d01-
 ## Facet analysis
 No video yet.
 
+## CXI file
+An example file can be downloaded at: https://www.dsimonne.eu/Attachments/align_031968.cxi
+
 # Installing different packages
 
 First, I advise you to create a Packages directory to keep these.
