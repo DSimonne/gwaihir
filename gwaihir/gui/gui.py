@@ -3323,6 +3323,7 @@ class Interface():
                 # self.window.selected_index = 8
 
         if not init_para:
+            plt.close()
             clear_output(True)
             print("Cleared window.")
 
@@ -5007,6 +5008,14 @@ class Interface():
                     key=os.path.getmtime)
                 self.Dataset.strain_output_file = files[0]
 
+                print(
+                    "\n#########################################################################################\n"
+                )
+                print(f"Using: {self.Dataset.strain_output_file} as data file for cxi file, make sure it is the latest one.")
+                print(
+                    "\n#########################################################################################\n"
+                )
+
             except AttributeError:
                 raise AttributeError(
                     "Bad values for inplane or outofplane angles")
@@ -5030,6 +5039,7 @@ class Interface():
                     change=self.preprocessing_folder)
 
         if not run_strain:
+            plt.close()
             for w in self._list_widgets_strain.children[:-1]:
                 w.disabled = False
 
