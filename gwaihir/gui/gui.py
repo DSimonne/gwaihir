@@ -232,7 +232,8 @@ class Interface():
 
             beamline=widgets.Dropdown(
                 options=['ID01', 'SIXS_2018', 'SIXS_2019',
-                         'CRISTAL', 'P10', 'NANOMAX', '34ID'],
+                         'CRISTAL', 'P10', 'NANOMAX', '34ID',
+                         "ID01BLISS"],
                 value="SIXS_2019",
                 description='Beamline',
                 continuous_update=False,
@@ -3175,7 +3176,7 @@ class Interface():
                     root_folder = self.Dataset.data_dir
                     data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
 
-                elif self.Dataset.beamline == "ID01":
+                elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
                     root_folder = self.Dataset.data_dir
                     data_dir = self.Dataset.data_dir
 
@@ -4845,7 +4846,7 @@ class Interface():
                     root_folder = self.Dataset.data_dir
                     data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
 
-                elif self.Dataset.beamline == "ID01":
+                elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
                     root_folder = self.Dataset.data_dir
                     data_dir = self.Dataset.data_dir
 
