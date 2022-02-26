@@ -4165,10 +4165,10 @@ class Interface():
 
             elif self.run_pynx_tools == "filter":
                 self.filter_reconstructions(
-                    self.Dataset.parent_folder,
-                    self.Dataset.nb_run,
-                    self.Dataset.nb_run_keep,
-                    self.Dataset.filter_criteria
+                    folder = self.Dataset.parent_folder,
+                    nb_run = None,
+                    nb_run_keep = self.Dataset.nb_run_keep,
+                    filter_criteria = self.Dataset.filter_criteria
                 )
 
         # Clean output
@@ -4205,13 +4205,18 @@ class Interface():
 
         The parameters are specified in the phase retrieval tab, and
         their values saved through self.initialize_phase_retrieval()
-
-        :param nb_run: number of times to run the optimization
-        :param nb_run_keep: number of best run results to keep, according to
-         filter_criteria.
+        
+        .param folder: parent folder to cxi files
+        :param nb_run: number of times to run the optimization, if None, equal 
+         to nb of files detected
+        :param nb_run_keep: number of best run results to keep in the end,
+         according to filter_criteria.
         :param filter_criteria: e.g. "LLK"
-            criteria onto which the best solutions will be chosen
+         criteria onto which the best solutions will be chosen
+         possible values are ("standard_deviation", "LLK", 
+         "standard_deviation_LLK", "LLK_standard_deviation")
         """
+
         # Sorting functions depending on filtering criteria
         def filter_by_std(cxi_files, nb_keep):
             """Use the standard deviation of the reconstructed object as
@@ -4302,6 +4307,9 @@ class Interface():
 
                 # standard_deviation then LLK
                 elif filter_criteria == "standard_deviation_LLK":
+                    if nb_run == None:
+                        nb_run = len(cxi_files)
+
                     filter_by_std(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
                     print(
@@ -4324,6 +4332,9 @@ class Interface():
 
                 # LLK then standard_deviation
                 elif filter_criteria == "LLK_standard_deviation":
+                    if nb_run == None:
+                        nb_run = len(cxi_files)
+
                     filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
                     print(
@@ -4365,10 +4376,16 @@ class Interface():
         """
         try:
             print(
+                "\n#########################################################################################"
+            )
+            print(
                 f"Using {self.path_scripts}/pynx-cdi-analysis.py\n"
                 f"Using {folder}/*LLK* files.\n"
                 "Running: $ pynx-cdi-analysis.py *LLK* modes=1\n"
                 f"Output in {folder}/modes_gui.h5")
+            print(
+                "#########################################################################################\n"
+            )
             os.system(
                 "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
                     quote(self.path_scripts),
@@ -4377,8 +4394,13 @@ class Interface():
                 )
             )
         except KeyboardInterrupt:
+            print(
+                "\n#########################################################################################"
+            )
             print("Decomposition into modes stopped by user...")
-
+            print(
+                "#########################################################################################\n"
+            )
     def save_as_cxi(self, cdi_operator, path_to_cxi):
         """We need to create a dictionnary with the parameters to save in the
         cxi file.
@@ -5942,9 +5964,6 @@ class Interface():
                         np.mean(self.Dataset.tilt_values[1:]
                                 - self.Dataset.tilt_values[:-1]), 4)
 
-                    self._list_widgets_preprocessing.children[59].value\
-                        = self.Dataset.tilt_angle
-
                 except tb.NoSuchNodeError:
                     # No angle correction during preprocess
                     pass
@@ -5966,6 +5985,7 @@ class Interface():
                 #     = self.Dataset.bragg_inplane
                 # print(f"Using {metadata_file}")
                 # print("Corrected angles values saved in setup tab.")
+                # also tilt angle here
 
             # Save in a csv file
             if self.Dataset.beamline == "SIXS_2019":
