@@ -32,9 +32,9 @@ echo "Preprocessing scan..."
 echo bcdi_preprocess_BCDI.py --config config_preprocessing.yml
 echo "##################################################################"
 bcdi_preprocess_BCDI.py --config config_preprocessing.yml \
-	--save_dir $2$3/preprocessing \
+	--scans $3 \
 	--root_folder $2$3/data \
-	--scans $3
+	--save_dir $2$3/preprocessing
 
 # echo "##################################################################"
 # echo "Ready to launch phase retrieval !"

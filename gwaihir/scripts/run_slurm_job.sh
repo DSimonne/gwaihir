@@ -117,23 +117,32 @@ modes=${modes/#=/}
 filtering=${filtering/#=/}
 
 # TODO: add environment as an option
-if [[ $(command -v sbatch ) ]] ; then # Already on slurm
+# if [[ $(command -v sbatch ) ]] ; then # Already on slurm
+#   echo "Running sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering"
+#   echo
+#   sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
+
+# else # Not on slurm yet
+
+#   echo "Connecting to slurm-nice-devel"
+#   ssh $username@slurm-nice-devel << EOF
+#     echo "Running sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering"
+#     echo
+#     sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
+
+#     exit
+# EOF
+# fi
+
+# Old version, since the new one is kinda boggy
+echo "Connecting to slurm-nice-devel"
+ssh $username@slurm-nice-devel << EOF
   echo "Running sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering"
   echo
   sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
 
-else # Not on slurm yet
-
-  echo "Connecting to slurm-nice-devel"
-  ssh $username@slurm-nice-devel << EOF
-    echo "Running sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering"
-    echo
-    sbatch /data/id01/inhouse/david/py38-stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
-
-    exit
+  exit
 EOF
-
-fi
 
 echo
 echo "You may follow the evolution of the job by typing: 'tail -f job_esrf.slurm-XXXXX.out'"
