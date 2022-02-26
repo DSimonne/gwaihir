@@ -856,7 +856,7 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             tilt_angle=widgets.FloatText(
-                value=0.003,
+                value=0,
                 step=0.0001,
                 description='Tilt angle',
                 continuous_update=False,
@@ -5958,14 +5958,14 @@ class Interface():
 
                 # Save corrected angles in the widgets
                 # will clear output
-                self._list_widgets_preprocessing.children[14].value\
-                    = str(list(self.Dataset.bragg_peak))
-                self._list_widgets_preprocessing.children[57].value\
-                    = self.Dataset.bragg_outofplane
-                self._list_widgets_preprocessing.children[58].value\
-                    = self.Dataset.bragg_inplane
-                print(f"Using {metadata_file}")
-                print("Corrected angles values saved in setup tab.")
+                # self._list_widgets_preprocessing.children[14].value\
+                #     = str(list(self.Dataset.bragg_peak))
+                # self._list_widgets_preprocessing.children[57].value\
+                #     = self.Dataset.bragg_outofplane
+                # self._list_widgets_preprocessing.children[58].value\
+                #     = self.Dataset.bragg_inplane
+                # print(f"Using {metadata_file}")
+                # print("Corrected angles values saved in setup tab.")
 
             # Save in a csv file
             if self.Dataset.beamline == "SIXS_2019":
