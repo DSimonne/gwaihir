@@ -2206,7 +2206,7 @@ class Interface():
 
             cmap=widgets.Dropdown(
                 options=plt.colormaps(),
-                value="YlGnBu_r",
+                value="jet",
                 description="Color map:",
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -3275,7 +3275,7 @@ class Interface():
                 print(
                     "\n#########################################################################################\n"
                 )
-                print(f"Running: {self.path_scripts}/bcdi_preprocess_BCDI.py")
+                print(f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py")
                 print(
                     f"Config file: {self.preprocessing_folder}config_preprocessing.yml")
                 print(
@@ -3878,9 +3878,9 @@ class Interface():
                     # Runs modes directly and saves all data in a "gui_run"
                     # subdir, filter based on LLK
                     print(
-                        f"\nRunning {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_keep_std} --modes true")
+                        f"\nRunning: $ {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_keep_std} --modes true")
                     print(
-                        "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.\n")
+                        "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.")
                     os.system(
                         "{}/run_slurm_job.sh \
                         --reconstruct gui \
@@ -3902,7 +3902,7 @@ class Interface():
                 elif self.run_phase_retrieval == "local_script":
                     try:
                         print(
-                            f"\nRunning {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
+                            f"\nRunning: $ {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
                             end="\n\n")
                         os.system(
                             "cd {}; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
@@ -3933,7 +3933,7 @@ class Interface():
                         cdi = self.initialize_cdi_operator()
 
                         if i > 4:
-                            print("\nStopping liveplot to go faster\n")
+                            print("Stopping liveplot to go faster\n")
                             self.Dataset.live_plot = False
 
                         # Change support threshold for supports update
@@ -4222,22 +4222,30 @@ class Interface():
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
 
+            print(
+                "\n#########################################################################################"
+            )
+            print("Computing standard deviation of object modulus for scans:")
             for filename in cxi_files:
-                print(
-                    "Computing standard deviation of object modulus for ",
-                    filename)
+                print(f"\t{os.path.basename(filename)}")
                 with tb.open_file(filename, "r") as f:
                     data = f.root.entry_1.image_1.data[:]
                     filtering_criteria_value[filename] = np.std(np.abs(data))
 
+            # Sort files
             sorted_dict = sorted(
                 filtering_criteria_value.items(),
                 key=operator_lib.itemgetter(1)
             )
 
-            for f, filtering_criteria_value in sorted_dict[nb_keep:]:
-                print(f"Removed scan {f}")
-                os.remove(f)
+            # Remove files
+            print("\nRemoving scans:")
+            for filename, filtering_criteria_value in sorted_dict[nb_keep:]:
+                print(f"\t{os.path.basename(filename)}")
+                os.remove(filename)
+            print(
+                "#########################################################################################\n"
+            )
 
         def filter_by_LLK(cxi_files, nb_keep):
             """Use the free log-likelihood values of the reconstructed object
@@ -4249,27 +4257,35 @@ class Interface():
             # Keep filtering criteria of reconstruction modules in dictionnary
             filtering_criteria_value = {}
 
+            print(
+                "\n#########################################################################################"
+            )
+            print("Extracting LLK value (poisson statistics) for scans:")
             for filename in cxi_files:
-                print(
-                    "Extracting llk value for poisson statistics for ",
-                    filename)
+                print(f"\t{os.path.basename(filename)}")
                 with tb.open_file(filename, "r") as f:
                     llk = f.root.entry_1.image_1.process_1.\
                         results.llk_poisson[...]
                     filtering_criteria_value[filename] = llk
 
+            # Sort files
             sorted_dict = sorted(
                 filtering_criteria_value.items(),
                 key=operator_lib.itemgetter(1)
             )
 
-            for f, filtering_criteria_value in sorted_dict[nb_keep:]:
-                print(f"Removed scan {f}")
-                os.remove(f)
+            # Remove files
+            print("\nRemoving scans:")
+            for filename, filtering_criteria_value in sorted_dict[nb_keep:]:
+                print(f"\t{os.path.basename(filename)}")
+                os.remove(filename)
+            print(
+                "#########################################################################################\n"
+            )
 
         # Main function supporting different cases
         try:
-            print(f"Iterating on files corresponding to {folder}/*LLK*.cxi")
+            print(f"Iterating on files matching {folder}/*LLK*.cxi")
             cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
             if cxi_files == []:
@@ -4289,7 +4305,13 @@ class Interface():
                     filter_by_std(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
                     print(
-                        f"Iterating on remaining files in {folder}/*LLK*.cxi")
+                        "\n#########################################################################################"
+                    )
+                    print(
+                        f"\nIterating on remaining files in {folder}/*LLK*.cxi")
+                    print(
+                           "#########################################################################################\n"
+                    )
                     cxi_files = sorted(
                         glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
@@ -4305,7 +4327,13 @@ class Interface():
                     filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
                     print(
+                        "\n#########################################################################################"
+                    )
+                    print(
                         f"Iterating on remaining files in {folder}/*LLK*.cxi")
+                    print(
+                           "#########################################################################################\n"
+                    )
                     cxi_files = sorted(
                         glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
@@ -4319,7 +4347,13 @@ class Interface():
                 else:
                     print("No filtering")
         except KeyboardInterrupt:
-            print("cxi files filtering stopped by user ...")
+            print(
+                "\n#########################################################################################"
+            )
+            print("File filtering stopped by user ...")
+            print(
+                   "#########################################################################################\n"
+            )
 
     def run_modes_decomposition(self, folder,):
         """Decomposes several phase retrieval solutions into modes, saves only
@@ -4333,7 +4367,7 @@ class Interface():
             print(
                 f"Using {self.path_scripts}/pynx-cdi-analysis.py\n"
                 f"Using {folder}/*LLK* files.\n"
-                "Running pynx-cdi-analysis.py *LLK* modes=1\n"
+                "Running: $ pynx-cdi-analysis.py *LLK* modes=1\n"
                 f"Output in {folder}/modes_gui.h5")
             os.system(
                 "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
@@ -4978,7 +5012,7 @@ class Interface():
                 print(
                     "\n#########################################################################################\n"
                 )
-                print(f"Running: {self.path_scripts}/bcdi_strain.py")
+                print(f"Running: $ {self.path_scripts}/bcdi_strain.py")
                 print(
                     f"Config file: {self.postprocessing_folder}/config_postprocessing.yml")
                 print(
