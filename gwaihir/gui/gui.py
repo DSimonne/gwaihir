@@ -4401,6 +4401,19 @@ class Interface():
             print(
                 "#########################################################################################\n"
             )
+        finally:
+            # Refresh folders
+            self.sub_directories_handler(change=self.Dataset.scan_folder)
+
+            # PyNX folder, refresh values
+            self._list_widgets_phase_retrieval.children[1].value\
+                = self.preprocessing_folder
+            self.pynx_folder_handler(change=self.preprocessing_folder)
+
+            self.tab_data.children[1].value = self.preprocessing_folder
+            self.plot_folder_handler(
+                change=self.preprocessing_folder)
+
     def save_as_cxi(self, cdi_operator, path_to_cxi):
         """We need to create a dictionnary with the parameters to save in the
         cxi file.
