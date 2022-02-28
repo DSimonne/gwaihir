@@ -66,7 +66,7 @@ class SupportTools():
                         )
                         np.savez(self.saving_directory +
                                  "extracted_support.npz", support=support)
-                        print(f"\nSaved support in {self.saving_directory} as:")
+                        print(f"Saved support in {self.saving_directory} as:")
                         print(f"\textracted_support.npz")
                         print(
                             "##########################################################################################\n"
@@ -117,7 +117,7 @@ class SupportTools():
                     oldsupport=old_support, support=conv_support)
 
 
-                print(f"\nSaved support in {self.saving_directory} as:")
+                print(f"Saved support in {self.saving_directory} as:")
                 print(f"\tfilter_sig{sigma}_t{threshold}")
                 print(
                     "##########################################################################################\n"
@@ -158,7 +158,7 @@ class SupportTools():
 
                     # Find max value in image, we work with the module
                     amp = np.abs(electronic_density)
-                    print(f"Maximum value in amplitude array: {amp.max()}")
+                    print(f"\tMaximum value in amplitude array: {amp.max()}")
 
                     # Define support based on max value and threshold
                     support = np.where(amp < threshold * amp.max(), 0, 1)
@@ -173,7 +173,7 @@ class SupportTools():
                     # Save support
                     np.savez(self.saving_directory +
                              "computed_support.npz", support=support)
-                    print(f"\nSaved support in {self.saving_directory} as:")
+                    print(f"Saved support in {self.saving_directory} as:")
                     print(f"\tcomputed_support.npz")
                     print(
                         "##########################################################################################\n"

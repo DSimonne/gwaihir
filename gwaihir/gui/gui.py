@@ -3316,11 +3316,11 @@ class Interface():
         if self.Dataset.iobs not in ("", None):
             if self.Dataset.iobs.endswith(".npy"):
                 iobs = np.load(self.Dataset.iobs)
-                print("CXI input: loading data")
+                print("\tCXI input: loading data")
             elif self.Dataset.iobs.endswith(".npz"):
                 try:
                     iobs = np.load(self.Dataset.iobs)["data"]
-                    print("CXI input: loading data")
+                    print("\tCXI input: loading data")
                 except KeyError:
                     print("\"data\" key does not exist.")
 
@@ -3338,14 +3338,14 @@ class Interface():
             if self.Dataset.mask.endswith(".npy"):
                 mask = np.load(self.Dataset.mask).astype(np.int8)
                 nb = mask.sum()
-                print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
                     nb, nb * 100 / mask.size))
             elif self.Dataset.mask.endswith(".npz"):
                 try:
                     mask = np.load(self.Dataset.mask)[
                         "mask"].astype(np.int8)
                     nb = mask.sum()
-                    print("CXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                    print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
                         nb, nb * 100 / mask.size))
                 except KeyError:
                     print("\"mask\" key does not exist.")
@@ -3363,23 +3363,23 @@ class Interface():
         if self.Dataset.support not in ("", None, self.Dataset.parent_folder):
             if self.Dataset.support.endswith(".npy"):
                 support = np.load(self.Dataset.support)
-                print("CXI input: loading support")
+                print("\tCXI input: loading support")
             elif self.Dataset.support.endswith(".npz"):
                 try:
                     support = np.load(self.Dataset.support)["data"]
-                    print("CXI input: loading support")
+                    print("\tCXI input: loading support")
                 except (FileNotFoundError, ValueError):
                     print("File not supported or does not exist.")
                 except KeyError:
                     print("\"data\" key does not exist.")
                     try:
                         support = np.load(self.Dataset.support)["support"]
-                        print("CXI input: loading support")
+                        print("\tCXI input: loading support")
                     except KeyError:
                         print("\"support\" key does not exist.")
                         try:
                             support = np.load(self.Dataset.support)["obj"]
-                            print("CXI input: loading support")
+                            print("\tCXI input: loading support")
                         except KeyError:
                             print(
                                 "\"obj\" key does not exist."
@@ -3399,11 +3399,11 @@ class Interface():
         if self.Dataset.obj not in ("", None, self.Dataset.parent_folder):
             if self.Dataset.obj.endswith(".npy"):
                 obj = np.load(self.Dataset.obj)
-                print("CXI input: loading object")
+                print("\tCXI input: loading object")
             elif self.Dataset.obj.endswith(".npz"):
                 try:
                     obj = np.load(self.Dataset.obj)["data"]
-                    print("CXI input: loading object")
+                    print("\tCXI input: loading object")
                 except KeyError:
                     print("\"data\" key does not exist.")
 
@@ -3896,12 +3896,12 @@ class Interface():
                 # Keep a list of the resulting scans
                 self.reconstruction_file_list = []
 
-                print(
-                    "\n#########################################################################################"
-                )
                 try:
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
+                        print(
+                            "\n#########################################################################################"
+                        )
                         print(f"Run {i}")
 
                         # Initialise the cdi operator
@@ -4110,15 +4110,13 @@ class Interface():
                             self.reconstruction_file_list.append(fn)
                             cdi.save_obj_cxi(fn)
                             print(f"\nSaved as {fn}.")
+                            print(
+                                "#########################################################################################\n"
+                            )
 
                         except SupportTooLarge:
                             print(
-                                "Threshold value probably too low, support \
-                                too large too continue")
-
-                        print(
-                            "#########################################################################################\n"
-                        )
+                                "Threshold value probably too low, support too large too continue")
 
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
@@ -4265,8 +4263,15 @@ class Interface():
 
         # Main function supporting different cases
         try:
-            hash_print(f"Iterating on files matching {folder}/*LLK*.cxi")
+            print(
+                "\n#########################################################################################"
+            )
+            print(f"Iterating on files matching:")
+            print(f"\t{folder}/*LLK*.cxi")
             cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
+            print(
+                "#########################################################################################\n"
+            )
 
             if cxi_files == []:
                 print(f"No *LLK*.cxi files in {folder}/result_scan*LLK*.cxi")
@@ -4306,8 +4311,7 @@ class Interface():
 
                     filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
-                    hash_print(
-                        f"Iterating on remaining files in {folder}/*LLK*.cxi")
+                    hash_print("Iterating on remaining files.")
 
                     cxi_files = sorted(
                         glob.glob(f"{folder}/result_scan*LLK*.cxi"))
@@ -4483,7 +4487,7 @@ class Interface():
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
 
-        hash_print("Saving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
+        print("\nSaving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
             process_parameters=self.params,
@@ -5035,7 +5039,7 @@ class Interface():
                 )
                 print(f"Result file used to extract results savd in the .cxi file:")
                 print(f"\n{self.Dataset.strain_output_file}")
-                print("Make sure it is the latest one".)
+                print("Make sure it is the latest one.")
                 print(
                     "##########################################################################################\n"
                 )
