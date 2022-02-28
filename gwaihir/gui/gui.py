@@ -5037,9 +5037,9 @@ class Interface():
                 print(
                     "\n#########################################################################################"
                 )
-                print(f"Result file used to extract results savd in the .cxi file:")
-                print(f"\n{self.Dataset.strain_output_file}")
-                print("Make sure it is the latest one.")
+                print(f"Result file used to extract results saved in the .cxi file:")
+                print(f"{self.Dataset.strain_output_file}")
+                print("\nMake sure it is the latest one.")
                 print(
                     "##########################################################################################\n"
                 )
