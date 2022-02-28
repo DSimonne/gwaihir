@@ -2464,7 +2464,7 @@ class Interface():
                     except (FileExistsError, PermissionError):
                         pass
 
-            print("Updating directories ...")
+            hash_print("Updating directories ...")
 
             # Scan directory
             try:
@@ -2592,17 +2592,11 @@ class Interface():
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(buttons_init)
-                    print(
-                        "\n#########################################################################################\n"
-                    )
-                    print("Saving data, takes some time ...")
+                    hash_print("Saving data, takes some time ...", hash_line_after=False)
 
                     try:
                         # Reciprocal space data
-                        print(
-                            "\n#########################################################################################\n"
-                        )
-                        print(
+                        hash_print(
                             "Saving diffraction data and mask selected in the PyNX tab...")
                         self.initialize_cdi_operator()
 
@@ -2626,25 +2620,18 @@ class Interface():
                         )
 
                     except (AttributeError, UnboundLocalError):
-                        print(
-                            "Could not save reciprocal space data, select the intensity and the mask in the phase retrieval tab first.")
+                        hash_print(
+                            "Could not save reciprocal space data, select the intensity and the mask in the phase retrieval tab first.", hash_line_before=False)
 
-                    finally:
-                        print(
-                            "\n#########################################################################################\n"
-                        )
 
                     # Facets analysis output
                     try:
-                        print(
-                            "\n#########################################################################################\n"
-                        )
-                        print("Saving Facets class data")
+                        hash_print("Saving Facets class data", hash_line_after=False)
                         self.Facets.to_hdf5(
                             f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
                     except AttributeError:
-                        print(
-                            "Could not save facets' data, run the analysis in the `Facets` tab first.")
+                        hash_print(
+                            "Could not save facets' data, run the analysis in the `Facets` tab first.", hash_line_after=False)
 
                     print(
                         "\n#########################################################################################\n"
@@ -2655,19 +2642,13 @@ class Interface():
                     """Create button to reload Dataset object from .cxi file."""
                     clear_output(True)
                     display(buttons_init)
-                    print(
-                        "\n#########################################################################################\n"
-                    )
                     # Reload previous data that was saved as .cxi file,
                     # initialize all related widgets values, authorize all
                     # functions
-                    print("Not implemented yet")
-                    print(
-                        "\n#########################################################################################\n"
-                    )
+                    hash_print("Not implemented yet")
 
         elif not run_dir_init:
-            print("Cleared window.")
+            hash_print("Cleared window.")
             clear_output(True)
 
     # Preprocessing
@@ -3103,7 +3084,7 @@ class Interface():
                             getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                print(f"Wrong list syntax for {p}")
+                hash_print(f"Wrong list syntax for {p}")
 
             try:
                 for p in tuple_parameters:
@@ -3114,7 +3095,7 @@ class Interface():
                             getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                print(f"Wrong tuple syntax for {p}")
+                hash_print(f"Wrong tuple syntax for {p}")
 
             try:
                 for p in dict_parameters:
@@ -3128,7 +3109,7 @@ class Interface():
                                 getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                print(f"Wrong dict syntax for {p}")
+                hash_print(f"Wrong dict syntax for {p}")
 
             # Set None if we are not using custom scans
             if not self.Dataset.custom_scan:
@@ -3156,7 +3137,7 @@ class Interface():
                 style={'description_width': 'initial'},
                 icon='fast-forward')
             display(button_run_preprocess)
-            print("Parameters initialized...")
+            hash_print("Parameters initialized...")
 
             @ button_run_preprocess.on_click
             def action_button_run_preprocess(selfbutton):
@@ -3272,15 +3253,9 @@ class Interface():
                 )
 
                 # On lance bcdi_preprocess
-                print(
-                    "\n#########################################################################################\n"
-                )
-                print(f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py")
-                print(
-                    f"Config file: {self.preprocessing_folder}config_preprocessing.yml")
-                print(
-                    "\n#########################################################################################\n"
-                )
+                hash_print(f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py", hash_line_after=False)
+                hash_print(
+                    f"Config file: {self.preprocessing_folder}config_preprocessing.yml", hash_line_before=False)
 
                 # Construct the argument parser
                 ap = argparse.ArgumentParser()
@@ -3293,7 +3268,7 @@ class Interface():
 
                 # Run function
                 run_preprocessing(prm=args)
-                print("\nEnd of script")
+                hash_print("End of script")
 
                 # Button to save metadata
                 button_save_metadata = Button(
@@ -3325,7 +3300,7 @@ class Interface():
         if not init_para:
             plt.close()
             clear_output(True)
-            print("Cleared window.")
+            hash_print("Cleared window.")
 
     # Phase retrieval
 
@@ -3743,11 +3718,11 @@ class Interface():
         self.Dataset.wavelength = 1.2399 * 1e-6 / self.Dataset.energy
         self.Dataset.sdd = self._list_widgets_preprocessing.children[49].value
 
-        print("CXI input: Energy = %8.2feV" % self.Dataset.energy)
-        print(f"CXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
-        print("CXI input: detector distance = %8.2fm" % self.Dataset.sdd)
+        print("\tCXI input: Energy = %8.2f eV" % self.Dataset.energy)
+        print(f"\tCXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
+        print("\tCXI input: detector distance = %8.2f m" % self.Dataset.sdd)
         print(
-            f"CXI input: detector pixel size = {self.Dataset.pixel_size_detector}")
+            f"\tCXI input: detector pixel size = {self.Dataset.pixel_size_detector} m")
 
         # PyNX arguments text files
         self.Dataset.pynx_parameter_gui_file = self.preprocessing_folder\
@@ -3871,8 +3846,8 @@ class Interface():
                     for line in self.text_file:
                         v.write(line)
 
-                print(
-                    f"Saved parameters in:\n{self.Dataset.pynx_parameter_gui_file}")
+                hash_print(
+                    f"Saved parameters in: {self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
                     # Runs modes directly and saves all data in a "gui_run"
@@ -3915,14 +3890,14 @@ class Interface():
 
             elif self.run_phase_retrieval == "operators":
                 # Extract data
-                print("Log likelihood is updated every 50 iterations.")
+                hash_print("Log likelihood is updated every 50 iterations.")
                 self.Dataset.calc_llk = 50  # TODO
 
                 # Keep a list of the resulting scans
                 self.reconstruction_file_list = []
 
                 print(
-                    "\n#########################################################################################\n"
+                    "\n#########################################################################################"
                 )
                 try:
                     # Run phase retrieval for nb_run
@@ -4134,7 +4109,7 @@ class Interface():
 
                             self.reconstruction_file_list.append(fn)
                             cdi.save_obj_cxi(fn)
-                            print(f"Saved as {fn}.")
+                            print(f"\nSaved as {fn}.")
 
                         except SupportTooLarge:
                             print(
@@ -4142,7 +4117,7 @@ class Interface():
                                 too large too continue")
 
                         print(
-                            "\n#########################################################################################\n"
+                            "#########################################################################################\n"
                         )
 
                     # If filter, filter data
@@ -4156,7 +4131,7 @@ class Interface():
 
                 except KeyboardInterrupt:
                     clear_output(True)
-                    print("Phase retrieval stopped by user ...")
+                    hash_print("Phase retrieval stopped by user ...")
 
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
@@ -4167,13 +4142,13 @@ class Interface():
                 self.filter_reconstructions(
                     folder = self.Dataset.parent_folder,
                     nb_run = None,
-                    nb_run_keep = self.Dataset.nb_run_keep,
+                    nb_keep = self.Dataset.nb_run_keep,
                     filter_criteria = self.Dataset.filter_criteria
                 )
 
         # Clean output
         if not self.run_phase_retrieval and not self.run_pynx_tools:
-            print("Cleared output.")
+            hash_print("Cleared output.")
             clear_output(True)
 
             # Refresh folders
@@ -4290,7 +4265,7 @@ class Interface():
 
         # Main function supporting different cases
         try:
-            print(f"Iterating on files matching {folder}/*LLK*.cxi")
+            hash_print(f"Iterating on files matching {folder}/*LLK*.cxi")
             cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
             if cxi_files == []:
@@ -4312,14 +4287,8 @@ class Interface():
 
                     filter_by_std(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
-                    print(
-                        "\n#########################################################################################"
-                    )
-                    print(
-                        f"\nIterating on remaining files in {folder}/*LLK*.cxi")
-                    print(
-                           "#########################################################################################\n"
-                    )
+                    hash_print("Iterating on remaining files.")
+
                     cxi_files = sorted(
                         glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
@@ -4337,14 +4306,9 @@ class Interface():
 
                     filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
 
-                    print(
-                        "\n#########################################################################################"
-                    )
-                    print(
+                    hash_print(
                         f"Iterating on remaining files in {folder}/*LLK*.cxi")
-                    print(
-                           "#########################################################################################\n"
-                    )
+
                     cxi_files = sorted(
                         glob.glob(f"{folder}/result_scan*LLK*.cxi"))
 
@@ -4356,15 +4320,9 @@ class Interface():
                         filter_by_std(cxi_files, nb_keep)
 
                 else:
-                    print("No filtering")
+                    hash_print("No filtering")
         except KeyboardInterrupt:
-            print(
-                "\n#########################################################################################"
-            )
-            print("File filtering stopped by user ...")
-            print(
-                   "#########################################################################################\n"
-            )
+            hash_print("File filtering stopped by user ...")
 
     def run_modes_decomposition(self, folder,):
         """Decomposes several phase retrieval solutions into modes, saves only
@@ -4394,13 +4352,8 @@ class Interface():
                 )
             )
         except KeyboardInterrupt:
-            print(
-                "\n#########################################################################################"
-            )
-            print("Decomposition into modes stopped by user...")
-            print(
-                "#########################################################################################\n"
-            )
+            hash_print("Decomposition into modes stopped by user...")
+
         finally:
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
@@ -4530,7 +4483,7 @@ class Interface():
         # self.params["imgname"] = self.Dataset.imgname
         self.params["scan"] = self.Dataset.scan
 
-        print("\nSaving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
+        hash_print("Saving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
         cdi_operator.save_data_cxi(
             filename=path_to_cxi,
             process_parameters=self.params,
@@ -4881,7 +4834,7 @@ class Interface():
                             getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                print(f"Wrong list syntax for {p}")
+                hash_print(f"Wrong list syntax for {p}")
 
             try:
                 for p in tuple_parameters:
@@ -4892,7 +4845,7 @@ class Interface():
                             getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                print(f"Wrong tuple syntax for {p}")
+                hash_print(f"Wrong tuple syntax for {p}")
 
             # Empty parameters are set to None (bcdi syntax)
             if self.Dataset.output_size == []:
@@ -5065,7 +5018,7 @@ class Interface():
 
                 # Run function
                 run_postprocessing(prm=args)
-                print("\nEnd of script")
+                hash_print("End of script")
 
                 # Get data from saved file
                 phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
@@ -5078,18 +5031,21 @@ class Interface():
                 self.Dataset.strain_output_file = files[0]
 
                 print(
-                    "\n#########################################################################################\n"
+                    "\n#########################################################################################"
                 )
-                print(f"Using: {self.Dataset.strain_output_file} as data file for cxi file, make sure it is the latest one.")
+                print(f"Result file used to extract results savd in the .cxi file:")
+                print(f"\n{self.Dataset.strain_output_file}")
+                print("Make sure it is the latest one".)
                 print(
-                    "\n#########################################################################################\n"
+                    "##########################################################################################\n"
                 )
+
 
             except AttributeError:
                 raise AttributeError(
                     "Bad values for inplane or outofplane angles")
             except KeyboardInterrupt:
-                print("Strain analysis stopped by user ...")
+                hash_print("Strain analysis stopped by user ...")
 
             finally:
                 # At the end of the function
@@ -5127,7 +5083,7 @@ class Interface():
             self.tab_data.children[1].value = self.preprocessing_folder
             self.plot_folder_handler(change=self.preprocessing_folder)
 
-            print("Cleared window.")
+            hash_print("Cleared window.")
             clear_output(True)
 
     def init_facet_analysis(
@@ -5290,7 +5246,7 @@ class Interface():
                                         getattr(self.Facets, p)))
                                 # print(f"{p}:", getattr(self.Dataset, p))
                         except ValueError:
-                            print(f"Wrong list syntax for {p}")
+                            hash_print(f"Wrong list syntax for {p}")
 
                         # Plot the chosen facet to help the user to pick the facets
                         # he wants to use to orient the particule
@@ -5422,12 +5378,12 @@ class Interface():
                 display(buttons_facets)
 
             except TypeError:
-                print("Data type not supported.")
+                hash_print("Data type not supported.")
 
         if not load_data:
             self.tab_facet.children[1].disabled = False
             self.vtk_file_handler(parent_folder)
-            print("Cleared window.")
+            hash_print("Cleared window.")
             clear_output(True)
 
     @ staticmethod
@@ -5604,7 +5560,7 @@ class Interface():
                     try:
                         logs = pd.read_csv(csv_file)
                     except ValueError:
-                        print("Data type not supported.")
+                        hash_print("Data type not supported.")
                     # else:
                     #     print(
                     #         f"""
@@ -5637,7 +5593,7 @@ class Interface():
                     display(logs[list(cols)])
 
             except (FileNotFoundError, UnboundLocalError):
-                print("Wrong path")
+                hash_print("Wrong path")
             except AttributeError:
                 print("You need to run the facet analysis in the dedicated tab first."
                       "Then this function will load the resulting DataFrame.")
@@ -5668,9 +5624,13 @@ class Interface():
 
         if data_use in ["2D", "3D"] and len(filename) == 1:
             # Disable widgets
-            for w in self.tab_data.children[:-3]:
-                w.disabled = True
+            if data_use == "2D":
+                for w in self.tab_data.children[:-3]:
+                    w.disabled = True
 
+            if data_use == "3D":
+                for w in self.tab_data.children[:-2]:
+                    w.disabled = True
             # Plot data
             plot.Plotter(
                 folder + "/" + filename[0],
@@ -5686,7 +5646,7 @@ class Interface():
 
             # Plot data
             for p in filename:
-                print(f"Showing {p}")
+                hash_print(f"Showing {p}")
                 plot.Plotter(
                     folder + "/" + p,
                     plot=data_use,
@@ -5824,15 +5784,15 @@ class Interface():
 
             try:
                 for p in filename:
-                    print(f"Showing {p}")
+                    hash_print(f"Showing {p}")
                     display(Image(filename=folder + "/" + p))
 
             except (FileNotFoundError, ValueError):
-                print("Could not load image from file.")
+                hash_print("Could not load image from file.")
 
         elif data_use in ["2D", "3D", "create_support", "extract_support",
                           "smooth_support"] and len(filename) != 1:
-            print("Please select only one file.")
+            hash_print("Please select only one file.")
 
         elif data_use == "delete":
             # Disable widgets
@@ -5852,12 +5812,12 @@ class Interface():
                 for p in filename:
                     try:
                         os.remove(folder + "/" + p)
-                        print(f"Removed {p}")
+                        hash_print(f"Removed {p}")
 
                         # Refresh folder
                         self.plot_folder_handler(change=folder)
                     except FileNotFoundError:
-                        print(f"Could not remove {p}")
+                        hash_print(f"Could not remove {p}")
 
             display(button_delete_data)
 
@@ -5866,7 +5826,7 @@ class Interface():
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
             self.plot_folder_handler(change=folder)
-            print("Cleared window.")
+            hash_print("Cleared window.")
             clear_output(True)
 
     # Non-Widgets interactive functions
@@ -5885,7 +5845,7 @@ class Interface():
                 data_already_rotated = f['rotation'][...]
 
         if not data_already_rotated:
-            print("Rotating SIXS data ...")
+            hash_print("Rotating SIXS data ...")
             with tb.open_file(self.Dataset.path_to_data, "a") as f:
                 # Get data
                 try:
@@ -5950,7 +5910,7 @@ class Interface():
                     print("Could not overwrite data ><")
 
         else:
-            print("Data already rotated ...")
+            hash_print("Data already rotated ...")
 
     def extract_metadata(self):
         """Needs Dataset to be corrected beforehand Extract meaningful data and
@@ -6071,14 +6031,14 @@ class Interface():
             # Save
             if isinstance(self.metadata_csv_file, str):
                 result.to_csv(self.metadata_csv_file, index=False)
-                print(f"Saved logs in {self.metadata_csv_file}")
+                hash_print(f"Saved logs in {self.metadata_csv_file}")
             else:
                 self.metadata_csv_file = self.Dataset.root_folder + "/metadata.csv"
                 result.to_csv(self.metadata_csv_file, index=False)
-                print(f"Saved logs in {self.metadata_csv_file}")
+                hash_print(f"Saved logs in {self.metadata_csv_file}")
 
         except (IndexError, TypeError):
-            print(
+            hash_print(
                 f"Could not find any .h5 file in {self.preprocessing_folder}")
 
     # Below are handlers
@@ -6437,3 +6397,23 @@ class Interface():
 
         finally:
             self.tab_facet.children[2].options = vtk_files
+
+
+def hash_print(
+    string_to_print,
+    hash_line_before=True,
+    hash_line_after=True,
+    new_line_before=True,
+    new_line_after=True
+):
+    if new_line_before:
+        print()
+    hash_line = "#" * len(string_to_print)
+    if hash_line_before:
+        print(hash_line)
+    print(string_to_print)
+    if hash_line_after:
+        print(hash_line)
+
+    if new_line_after:
+        print()

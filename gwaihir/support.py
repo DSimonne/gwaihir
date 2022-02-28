@@ -44,7 +44,6 @@ class SupportTools():
                     raise AttributeError("Please provide a saving_directory.")
         else:
             self.saving_directory = saving_directory
-        print("Saving directory:", self.saving_directory)
 
     def extract_support(self, compute=True):
         """Extract support as a 3D array of 0 et 1 from a reconstruction.
@@ -62,23 +61,28 @@ class SupportTools():
                         support = f.root.entry_1.image_1.mask[:]
 
                         # Save support
+                        print(
+                            "\n##########################################################################################"
+                        )
                         np.savez(self.saving_directory +
                                  "extracted_support.npz", support=support)
+                        print(f"\nSaved support in {self.saving_directory} as:")
+                        print(f"\textracted_support.npz")
                         print(
-                            f"Saved support in {self.saving_directory} as \
-                            extracted_support.npz")
+                            "##########################################################################################\n"
+                        )
                         plot.plot_3d_slices(support, log="interact")
                 except tb.NoSuchNodeError:
-                    print("Data type not supported")
+                    hash_print("Data type not supported")
 
             # elif self.self.path_to_data.endswith(".npz"):
 
             else:
-                print("Data type not supported")
+                hash_print("Data type not supported")
 
         else:
             clear_output(True)
-            print("Set compute to true to continue")
+            hash_print("Set compute to true to continue")
 
     def gaussian_convolution(self, sigma, threshold, compute=True):
         """Apply a gaussian convolution to the support, to avoid having holes
@@ -99,27 +103,34 @@ class SupportTools():
                     print("Could not load 'data' or 'support' array from \
                         file.")
             except ValueError:
-                print("Data type not supported")
+                hash_print("Data type not supported")
 
             try:
                 bigdata = 100 * old_support
                 conv_support = np.where(gaussian_filter(
                     bigdata, sigma) > threshold, 1, 0)
-
+                print(
+                    "\n##########################################################################################"
+                )
                 np.savez(
                     f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
                     oldsupport=old_support, support=conv_support)
 
+
+                print(f"\nSaved support in {self.saving_directory} as:")
+                print(f"\tfilter_sig{sigma}_t{threshold}")
                 print(
-                    f"Support saved in {self.saving_directory} as \
-                    \nfilter_sig{sigma}_t{threshold}")
+                    "##########################################################################################\n"
+                )
+
                 plot.plot_3d_slices(conv_support, log="interact")
+
             except UnboundLocalError:
                 pass
 
         else:
             clear_output(True)
-            print("Set compute to true to continue")
+            hash_print("Set compute to true to continue")
 
     def compute_support(self, threshold, compute=True):
         """Create support from data, based on maximum value of electronic
@@ -140,9 +151,10 @@ class SupportTools():
                         electronic_density = f.root.entry_1.data_1.data[:][0]
 
                     print(
-                        f"Shape of real space complex electronic density array \
-                        {np.shape(electronic_density)}"
+                        "\n##########################################################################################"
                     )
+                    print("Shape of real space complex electronic density array:")
+                    print(f"\t{np.shape(electronic_density)}")
 
                     # Find max value in image, we work with the module
                     amp = np.abs(electronic_density)
@@ -154,21 +166,43 @@ class SupportTools():
                     # Check % occupied by the support
                     rocc = np.where(support == 1)
                     rnocc = np.where(support == 0)
-                    print(
-                        f"Percentage of 3D array occupied by support:\n\
-                        {np.shape(rocc)[1] / np.shape(rnocc)[1]}"
-                    )
+
+                    print("Percentage of 3D array occupied by support:")
+                    print(f"\t{np.shape(rocc)[1] / np.shape(rnocc)[1]}")
 
                     # Save support
                     np.savez(self.saving_directory +
                              "computed_support.npz", support=support)
+                    print(f"\nSaved support in {self.saving_directory} as:")
+                    print(f"\tcomputed_support.npz")
                     print(
-                        f"Saved support in {self.saving_directory} as \
-                        computed_support.npz")
+                        "##########################################################################################\n"
+                    )
+
                     plot.plot_3d_slices(support, log="interact")
             except tb.HDF5ExtError:
-                print("Data type not supported")
+                hash_print("Data type not supported")
 
         else:
             clear_output(True)
-            print("Set compute to true to continue")
+            hash_print("Set compute to true to continue")
+
+
+def hash_print(
+    string_to_print,
+    hash_line_before=True,
+    hash_line_after=True,
+    new_line_before=True,
+    new_line_after=True
+):
+    if new_line_before:
+        print()
+    hash_line = "#" * len(string_to_print)
+    if hash_line_before:
+        print(hash_line)
+    print(string_to_print)
+    if hash_line_after:
+        print(hash_line)
+
+    if new_line_after:
+        print()
