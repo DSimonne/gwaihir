@@ -1087,7 +1087,8 @@ class Interface():
             iobs=widgets.Dropdown(
                 options=[""]
                 + sorted([os.path.basename(f) for f in
-                          glob.glob(os.getcwd() + "*.npz")]),
+                          glob.glob(os.getcwd() + "*.npz")],
+                          key=os.path.getmtime),
                 description='Dataset',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1095,7 +1096,8 @@ class Interface():
             mask=widgets.Dropdown(
                 options=[""]
                 + sorted([os.path.basename(f) for f in
-                          glob.glob(os.getcwd() + "*.npz")]),
+                          glob.glob(os.getcwd() + "*.npz")],
+                          key=os.path.getmtime),
                 description='Mask',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1103,7 +1105,8 @@ class Interface():
             support=widgets.Dropdown(
                 options=[""]
                 + sorted([os.path.basename(f) for f in
-                          glob.glob(os.getcwd() + "*.npz")]),
+                          glob.glob(os.getcwd() + "*.npz")],
+                          key=os.path.getmtime),
                 value="",
                 description='Support',
                 layout=Layout(width='90%'),
@@ -1112,7 +1115,8 @@ class Interface():
             obj=widgets.Dropdown(
                 options=[""]
                 + sorted([os.path.basename(f) for f in
-                          glob.glob(os.getcwd() + "*.npz")]),
+                          glob.glob(os.getcwd() + "*.npz")],
+                          key=os.path.getmtime),
                 value="",
                 description='Object',
                 layout=Layout(width='90%'),
@@ -1565,7 +1569,8 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             csv_file=widgets.Dropdown(
-                options=sorted(glob.glob(os.getcwd()+"*.csv")),
+                options=sorted(glob.glob(os.getcwd()+"*.csv"),
+                    key=os.path.getmtime),
                 description='csv file in subdirectories:',
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -2120,7 +2125,8 @@ class Interface():
                     glob.glob(os.getcwd() + "/*.h5")
                     + glob.glob(os.getcwd() + "/*.cxi")
                     + glob.glob(os.getcwd() + "/*.npy")
-                    + glob.glob(os.getcwd() + "/*.npz"))],
+                    + glob.glob(os.getcwd() + "/*.npz"),
+                    key=os.path.getmtime)],
                 description='Compatible file list',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2198,7 +2204,8 @@ class Interface():
                     + glob.glob(os.getcwd() + "/*.npz")
                     + glob.glob(os.getcwd() + "/*.cxi")
                     + glob.glob(os.getcwd() + "/*.h5")
-                    + glob.glob(os.getcwd() + "/*.png"))],
+                    + glob.glob(os.getcwd() + "/*.png"),
+                    key=os.path.getmtime)],
                 rows=10,
                 description='Compatible file list',
                 layout=Layout(width='90%'),
@@ -2267,7 +2274,8 @@ class Interface():
                 style={'description_width': 'initial'}),
 
             vtk_file=widgets.Dropdown(
-                options=sorted(glob.glob(os.getcwd()+"*.vtk")),
+                options=sorted(glob.glob(os.getcwd()+"*.vtk"),
+                    key=os.path.getmtime),
                 description='vtk file in subdirectories:',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -3322,7 +3330,7 @@ class Interface():
                     iobs = np.load(self.Dataset.iobs)["data"]
                     print("\tCXI input: loading data")
                 except KeyError:
-                    print("\"data\" key does not exist.")
+                    print("\t\"data\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
                 iobs = bin_data(iobs, self.Dataset.rebin)
@@ -3348,7 +3356,7 @@ class Interface():
                     print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
                         nb, nb * 100 / mask.size))
                 except KeyError:
-                    print("\"mask\" key does not exist.")
+                    print("\t\"mask\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
                 mask = bin_data(mask, self.Dataset.rebin)
@@ -3369,21 +3377,21 @@ class Interface():
                     support = np.load(self.Dataset.support)["data"]
                     print("\tCXI input: loading support")
                 except (FileNotFoundError, ValueError):
-                    print("File not supported or does not exist.")
+                    print("\tFile not supported or does not exist.")
                 except KeyError:
-                    print("\"data\" key does not exist.")
+                    print("\t\"data\" key does not exist.")
                     try:
                         support = np.load(self.Dataset.support)["support"]
                         print("\tCXI input: loading support")
                     except KeyError:
-                        print("\"support\" key does not exist.")
+                        print("\t\"support\" key does not exist.")
                         try:
                             support = np.load(self.Dataset.support)["obj"]
                             print("\tCXI input: loading support")
                         except KeyError:
                             print(
-                                "\"obj\" key does not exist."
-                                "Could not load support array."
+                                "\t\"obj\" key does not exist."
+                                "\t--> Could not load support array."
                             )
 
             if self.Dataset.rebin != (1, 1, 1):
@@ -3405,7 +3413,7 @@ class Interface():
                     obj = np.load(self.Dataset.obj)["data"]
                     print("\tCXI input: loading object")
                 except KeyError:
-                    print("\"data\" key does not exist.")
+                    print("\t\"data\" key does not exist.")
 
             if self.Dataset.rebin != (1, 1, 1):
                 obj = bin_data(obj, self.Dataset.rebin)
@@ -5367,8 +5375,7 @@ class Interface():
                                         f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.scan_name}.cxi")
                                 except AttributeError:
                                     print(
-                                        "Initialize the directories first to save \
-                                        the figures and data ...")
+                                        "Initialize the directories first to save the figures and data ...")
 
                 @ button_view_particle.on_click
                 def action_button_view_particle(selfbutton):
@@ -6211,11 +6218,13 @@ class Interface():
 
         try:
             for x in os.walk(change.new):
-                csv_files += sorted(glob.glob(f"{x[0]}/*.csv"))
+                csv_files += sorted(glob.glob(f"{x[0]}/*.csv"),
+                    key=os.path.getmtime)
 
         except AttributeError:
             for x in os.walk(change):
-                csv_files += sorted(glob.glob(f"{x[0]}/*.csv"))
+                csv_files += sorted(glob.glob(f"{x[0]}/*.csv"),
+                    key=os.path.getmtime)
 
         finally:
             self.tab_data_frame.children[2].options = csv_files
@@ -6224,43 +6233,46 @@ class Interface():
         """Handles changes on the widget used to load a data file."""
         try:
             list_all_npz = [os.path.basename(f) for f in sorted(
-                glob.glob(change.new + "/*.npz"))]
+                glob.glob(change.new + "/*.npz"),
+                    key=os.path.getmtime)]
 
             list_probable_iobs_files = [os.path.basename(f) for f in sorted(
-                glob.glob(change.new + "/*_pynx_align*.npz"))]
+                glob.glob(change.new + "/*_pynx_align*.npz"),
+                    key=os.path.getmtime)]
 
             list_probable_mask_files = [os.path.basename(f) for f in sorted(
-                glob.glob(change.new + "/*maskpynx*.npz"))]
+                glob.glob(change.new + "/*maskpynx*.npz"),
+                    key=os.path.getmtime)]
 
             # support list
             self._list_widgets_phase_retrieval.children[4].options = [""]\
                 + [os.path.basename(f) for f in sorted(
-                    glob.glob(change.new + "/*.npz"))]
+                    glob.glob(change.new + "/*.npz"), key=os.path.getmtime)]
 
             # obj list
             self._list_widgets_phase_retrieval.children[5].options = [""]\
                 + [os.path.basename(f) for f in sorted(
-                    glob.glob(change.new + "/*.npz"))]
+                    glob.glob(change.new + "/*.npz"), key=os.path.getmtime)]
 
         except AttributeError:
             list_all_npz = [os.path.basename(f) for f in sorted(
-                glob.glob(change + "/*.npz"))]
+                glob.glob(change + "/*.npz"), key=os.path.getmtime)]
 
             list_probable_iobs_files = [os.path.basename(f) for f in sorted(
-                glob.glob(change + "/*_pynx_align*.npz"))]
+                glob.glob(change + "/*_pynx_align*.npz"), key=os.path.getmtime)]
 
             list_probable_mask_files = [os.path.basename(f) for f in sorted(
-                glob.glob(change + "/*maskpynx*.npz"))]
+                glob.glob(change + "/*maskpynx*.npz"), key=os.path.getmtime)]
 
             # support list
             self._list_widgets_phase_retrieval.children[4].options = [""]\
                 + [os.path.basename(f) for f in sorted(
-                    glob.glob(change + "/*.npz"))]
+                    glob.glob(change + "/*.npz"), key=os.path.getmtime)]
 
             # obj list
             self._list_widgets_phase_retrieval.children[5].options = [""]\
                 + [os.path.basename(f) for f in sorted(
-                    glob.glob(change + "/*.npz"))]
+                    glob.glob(change + "/*.npz"), key=os.path.getmtime)]
 
         finally:
             # Find probable iobs file
@@ -6349,7 +6361,8 @@ class Interface():
                 glob.glob(change.new + "/*.h5")
                 + glob.glob(change.new + "/*.cxi")
                 + glob.glob(change.new + "/*.npy")
-                + glob.glob(change.new + "/*.npz"))
+                + glob.glob(change.new + "/*.npz"),
+                key=os.path.getmtime)
             ]
 
         except AttributeError:
@@ -6357,7 +6370,8 @@ class Interface():
                 glob.glob(change + "/*.h5")
                 + glob.glob(change + "/*.cxi")
                 + glob.glob(change + "/*.npy")
-                + glob.glob(change + "/*.npz"))
+                + glob.glob(change + "/*.npz"),
+                key=os.path.getmtime)
             ]
 
         finally:
@@ -6371,7 +6385,8 @@ class Interface():
                 + glob.glob(change.new + "/*.npz")
                 + glob.glob(change.new + "/*.cxi")
                 + glob.glob(change.new + "/*.h5")
-                + glob.glob(change.new + "/*.png"))
+                + glob.glob(change.new + "/*.png"),
+                key=os.path.getmtime)
             ]
 
         except AttributeError:
@@ -6380,7 +6395,8 @@ class Interface():
                 + glob.glob(change + "/*.npz")
                 + glob.glob(change + "/*.cxi")
                 + glob.glob(change + "/*.h5")
-                + glob.glob(change + "/*.png"))
+                + glob.glob(change + "/*.png"),
+                key=os.path.getmtime)
             ]
 
         finally:
@@ -6393,11 +6409,13 @@ class Interface():
 
         try:
             for x in os.walk(change.new):
-                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"))
+                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
+                    key=os.path.getmtime)
 
         except AttributeError:
             for x in os.walk(change):
-                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"))
+                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
+                    key=os.path.getmtime)
 
         finally:
             self.tab_facet.children[2].options = vtk_files

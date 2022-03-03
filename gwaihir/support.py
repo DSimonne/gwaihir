@@ -64,7 +64,7 @@ class SupportTools():
                         print(
                             "\n##########################################################################################"
                         )
-                        np.savez(self.saving_directory +
+                        np.savez_compressed(self.saving_directory +
                                  "extracted_support.npz", support=support)
                         print(f"Saved support in {self.saving_directory} as:")
                         print(f"\textracted_support.npz")
@@ -112,7 +112,7 @@ class SupportTools():
                 print(
                     "\n##########################################################################################"
                 )
-                np.savez(
+                np.savez_compressed(
                     f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
                     oldsupport=old_support, support=conv_support)
 
@@ -171,7 +171,7 @@ class SupportTools():
                     print(f"\t{np.shape(rocc)[1] / np.shape(rnocc)[1]}")
 
                     # Save support
-                    np.savez(self.saving_directory +
+                    np.savez_compressed(self.saving_directory +
                              "computed_support.npz", support=support)
                     print(f"Saved support in {self.saving_directory} as:")
                     print(f"\tcomputed_support.npz")
