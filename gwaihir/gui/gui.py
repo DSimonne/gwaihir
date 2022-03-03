@@ -4216,7 +4216,10 @@ class Interface():
                 print(f"\t{os.path.basename(filename)}")
                 with tb.open_file(filename, "r") as f:
                     data = f.root.entry_1.image_1.data[:]
-                    filtering_criteria_value[filename] = np.std(np.abs(data))
+                    amp = np.abs(data)
+                    # Skip values near 0
+                    meaningful_data = amp[amp > 0.05 * amp.max()]
+                    filtering_criteria_value[filename] = np.std(amp)
 
             # Sort files
             sorted_dict = sorted(
