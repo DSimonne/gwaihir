@@ -994,16 +994,16 @@ def plot_data(
                              ):
                 if axplot == "xy":
                     dt = data[:, :, i]
-                    x_label = "x"
-                    y_label = "y"
+                    x_label = "y"
+                    y_label = "x"
                 elif axplot == "yz":
                     dt = data[i, :, :]
-                    x_label = "y"
-                    y_label = "z"
+                    x_label = "z"
+                    y_label = "y"
                 elif axplot == "xz":
                     dt = data[:, i, :]
-                    x_label = "x"
-                    y_label = "z"
+                    x_label = "z"
+                    y_label = "x"
 
                 else:
                     raise TypeError("Choose xy, yz or xz as axplot.")
@@ -1045,7 +1045,17 @@ def plot_data(
                 #     plt.show()
 
 
-def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="YlGnBu_r", title=None, x_label="x", y_label="y"):
+def plot_2d_image(
+    two_d_array,
+    fontsize=15,
+    fig=None,
+    ax=None,
+    log=False,
+    cmap="YlGnBu_r",
+    title=None,
+    x_label="x",
+    y_label="y"
+):
     """Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
@@ -1113,8 +1123,15 @@ def plot_2d_image(two_d_array, fontsize=15, fig=None, ax=None, log=False, cmap="
         return None
 
 
-def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnBu_r", title=None):
-    """Create figure for 3d data.
+def plot_3d_slices(
+    data_array,
+    fontsize=15,
+    figsize=None,
+    log=False,
+    cmap="YlGnBu_r",
+    title=None
+):
+    """Plot 3 slices for 3d data.
 
     :param data_array: np.ndarray to plotn must be 3D
     :param fontsize: default 15
@@ -1147,7 +1164,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
         two_d_array = data_array[shape[0]//2, :, :]
         img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
                               ax=axs[0], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="y", y_label="z")
+                              x_label="z", y_label="y")
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[0]).append_axes(
@@ -1159,7 +1176,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
         two_d_array = data_array[:, shape[1]//2, :]
         img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
                               ax=axs[1], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="x", y_label="z")
+                              x_label="z", y_label="x")
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[1]).append_axes(
@@ -1171,7 +1188,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
         two_d_array = data_array[:, :, shape[2]//2]
         img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
                               ax=axs[2], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="x", y_label="y")
+                              x_label="y", y_label="x")
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[2]).append_axes(
@@ -1222,7 +1239,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
                 two_d_array = data_array[shape[0]//2, :, :]
                 img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
                                       ax=axs[0], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="y", y_label="z")
+                                      fontsize=fontsize, x_label="z", y_label="y")
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(axs[0]).append_axes(
@@ -1235,7 +1252,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
                 two_d_array = data_array[:, shape[1]//2, :]
                 img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
                                       ax=axs[1], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="x", y_label="z")
+                                      fontsize=fontsize, x_label="z", y_label="x")
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(axs[1]).append_axes(
@@ -1248,7 +1265,7 @@ def plot_3d_slices(data_array, fontsize=15, figsize=None, log=False, cmap="YlGnB
                 two_d_array = data_array[:, :, shape[2]//2]
                 img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
                                       ax=axs[2], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="x", y_label="y")
+                                      fontsize=fontsize, x_label="y", y_label="x")
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(axs[2]).append_axes(
