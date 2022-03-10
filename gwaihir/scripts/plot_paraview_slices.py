@@ -3,6 +3,10 @@
 
 # the path needs to be changed to #!usr/bin/pvpython
 
+# can be used in the command line like this :
+# plot_paraview_slices.py reconstructions/vti_files/S3572_amp-disp-strain_mode_avg3_apodize_blackman_crystalframe.vti strain 0.5
+# will be improved further soon
+
 #### import the simple module from the paraview
 from paraview.simple import *
 
