@@ -82,29 +82,30 @@ class Interface:
         # Plotting tool
         self.plot_only = plot_only
 
-        # Get path to scripts folder
-        self.cwd = os.getcwd()
-        self.path_package = inspect.getfile(gwaihir).split("__")[0]
-        self.path_scripts = self.path_package.split("/lib/python")[0] + "/bin"
-        print(
-            f"Using `{self.path_scripts}`\n"
-            "as absolute path to scripts containing folder.\n"
-            "This should be correct if gwaihir was installed in an environment.\n"
-            "Otherwise change self.path_scripts attribute to the correct folder.\n"
-        )
-
-        # Get user name
-        try:
-            self.user_name = getpass.getuser()
-
+        if not plot_only:
+            # Get path to scripts folder
+            self.path_package = inspect.getfile(gwaihir).split("__")[0]
+            self.path_scripts = self.path_package.split(
+                "/lib/python")[0] + "/bin"
             print(
-                f"Login used for batch jobs: {self.user_name}\n"
-                "If wrong login, please change self.user_name attribute")
-        except Exception as e:
-            print(
-                "Could not get user name, please create self.user_name \
-                attribute for jobs")
-            raise e
+                f"Using `{self.path_scripts}`\n"
+                "as absolute path to scripts containing folder.\n"
+                "This should be correct if gwaihir was installed in an environment.\n"
+                "Otherwise change self.path_scripts attribute to the correct folder.\n"
+            )
+
+            # Get user name
+            try:
+                self.user_name = getpass.getuser()
+
+                print(
+                    f"Login used for batch jobs: {self.user_name}\n"
+                    "If wrong login, please change self.user_name attribute")
+            except Exception as e:
+                print(
+                    "Could not get user name, please create self.user_name \
+                    attribute for jobs")
+                raise e
 
         # Initialize future attributes
         self.Dataset = None
@@ -647,7 +648,7 @@ class Interface:
 
             background_file=widgets.Text(
                 value="",
-                placeholder=f"{self.cwd}/background.npz'",
+                placeholder=f"{os.getcwd()}/background.npz'",
                 description='Background file',
                 disabled=True,
                 continuous_update=False,
@@ -657,7 +658,7 @@ class Interface:
 
             flatfield_file=widgets.Text(
                 value="",
-                placeholder=f"{self.cwd}/flatfield_maxipix_8kev.npz",
+                placeholder=f"{os.getcwd()}/flatfield_maxipix_8kev.npz",
                 description='Flatfield file',
                 disabled=True,
                 continuous_update=False,
@@ -667,7 +668,7 @@ class Interface:
 
             hotpixels_file=widgets.Text(
                 value="",
-                placeholder=f"{self.cwd}/mask_merlin.npz",
+                placeholder=f"{os.getcwd()}/mask_merlin.npz",
                 description='Hotpixels file',
                 disabled=True,
                 continuous_update=False,

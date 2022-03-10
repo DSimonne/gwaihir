@@ -26,6 +26,9 @@ No video yet.
 ## CXI file
 An example file can be downloaded at: https://www.dsimonne.eu/Attachments/align_031968.cxi
 
+# Using `Gwaihir` only as a plotting tool in Jupyter Notebook
+![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
+
 # Installing different packages
 
 First, I advise you to create a Packages directory to keep these.
