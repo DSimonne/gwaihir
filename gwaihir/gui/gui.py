@@ -56,7 +56,7 @@ except ModuleNotFoundError:
         "Make sure you have the right version of PyNX installed.")
 
 
-class Interface():
+class Interface:
     """This class is a Graphical User Interface (GUI).
 
     It makes extensive use of the ipywidgets and is thus meant to be
@@ -64,7 +64,7 @@ class Interface():
     in the "ReadMe" tab of the GUI.
     """
 
-    def __init__(self):
+    def __init__(self, plot_only=False):
         """All the widgets for the GUI are defined here. They are regrouped in
         a few tabs that design the GUI, the tabs are: tab_init tab_detector
         tab_setup tab_preprocess tab_data_frame tab_pynx tab_strain
@@ -74,8 +74,13 @@ class Interface():
             path_scripts: path to folder in which bcdi script are stored
             user_name: user_name used to login to slurm if working
                 on the ESRF cluster
+
+        :param plot_only: True to only work with the plotting tab
         """
         super(Interface, self).__init__()
+
+        # Plotting tool
+        self.plot_only = plot_only
 
         # Get path to scripts folder
         self.cwd = os.getcwd()
@@ -2317,7 +2322,7 @@ class Interface():
 
         # Create the final window
         # Ignore phase retrieval tab if PyNX could not be imported
-        if pynx_import:
+        if pynx_import and not plot_only:
             self.window = widgets.Tab(
                 children=[
                     self.tab_init,
@@ -2342,7 +2347,7 @@ class Interface():
             self.window.set_title(8, 'Facets')
             self.window.set_title(9, 'Readme')
 
-        elif not pynx_import:
+        elif not pynx_import and not plot_only:
             self.window = widgets.Tab(
                 children=[
                     self.tab_init,
@@ -2364,6 +2369,13 @@ class Interface():
             self.window.set_title(6, 'Plot data')
             self.window.set_title(7, 'Facets')
             self.window.set_title(8, 'Readme')
+
+        elif plot_only:
+            self.window = widgets.Tab(
+                children=[
+                    self.tab_data,
+                ])
+            self.window.set_title(0, 'Plot data')
 
         # Display the final window
         display(self.window)
@@ -5811,7 +5823,8 @@ class Interface():
             try:
                 display(H5Glance(filename[0]))
             except TypeError:
-                hash_print("This tool supports .nxs, .cxi or .hdf5 files only.")
+                hash_print(
+                    "This tool supports .nxs, .cxi or .hdf5 files only.")
 
         elif data_use in [
             "2D", "3D", "create_support", "extract_support",
@@ -6416,6 +6429,11 @@ class Interface():
         finally:
             self.tab_data.children[2].options = [os.path.basename(f)
                                                  for f in options]
+
+            if self.plot_only:
+                self.tab_data.children[1].options = [
+                    x[0] + "/" for x in os.walk(os.getcwd())
+                ]
 
     def vtk_file_handler(self, change):
         """List all .vtk files in change subdirectories"""
