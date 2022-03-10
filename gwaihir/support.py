@@ -65,7 +65,7 @@ class SupportTools():
                             "\n##########################################################################################"
                         )
                         np.savez_compressed(self.saving_directory +
-                                 "extracted_support.npz", support=support)
+                                            "extracted_support.npz", support=support)
                         print(f"Saved support in {self.saving_directory} as:")
                         print(f"\textracted_support.npz")
                         print(
@@ -115,7 +115,6 @@ class SupportTools():
                 np.savez_compressed(
                     f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
                     oldsupport=old_support, support=conv_support)
-
 
                 print(f"Saved support in {self.saving_directory} as:")
                 print(f"\tfilter_sig{sigma}_t{threshold}")
@@ -172,7 +171,7 @@ class SupportTools():
 
                     # Save support
                     np.savez_compressed(self.saving_directory +
-                             "computed_support.npz", support=support)
+                                        "computed_support.npz", support=support)
                     print(f"Saved support in {self.saving_directory} as:")
                     print(f"\tcomputed_support.npz")
                     print(

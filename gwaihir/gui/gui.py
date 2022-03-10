@@ -14,6 +14,7 @@ import pickle
 import inspect
 import time
 import tables as tb
+from h5glance import H5Glance
 
 # Widgets
 import ipywidgets as widgets
@@ -1088,7 +1089,7 @@ class Interface():
                 options=[""]
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")],
-                          key=os.path.getmtime),
+                         key=os.path.getmtime),
                 description='Dataset',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1097,7 +1098,7 @@ class Interface():
                 options=[""]
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")],
-                          key=os.path.getmtime),
+                         key=os.path.getmtime),
                 description='Mask',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -1106,7 +1107,7 @@ class Interface():
                 options=[""]
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")],
-                          key=os.path.getmtime),
+                         key=os.path.getmtime),
                 value="",
                 description='Support',
                 layout=Layout(width='90%'),
@@ -1116,7 +1117,7 @@ class Interface():
                 options=[""]
                 + sorted([os.path.basename(f) for f in
                           glob.glob(os.getcwd() + "*.npz")],
-                          key=os.path.getmtime),
+                         key=os.path.getmtime),
                 value="",
                 description='Object',
                 layout=Layout(width='90%'),
@@ -1570,7 +1571,7 @@ class Interface():
 
             csv_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.csv"),
-                    key=os.path.getmtime),
+                               key=os.path.getmtime),
                 description='csv file in subdirectories:',
                 continuous_update=False,
                 layout=Layout(width='90%'),
@@ -2229,6 +2230,7 @@ class Interface():
                     ("Extract support", "extract_support"),
                     ("Smooth support", "smooth_support"),
                     ("Display .png image", "show_image"),
+                    ("Display hdf5 tree", "hf_glance"),
                     ("Delete selected files", "delete")
                 ],
                 value=False,
@@ -2275,7 +2277,7 @@ class Interface():
 
             vtk_file=widgets.Dropdown(
                 options=sorted(glob.glob(os.getcwd()+"*.vtk"),
-                    key=os.path.getmtime),
+                               key=os.path.getmtime),
                 description='vtk file in subdirectories:',
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
@@ -2510,7 +2512,7 @@ class Interface():
             except (FileExistsError, PermissionError):
                 print(
                     f"{self.postprocessing_folder} exists", end="\n\n")
-            
+
             # subfolders to avoid bog
             for d in ["result_crystal", "result_lab_flat_sample", "result_laboratory"]:
                 try:
@@ -2600,7 +2602,8 @@ class Interface():
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(buttons_init)
-                    hash_print("Saving data, takes some time ...", hash_line_after=False)
+                    hash_print("Saving data, takes some time ...",
+                               hash_line_after=False)
 
                     try:
                         # Reciprocal space data
@@ -2631,10 +2634,10 @@ class Interface():
                         hash_print(
                             "Could not save reciprocal space data, select the intensity and the mask in the phase retrieval tab first.", hash_line_before=False)
 
-
                     # Facets analysis output
                     try:
-                        hash_print("Saving Facets class data", hash_line_after=False)
+                        hash_print("Saving Facets class data",
+                                   hash_line_after=False)
                         self.Facets.to_hdf5(
                             f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
                     except AttributeError:
@@ -3261,7 +3264,8 @@ class Interface():
                 )
 
                 # On lance bcdi_preprocess
-                hash_print(f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py", hash_line_after=False)
+                hash_print(
+                    f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py", hash_line_after=False)
                 hash_print(
                     f"Config file: {self.preprocessing_folder}config_preprocessing.yml", hash_line_before=False)
 
@@ -4146,10 +4150,10 @@ class Interface():
 
             elif self.run_pynx_tools == "filter":
                 self.filter_reconstructions(
-                    folder = self.Dataset.parent_folder,
-                    nb_run = None,
-                    nb_keep = self.Dataset.nb_run_keep,
-                    filter_criteria = self.Dataset.filter_criteria
+                    folder=self.Dataset.parent_folder,
+                    nb_run=None,
+                    nb_keep=self.Dataset.nb_run_keep,
+                    filter_criteria=self.Dataset.filter_criteria
                 )
 
         # Clean output
@@ -4186,7 +4190,7 @@ class Interface():
 
         The parameters are specified in the phase retrieval tab, and
         their values saved through self.initialize_phase_retrieval()
-        
+
         .param folder: parent folder to cxi files
         :param nb_run: number of times to run the optimization, if None, equal 
          to nb of files detected
@@ -5055,7 +5059,6 @@ class Interface():
                     "##########################################################################################\n"
                 )
 
-
             except AttributeError:
                 raise AttributeError(
                     "Bad values for inplane or outofplane angles")
@@ -5633,7 +5636,7 @@ class Interface():
         :param filename: file name, can be multiple
         :param data_use: e.g. "2D"
          Can be "2D", "3D", "slices", "create_support", "extract_support",
-         "smooth_support"
+         "smooth_support", "show_image", "hf_glance", "delete"
         """
 
         if data_use in ["2D", "3D"] and len(filename) == 1:
@@ -5804,8 +5807,16 @@ class Interface():
             except (FileNotFoundError, ValueError):
                 hash_print("Could not load image from file.")
 
-        elif data_use in ["2D", "3D", "create_support", "extract_support",
-                          "smooth_support"] and len(filename) != 1:
+        elif data_use == "hf_glance" and len(filename) == 1:
+            try:
+                display(H5Glance(filename[0]))
+            except TypeError:
+                hash_print("This tool supports .nxs, .cxi or .hdf5 files only.")
+
+        elif data_use in [
+            "2D", "3D", "create_support", "extract_support",
+            "smooth_support", "hf_glance"
+        ] and len(filename) != 1:
             hash_print("Please select only one file.")
 
         elif data_use == "delete":
@@ -6222,12 +6233,12 @@ class Interface():
         try:
             for x in os.walk(change.new):
                 csv_files += sorted(glob.glob(f"{x[0]}/*.csv"),
-                    key=os.path.getmtime)
+                                    key=os.path.getmtime)
 
         except AttributeError:
             for x in os.walk(change):
                 csv_files += sorted(glob.glob(f"{x[0]}/*.csv"),
-                    key=os.path.getmtime)
+                                    key=os.path.getmtime)
 
         finally:
             self.tab_data_frame.children[2].options = csv_files
@@ -6237,15 +6248,15 @@ class Interface():
         try:
             list_all_npz = [os.path.basename(f) for f in sorted(
                 glob.glob(change.new + "/*.npz"),
-                    key=os.path.getmtime)]
+                key=os.path.getmtime)]
 
             list_probable_iobs_files = [os.path.basename(f) for f in sorted(
                 glob.glob(change.new + "/*_pynx_align*.npz"),
-                    key=os.path.getmtime)]
+                key=os.path.getmtime)]
 
             list_probable_mask_files = [os.path.basename(f) for f in sorted(
                 glob.glob(change.new + "/*maskpynx*.npz"),
-                    key=os.path.getmtime)]
+                key=os.path.getmtime)]
 
             # support list
             self._list_widgets_phase_retrieval.children[4].options = [""]\
@@ -6413,12 +6424,12 @@ class Interface():
         try:
             for x in os.walk(change.new):
                 vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
-                    key=os.path.getmtime)
+                                    key=os.path.getmtime)
 
         except AttributeError:
             for x in os.walk(change):
                 vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
-                    key=os.path.getmtime)
+                                    key=os.path.getmtime)
 
         finally:
             self.tab_facet.children[2].options = vtk_files
