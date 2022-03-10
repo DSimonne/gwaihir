@@ -32,6 +32,7 @@ setuptools.setup(
         "gwaihir/scripts/run_rotate.py",
         "gwaihir/scripts/run_slurm_job.sh",
         "gwaihir/scripts/run_std_filter.py",
+        "gwaihir/scripts/plot_paraview_slices.py",
     ],
     keywords=["BCDI", "ipywidgets", "PyNX"],
     long_description=long_description,
