@@ -3276,11 +3276,17 @@ class Interface:
                     tilt_detector=self.Dataset.tilt_detector,
                 )
 
-                # On lance bcdi_preprocess
-                hash_print(
-                    f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py", hash_line_after=False)
-                hash_print(
-                    f"Config file: {self.preprocessing_folder}config_preprocessing.yml", hash_line_before=False)
+                # Run bcdi_preprocess
+                print(
+                    "\n#########################################################################################\n"
+                )
+                print(
+                    f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py")
+                print(
+                    f"Config file: {self.preprocessing_folder}config_preprocessing.yml")
+                print(
+                    "\n#########################################################################################\n"
+                )
 
                 # Construct the argument parser
                 ap = argparse.ArgumentParser()
@@ -4929,7 +4935,6 @@ class Interface:
                         pass
 
             try:
-                # Run strain.py script
                 self.create_yaml_file(
                     fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
                     scan=self.Dataset.scan,
@@ -5028,7 +5033,7 @@ class Interface:
                     save_support=self.Dataset.save_support,
                     save=self.Dataset.save,
                 )
-                # On lance bcdi_postprocessing (strain)
+                # Run bcdi_postprocessing
                 print(
                     "\n#########################################################################################\n"
                 )
@@ -5072,9 +5077,6 @@ class Interface:
                     "##########################################################################################\n"
                 )
 
-            except AttributeError:
-                raise AttributeError(
-                    "Bad values for inplane or outofplane angles")
             except KeyboardInterrupt:
                 hash_print("Strain analysis stopped by user ...")
 
@@ -5871,9 +5873,9 @@ class Interface:
     # Non-Widgets interactive functions
 
     def rotate_sixs_data(self):
-        """Python script to rotate the data for vertical configuration Only for
-        SIXS data in the vertical MED configuration.
-        self.Dataset.path_to_data must be a copy of the original data
+        """
+        Python script to rotate the data when using the vertical configuration.
+        Should work on a copy of the data !! Never use the OG data !!
         """
         # Check if already rotated
         with h5py.File(self.Dataset.path_to_data, "a") as f:
@@ -5922,8 +5924,7 @@ class Interface:
                 plt.xlabel('Delta')
                 plt.ylabel('Gamma')
                 plt.tight_layout()
-                plt.savefig(self.Dataset.root_folder
-                            + self.scan_name
+                plt.savefig(self.Dataset.scan_folder
                             + "/data/data_before_rotation.png")
                 plt.close()
 
@@ -5932,8 +5933,7 @@ class Interface:
                 plt.xlabel('Gamma')
                 plt.ylabel('Delta')
                 plt.tight_layout()
-                plt.savefig(self.Dataset.root_folder
-                            + self.scan_name
+                plt.savefig(self.Dataset.scan_folder
                             + "/data/data_after_rotation.png")
                 plt.close()
 
