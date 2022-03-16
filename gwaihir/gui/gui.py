@@ -5824,7 +5824,7 @@ class Interface:
 
         elif data_use == "hf_glance" and len(filename) == 1:
             try:
-                display(H5Glance(filename[0]))
+                display(H5Glance(folder + "/" + filename[0]))
             except TypeError:
                 hash_print(
                     "This tool supports .nxs, .cxi or .hdf5 files only.")
