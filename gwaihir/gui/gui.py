@@ -5855,8 +5855,6 @@ class Interface:
                         os.remove(folder + "/" + p)
                         hash_print(f"Removed {p}")
 
-                        # Refresh folder
-                        self.plot_folder_handler(change=folder)
                     except FileNotFoundError:
                         hash_print(f"Could not remove {p}")
 
