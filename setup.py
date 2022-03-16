@@ -5,7 +5,7 @@ with open("gwaihir/README.md", "r") as fh:
 
 setuptools.setup(
     name="gwaihir",
-    version="0.0.1",
+    version="0.0.2",
     description="Python package for BCDI data analysis",
     author="David Simonne",
     author_email="david.simonne@universite-paris-saclay.fr",
