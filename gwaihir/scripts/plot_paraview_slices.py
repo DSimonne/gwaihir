@@ -16,6 +16,7 @@ import os
 import glob
 import numpy as np
 
+
 def save_multislice(
     filename,
     array="disp",
@@ -23,8 +24,8 @@ def save_multislice(
     save_dir=None,
     pixel_width=1280,
     pixel_height=720,
-    scale_factor = 61,
-    gaussian_radius = 3.074962463378906,
+    scale_factor=61,
+    gaussian_radius=3.074962463378906,
 ):
     """
     Create a png image from a vti file, with view along its
@@ -71,9 +72,9 @@ def save_multislice(
 
     camera_position = np.array([
         [-1798,   904,   891],
-        [  902, -1936,   891],
-        [  902,   904, -1955]
-        ])
+        [902, -1936,   891],
+        [902,   904, -1955]
+    ])
 
     # disable automatic camera reset on 'Show'
     paraview.simple._DisableFirstRenderCameraReset()
@@ -106,9 +107,7 @@ def save_multislice(
     # hide data in view
     Hide(data, renderView1)
 
-
     ######### FIRST CONTOUR #########
-
 
     # create a new 'Contour'
     contour1 = Contour(registrationName='Contour1', Input=data)
@@ -185,10 +184,7 @@ def save_multislice(
     # get opacity transfer function/opacity map for array
     dispPWF = GetOpacityTransferFunction(array)
 
-
-
     ######### SECOND CONTOUR #########
-
 
     # get layout
     layout1 = GetLayout()
@@ -266,9 +262,7 @@ def save_multislice(
     # show color bar/color legend
     contour1Display_1.SetScalarBarVisibility(renderView2, True)
 
-
     ######### THIRD CONTOUR #########
-
 
     # split cell
     layout1.SplitHorizontal(2, 0.5)
@@ -343,11 +337,7 @@ def save_multislice(
     # show color bar/color legend
     contour1Display_2.SetScalarBarVisibility(renderView3, True)
 
-
-
     ########### SCALE FINAL IMAGE #############
-
-
 
     # Enter preview mode
     layout1.PreviewMode = [pixel_width, pixel_height]
@@ -355,10 +345,7 @@ def save_multislice(
     # layout/tab size in pixels
     layout1.SetSize(pixel_width, pixel_height)
 
-
-
     ########### VIEWS ########
-
 
     # current camera placement for renderView1renderView2
     renderView1.CameraPosition = camera_position[0]
@@ -377,11 +364,7 @@ def save_multislice(
     renderView3.CameraFocalPoint = focal_point
     renderView3.CameraParallelScale = camera_parallel_scale[2]
 
-
-
     ########## TEXT ###############
-
-
 
     # create a new 'Text'
     text1 = Text(registrationName='Text1')
@@ -411,11 +394,7 @@ def save_multislice(
     # update the view to ensure updated data information
     renderView1.Update()
 
-
-
     ########## COLORBAR ###############
-
-
 
     # disable automatic camera reset on 'Show'
     paraview.simple._DisableFirstRenderCameraReset()
