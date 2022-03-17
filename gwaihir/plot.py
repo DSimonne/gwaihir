@@ -20,8 +20,19 @@ from IPython.core.display import display, HTML
 # import ipyfilechooser
 import ipyvolume as ipv
 
+from bokeh.plotting import figure, show, output_file
+from bokeh.layouts import row, column
+from bokeh.io import output_notebook
+from bokeh.models import ColumnDataSource, ColorBar, LogColorMapper, LinearColorMapper
+from bokeh.models import BoxEditTool, HoverTool, CrosshairTool, LassoSelectTool
+from bokeh.models import CustomJS, Slider
+from bokeh.models.widgets import Tabs, Panel
+import bokeh.palettes as bp
+
 import warnings
 warnings.filterwarnings("ignore")
+
+output_notebook()
 
 # Classes
 
@@ -192,7 +203,6 @@ class Plotter():
                         options=rawdata.files,
                         value=rawdata.files[0],
                         description='Pick an array to load:',
-                        disabled=False,
                         style={'description_width': 'initial'}))
                 def open_npz(file):
                     # Pick an array
@@ -203,27 +213,30 @@ class Plotter():
 
                     # Plot data
                     if self.plot == "2D":
+                        print(
+                            "\n#############################################"
+                            f"\nArray shape (x, y, z): {self.data_array.shape}\n"
+                            "##############################################"
+                        )
                         self.plot_data(fontsize=self.fontsize, title=self.title,
-                                       figsize=self.figsize, log=self.log, cmap=self.cmap)
+                                       figsize=self.figsize, log=self.log,
+                                       cmap=self.cmap)
 
                     elif self.plot == "slices" and self.data_array.ndim == 3:
                         self.plot_3d_slices(fontsize=self.fontsize, title=self.title,
-                                            figsize=None, log=self.log, cmap=self.cmap)
+                                            figsize=None, log=self.log,
+                                            cmap=self.cmap)
 
                     elif self.plot == "3D" and self.data_array.ndim == 3:
                         ThreeDViewer(self.data_array)
 
                     else:
                         print(
-                            "###########################################\
-                            # \
-                            # \n"
-                            f"Loaded data array from {self.filename}\n"
+                            "\n#############################################"
+                            f"\nLoaded data array from {self.filename}\n"
                             f"\tNb of dimensions: {self.data_array.ndim}\n"
                             f"\tShape: {self.data_array.shape}\n"
-                            "############################################\
-                            # \
-                            # "
+                            "##############################################\n"
                         )
 
             except ValueError:
@@ -908,17 +921,20 @@ def plot_data(
     elif data_dimensions == 3:
         @interact(
             axplot=widgets.Dropdown(
-                options=["xy", "yz", "xz"],
+                options=[
+                    ("z", "xy"),
+                    ("x", "yz"),
+                    ("y", "xz")
+                ],
                 value="xy",
-                description='First 2 axes:',
-                disabled=False,
+                description='Slice along:',
                 style={'description_width': 'initial'}),
             ComplexNumber=widgets.ToggleButtons(
                 options=["Real", "Imaginary", "Module", "Phase"],
                 value="Module",
-                description='Plotting options',
-                disabled=False,
-                tooltip=['Plot only contour or not', "", ""])
+                description='Plotting options:',
+                tooltip=['Plot only contour or not', "", ""],
+                style={'description_width': 'initial'})
         )
         def plot_3d(
             axplot,
@@ -937,37 +953,26 @@ def plot_data(
 
             # Take the shape of that array along 2 axis
             if axplot == "xy":
-                print(
-                    f"Projection shape: {np.shape(data[:, :, 0])}")
-
                 r = np.shape(data[0, 0, :])
-                print(f"The range in the last axis is [0, {r[0]}]")
 
             elif axplot == "yz":
-                print(
-                    f"Projection shape: {np.shape(data[0, :, :])}")
-
                 r = np.shape(data[:, 0, 0])
-                print(f"The range in the last axis is [0, {r[0]}]")
 
             elif axplot == "xz":
-                print(
-                    f"Projection shape: {np.shape(data[:, 0, :])}")
-
                 r = np.shape(data[0, :, 0])
-                print(f"The range in the last axis is [0, {r[0]}]")
 
             @interact(
                 i=widgets.IntSlider(
                     min=0,
                     max=r[0]-1,
                     step=1,
-                    description='Index along last axis:',
-                    disabled=False,
+                    description=f'Index [0; {r[0]-1}]:',
                     orientation='horizontal',
                     continuous_update=False,
                     readout=True,
                     readout_format='d',
+                    layout=Layout(width='80%'),
+                    style={'description_width': 'initial'},
                 ),
                 # PlottingOptions=widgets.ToggleButtons(
                 #     options=[("2D image", "2D"),
@@ -979,18 +984,17 @@ def plot_data(
                 #     disabled=False,
                 #     button_style='',
                 #     tooltip=['Plot only contour or not', "", ""],
-                #     # icon='check'
                 # ),
-                scale=widgets.ToggleButtons(
-                    options=["linear", "logarithmic"],
-                    value="linear",
-                    description='Scale',
-                    disabled=False,
-                    style={'description_width': 'initial'}),
+                # scale=widgets.ToggleButtons(
+                #     options=["linear", "logarithmic"],
+                #     value="linear",
+                #     description='Scale',
+                #     disabled=False,
+                #     style={'description_width': 'initial'}),
             )
             def PickLastAxis(i,
                              # PlottingOptions,
-                             scale
+                             # scale
                              ):
                 if axplot == "xy":
                     dt = data[:, :, i]
@@ -1007,31 +1011,113 @@ def plot_data(
 
                 else:
                     raise TypeError("Choose xy, yz or xz as axplot.")
+                ## No BOKEH ##
+                # # Create figure
+                # plt.close()
+                # print("Figure size defaulted to", figsize)
+                # fig, ax = plt.subplots(1, 1, figsize=figsize)
 
-                # Create figure
-                plt.close()
-                print("Figure size defaulted to", figsize)
-                fig, ax = plt.subplots(1, 1, figsize=figsize)
+                # # Get scale
+                # log = scale == "logarithmic"
 
-                # Get scale
-                log = scale == "logarithmic"
+                # # Plot 2D image in interactive environment
+                # img = plot_2d_image(two_d_array=dt, log=log, fontsize=fontsize,
+                #                     fig=fig, ax=ax, cmap=cmap, title=title,
+                #                     x_label=x_label, y_label=y_label)
 
-                # Plot 2D image in interactive environment
-                img = plot_2d_image(two_d_array=dt, log=log, fontsize=fontsize,
-                                    fig=fig, ax=ax, cmap=cmap, title=title,
-                                    x_label=x_label, y_label=y_label)
+                # # Create axis for colorbar
+                # cbar_ax = make_axes_locatable(ax).append_axes(
+                #     position='right', size='5%', pad=0.1)
 
-                # Create axis for colorbar
-                cbar_ax = make_axes_locatable(ax).append_axes(
-                    position='right', size='5%', pad=0.1)
+                # # Create colorbar
+                # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
 
-                # Create colorbar
-                cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+                # # Show figure
+                # plt.tight_layout()
+                # plt.show()
+                # plt.close()
 
-                # Show figure
-                plt.tight_layout()
-                plt.show()
-                plt.close()
+                ## BOKEH ##
+                TOOLTIPS = [
+                    ("x", "$x"),
+                    ("y", "$y"),
+                    ("value", "@image"),
+                ]
+
+                # List of compatible cmaps in bokeh
+                palette = "Viridis256"
+                bokey_cmaps = [
+                    p for p in bp.__palettes__ if p.endswith("256")
+                ]
+                for p in bokey_cmaps:
+                    if cmap[1:] in p:  # skip capital letter
+                        palette = p
+                        print("Changing cmap to", p)
+
+                panels = []
+
+                for axis_type, cmapper in zip(
+                    ["Linear scale", "Logarithmic scale"],
+                    [LinearColorMapper, LogColorMapper]
+                ):
+                    # Figure
+                    fig = figure(
+                        title=f"Data slice on ({x_label}, {y_label}) for i={i}",
+                        x_axis_label=x_label,
+                        y_axis_label=y_label,
+                        toolbar_location="above",
+                        toolbar_sticky=False,
+                        tools="pan, wheel_zoom, box_zoom, reset, undo, redo, crosshair, hover",
+                        active_scroll="wheel_zoom",
+                        active_tap="auto",
+                        active_drag="box_zoom",
+                        active_inspect="auto",
+                        tooltips=TOOLTIPS,
+                        match_aspect=True,
+                    )
+
+                    # Color bar
+                    if axis_type == "Linear scale":
+                        low = np.min(dt)
+                    else:
+                        low = 0.1 if np.min(dt) == 0 else np.min(dt)
+
+                    color_mapper = cmapper(
+                        palette=palette,
+                        low=low,
+                        high=np.max(dt),
+                    )
+                    color_bar = ColorBar(color_mapper=color_mapper)
+                    fig.add_layout(color_bar, 'right')
+
+                    # Image
+                    image = fig.image(
+                        image=[dt],
+                        x=0,
+                        y=0,
+                        dw=dt.shape[0],
+                        dh=dt.shape[1],
+                        color_mapper=color_mapper,
+                    )
+
+                    # Background
+                    fig.background_fill_color = "white"
+                    fig.background_fill_alpha = 0.5
+
+                    # Title
+                    # fig.title.text_color = "olive"
+                    fig.title.text_font = "futura"
+                    fig.title.text_font_style = "bold"
+                    fig.title.text_font_size = "15px"
+
+                    panel = Panel(child=fig, title=axis_type)
+                    panels.append(panel)
+
+                tabs = Tabs(tabs=panels)
+
+                show(tabs)
+
+                ## CONTOUR ##
 
                 # if PlottingOptions == "2D":
                 # elif PlottingOptions == "2DC":

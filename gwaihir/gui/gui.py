@@ -5654,15 +5654,26 @@ class Interface:
          "smooth_support", "show_image", "hf_glance", "delete"
         """
 
-        if data_use in ["2D", "3D"] and len(filename) == 1:
+        if data_use == "2D":
             # Disable widgets
-            if data_use == "2D":
-                for w in self.tab_data.children[:-3]:
-                    w.disabled = True
+            for w in self.tab_data.children[:-3]:
+                w.disabled = True
 
-            if data_use == "3D":
-                for w in self.tab_data.children[:-2]:
-                    w.disabled = True
+            # Plot data
+            for p in filename:
+                hash_print(f"Showing {p}")
+                plot.Plotter(
+                    folder + "/" + p,
+                    plot=data_use,
+                    log="interact",
+                    cmap=cmap
+                )
+
+        if data_use == "3D" and len(filename) == 1:
+            # Disable widgets
+            for w in self.tab_data.children[:-2]:
+                w.disabled = True
+
             # Plot data
             plot.Plotter(
                 folder + "/" + filename[0],
@@ -5822,16 +5833,23 @@ class Interface:
             except (FileNotFoundError, ValueError):
                 hash_print("Could not load image from file.")
 
-        elif data_use == "hf_glance" and len(filename) == 1:
-            try:
-                display(H5Glance(folder + "/" + filename[0]))
-            except TypeError:
-                hash_print(
-                    "This tool supports .nxs, .cxi or .hdf5 files only.")
+        elif data_use == "hf_glance":
+            # Disable widgets
+            for w in self.tab_data.children[:-2]:
+                w.disabled = True
+
+            # Show tree
+            for p in filename:
+                try:
+                    hash_print(f"Showing {p}")
+                    display(H5Glance(folder + "/" + filename[0]))
+                except TypeError:
+                    hash_print(
+                        "This tool supports .nxs, .cxi or .hdf5 files only.")
 
         elif data_use in [
-            "2D", "3D", "create_support", "extract_support",
-            "smooth_support", "hf_glance"
+            "3D", "create_support", "extract_support",
+            "smooth_support",
         ] and len(filename) != 1:
             hash_print("Please select only one file.")
 
