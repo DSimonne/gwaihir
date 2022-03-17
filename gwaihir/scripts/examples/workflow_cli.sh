@@ -15,17 +15,8 @@ echo run_movetodir.py $1 $2 $3
 echo "##################################################################"
 run_movetodir.py $1 $2 $3
 
-# echo "##################################################################"
-# echo "Rotating scan..."
-# echo run_rotate.py $2 $3
-# echo "##################################################################"
-# rotate.py $2 $3
-
-# echo "##################################################################"
-# echo "Correcting angles..."
-# echo run_correct_angles_detector.py $2 $3
-# echo "##################################################################"
-# correct_angles_detector.py $2 $3
+# Only for SixS data
+# Use rotate method from gwaihir.gui.gui.Interface()
 
 echo "##################################################################"
 echo "Preprocessing scan..."
@@ -36,12 +27,23 @@ bcdi_preprocess_BCDI.py --config config_preprocessing.yml \
 	--root_folder $2$3/data \
 	--save_dir $2$3/preprocessing
 
-# echo "##################################################################"
-# echo "Ready to launch phase retrieval !"
-# echo run_slurm_job.sh --reconstruct gui --username simonne --path $2S$3/preprocessing --filtering 20 --modes true
-# echo "##################################################################"
+echo "##################################################################"
+echo "Ready to launch phase retrieval with slurm!"
+echo run_slurm_job.sh --reconstruct gui --username simonne --path $2S$3/preprocessing --filtering 20 --modes true
+echo "##################################################################"
 
+# Or use pynx scripts
 # echo "##################################################################"
-# echo "Once phase retrieval is finished and you are satisfied on the final solution, you can run the postprocessing..."
-# echo bcdi_strain_BCDI.py -save_dir $2S$3/preprocessing -data_dir $2S$3/data -scans $3 -config_file config_postprocessing_sixs.yml -reconstruction_file path\to\solution
+# echo "Ready to launch phase retrieval!"
+# echo pynx-id01.py pynx-run.txt
 # echo "##################################################################"
+# Use filtering method from gwaihir.gui.gui.Interface()
+
+echo "##################################################################"
+echo "Postprocessing scan..."
+echo bcdi_strain_BCDI.py -save_dir $2S$3/preprocessing -data_dir $2S$3/data -scans $3 -config_file config_postprocessing_sixs.yml -reconstruction_file "path\to\solution"
+echo "##################################################################"
+# bcdi_strain_BCDI.py --config_file config_postprocessing_sixs.yml \
+# 	--save_dir $2S$3/preprocessing \
+# 	--data_dir $2S$3/data -scans $3 \
+# 	--reconstruction_file "path\to\solutionfile"

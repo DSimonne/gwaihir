@@ -1,5 +1,6 @@
 #!/home/david/Documents/py39-env/bin/python3.9
 
+# Example file
 # can be used in the command line like this :
 # plot_paraview_slices.py reconstructions/vti_files/S3572_amp-disp-strain_mode_avg3_apodize_blackman_crystalframe.vti strain 0.5
 

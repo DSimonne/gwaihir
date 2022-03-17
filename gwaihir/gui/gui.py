@@ -2527,7 +2527,11 @@ class Interface:
                     f"{self.postprocessing_folder} exists", end="\n\n")
 
             # subfolders to avoid bog
-            for d in ["result_crystal", "result_lab_flat_sample", "result_laboratory"]:
+            for d in [
+                "result_crystal",
+                "result_lab_flat_sample",
+                "result_laboratory"
+            ]:
                 try:
                     os.mkdir(
                         f"{self.postprocessing_folder}{d}")
@@ -3173,7 +3177,9 @@ class Interface:
                 # Change data_dir and root folder
                 # depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    self.rotate_sixs_data()  # todo ADD ANOTHER BEAMLINE ? -V
+                    self.rotate_sixs_data(
+                        path_to_data=self.Dataset.path_to_data
+                    )
                     root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
@@ -3822,17 +3828,17 @@ class Interface:
 
                 # Filtering the reconstructions
                 if self.Dataset.filter_criteria == "LLK":
-                    nb_keep_LLK = self.Dataset.nb_run_keep
-                    nb_keep_std = False
+                    nb_run_keep_LLK = self.Dataset.nb_run_keep
+                    nb_run_keep_std = False
 
                 elif self.Dataset.filter_criteria == "std":
-                    nb_keep_LLK = self.Dataset.nb_run
-                    nb_keep_std = self.Dataset.nb_run_keep
+                    nb_run_keep_LLK = self.Dataset.nb_run
+                    nb_run_keep_std = self.Dataset.nb_run_keep
 
                 elif self.Dataset.filter_criteria == "LLK_standard_deviation":
-                    nb_keep_LLK = self.Dataset.nb_run_keep + \
+                    nb_run_keep_LLK = self.Dataset.nb_run_keep + \
                         (self.Dataset.nb_run - self.Dataset.nb_run_keep) // 2
-                    nb_keep_std = self.Dataset.nb_run_keep
+                    nb_run_keep_std = self.Dataset.nb_run_keep
 
                 # Clean rebin syntax
                 rebin = rebin.replace("(", "")
@@ -3850,7 +3856,7 @@ class Interface:
                     f'nb_ml = {self.Dataset.nb_ml}\n',
                     '\n',
                     f'nb_run = {self.Dataset.nb_run}\n',
-                    f'nb_run_keep = {nb_keep_LLK}\n',
+                    f'nb_run_keep = {nb_run_keep_LLK}\n',
                     '\n',
                     f'# max_size = {self.Dataset.max_size}\n',
                     'zero_mask = auto # masked pixels will start from imposed 0 and then let free\n',
@@ -3884,7 +3890,7 @@ class Interface:
                     # Runs modes directly and saves all data in a "gui_run"
                     # subdir, filter based on LLK
                     print(
-                        f"\nRunning: $ {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_keep_std} --modes true")
+                        f"\nRunning: $ {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_run_keep_std} --modes true")
                     print(
                         "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.")
                     os.system(
@@ -3897,7 +3903,7 @@ class Interface:
                             quote(self.path_scripts),
                             quote(self.user_name),
                             quote(self.preprocessing_folder),
-                            quote(str(nb_keep_std)),
+                            quote(str(nb_run_keep_std)),
                         )
                     )
 
@@ -4171,7 +4177,7 @@ class Interface:
                 self.filter_reconstructions(
                     folder=self.Dataset.parent_folder,
                     nb_run=None,
-                    nb_keep=self.Dataset.nb_run_keep,
+                    nb_run_keep=self.Dataset.nb_run_keep,
                     filter_criteria=self.Dataset.filter_criteria
                 )
 
@@ -4198,31 +4204,36 @@ class Interface:
             self.strain_folder_handler(change=self.preprocessing_folder)
 
     @ staticmethod
-    def filter_reconstructions(folder, nb_run, nb_keep, filter_criteria):
+    def filter_reconstructions(
+        folder,
+        nb_run_keep,
+        nb_run=None,
+        filter_criteria="LLK"
+    ):
         """Filter the phase retrieval output depending on a given parameter,
         for now only LLK and standard deviation are available. This allows the
         user to run a lot of reconstructions but to then automatically keep the
         "best" ones, according to this parameter. filter_criteria can take the
         values "LLK" or "standard_deviation" If you filter based on both, the
-        function will filter nb_keep/2 files by the first criteria, and the
+        function will filter nb_run_keep/2 files by the first criteria, and the
         remaining files by the second criteria.
 
         The parameters are specified in the phase retrieval tab, and
         their values saved through self.initialize_phase_retrieval()
 
         .param folder: parent folder to cxi files
-        :param nb_run: number of times to run the optimization, if None, equal 
-         to nb of files detected
         :param nb_run_keep: number of best run results to keep in the end,
          according to filter_criteria.
-        :param filter_criteria: e.g. "LLK"
+        :param nb_run: number of times to run the optimization, if None, equal
+         to nb of files detected
+        :param filter_criteria: default "LLK"
          criteria onto which the best solutions will be chosen
          possible values are ("standard_deviation", "LLK", 
          "standard_deviation_LLK", "LLK_standard_deviation")
         """
 
         # Sorting functions depending on filtering criteria
-        def filter_by_std(cxi_files, nb_keep):
+        def filter_by_std(cxi_files, nb_run_keep):
             """Use the standard deviation of the reconstructed object as
             filtering criteria.
 
@@ -4252,14 +4263,14 @@ class Interface:
 
             # Remove files
             print("\nRemoving scans:")
-            for filename, filtering_criteria_value in sorted_dict[nb_keep:]:
+            for filename, filtering_criteria_value in sorted_dict[nb_run_keep:]:
                 print(f"\t{os.path.basename(filename)}")
                 os.remove(filename)
             print(
                 "#########################################################################################\n"
             )
 
-        def filter_by_LLK(cxi_files, nb_keep):
+        def filter_by_LLK(cxi_files, nb_run_keep):
             """Use the free log-likelihood values of the reconstructed object
             as filtering criteria.
 
@@ -4288,7 +4299,7 @@ class Interface:
 
             # Remove files
             print("\nRemoving scans:")
-            for filename, filtering_criteria_value in sorted_dict[nb_keep:]:
+            for filename, filtering_criteria_value in sorted_dict[nb_run_keep:]:
                 print(f"\t{os.path.basename(filename)}")
                 os.remove(filename)
             print(
@@ -4313,18 +4324,19 @@ class Interface:
             else:
                 # only standard_deviation
                 if filter_criteria == "standard_deviation":
-                    filter_by_std(cxi_files, nb_keep)
+                    filter_by_std(cxi_files, nb_run_keep)
 
                 # only LLK
                 elif filter_criteria == "LLK":
-                    filter_by_LLK(cxi_files, nb_keep)
+                    filter_by_LLK(cxi_files, nb_run_keep)
 
                 # standard_deviation then LLK
                 elif filter_criteria == "standard_deviation_LLK":
                     if nb_run == None:
                         nb_run = len(cxi_files)
 
-                    filter_by_std(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
+                    filter_by_std(cxi_files, nb_run_keep +
+                                  (nb_run - nb_run_keep) // 2)
 
                     hash_print("Iterating on remaining files.")
 
@@ -4336,14 +4348,15 @@ class Interface:
                             f"No *LLK*.cxi files remaining in \
                             {folder}/result_scan*LLK*.cxi")
                     else:
-                        filter_by_LLK(cxi_files, nb_keep)
+                        filter_by_LLK(cxi_files, nb_run_keep)
 
                 # LLK then standard_deviation
                 elif filter_criteria == "LLK_standard_deviation":
                     if nb_run == None:
                         nb_run = len(cxi_files)
 
-                    filter_by_LLK(cxi_files, nb_keep + (nb_run - nb_keep) // 2)
+                    filter_by_LLK(cxi_files, nb_run_keep +
+                                  (nb_run - nb_run_keep) // 2)
 
                     hash_print("Iterating on remaining files.")
 
@@ -4355,7 +4368,7 @@ class Interface:
                             f"No *LLK*.cxi files remaining in \
                             {folder}/result_scan*LLK*.cxi")
                     else:
-                        filter_by_std(cxi_files, nb_keep)
+                        filter_by_std(cxi_files, nb_run_keep)
 
                 else:
                     hash_print("No filtering")
@@ -5888,13 +5901,19 @@ class Interface:
 
     # Non-Widgets interactive functions
 
-    def rotate_sixs_data(self):
+    @ staticmethod
+    def rotate_sixs_data(
+        path_to_data,
+    ):
         """
         Python script to rotate the data when using the vertical configuration.
         Should work on a copy of the data !! Never use the OG data !!
         """
+        # Define save folder
+        save_folder = os.path.dirname(path_to_data)
+
         # Check if already rotated
-        with h5py.File(self.Dataset.path_to_data, "a") as f:
+        with h5py.File(path_to_data, "a") as f:
             try:
                 f.create_dataset("rotation", data=True)
                 data_already_rotated = False
@@ -5903,7 +5922,7 @@ class Interface:
 
         if not data_already_rotated:
             hash_print("Rotating SIXS data ...")
-            with tb.open_file(self.Dataset.path_to_data, "a") as f:
+            with tb.open_file(path_to_data, "a") as f:
                 # Get data
                 try:
                     # if rocking_angle == "omega":
@@ -5915,12 +5934,12 @@ class Interface:
                     # elif rocking_angle == "mu":
                     #     data_og = f.root.com.scan_data.merlin_image[:]
                     print("Calling merlin the enchanter in SBS...")
-                    self.Dataset.scan_type = "SBS"
+                    scan_type = "SBS"
                 except tb.NoSuchNodeError:
                     try:
                         data_og = f.root.com.scan_data.self_image[:]
                         print("Calling merlin the enchanter in FLY...")
-                        self.Dataset.scan_type = "FLY"
+                        scan_type = "FLY"
                     except tb.NoSuchNodeError:
                         print("This data does not result from Merlin :/")
 
@@ -5940,8 +5959,7 @@ class Interface:
                 plt.xlabel('Delta')
                 plt.ylabel('Gamma')
                 plt.tight_layout()
-                plt.savefig(self.Dataset.scan_folder
-                            + "/data/data_before_rotation.png")
+                plt.savefig(save_folder + "/data_before_rotation.png")
                 plt.close()
 
                 plt.figure(figsize=(16, 9))
@@ -5949,17 +5967,16 @@ class Interface:
                 plt.xlabel('Gamma')
                 plt.ylabel('Delta')
                 plt.tight_layout()
-                plt.savefig(self.Dataset.scan_folder
-                            + "/data/data_after_rotation.png")
+                plt.savefig(save_folder + "/data_after_rotation.png")
                 plt.close()
 
                 # Overwrite data in copied file
                 try:
-                    if self.Dataset.scan_type == "SBS" and index == 2:
+                    if scan_type == "SBS" and index == 2:
                         f.root.com.scan_data.data_02[:] = data
-                    elif self.Dataset.scan_type == "SBS" and index == 10:
+                    elif scan_type == "SBS" and index == 10:
                         f.root.com.scan_data.data_10[:] = data
-                    elif self.Dataset.scan_type == "FLY":
+                    elif scan_type == "FLY":
                         f.root.com.scan_data.test_image[:] = data
                 except tb.NoSuchNodeError:
                     print("Could not overwrite data ><")
