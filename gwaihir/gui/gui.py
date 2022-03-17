@@ -804,7 +804,7 @@ class Interface:
                 indent=False,
                 layout=Layout(
                     width='20%'),
-                tooltip="""used only when interpolation_method is \
+                tooltip="""Used only when interpolation_method is \
                 'linearization', if True it rotates the crystal to align q \
                 along one axis of the array""",
                 icon='check'),
@@ -2754,14 +2754,14 @@ class Interface:
         unused_label_preprocess,
         init_para
     ):
-        """Initialize the parameters used in bcdi_preprocess_BCDI.py Necessary
-        for preprocessing and postprocessing.
+        """
+        Initialize the parameters used in bcdi_preprocess_BCDI.py.
+        Necessary for preprocessing and postprocessing.
 
         If init_para is True, displays a button that allow
         the user to run the bcdi_preprocess_BCDI script
 
-        All the parameters values are then saved in a yaml
-        configuration file.
+        All the parameters values are then saved in a yaml configuration file.
 
         Parameters used in the interactive masking GUI:
 
@@ -3595,7 +3595,8 @@ class Interface:
         unused_label_run_pynx_tools,
         run_pynx_tools,
     ):
-        """Get parameters values from widgets and run phase retrieval Possible
+        """
+        Get parameters values from widgets and run phase retrieval Possible
         to run phase retrieval via the CLI (with ot without MPI) Or directly in
         python using the operators.
 
@@ -4211,7 +4212,8 @@ class Interface:
             self.strain_folder_handler(change=self.preprocessing_folder)
 
     def run_modes_decomposition(self, folder,):
-        """Decomposes several phase retrieval solutions into modes, saves only
+        """
+        Decomposes several phase retrieval solutions into modes, saves only
         the first mode to save space.
 
         :param folder: path to folder in which are stored
@@ -4254,7 +4256,8 @@ class Interface:
                 change=self.preprocessing_folder)
 
     def save_as_cxi(self, cdi_operator, path_to_cxi):
-        """We need to create a dictionnary with the parameters to save in the
+        """
+        We need to create a dictionnary with the parameters to save in the
         cxi file.
 
         :param cdi_operator: cdi object
@@ -4441,7 +4444,8 @@ class Interface:
         reconstruction_file,
         run_strain,
     ):
-        """Loading argument from strain tab widgets but also values of
+        """
+        Loading argument from strain tab widgets but also values of
         parameters used in preprocessing that are common Runs postprocessing
         script from bcdi package to extract the strain from the reconstructed
         phase. Also plots images depending on the given isosurface.
@@ -5089,7 +5093,8 @@ class Interface:
                         elev,
                         azim,
                     ):
-                        """Function to interactively visualize the two facets that
+                        """
+                        Function to interactively visualize the two facets that
                         will be chosen, to also help pick two vectors.
                         """
                         # Save parameters value
@@ -5137,7 +5142,8 @@ class Interface:
 
                         @ button_fix_facets.on_click
                         def action_button_fix_facets(selfbutton):
-                            """Fix facets to compute the new rotation matrix and
+                            """
+                            Fix facets to compute the new rotation matrix and
                             launch the data extraction.
                             """
                             clear_output(True)
@@ -5262,7 +5268,8 @@ class Interface:
         csv_file,
         show_logs
     ):
-        """Loads exterior .csv file and displays it in the GUI.
+        """
+        Loads exterior .csv file and displays it in the GUI.
 
         :param parent_folder: all .csv files in the parent_folder subsirectories
          will be shown in the dropdown list.
@@ -5419,9 +5426,7 @@ class Interface:
             )
 
             def support_handler(change):
-                """Handles changes on the widget used for the
-                initialization.
-                """
+                """Handles changes on the widget used for the initialization."""
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -5492,9 +5497,7 @@ class Interface:
             )
 
             def support_handler(change):
-                """Handles changes on the widget used for the
-                initialization.
-                """
+                """Handles changes on the widget used for the initialization."""
                 if not change.new:
                     window_support.children[0].disabled = False
 
@@ -5602,12 +5605,6 @@ class Interface:
                 The output DataFrame can be opened in the `Logs` tab.
                 The "View particle" tool helps you visualizing the particle
                 facets.
-                """)
-
-        elif contents == "Tutorial":
-            clear_output(True)
-            print("""
-
                 """)
 
         elif contents is "GUI":
