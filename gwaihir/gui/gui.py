@@ -2398,17 +2398,15 @@ class Interface:
         Mandatory to run before any other step
 
         :param sample_name: e.g. "S"
-         str or list of str of sample names (string in front of the scan \
-         number in the folder name). If only one name is indicated, it will be \
-         repeated to match the number of scans.
+         str of sample names (usually string in front of the scan number in the
+         folder name).
         :param scan: e.g. 11
-         scan number or list of scan numbers
+         scan number
         :param data_dir: e.g. None
          use this to override the beamline default search path for the data
-        :param root_folder: e.g. "C:/Users/Jerome/Documents/data/dataset_ID01/"
-         folder of the experiment, where all scans are stored
+        :param root_folder: folder of the experiment, where all scans are stored
         :param comment: string use in filenames when saving
-        :param debug: e.g. False. True to see plots
+        :param debug: e.g. False. True to see extra plots to help with debugging
         :param matplotlib_backend: e.g. "Qt5Agg"
          Backend used in script, change to "Agg" to make sure the figures are
          saved, not compatible with interactive masking. Other possibilities
@@ -2580,7 +2578,6 @@ class Interface:
             self.vtk_file_handler(change=self.postprocessing_folder)
 
             # Only allow to save data if PyNX is imported to avoid errors
-            # PyNX is needed to create the cxi file
             if pynx_import:
                 # Button to save data
                 button_save_as_cxi = Button(
@@ -2617,6 +2614,8 @@ class Interface:
                         # Reciprocal space data
                         hash_print(
                             "Saving diffraction data and mask selected in the PyNX tab...")
+
+                        # Define cxi operator
                         self.initialize_cdi_operator()
 
                         # Real space data
@@ -2625,12 +2624,12 @@ class Interface:
                         )
                         if os.path.isfile(self.Dataset.reconstruction_file):
                             self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename,  # Defined earlier so no error
+                                cxi_filename=self.cxi_filename,
                                 reconstruction_filename=self.Dataset.reconstruction_file,
                             )
                         else:
                             self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename,  # Defined earlier so no error
+                                cxi_filename=self.cxi_filename,
                                 reconstruction_filename=False,
                             )
 
@@ -2639,8 +2638,10 @@ class Interface:
                         )
 
                     except (AttributeError, UnboundLocalError):
-                        hash_print(
-                            "Could not save reciprocal space data, select the intensity and the mask in the phase retrieval tab first.", hash_line_before=False)
+                        print(
+                            "Could not save reciprocal space data, select the\
+                            \n intensity and the mask files in the phase\
+                            \n retrieval tab first")
 
                     # Facets analysis output
                     try:
@@ -3345,13 +3346,16 @@ class Interface:
     # Phase retrieval
 
     def initialize_cdi_operator(self, save_as_cxi=True):
-        """Initialize the cdi operator by processing the possible inputs: iobs,
-        mask, support, obj Will also crop and center the data if specified
+        """
+        Initialize the cdi operator by processing the possible inputs:
+            iobs, mask, support, obj
+        Will also crop and center the data if specified.
         Loads phase retrieval tab parameters values.
 
         :param save_as_cxi: e.g. True
-         Save the instanced cdi object as .cxi following
-         the cxi convention
+         Save the instanced cdi object as .cxi following the cxi convention
+
+        return: cdi operator
         """
         if self.Dataset.iobs not in ("", None):
             if self.Dataset.iobs.endswith(".npy"):
