@@ -2464,7 +2464,7 @@ class Interface:
                 self._list_widgets_preprocessing.children[42].value\
                     = self.Dataset.template_imagefile.split("/")[-1]
 
-            except (IndexError,AttributeError):
+            except (IndexError, AttributeError):
                 pass
 
             # Create final directory, if not yet existing
@@ -2598,9 +2598,7 @@ class Interface:
                     style={'description_width': 'initial'},
                     icon='step-forward')
 
-                buttons_init = widgets.HBox(
-                    [button_save_as_cxi, button_reload_previous_data])
-                display(buttons_init)
+                display(button_save_as_cxi)
 
                 @ button_save_as_cxi.on_click
                 def action_button_save_as_cxi(selfbutton):
@@ -2656,16 +2654,6 @@ class Interface:
                     print(
                         "\n#########################################################################################\n"
                     )
-
-                @ button_reload_previous_data.on_click
-                def action_reload_previous_data(selfbutton):
-                    """Create button to reload Dataset object from .cxi file."""
-                    clear_output(True)
-                    display(buttons_init)
-                    # Reload previous data that was saved as .cxi file,
-                    # initialize all related widgets values, authorize all
-                    # functions
-                    hash_print("Not implemented yet")
 
         elif not run_dir_init:
             hash_print("Cleared window.")
