@@ -16,7 +16,7 @@ echo "##################################################################"
 run_movetodir.py $1 $2 $3
 
 # Only for SixS data
-# Use rotate method from gwaihir.gui.gui.Interface()
+# Use rotate method from gwaihir.utilities
 
 echo "##################################################################"
 echo "Preprocessing scan..."
@@ -37,7 +37,7 @@ echo "##################################################################"
 # echo "Ready to launch phase retrieval!"
 # echo pynx-id01.py pynx-run.txt
 # echo "##################################################################"
-# Use filtering method from gwaihir.gui.gui.Interface()
+# Use filtering method from gwaihir.utilities
 
 echo "##################################################################"
 echo "Postprocessing scan..."

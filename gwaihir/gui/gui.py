@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import glob
 import os
 from shlex import quote
@@ -10,7 +9,6 @@ from ast import literal_eval
 import operator as operator_lib
 import getpass
 from datetime import datetime
-import pickle
 import inspect
 import time
 import tables as tb
@@ -18,13 +16,14 @@ from h5glance import H5Glance
 
 # Widgets
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import display, Markdown, Latex, clear_output, Image
+from ipywidgets import interact, Button, Layout, interactive
+from IPython.display import display, Markdown, clear_output, Image
 
 # gwaihir package
 import gwaihir
 from gwaihir import plot, support
 from gwaihir.gui import gui_iterable
+from gwaihir.utilities import *
 
 # bcdi package
 from bcdi.utils.utilities import bin_data
@@ -32,7 +31,7 @@ from bcdi.postprocessing import facet_analysis
 from bcdi.preprocessing import ReadNxs3 as rd
 from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
-from bcdi.utils.parser import add_cli_parameters, ConfigParser
+from bcdi.utils.parser import ConfigParser
 import argparse
 
 # PyNX package
@@ -46,7 +45,6 @@ try:
     from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport,\
         InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
     from pynx.cdi.runner.id01 import params
-    from pynx.cdi.widgets import CDIViewer
     from pynx.utils.math import smaller_primes
     pynx_import = True
 except ModuleNotFoundError:
@@ -57,7 +55,8 @@ except ModuleNotFoundError:
 
 
 class Interface:
-    """This class is a Graphical User Interface (GUI).
+    """
+    This class is a Graphical User Interface (GUI).
 
     It makes extensive use of the ipywidgets and is thus meant to be
     used with a jupyter notebook. Additional informations are provided
@@ -65,7 +64,8 @@ class Interface:
     """
 
     def __init__(self, plot_only=False):
-        """All the widgets for the GUI are defined here. They are regrouped in
+        """
+        All the widgets for the GUI are defined here. They are regrouped in
         a few tabs that design the GUI, the tabs are: tab_init tab_detector
         tab_setup tab_preprocess tab_data_frame tab_pynx tab_strain
         tab_data tab_facet tab_readme.
@@ -115,7 +115,6 @@ class Interface:
         self.text_file = None
         self.params = None
         self.Facets = None
-        self.metadata_csv_file = None
         self.scan_name = None
         self.preprocessing_folder = None
         self.postprocessing_folder = None
@@ -163,7 +162,7 @@ class Interface:
             root_folder=widgets.Text(
                 value=os.getcwd() + "/TestGui/",
                 placeholder="Root folder (parent to all scan directories)",
-                description='Target directory',
+                description='Target directory (root_folder)',
                 continuous_update=False,
                 layout=Layout(
                     width='90%'),
@@ -2395,9 +2394,7 @@ class Interface:
         matplotlib_backend,
         run_dir_init,
     ):
-        """Function to move file from `data_dir` to `root_folder` where it will
-        be preprocessed.
-
+        """
         Mandatory to run before any other step
 
         :param sample_name: e.g. "S"
@@ -2427,10 +2424,8 @@ class Interface:
             # Start to assign attributes
             self.Dataset.comment = comment
             self.Dataset.debug = debug
-            self.Dataset.root_folder = root_folder
             self.scan_name = self.Dataset.sample_name + str(self.Dataset.scan)
 
-            # self.matplotlib_backend = 'module://matplotlib_inline.backend_inline'
             self.matplotlib_backend = matplotlib_backend
 
             # Assign scan folder
@@ -2446,35 +2441,33 @@ class Interface:
             self.postprocessing_folder = self.Dataset.scan_folder \
                 + "postprocessing/"
 
-            # Assign data folder
-            self.Dataset.data_folder = self.Dataset.scan_folder + "data/"
-
-            # Get template_imagefile from data in data_dir, based on sixs
-            # routine, depends on mu or omega scan at sixs
+            # Get path_to_sixs_data from data in data_dir for SixS
             try:
-                self.Dataset.path_to_data = glob.glob(
+                # Try and find a mu scan
+                self.Dataset.path_to_sixs_data = glob.glob(
                     f"{self.Dataset.data_dir}*mu*{self.Dataset.scan}*")[0]
             except IndexError:
                 try:
-                    self.Dataset.path_to_data = glob.glob(
+                    # Try and find an omega scan
+                    self.Dataset.path_to_sixs_data = glob.glob(
                         f"{self.Dataset.data_dir}*omega*{self.Dataset.scan}*")[0]
                 except IndexError:
                     print("Could not find data, please specify template.")
 
+            # Get template_imagefile from path_to_sixs_data
             try:
-                print("File path:", self.Dataset.path_to_data)
-                self.Dataset.template_imagefile = self.Dataset.path_to_data.split(
+                print("File path:", self.Dataset.path_to_sixs_data)
+                self.Dataset.template_imagefile = self.Dataset.path_to_sixs_data.split(
                     "%05d" % self.Dataset.scan)[0] + "%05d.nxs"
                 print(
                     f"File template: {self.Dataset.template_imagefile}\n\n")
 
-                # Save file name
+                # Save template_imagefile in GUI
                 self._list_widgets_preprocessing.children[42].value\
                     = self.Dataset.template_imagefile.split("/")[-1]
 
-            except AttributeError:
-                self.Dataset.template_imagefile = ""
-                self.Dataset.path_to_data = ""
+            except (IndexError,AttributeError):
+                pass
 
             # Create final directory, if not yet existing
             if not os.path.isdir(self.Dataset.root_folder):
@@ -2499,12 +2492,10 @@ class Interface:
 
             # /data directory
             try:
-                os.mkdir(
-                    f"{self.Dataset.data_folder}")
-                print(
-                    f"Created {self.Dataset.data_folder}")
+                os.mkdir(f"{self.Dataset.scan_folder}/data/")
+                print(f"Created {self.Dataset.scan_folder}/data/")
             except (FileExistsError, PermissionError):
-                print(f"{self.Dataset.data_folder} exists")
+                print(f"{self.Dataset.scan_folder}/data/ exists")
 
             # /preprocessing directory
             try:
@@ -2526,7 +2517,7 @@ class Interface:
                 print(
                     f"{self.postprocessing_folder} exists", end="\n\n")
 
-            # subfolders to avoid bog
+            # Subfolders to avoid bog
             for d in [
                 "result_crystal",
                 "result_lab_flat_sample",
@@ -2538,26 +2529,26 @@ class Interface:
                 except FileExistsError:
                     pass
 
-            # Move data file
+            # Move data file to self.Dataset.scan_folder + "data/"
             try:
                 shutil.copy2(
-                    self.Dataset.path_to_data,
-                    self.Dataset.data_folder
+                    self.Dataset.path_to_sixs_data,
+                    self.Dataset.scan_folder + "data/",
                 )
+
+                # Change data_dir, only if copy successful
+                self.Dataset.data_dir = self.Dataset.scan_folder + "data/"
+
                 print(
-                    f"Copied {self.Dataset.path_to_data} to \
-                    {self.Dataset.data_folder}")
+                    f"Copied {self.Dataset.path_to_sixs_data} to \
+                    {self.Dataset.data_dir}")
 
-                # Change path_to_data, only if copy successful
-                self.Dataset.path_to_data = self.Dataset.data_folder + \
-                    os.path.basename(self.Dataset.path_to_data)
-
-                self.Dataset.data_dir = self.Dataset.data_folder  # TODO CONFUSING
+                # Change path_to_sixs_data, only if copy successful
+                self.Dataset.path_to_sixs_data = self.Dataset.data_dir \
+                    + os.path.basename(self.Dataset.path_to_sixs_data)
 
             except (FileExistsError, PermissionError, shutil.SameFileError):
-                print(
-                    f"{self.Dataset.data_folder}\
-                    {self.Dataset.path_to_data} exists")
+                print(f"File exists in {self.Dataset.scan_folder}data/")
             except (AttributeError, FileNotFoundError):
                 pass
 
@@ -3174,28 +3165,24 @@ class Interface:
                 clear_output(True)
                 display(button_run_preprocess)
 
-                # Change data_dir and root folder
-                # depending on beamline
+                # Change data_dir and root folder depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    self.rotate_sixs_data(
-                        path_to_data=self.Dataset.path_to_data
+                    rotate_sixs_data(
+                        path_to_data=self.Dataset.path_to_sixs_data
                     )
-                    root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
-                    root_folder = self.Dataset.data_dir
                     data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
 
                 elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
-                    root_folder = self.Dataset.data_dir
                     data_dir = self.Dataset.data_dir
 
                 # Create config file
-                self.create_yaml_file(
+                create_yaml_file(
                     fname=f"{self.preprocessing_folder}config_preprocessing.yml",
                     scans=self.Dataset.scan,
-                    root_folder=root_folder,
+                    root_folder=self.Dataset.root_folder,
                     save_dir=self.preprocessing_folder,
                     data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
@@ -3318,7 +3305,23 @@ class Interface:
 
                 @ button_save_metadata.on_click
                 def action_button_save_metadata(selfbutton):
-                    self.extract_metadata()
+                    try:
+                        # Get latest file
+                        metadata_file = sorted(
+                            glob.glob(
+                                f"{self.preprocessing_folder}*preprocessing*.h5"),
+                            key=os.path.getmtime)[-1]
+
+                        extract_metadata(
+                            scan_nb=self.Dataset.scan,
+                            metadata_file=metadata_file,
+                            gwaihir_dataset=self.Dataset,
+                            metadata_csv_file=self.Dataset.root_folder
+                            + "metadata.csv"
+                        )
+                    except (IndexError, TypeError):
+                        hash_print(
+                            f"Could not find any .h5 file in {self.preprocessing_folder}")
 
                     # PyNX folder, refresh
                     self._list_widgets_phase_retrieval.children[1].value\
@@ -4157,7 +4160,7 @@ class Interface:
 
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
-                        self.filter_reconstructions(
+                        filter_reconstructions(
                             self.Dataset.parent_folder,
                             self.Dataset.nb_run,
                             self.Dataset.nb_run_keep,
@@ -4174,7 +4177,7 @@ class Interface:
                 self.run_modes_decomposition(self.Dataset.parent_folder)
 
             elif self.run_pynx_tools == "filter":
-                self.filter_reconstructions(
+                filter_reconstructions(
                     folder=self.Dataset.parent_folder,
                     nb_run=None,
                     nb_run_keep=self.Dataset.nb_run_keep,
@@ -4202,178 +4205,6 @@ class Interface:
             self._list_widgets_strain.children[-4].value\
                 = self.preprocessing_folder
             self.strain_folder_handler(change=self.preprocessing_folder)
-
-    @ staticmethod
-    def filter_reconstructions(
-        folder,
-        nb_run_keep,
-        nb_run=None,
-        filter_criteria="LLK"
-    ):
-        """Filter the phase retrieval output depending on a given parameter,
-        for now only LLK and standard deviation are available. This allows the
-        user to run a lot of reconstructions but to then automatically keep the
-        "best" ones, according to this parameter. filter_criteria can take the
-        values "LLK" or "standard_deviation" If you filter based on both, the
-        function will filter nb_run_keep/2 files by the first criteria, and the
-        remaining files by the second criteria.
-
-        The parameters are specified in the phase retrieval tab, and
-        their values saved through self.initialize_phase_retrieval()
-
-        .param folder: parent folder to cxi files
-        :param nb_run_keep: number of best run results to keep in the end,
-         according to filter_criteria.
-        :param nb_run: number of times to run the optimization, if None, equal
-         to nb of files detected
-        :param filter_criteria: default "LLK"
-         criteria onto which the best solutions will be chosen
-         possible values are ("standard_deviation", "LLK", 
-         "standard_deviation_LLK", "LLK_standard_deviation")
-        """
-
-        # Sorting functions depending on filtering criteria
-        def filter_by_std(cxi_files, nb_run_keep):
-            """Use the standard deviation of the reconstructed object as
-            filtering criteria.
-
-            The lowest standard deviations are best.
-            """
-            # Keep filtering criteria of reconstruction modules in dictionnary
-            filtering_criteria_value = {}
-
-            print(
-                "\n#########################################################################################"
-            )
-            print("Computing standard deviation of object modulus for scans:")
-            for filename in cxi_files:
-                print(f"\t{os.path.basename(filename)}")
-                with tb.open_file(filename, "r") as f:
-                    data = f.root.entry_1.image_1.data[:]
-                    amp = np.abs(data)
-                    # Skip values near 0
-                    meaningful_data = amp[amp > 0.05 * amp.max()]
-                    filtering_criteria_value[filename] = np.std(amp)
-
-            # Sort files
-            sorted_dict = sorted(
-                filtering_criteria_value.items(),
-                key=operator_lib.itemgetter(1)
-            )
-
-            # Remove files
-            print("\nRemoving scans:")
-            for filename, filtering_criteria_value in sorted_dict[nb_run_keep:]:
-                print(f"\t{os.path.basename(filename)}")
-                os.remove(filename)
-            print(
-                "#########################################################################################\n"
-            )
-
-        def filter_by_LLK(cxi_files, nb_run_keep):
-            """Use the free log-likelihood values of the reconstructed object
-            as filtering criteria.
-
-            The lowest standard deviations are best. See PyNX for
-            details
-            """
-            # Keep filtering criteria of reconstruction modules in dictionnary
-            filtering_criteria_value = {}
-
-            print(
-                "\n#########################################################################################"
-            )
-            print("Extracting LLK value (poisson statistics) for scans:")
-            for filename in cxi_files:
-                print(f"\t{os.path.basename(filename)}")
-                with tb.open_file(filename, "r") as f:
-                    llk = f.root.entry_1.image_1.process_1.\
-                        results.llk_poisson[...]
-                    filtering_criteria_value[filename] = llk
-
-            # Sort files
-            sorted_dict = sorted(
-                filtering_criteria_value.items(),
-                key=operator_lib.itemgetter(1)
-            )
-
-            # Remove files
-            print("\nRemoving scans:")
-            for filename, filtering_criteria_value in sorted_dict[nb_run_keep:]:
-                print(f"\t{os.path.basename(filename)}")
-                os.remove(filename)
-            print(
-                "#########################################################################################\n"
-            )
-
-        # Main function supporting different cases
-        try:
-            print(
-                "\n#########################################################################################"
-            )
-            print(f"Iterating on files matching:")
-            print(f"\t{folder}/*LLK*.cxi")
-            cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
-            print(
-                "#########################################################################################\n"
-            )
-
-            if cxi_files == []:
-                print(f"No *LLK*.cxi files in {folder}/result_scan*LLK*.cxi")
-
-            else:
-                # only standard_deviation
-                if filter_criteria == "standard_deviation":
-                    filter_by_std(cxi_files, nb_run_keep)
-
-                # only LLK
-                elif filter_criteria == "LLK":
-                    filter_by_LLK(cxi_files, nb_run_keep)
-
-                # standard_deviation then LLK
-                elif filter_criteria == "standard_deviation_LLK":
-                    if nb_run == None:
-                        nb_run = len(cxi_files)
-
-                    filter_by_std(cxi_files, nb_run_keep +
-                                  (nb_run - nb_run_keep) // 2)
-
-                    hash_print("Iterating on remaining files.")
-
-                    cxi_files = sorted(
-                        glob.glob(f"{folder}/result_scan*LLK*.cxi"))
-
-                    if cxi_files == []:
-                        print(
-                            f"No *LLK*.cxi files remaining in \
-                            {folder}/result_scan*LLK*.cxi")
-                    else:
-                        filter_by_LLK(cxi_files, nb_run_keep)
-
-                # LLK then standard_deviation
-                elif filter_criteria == "LLK_standard_deviation":
-                    if nb_run == None:
-                        nb_run = len(cxi_files)
-
-                    filter_by_LLK(cxi_files, nb_run_keep +
-                                  (nb_run - nb_run_keep) // 2)
-
-                    hash_print("Iterating on remaining files.")
-
-                    cxi_files = sorted(
-                        glob.glob(f"{folder}/result_scan*LLK*.cxi"))
-
-                    if cxi_files == []:
-                        print(
-                            f"No *LLK*.cxi files remaining in \
-                            {folder}/result_scan*LLK*.cxi")
-                    else:
-                        filter_by_std(cxi_files, nb_run_keep)
-
-                else:
-                    hash_print("No filtering")
-        except KeyboardInterrupt:
-            hash_print("File filtering stopped by user ...")
 
     def run_modes_decomposition(self, folder,):
         """Decomposes several phase retrieval solutions into modes, saves only
@@ -4526,7 +4357,6 @@ class Interface:
         self.params["nb_er"] = self.Dataset.nb_er
         self.params["nb_ml"] = self.Dataset.nb_ml
         try:
-            self.params = params
             self.params["specfile"] = self.Dataset.specfile_name
         except AttributeError:
             pass
@@ -4859,8 +4689,10 @@ class Interface:
         self.Dataset.reconstruction_file = strain_folder + reconstruction_file
 
         if run_strain:
-            # Disable all widgets until the end of the program, will update
-            # automatticaly after
+            # Save directory
+            save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
+
+            # Disable all widgets until the end of the program
             for w in self._list_widgets_strain.children[:-1]:
                 w.disabled = True
 
@@ -4883,7 +4715,6 @@ class Interface:
                     else:
                         setattr(self.Dataset, p, literal_eval(
                             getattr(self.Dataset, p)))
-                    # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 hash_print(f"Wrong list syntax for {p}")
 
@@ -4894,7 +4725,6 @@ class Interface:
                     else:
                         setattr(self.Dataset, p, literal_eval(
                             getattr(self.Dataset, p)))
-                    # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 hash_print(f"Wrong tuple syntax for {p}")
 
@@ -4910,21 +4740,16 @@ class Interface:
 
             # Check beamline for save folder
             try:
-                # Change data_dir and root folder
-                # depending on beamline
+                # Change data_dir and root folder depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
-                    root_folder = self.Dataset.data_dir
                     data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
 
                 elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
-                    root_folder = self.Dataset.data_dir
                     data_dir = self.Dataset.data_dir
 
-                save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
             except AttributeError:
                 for w in self._list_widgets_strain.children[:-1]:
                     w.disabled = False
@@ -4937,21 +4762,11 @@ class Interface:
                     as the energy, detector distance, ...""")
                 return
 
-            # Create final directory is not yet existing
-            if not os.path.isdir(save_dir):
-                full_path = ""
-                for d in save_dir.split("/"):
-                    full_path += d + "/"
-                    try:
-                        os.mkdir(full_path)
-                    except (FileExistsError, PermissionError):
-                        pass
-
             try:
-                self.create_yaml_file(
+                create_yaml_file(
                     fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
                     scan=self.Dataset.scan,
-                    root_folder=root_folder,
+                    root_folder=self.Dataset.root_folder,
                     save_dir=save_dir,
                     data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
@@ -5139,11 +4954,14 @@ class Interface:
         vtk_file,
         load_data,
     ):
-        """Allows one to:
+        """
+        Allows one to:
 
-        load a vtk file (previously created in paraview via
-        theFacetAnalyser plugin) realign the particle by assigning a
-        vector to 2 of its facets extract information from each facet
+            Load a vtk file (previously created in paraview via the FacetAnalyser
+            plugin)
+            Realign the particle by assigning a vector to 2 of its facets
+            Extract information from each facet
+
         :param parent_folder: all .vtk files in the parent_folder subsirectories
          will be shown in the dropdown list.
         :param vtk_file: path to vtk file
@@ -5431,155 +5249,7 @@ class Interface:
             hash_print("Cleared window.")
             clear_output(True)
 
-    @ staticmethod
-    def create_yaml_file(fname, **kwargs):
-        """Create yaml file storing all keywords arguments given in input Used
-        for bcdi scripts.
-
-        :param fname: path to created yaml file
-        """
-        config_file = []
-
-        for k, v in kwargs.items():
-            if isinstance(v, str):
-                config_file.append(f"{k}: \"{v}\"")
-            elif isinstance(v, tuple):
-                if v:
-                    config_file.append(f"{k}: {list(v)}")
-                else:
-                    config_file.append(f"{k}: None")
-            elif isinstance(v, np.ndarray):
-                config_file.append(f"{k}: {list(v)}")
-            elif isinstance(v, list):
-                if v:
-                    config_file.append(f"{k}: {v}")
-                else:
-                    config_file.append(f"{k}: None")
-            else:
-                config_file.append(f"{k}: {v}")
-
-        file = os.path.basename(fname)
-        directory = fname.strip(file)
-        # Create directory
-        if not os.path.isdir(directory):
-            full_path = ""
-            for d in directory.split("/"):
-                full_path += d + "/"
-                try:
-                    os.mkdir(full_path)
-                except (FileExistsError, PermissionError):
-                    pass
-
-        with open(fname, "w") as v:
-            for line in config_file:
-                v.write(line + "\n")
-
-    # Other methods
-
-    def display_readme(self, contents):
-        """Help text about different steps in data analysis workflow.
-
-        :param contents: e.g. "Preprocessing"
-         Possible values are "Preprocessing", "Phase retrieval",
-         "Postprocessing" or "Facet analysis"
-        """
-        if contents == "Preprocessing":
-            clear_output(True)
-            print(help(self.initialize_preprocessing))
-
-        elif contents == "Phase retrieval":
-            clear_output(True)
-            print(help(self.initialize_phase_retrieval))
-
-        elif contents == "Postprocessing":
-            clear_output(True)
-            print(help(self.initialize_postprocessing))
-
-        elif contents == "Facet analysis":
-            clear_output(True)
-            print(help(facet_analysis.Facets))
-            print("""
-                The output DataFrame can be opened in the `Logs` tab.
-                The "View particle" tool helps you visualizing the particle
-                facets.
-                """)
-
-        elif contents == "Tutorial":
-            clear_output(True)
-            print("""
-
-                """)
-
-        elif contents is "GUI":
-            display(Markdown("# Welcome to `Gwaihir`"))
-            display(Markdown("Remember that a detailed tutorial on the installation of each package is "
-                             " available on the [Github](https://github.com/DSimonne/gwaihir#welcome),"
-                             " together with a video that presents the data analysis workflow."
-                             ))
-            display(Markdown("On the other tabs of this README are presented the main functions used for"
-                             " data analysis and their parameters."))
-            display(Markdown(""))
-
-            display(Markdown("# Example of parameter values"))
-            display(Markdown("## SixS data (SOLEIL)"))
-            display(Markdown(
-                "Most of the initial guesses are valid. Be careful about the energy, scan number, central pixel and detector."
-                " If you are working with the vertical configuration, make sure that the mask is correct."))
-
-            display(Markdown("## ID01 data (ESRF)"))
-            display(Markdown("* Scan number: `11`"))
-            display(Markdown(
-                "* Data directory: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/`"))
-            display(Markdown("* Detector: `Maxipix`"))
-            display(Markdown("* Template imagefile: `S11/data_mpx4_%05d.edf.gz`"))
-            display(Markdown("* Sample offsets: `(90, 0, 0)`"))
-            display(Markdown("* Sample detector distance (m): `0.50678`"))
-            display(Markdown("* X-ray energy (eV): `9000`"))
-            display(Markdown("* Beamline: `ID01`"))
-            display(Markdown(
-                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
-            display(Markdown("* Rocking angle: `outofplane`"))
-
-            display(Markdown("## P10 data (PETRA)"))
-            display(Markdown("* Sample name: `align_03`"))
-            display(Markdown("* Scan number: `11`"))
-            display(
-                Markdown("* Data directory: `/data/id01/inhouse/david/UM2022/Petra/raw/`"))
-            display(Markdown("* Detector: `Eiger4M`"))
-            display(Markdown("* Template imagefile: `_master.h5`"))
-            display(Markdown("* Sample offsets: `(0, 0, 0, 0)`"))
-            display(Markdown("* Sample detector distance (m): `0.50678`"))
-            display(Markdown("* X-ray energy (eV): `9000`"))
-            display(Markdown("* Beamline: `P10`"))
-            display(Markdown(
-                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
-            display(Markdown("* Rocking angle: `inplane`"))
-            display(Markdown("* Pixel size (in phase retrieval): `75`"))
-
-            display(Markdown("# To go further ..."))
-            display(Markdown("* All the plotting functions are accessible in `gwaihir.plot`, try to use the `Plotter` Class"
-                             " that reads all kind of numpy arrays."
-                             " e.g. `Plotter(filename=\"TestGui/S11/preprocessing/S11_maskpynx_align-q-y_norm_252_420_392_1_1_1.npz\", plot=\"2D\")`"
-                             ))
-            display(Markdown("* I highly recommend the use of [Paraview](https://www.paraview.org/) for 3D contouring."
-                             " Many tutorials can be found online: <https://www.bu.edu/tech/support/research/training-consulting/online-tutorials/paraview/>"))
-            display(Markdown(
-                "* If you saved your data in the cxi format, you can visualize it with JupyterLab !"))
-            display(Markdown("* `Qt5Agg` is a backend that does not work on remote servers, if you install `Gwaihir` on"
-                             " your local computer, you can use this backend for masking. "
-                             " We are currently working on implementing a solution in Jupyter Notebook with Bokeh."))
-            display(Markdown("* If you saved your data in the `.cxi` format, you can visualize it with JupyterLab !"
-                             " Otherwise you can use [`silx`](http://www.silx.org/doc/silx/0.7.0/applications/view.html) from the terminal"))
-
-            display(Markdown(
-                "## Type the following code to stop the scrolling in the output cell, then reload the cell."))
-            display(Markdown("`%%javascript`"))
-            display(
-                Markdown("`IPython.OutputArea.prototype._should_scroll = function(lines) {`"))
-            display(Markdown("`return false;`"))
-            display(Markdown("`}`"))
-
-            display(Markdown("To contact me <david.simonne@synchrotron-soleil.fr>"))
+    # Other tabs function
 
     def display_data_frame(
         self,
@@ -5656,8 +5326,9 @@ class Interface:
         cmap,
         data_use,
     ):
-        """Allows the user to plot an array (1D, 2D or 3D) from npz, npy or
-        .cxi files.
+        """
+        Allows the user to plot an array (1D, 2D or 3D) from npz, npy or .cxi
+        files.
 
         :param folder: folder in which the files are located
         :param cmap: cmap used for plots
@@ -5899,219 +5570,112 @@ class Interface:
             hash_print("Cleared window.")
             clear_output(True)
 
-    # Non-Widgets interactive functions
-
     @ staticmethod
-    def rotate_sixs_data(
-        path_to_data,
-    ):
+    def display_readme(contents):
         """
-        Python script to rotate the data when using the vertical configuration.
-        Should work on a copy of the data !! Never use the OG data !!
+        Help text about different steps in data analysis workflow.
+
+        :param contents: e.g. "Preprocessing"
+         Possible values are "Preprocessing", "Phase retrieval",
+         "Postprocessing" or "Facet analysis"
         """
-        # Define save folder
-        save_folder = os.path.dirname(path_to_data)
+        if contents == "Preprocessing":
+            clear_output(True)
+            print(help(gwaihir.gui.gui.Interface.initialize_preprocessing))
 
-        # Check if already rotated
-        with h5py.File(path_to_data, "a") as f:
-            try:
-                f.create_dataset("rotation", data=True)
-                data_already_rotated = False
-            except (ValueError, RuntimeError):
-                data_already_rotated = f['rotation'][...]
+        elif contents == "Phase retrieval":
+            clear_output(True)
+            print(help(gwaihir.gui.gui.Interface.initialize_phase_retrieval))
 
-        if not data_already_rotated:
-            hash_print("Rotating SIXS data ...")
-            with tb.open_file(path_to_data, "a") as f:
-                # Get data
-                try:
-                    # if rocking_angle == "omega":
-                    data_og = f.root.com.scan_data.data_02[:]
-                    index = 2
-                    if np.ndim(data_og) == 1:
-                        data_og = f.root.com.scan_data.data_10[:]
-                        index = 10
-                    # elif rocking_angle == "mu":
-                    #     data_og = f.root.com.scan_data.merlin_image[:]
-                    print("Calling merlin the enchanter in SBS...")
-                    scan_type = "SBS"
-                except tb.NoSuchNodeError:
-                    try:
-                        data_og = f.root.com.scan_data.self_image[:]
-                        print("Calling merlin the enchanter in FLY...")
-                        scan_type = "FLY"
-                    except tb.NoSuchNodeError:
-                        print("This data does not result from Merlin :/")
+        elif contents == "Postprocessing":
+            clear_output(True)
+            print(help(gwaihir.gui.gui.Interface.initialize_postprocessing))
 
-                # Just an index for plotting schemes
-                half = int(data_og.shape[0] / 2)
+        elif contents == "Facet analysis":
+            clear_output(True)
+            print(help(facet_analysis.Facets))
+            print("""
+                The output DataFrame can be opened in the `Logs` tab.
+                The "View particle" tool helps you visualizing the particle
+                facets.
+                """)
 
-                # Transpose and flip lr data
-                data = np.transpose(data_og, axes=(0, 2, 1))
-                for idx in range(data.shape[0]):
-                    tmp = data[idx, :, :]
-                    data[idx, :, :] = np.fliplr(tmp)
-                print("Data well rotated by 90°.")
+        elif contents == "Tutorial":
+            clear_output(True)
+            print("""
 
-                print("Saving example figures...", end="\n\n")
-                plt.figure(figsize=(16, 9))
-                plt.imshow(data_og[half, :, :], vmax=10)
-                plt.xlabel('Delta')
-                plt.ylabel('Gamma')
-                plt.tight_layout()
-                plt.savefig(save_folder + "/data_before_rotation.png")
-                plt.close()
+                """)
 
-                plt.figure(figsize=(16, 9))
-                plt.imshow(data[half, :, :], vmax=10)
-                plt.xlabel('Gamma')
-                plt.ylabel('Delta')
-                plt.tight_layout()
-                plt.savefig(save_folder + "/data_after_rotation.png")
-                plt.close()
+        elif contents is "GUI":
+            display(Markdown("# Welcome to `Gwaihir`"))
+            display(Markdown("Remember that a detailed tutorial on the installation of each package is "
+                             " available on the [Github](https://github.com/DSimonne/gwaihir#welcome),"
+                             " together with a video that presents the data analysis workflow."
+                             ))
+            display(Markdown("On the other tabs of this README are presented the main functions used for"
+                             " data analysis and their parameters."))
+            display(Markdown(""))
 
-                # Overwrite data in copied file
-                try:
-                    if scan_type == "SBS" and index == 2:
-                        f.root.com.scan_data.data_02[:] = data
-                    elif scan_type == "SBS" and index == 10:
-                        f.root.com.scan_data.data_10[:] = data
-                    elif scan_type == "FLY":
-                        f.root.com.scan_data.test_image[:] = data
-                except tb.NoSuchNodeError:
-                    print("Could not overwrite data ><")
+            display(Markdown("# Example of parameter values"))
+            display(Markdown("## SixS data (SOLEIL)"))
+            display(Markdown(
+                "Most of the initial guesses are valid. Be careful about the energy, scan number, central pixel and detector."
+                " If you are working with the vertical configuration, make sure that the mask is correct."))
 
-        else:
-            hash_print("Data already rotated ...")
+            display(Markdown("## ID01 data (ESRF)"))
+            display(Markdown("* Scan number: `11`"))
+            display(Markdown(
+                "* Data directory: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/`"))
+            display(Markdown("* Detector: `Maxipix`"))
+            display(Markdown("* Template imagefile: `S11/data_mpx4_%05d.edf.gz`"))
+            display(Markdown("* Sample offsets: `(90, 0, 0)`"))
+            display(Markdown("* Sample detector distance (m): `0.50678`"))
+            display(Markdown("* X-ray energy (eV): `9000`"))
+            display(Markdown("* Beamline: `ID01`"))
+            display(Markdown(
+                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
+            display(Markdown("* Rocking angle: `outofplane`"))
 
-    def extract_metadata(self):
-        """Needs Dataset to be corrected beforehand Extract meaningful data and
-        saves them in a csv file to allow comparison.
-        """
-        try:
-            # Get latest one
-            metadata_file = sorted(
-                glob.glob(
-                    f"{self.preprocessing_folder}*preprocessing*.h5"),
-                key=os.path.getmtime)[-1]
+            display(Markdown("## P10 data (PETRA)"))
+            display(Markdown("* Sample name: `align_03`"))
+            display(Markdown("* Scan number: `11`"))
+            display(
+                Markdown("* Data directory: `/data/id01/inhouse/david/UM2022/Petra/raw/`"))
+            display(Markdown("* Detector: `Eiger4M`"))
+            display(Markdown("* Template imagefile: `_master.h5`"))
+            display(Markdown("* Sample offsets: `(0, 0, 0, 0)`"))
+            display(Markdown("* Sample detector distance (m): `0.50678`"))
+            display(Markdown("* X-ray energy (eV): `9000`"))
+            display(Markdown("* Beamline: `P10`"))
+            display(Markdown(
+                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
+            display(Markdown("* Rocking angle: `inplane`"))
+            display(Markdown("* Pixel size (in phase retrieval): `75`"))
 
-            with tb.open_file(metadata_file, "r") as f:
-                try:
-                    self.Dataset.tilt_values = f.root.output.tilt_values[...]
-                    self.Dataset.rocking_curve = f.root.output.rocking_curve[...]
-                    self.Dataset.interp_tilt = f.root.output.interp_tilt[...]
-                    self.Dataset.interp_curve = f.root.output.interp_curve[...]
-                    self.Dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
-                    self.Dataset.detector_data_COM = f.root.output.detector_data_COM[...]
-                    self.Dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+            display(Markdown("# To go further ..."))
+            display(Markdown("* All the plotting functions are accessible in `gwaihir.plot`, try to use the `Plotter` Class"
+                             " that reads all kind of numpy arrays."
+                             " e.g. `Plotter(filename=\"TestGui/S11/preprocessing/S11_maskpynx_align-q-y_norm_252_420_392_1_1_1.npz\", plot=\"2D\")`"
+                             ))
+            display(Markdown("* I highly recommend the use of [Paraview](https://www.paraview.org/) for 3D contouring."
+                             " Many tutorials can be found online: <https://www.bu.edu/tech/support/research/training-consulting/online-tutorials/paraview/>"))
+            display(Markdown(
+                "* If you saved your data in the cxi format, you can visualize it with JupyterLab !"))
+            display(Markdown("* `Qt5Agg` is a backend that does not work on remote servers, if you install `Gwaihir` on"
+                             " your local computer, you can use this backend for masking. "
+                             " We are currently working on implementing a solution in Jupyter Notebook with Bokeh."))
+            display(Markdown("* If you saved your data in the `.cxi` format, you can visualize it with JupyterLab !"
+                             " Otherwise you can use [`silx`](http://www.silx.org/doc/silx/0.7.0/applications/view.html) from the terminal"))
 
-                    self.Dataset.tilt_angle = np.round(
-                        np.mean(self.Dataset.tilt_values[1:]
-                                - self.Dataset.tilt_values[:-1]), 4)
+            display(Markdown(
+                "## Type the following code to stop the scrolling in the output cell, then reload the cell."))
+            display(Markdown("`%%javascript`"))
+            display(
+                Markdown("`IPython.OutputArea.prototype._should_scroll = function(lines) {`"))
+            display(Markdown("`return false;`"))
+            display(Markdown("`}`"))
 
-                except tb.NoSuchNodeError:
-                    # No angle correction during preprocess
-                    pass
-                # Other metadata
-                self.Dataset.bragg_peak = f.root.output.bragg_peak[...]
-                self.Dataset.q = f.root.output.q[...]
-                self.Dataset.qnorm = f.root.output.qnorm[...]
-                self.Dataset.dist_plane = f.root.output.dist_plane[...]
-                self.Dataset.bragg_inplane = f.root.output.bragg_inplane[...]
-                self.Dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
-
-                # Save corrected angles in the widgets
-                # will clear output
-                # self._list_widgets_preprocessing.children[14].value\
-                #     = str(list(self.Dataset.bragg_peak))
-                # self._list_widgets_preprocessing.children[57].value\
-                #     = self.Dataset.bragg_outofplane
-                # self._list_widgets_preprocessing.children[58].value\
-                #     = self.Dataset.bragg_inplane
-                # print(f"Using {metadata_file}")
-                # print("Corrected angles values saved in setup tab.")
-                # also tilt angle here
-
-            # Save in a csv file
-            if self.Dataset.beamline == "SIXS_2019":
-                data = rd.DataSet(self.Dataset.path_to_data)
-
-                # Add new data
-                temp_df = pd.DataFrame([[
-                    self.Dataset.scan,
-                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-                    self.Dataset.qnorm, self.Dataset.dist_plane,
-                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                    self.Dataset.bragg_peak,
-                    data.x[0], data.y[0], data.z[0], data.mu[0],
-                    data.delta[0], data.omega[0],
-                    data.gamma[0], data.gamma[0] - data.mu[0],
-                    (data.mu[-1] - data.mu[-0]) /
-                    len(data.mu), data.integration_time[0], len(
-                        data.integration_time),
-                    self.Dataset.interp_fwhm, self.Dataset.COM_rocking_curve,
-                    # data.ssl3hg[0], data.ssl3vg[0],
-                    # data.ssl1hg[0], data.ssl1vg[0]
-                ]],
-                    columns=[
-                        "scan",
-                        "qx", "qy", "qz",
-                        "q_norm", "d_hkl",
-                        "inplane_angle", "out_of_plane_angle",
-                        "bragg_peak",
-                        "x", "y", "z", "mu",
-                        "delta", "omega",
-                        "gamma", 'gamma-mu',
-                        "step size", "integration time", "steps",
-                        "FWHM", "COM_rocking_curve",
-                        # "ssl3hg", "ssl3vg",
-                        # "ssl1hg", "ssl1vg",
-                ])
-            else:
-                # Add new data
-                temp_df = pd.DataFrame([[
-                    self.Dataset.scan,
-                    self.Dataset.q[0], self.Dataset.q[1], self.Dataset.q[2],
-                    self.Dataset.qnorm, self.Dataset.dist_plane,
-                    self.Dataset.bragg_inplane, self.Dataset.bragg_outofplane,
-                    self.Dataset.bragg_peak,
-                ]],
-                    columns=[
-                        "scan",
-                        "qx", "qy", "qz",
-                        "q_norm", "d_hkl",
-                        "inplane_angle", "out_of_plane_angle",
-                        "bragg_peak",
-                ])
-
-            # Load all the logs
-            try:
-                df = pd.read_csv(self.metadata_csv_file)
-
-                # Replace old data linked to this scan, no problem if this row does
-                # not exist yet
-                indices = df[df['scan'] == self.Dataset.scan].index
-                df.drop(indices, inplace=True)
-
-                result = pd.concat([df, temp_df])
-
-            except (FileNotFoundError, ValueError):
-                result = temp_df
-
-            display(result.head())
-
-            # Save
-            if isinstance(self.metadata_csv_file, str):
-                result.to_csv(self.metadata_csv_file, index=False)
-                hash_print(f"Saved logs in {self.metadata_csv_file}")
-            else:
-                self.metadata_csv_file = self.Dataset.root_folder + "/metadata.csv"
-                result.to_csv(self.metadata_csv_file, index=False)
-                hash_print(f"Saved logs in {self.metadata_csv_file}")
-
-        except (IndexError, TypeError):
-            hash_print(
-                f"Could not find any .h5 file in {self.preprocessing_folder}")
+            display(Markdown("To contact me <david.simonne@synchrotron-soleil.fr>"))
 
     # Below are handlers
 
@@ -6485,23 +6049,3 @@ class Interface:
 
         finally:
             self.tab_facet.children[2].options = vtk_files
-
-
-def hash_print(
-    string_to_print,
-    hash_line_before=True,
-    hash_line_after=True,
-    new_line_before=True,
-    new_line_after=True
-):
-    if new_line_before:
-        print()
-    hash_line = "#" * len(string_to_print)
-    if hash_line_before:
-        print(hash_line)
-    print(string_to_print)
-    if hash_line_after:
-        print(hash_line)
-
-    if new_line_after:
-        print()
