@@ -272,8 +272,6 @@ def find_move_sixs_data(
             print("Could not move the data file.")
             pass
 
-
-
     return template_imagefile, data_dir
 
 

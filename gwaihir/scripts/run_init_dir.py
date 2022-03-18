@@ -41,13 +41,13 @@ except IndexError:
 scan_name = sample_name + str(scan)
 
 gutil.init_directories(
-    scan_name = scan_name,
-    root_folder = root_folder,
+    scan_name=scan_name,
+    root_folder=root_folder,
 )
 
 gutil.find_move_sixs_data(
-    scan = scan,
-    scan_name = scan_name,
-    root_folder = root_folder,
-    data_dir = data_dir,
+    scan=scan,
+    scan_name=scan_name,
+    root_folder=root_folder,
+    data_dir=data_dir,
 )
