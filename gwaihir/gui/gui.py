@@ -2449,7 +2449,7 @@ class Interface:
 
             # Try and find SixS data
             self.path_to_sixs_data, template_imagefile, self.Dataset.data_dir = gutil.find_move_sixs_data(
-                scan = self.Dataset.scan,
+                scan=self.Dataset.scan,
                 scan_name=self.Dataset.scan_name,
                 root_folder=self.Dataset.root_folder,
                 data_dir=self.Dataset.data_dir,
