@@ -22,13 +22,269 @@ from gwaihir.gui import gui_iterable
 from bcdi.preprocessing import ReadNxs3 as rd
 
 
+def init_directories(
+    scan_name,
+    root_folder,
+):
+    """
+    Create/touch following folders necessary for workflow:
+        scan_folder: root_folder + scan_name + "/"
+        preprocessing_folder: scan_folder + "preprocessing/"
+        postprocessing_folder: scan_folder + "postprocessing/"
+        data_folder: scan_folder + "data/"
+        postprocessing_folder + "result_crystal/""
+        postprocessing_folder + "result_lab_flat_sample/""
+        postprocessing_folder + "result_laboratory/""
+
+    :param scan_name: str, scan name, e.g. 'S1322'
+    :param root_folder: root folder of the experiment
+    """
+
+    # Assign scan folder
+    scan_folder = root_folder + "/" + scan_name + "/"
+    print("Scan folder:", scan_folder)
+
+    # Assign preprocessing folder
+    preprocessing_folder = scan_folder + "preprocessing/"
+
+    # Assign postprocessing folder
+    postprocessing_folder = scan_folder + "postprocessing/"
+
+    # Assign data folder
+    data_folder = scan_folder + "data/"
+
+    # Create final directory, if not yet existing
+    if not os.path.isdir(root_folder):
+        print(root_folder)
+        full_path = ""
+        for d in root_folder.split("/"):
+            full_path += d + "/"
+            try:
+                os.mkdir(full_path)
+            except (FileExistsError, PermissionError):
+                pass
+
+    # Scan directory
+    try:
+        os.mkdir(f"{scan_folder}")
+        print(f"\tCreated {scan_folder}")
+    except (FileExistsError, PermissionError):
+        print(f"\t{scan_folder} exists")
+
+    # /data directory
+    try:
+        os.mkdir(f"{data_folder}")
+        print(f"\tCreated {data_folder}")
+    except (FileExistsError, PermissionError):
+        print(f"\t{data_folder} exists")
+
+    # /preprocessing directory
+    try:
+        os.mkdir(f"{preprocessing_folder}")
+        print(f"\tCreated {preprocessing_folder}")
+    except (FileExistsError, PermissionError):
+        print(f"\t{preprocessing_folder} exists")
+
+    # /postprocessing directory
+    try:
+        os.mkdir(f"{postprocessing_folder}")
+        print(f"\tCreated {postprocessing_folder}")
+    except (FileExistsError, PermissionError):
+        print(f"\t{postprocessing_folder} exists")
+
+    # Subfolders to avoid bog
+    for d in [
+        "result_crystal",
+        "result_lab_flat_sample",
+        "result_laboratory"
+    ]:
+        try:
+            os.mkdir(f"{postprocessing_folder}{d}")
+            print(f"\tCreated {preprocessing_folder}{d}")
+        except (FileExistsError, PermissionError):
+            pass
+
+
+def rotate_sixs_data(path_to_sixs_data):
+    """
+    Python script to rotate the data when using the vertical configuration.
+    Should work on a copy of the data !! Never use the OG data !!
+
+    :param path_to_sixs_data: absolute path to nexus file
+    """
+    # Define save folder
+    save_folder = os.path.dirname(path_to_sixs_data)
+
+    # Check if already rotated
+    with h5py.File(path_to_sixs_data, "a") as f:
+        try:
+            f.create_dataset("rotation", data=True)
+            data_already_rotated = False
+        except (ValueError, RuntimeError):
+            data_already_rotated = f['rotation'][...]
+
+    if not data_already_rotated:
+        hash_print("Rotating SIXS data ...")
+        with tb.open_file(path_to_sixs_data, "a") as f:
+            # Get data
+            try:
+                # if rocking_angle == "omega":
+                data_og = f.root.com.scan_data.data_02[:]
+                index = 2
+                if np.ndim(data_og) == 1:
+                    data_og = f.root.com.scan_data.data_10[:]
+                    index = 10
+                # elif rocking_angle == "mu":
+                #     data_og = f.root.com.scan_data.merlin_image[:]
+                print("Calling merlin the enchanter in SBS...")
+                scan_type = "SBS"
+            except tb.NoSuchNodeError:
+                try:
+                    data_og = f.root.com.scan_data.self_image[:]
+                    print("Calling merlin the enchanter in FLY...")
+                    scan_type = "FLY"
+                except tb.NoSuchNodeError:
+                    print("This data does not result from Merlin :/")
+
+            # Just an index for plotting schemes
+            half = int(data_og.shape[0] / 2)
+
+            # Transpose and flip lr data
+            data = np.transpose(data_og, axes=(0, 2, 1))
+            for idx in range(data.shape[0]):
+                tmp = data[idx, :, :]
+                data[idx, :, :] = np.fliplr(tmp)
+            print("Data well rotated by 90°.")
+
+            print("Saving example figures...", end="\n\n")
+            plt.figure(figsize=(16, 9))
+            plt.imshow(data_og[half, :, :], vmax=10)
+            plt.xlabel('Delta')
+            plt.ylabel('Gamma')
+            plt.tight_layout()
+            plt.savefig(save_folder + "/data_before_rotation.png")
+            plt.close()
+
+            plt.figure(figsize=(16, 9))
+            plt.imshow(data[half, :, :], vmax=10)
+            plt.xlabel('Gamma')
+            plt.ylabel('Delta')
+            plt.tight_layout()
+            plt.savefig(save_folder + "/data_after_rotation.png")
+            plt.close()
+
+            # Overwrite data in copied file
+            try:
+                if scan_type == "SBS" and index == 2:
+                    f.root.com.scan_data.data_02[:] = data
+                elif scan_type == "SBS" and index == 10:
+                    f.root.com.scan_data.data_10[:] = data
+                elif scan_type == "FLY":
+                    f.root.com.scan_data.test_image[:] = data
+            except tb.NoSuchNodeError:
+                print("Could not overwrite data ><")
+
+    else:
+        hash_print("Data already rotated ...")
+
+
+def find_move_sixs_data(
+    scan,
+    scan_name,
+    root_folder,
+    data_dir,
+):
+    """
+    If a file is indeed found:
+        template_imagefile parameter updated to match it
+        copy of the file is saved in scan_folder + "data/"
+        data_dir parameter is changed to scan_folder + "data/" to work with the
+        copy of the original data file
+    This method allows us not to work with the original data of SixS, since we
+    need to rotate the data when working with the vertical configuration.
+
+    :param scan: scan number
+    :param scan_name: str, scan name, e.g. 'S1322'
+    :param root_folder: root folder of the experiment
+    :param data_dir: original data directory
+
+    returns:
+    :template_imagefile: empty string if no file or string updated to match the
+     file found
+    :data_dir: updated
+    :path_to_sixs_data: empty string if no file or full path to file found
+    """
+
+    # Assign scan folder
+    scan_folder = root_folder + "/" + scan_name + "/"
+    path_to_sixs_data = ""
+    template_imagefile = ""
+
+    # Get path_to_sixs_data from data in data_dir
+    try:
+        # Try and find a mu scan
+        path_to_sixs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
+    except IndexError:
+        try:
+            # Try and find an omega scan
+            path_to_sixs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
+        except IndexError:
+            print("Could not find data, please specify template.")
+
+    # Get template_imagefile from path_to_sixs_data
+    if path_to_sixs_data != "":
+        try:
+            print("File path:", path_to_sixs_data)
+            template_imagefile = os.path.basename(path_to_sixs_data).split(
+                "%05d" % scan)[0] + "%05d.nxs"
+            print(f"File template: {template_imagefile}\n\n")
+
+        except (IndexError, AttributeError):
+            pass
+
+        # Move data file to scan_folder + "data/"
+        try:
+            shutil.copy2(path_to_sixs_data, scan_folder + "data/")
+            print(f"Copied {path_to_sixs_data} to {data_dir}")
+
+            # Change data_dir, only if copy successful
+            data_dir = scan_folder + "data/"
+
+            # Change path_to_sixs_data, only if copy successful
+            path_to_sixs_data = data_dir + os.path.basename(path_to_sixs_data)
+
+            # Rotate the data
+            rotate_sixs_data(path_to_sixs_data)
+
+        except (FileExistsError, PermissionError, shutil.SameFileError):
+            print(f"File exists in {scan_folder}data/")
+
+            # Change data_dir, only if copy successful
+            data_dir = scan_folder + "data/"
+
+            # Change path_to_sixs_data, only if copy successful
+            path_to_sixs_data = data_dir + os.path.basename(path_to_sixs_data)
+
+            # Rotate the data
+            rotate_sixs_data(path_to_sixs_data)
+
+        except (AttributeError, FileNotFoundError):
+            print("Could not move the data file.")
+            pass
+
+
+
+    return template_imagefile, data_dir
+
+
 def filter_reconstructions(
     folder,
     nb_run_keep,
     nb_run=None,
     filter_criteria="LLK"
 ):
-    """Filter the phase retrieval output depending on a given parameter,
+    """
+    Filter the phase retrieval output depending on a given parameter,
     for now only LLK and standard deviation are available. This allows the
     user to run a lot of reconstructions but to then automatically keep the
     "best" ones, according to this parameter. filter_criteria can take the
@@ -194,89 +450,6 @@ def filter_reconstructions(
         hash_print("File filtering stopped by user ...")
 
 
-def rotate_sixs_data(path_to_sixs_data):
-    """
-    Python script to rotate the data when using the vertical configuration.
-    Should work on a copy of the data !! Never use the OG data !!
-
-    :param path_to_sixs_data: absolute path to nexus file
-    """
-    # Define save folder
-    save_folder = os.path.dirname(path_to_sixs_data)
-
-    # Check if already rotated
-    with h5py.File(path_to_sixs_data, "a") as f:
-        try:
-            f.create_dataset("rotation", data=True)
-            data_already_rotated = False
-        except (ValueError, RuntimeError):
-            data_already_rotated = f['rotation'][...]
-
-    if not data_already_rotated:
-        hash_print("Rotating SIXS data ...")
-        with tb.open_file(path_to_sixs_data, "a") as f:
-            # Get data
-            try:
-                # if rocking_angle == "omega":
-                data_og = f.root.com.scan_data.data_02[:]
-                index = 2
-                if np.ndim(data_og) == 1:
-                    data_og = f.root.com.scan_data.data_10[:]
-                    index = 10
-                # elif rocking_angle == "mu":
-                #     data_og = f.root.com.scan_data.merlin_image[:]
-                print("Calling merlin the enchanter in SBS...")
-                scan_type = "SBS"
-            except tb.NoSuchNodeError:
-                try:
-                    data_og = f.root.com.scan_data.self_image[:]
-                    print("Calling merlin the enchanter in FLY...")
-                    scan_type = "FLY"
-                except tb.NoSuchNodeError:
-                    print("This data does not result from Merlin :/")
-
-            # Just an index for plotting schemes
-            half = int(data_og.shape[0] / 2)
-
-            # Transpose and flip lr data
-            data = np.transpose(data_og, axes=(0, 2, 1))
-            for idx in range(data.shape[0]):
-                tmp = data[idx, :, :]
-                data[idx, :, :] = np.fliplr(tmp)
-            print("Data well rotated by 90°.")
-
-            print("Saving example figures...", end="\n\n")
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data_og[half, :, :], vmax=10)
-            plt.xlabel('Delta')
-            plt.ylabel('Gamma')
-            plt.tight_layout()
-            plt.savefig(save_folder + "/data_before_rotation.png")
-            plt.close()
-
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data[half, :, :], vmax=10)
-            plt.xlabel('Gamma')
-            plt.ylabel('Delta')
-            plt.tight_layout()
-            plt.savefig(save_folder + "/data_after_rotation.png")
-            plt.close()
-
-            # Overwrite data in copied file
-            try:
-                if scan_type == "SBS" and index == 2:
-                    f.root.com.scan_data.data_02[:] = data
-                elif scan_type == "SBS" and index == 10:
-                    f.root.com.scan_data.data_10[:] = data
-                elif scan_type == "FLY":
-                    f.root.com.scan_data.test_image[:] = data
-            except tb.NoSuchNodeError:
-                print("Could not overwrite data ><")
-
-    else:
-        hash_print("Data already rotated ...")
-
-
 def extract_metadata(
     scan_nb,
     metadata_file,
@@ -408,10 +581,12 @@ def extract_metadata(
 
 
 def create_yaml_file(fname, **kwargs):
-    """Create yaml file storing all keywords arguments given in input Used
-    for bcdi scripts.
+    """
+    Create yaml file storing all keywords arguments given in input.
+    Used for bcdi scripts.
 
     :param fname: path to created yaml file
+    :param kwargs: kwargs to store in file
     """
     config_file = []
 
@@ -457,6 +632,7 @@ def hash_print(
     new_line_before=True,
     new_line_after=True
 ):
+    """Print string with hashtag lines before and after"""
     if new_line_before:
         print()
     hash_line = "#" * len(string_to_print)
@@ -468,156 +644,3 @@ def hash_print(
 
     if new_line_after:
         print()
-
-
-def init_directories(
-    scan_name,
-    root_folder,
-):
-    """
-    :param scan_name: str, scan name, e.g. 'S1322'
-    :param root_folder: root folder of the experiment
-    """
-
-    # Assign scan folder
-    scan_folder = root_folder + scan_name + "/"
-    print("Scan folder:", scan_folder)
-
-    # Assign preprocessing folder
-    preprocessing_folder = scan_folder + "preprocessing/"
-
-    # Assign postprocessing folder
-    postprocessing_folder = scan_folder + "postprocessing/"
-
-    # Assign data folder
-    data_folder = scan_folder + "data/"
-
-    # Create final directory, if not yet existing
-    if not os.path.isdir(root_folder):
-        print(root_folder)
-        full_path = ""
-        for d in root_folder.split("/"):
-            full_path += d + "/"
-            try:
-                os.mkdir(full_path)
-            except (FileExistsError, PermissionError):
-                pass
-
-    # Scan directory
-    try:
-        os.mkdir(f"{scan_folder}")
-        print(f"\tCreated {scan_folder}")
-    except (FileExistsError, PermissionError):
-        print(f"\t{scan_folder} exists")
-
-    # /data directory
-    try:
-        os.mkdir(f"{data_folder}")
-        print(f"\tCreated {data_folder}")
-    except (FileExistsError, PermissionError):
-        print(f"\t{data_folder} exists")
-
-    # /preprocessing directory
-    try:
-        os.mkdir(f"{preprocessing_folder}")
-        print(f"\tCreated {preprocessing_folder}")
-    except (FileExistsError, PermissionError):
-        print(f"\t{preprocessing_folder} exists")
-
-    # /postprocessing directory
-    try:
-        os.mkdir(f"{postprocessing_folder}")
-        print(f"\tCreated {postprocessing_folder}", end="\n\n")
-    except (FileExistsError, PermissionError):
-        print(f"\t{postprocessing_folder} exists", end="\n\n")
-
-    # Subfolders to avoid bog
-    for d in [
-        "result_crystal",
-        "result_lab_flat_sample",
-        "result_laboratory"
-    ]:
-        try:
-            os.mkdir(
-                f"{postprocessing_folder}{d}")
-        except (FileExistsError, PermissionError):
-            pass
-
-
-def find_move_sixs_data(
-    scan,
-    scan_name,
-    root_folder,
-    data_dir,
-):
-    """
-    If a file is indeed found:
-        template_imagefile parameter updated to match it
-        copy of the file is saved in scan_folder + "data/"
-        data_dir parameter is changed to scan_folder + "data/" to work with the
-        copy of the original data file
-    This method allows us not to work with the original data of SixS, since we
-    need to rotate the data when working with the vertical configuration.
-
-    :param scan: scan number
-    :param scan_name: str, scan name, e.g. 'S1322'
-    :param root_folder: root folder of the experiment
-    :param data_dir: original data directory
-
-    returns:
-    :template_imagefile: empty string if no file or string updated to match the
-     file found
-    :data_dir: updated
-    :path_to_sixs_data: empty string if no file or full path to file found
-    """
-
-    # Assign scan folder
-    scan_folder = root_folder + scan_name + "/"
-    path_to_sixs_data = ""
-    template_imagefile = ""
-
-    # Get path_to_sixs_data from data in data_dir
-    try:
-        # Try and find a mu scan
-        path_to_sixs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
-    except IndexError:
-        try:
-            # Try and find an omega scan
-            path_to_sixs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
-        except IndexError:
-            print("Could not find data, please specify template.")
-
-    # Get template_imagefile from path_to_sixs_data
-    try:
-        print("File path:", path_to_sixs_data)
-        template_imagefile = os.path.basename(path_to_sixs_data).split(
-            "%05d" % scan)[0] + "%05d.nxs"
-        print(f"File template: {template_imagefile}\n\n")
-
-    except (IndexError, AttributeError):
-        pass
-
-    # Move data file to scan_folder + "data/"
-    try:
-        shutil.copy2(path_to_sixs_data, scan_folder + "data/")
-        print(f"Copied {path_to_sixs_data} to {data_dir}")
-
-        # Change data_dir, only if copy successful
-        data_dir = scan_folder + "data/"
-
-        # Change path_to_sixs_data, only if copy successful
-        path_to_sixs_data = data_dir + os.path.basename(path_to_sixs_data)
-
-    except (FileExistsError, PermissionError, shutil.SameFileError):
-        print(f"File exists in {scan_folder}data/")
-
-        # Change data_dir, only if copy successful
-        data_dir = scan_folder + "data/"
-
-        # Change path_to_sixs_data, only if copy successful
-        path_to_sixs_data = data_dir + os.path.basename(path_to_sixs_data)
-
-    except (AttributeError, FileNotFoundError):
-        pass
-
-    return path_to_sixs_data, template_imagefile, data_dir

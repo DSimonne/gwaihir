@@ -24,10 +24,11 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     scripts=[
+        "gwaihir/scripts/run_init_dir.py",
         "gwaihir/scripts/job_esrf.slurm",
         "gwaihir/scripts/run_slurm_job.sh",
         "gwaihir/scripts/plot_paraview_slices.py",
-        "gwaihir/scripts/examples/workflow_cli.sh",
+        "gwaihir/scripts/workflow_cli.sh",
     ],
     keywords=["BCDI", "ipywidgets", "PyNX"],
     long_description=long_description,

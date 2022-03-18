@@ -2447,8 +2447,8 @@ class Interface:
                 root_folder=self.Dataset.root_folder,
             )
 
-            # Try and find SixS data
-            self.path_to_sixs_data, template_imagefile, self.Dataset.data_dir = gutil.find_move_sixs_data(
+            # Try and find SixS data, will also rotate the data
+            template_imagefile, self.Dataset.data_dir = gutil.find_move_sixs_data(
                 scan=self.Dataset.scan,
                 scan_name=self.Dataset.scan_name,
                 root_folder=self.Dataset.root_folder,
@@ -3066,9 +3066,6 @@ class Interface:
 
                 # Change data_dir and root folder depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    gutil.rotate_sixs_data(
-                        path_to_sixs_data=self.path_to_sixs_data
-                    )
                     data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
