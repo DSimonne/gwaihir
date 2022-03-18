@@ -25,7 +25,7 @@ from bokeh.layouts import row, column
 from bokeh.io import output_notebook
 from bokeh.models import ColumnDataSource, ColorBar, LogColorMapper, LinearColorMapper
 from bokeh.models import BoxEditTool, HoverTool, CrosshairTool, LassoSelectTool
-from bokeh.models import CustomJS, Slider
+from bokeh.models import CustomJS, Slider, SaveTool
 from bokeh.models.widgets import Tabs, Panel
 import bokeh.palettes as bp
 
@@ -1067,7 +1067,7 @@ def plot_data(
                         y_axis_label=y_label,
                         toolbar_location="above",
                         toolbar_sticky=False,
-                        tools="pan, wheel_zoom, box_zoom, reset, undo, redo, crosshair, hover",
+                        tools="pan, wheel_zoom, box_zoom, reset, undo, redo, crosshair, hover, save",
                         active_scroll="wheel_zoom",
                         active_tap="auto",
                         active_drag="box_zoom",
