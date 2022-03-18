@@ -11,9 +11,8 @@ echo "##################################################################"
 
 echo "##################################################################"
 echo "Moving scan to new directory and touching new directories..."
-echo run_movetodir.py $1 $2 $3
+# Use init_dir method from gwaihir.utilities
 echo "##################################################################"
-run_movetodir.py $1 $2 $3
 
 # Only for SixS data
 # Use rotate method from gwaihir.utilities

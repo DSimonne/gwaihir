@@ -25,7 +25,6 @@ setuptools.setup(
     ],
     scripts=[
         "gwaihir/scripts/job_esrf.slurm",
-        "gwaihir/scripts/run_movetodir.py",
         "gwaihir/scripts/run_slurm_job.sh",
         "gwaihir/scripts/plot_paraview_slices.py",
         "gwaihir/scripts/examples/workflow_cli.sh",

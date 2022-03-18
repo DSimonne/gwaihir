@@ -23,7 +23,7 @@ from IPython.display import display, Markdown, clear_output, Image
 import gwaihir
 from gwaihir import plot, support
 from gwaihir.gui import gui_iterable
-from gwaihir.utilities import *
+import gwaihir.utilities as gutil
 
 # bcdi package
 from bcdi.utils.utilities import bin_data
@@ -115,7 +115,6 @@ class Interface:
         self.text_file = None
         self.params = None
         self.Facets = None
-        self.scan_name = None
         self.preprocessing_folder = None
         self.postprocessing_folder = None
 
@@ -2422,13 +2421,15 @@ class Interface:
             # Start to assign attributes
             self.Dataset.comment = comment
             self.Dataset.debug = debug
-            self.scan_name = self.Dataset.sample_name + str(self.Dataset.scan)
+            self.Dataset.scan_name = self.Dataset.sample_name + \
+                str(self.Dataset.scan)
 
+            # Backend used for plotting
             self.matplotlib_backend = matplotlib_backend
 
             # Assign scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder \
-                + self.scan_name + "/"
+                + self.Dataset.scan_name + "/"
             print("Scan folder:", self.Dataset.scan_folder)
 
             # Assign preprocessing folder
@@ -2439,116 +2440,25 @@ class Interface:
             self.postprocessing_folder = self.Dataset.scan_folder \
                 + "postprocessing/"
 
-            # Get path_to_sixs_data from data in data_dir for SixS
-            try:
-                # Try and find a mu scan
-                self.Dataset.path_to_sixs_data = glob.glob(
-                    f"{self.Dataset.data_dir}*mu*{self.Dataset.scan}*")[0]
-            except IndexError:
-                try:
-                    # Try and find an omega scan
-                    self.Dataset.path_to_sixs_data = glob.glob(
-                        f"{self.Dataset.data_dir}*omega*{self.Dataset.scan}*")[0]
-                except IndexError:
-                    print("Could not find data, please specify template.")
+            # Update the directory structure
+            gutil.hash_print("Updating directories ...")
+            gutil.init_directories(
+                scan_name=self.Dataset.scan_name,
+                root_folder=self.Dataset.root_folder,
+            )
 
-            # Get template_imagefile from path_to_sixs_data
-            try:
-                print("File path:", self.Dataset.path_to_sixs_data)
-                self.Dataset.template_imagefile = self.Dataset.path_to_sixs_data.split(
-                    "%05d" % self.Dataset.scan)[0] + "%05d.nxs"
-                print(
-                    f"File template: {self.Dataset.template_imagefile}\n\n")
+            # Try and find SixS data
+            self.path_to_sixs_data, template_imagefile, self.Dataset.data_dir = gutil.find_move_sixs_data(
+                scan = self.Dataset.scan,
+                scan_name=self.Dataset.scan_name,
+                root_folder=self.Dataset.root_folder,
+                data_dir=self.Dataset.data_dir,
+            )
 
-                # Save template_imagefile in GUI
+            # Save template_imagefile in GUI
+            if template_imagefile != "":
                 self._list_widgets_preprocessing.children[42].value\
-                    = self.Dataset.template_imagefile.split("/")[-1]
-
-            except (IndexError, AttributeError):
-                pass
-
-            # Create final directory, if not yet existing
-            if not os.path.isdir(self.Dataset.root_folder):
-                print(self.Dataset.root_folder)
-                full_path = ""
-                for d in self.Dataset.root_folder.split("/"):
-                    full_path += d + "/"
-                    try:
-                        os.mkdir(full_path)
-                    except (FileExistsError, PermissionError):
-                        pass
-
-            hash_print("Updating directories ...")
-
-            # Scan directory
-            try:
-                os.mkdir(f"{self.Dataset.scan_folder}")
-                print(
-                    f"Created {self.Dataset.scan_folder}")
-            except (FileExistsError, PermissionError):
-                print(f"{self.Dataset.scan_folder} exists")
-
-            # /data directory
-            try:
-                os.mkdir(f"{self.Dataset.scan_folder}/data/")
-                print(f"Created {self.Dataset.scan_folder}/data/")
-            except (FileExistsError, PermissionError):
-                print(f"{self.Dataset.scan_folder}/data/ exists")
-
-            # /preprocessing directory
-            try:
-                os.mkdir(
-                    f"{self.preprocessing_folder}")
-                print(
-                    f"Created {self.preprocessing_folder}")
-            except (FileExistsError, PermissionError):
-                print(
-                    f"{self.preprocessing_folder} exists")
-
-            # /postprocessing directory
-            try:
-                os.mkdir(
-                    f"{self.postprocessing_folder}")
-                print(
-                    f"Created {self.postprocessing_folder}", end="\n\n")
-            except (FileExistsError, PermissionError):
-                print(
-                    f"{self.postprocessing_folder} exists", end="\n\n")
-
-            # Subfolders to avoid bog
-            for d in [
-                "result_crystal",
-                "result_lab_flat_sample",
-                "result_laboratory"
-            ]:
-                try:
-                    os.mkdir(
-                        f"{self.postprocessing_folder}{d}")
-                except FileExistsError:
-                    pass
-
-            # Move data file to self.Dataset.scan_folder + "data/"
-            try:
-                shutil.copy2(
-                    self.Dataset.path_to_sixs_data,
-                    self.Dataset.scan_folder + "data/",
-                )
-
-                # Change data_dir, only if copy successful
-                self.Dataset.data_dir = self.Dataset.scan_folder + "data/"
-
-                print(
-                    f"Copied {self.Dataset.path_to_sixs_data} to \
-                    {self.Dataset.data_dir}")
-
-                # Change path_to_sixs_data, only if copy successful
-                self.Dataset.path_to_sixs_data = self.Dataset.data_dir \
-                    + os.path.basename(self.Dataset.path_to_sixs_data)
-
-            except (FileExistsError, PermissionError, shutil.SameFileError):
-                print(f"File exists in {self.Dataset.scan_folder}data/")
-            except (AttributeError, FileNotFoundError):
-                pass
+                    = template_imagefile
 
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
@@ -2605,12 +2515,12 @@ class Interface:
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(buttons_init)
-                    hash_print("Saving data, takes some time ...",
-                               hash_line_after=False)
+                    gutil.hash_print("Saving data, takes some time ...",
+                                     hash_line_after=False)
 
                     try:
                         # Reciprocal space data
-                        hash_print(
+                        gutil.hash_print(
                             "Saving diffraction data and mask selected in the PyNX tab...")
 
                         # Define cxi operator
@@ -2643,12 +2553,12 @@ class Interface:
 
                     # Facets analysis output
                     try:
-                        hash_print("Saving Facets class data",
-                                   hash_line_after=False)
+                        gutil.hash_print("Saving Facets class data",
+                                         hash_line_after=False)
                         self.Facets.to_hdf5(
-                            f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
+                            f"{self.Dataset.scan_folder}{self.Dataset.scan_name}.cxi")
                     except AttributeError:
-                        hash_print(
+                        gutil.hash_print(
                             "Could not save facets' data, run the analysis in the `Facets` tab first.", hash_line_after=False)
 
                     print(
@@ -2656,7 +2566,7 @@ class Interface:
                     )
 
         elif not run_dir_init:
-            hash_print("Cleared window.")
+            gutil.hash_print("Cleared window.")
             clear_output(True)
 
     # Preprocessing
@@ -3092,7 +3002,7 @@ class Interface:
                             getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                hash_print(f"Wrong list syntax for {p}")
+                gutil.hash_print(f"Wrong list syntax for {p}")
 
             try:
                 for p in tuple_parameters:
@@ -3103,7 +3013,7 @@ class Interface:
                             getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                hash_print(f"Wrong tuple syntax for {p}")
+                gutil.hash_print(f"Wrong tuple syntax for {p}")
 
             try:
                 for p in dict_parameters:
@@ -3117,7 +3027,7 @@ class Interface:
                                 getattr(self.Dataset, p)))
                     # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
-                hash_print(f"Wrong dict syntax for {p}")
+                gutil.hash_print(f"Wrong dict syntax for {p}")
 
             # Set None if we are not using custom scans
             if not self.Dataset.custom_scan:
@@ -3145,7 +3055,7 @@ class Interface:
                 style={'description_width': 'initial'},
                 icon='fast-forward')
             display(button_run_preprocess)
-            hash_print("Parameters initialized...")
+            gutil.hash_print("Parameters initialized...")
 
             @ button_run_preprocess.on_click
             def action_button_run_preprocess(selfbutton):
@@ -3156,8 +3066,8 @@ class Interface:
 
                 # Change data_dir and root folder depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
-                    rotate_sixs_data(
-                        path_to_data=self.Dataset.path_to_sixs_data
+                    gutil.rotate_sixs_data(
+                        path_to_sixs_data=self.path_to_sixs_data
                     )
                     data_dir = self.Dataset.data_dir
 
@@ -3168,7 +3078,7 @@ class Interface:
                     data_dir = self.Dataset.data_dir
 
                 # Create config file
-                create_yaml_file(
+                gutil.create_yaml_file(
                     fname=f"{self.preprocessing_folder}config_preprocessing.yml",
                     scans=self.Dataset.scan,
                     root_folder=self.Dataset.root_folder,
@@ -3281,7 +3191,7 @@ class Interface:
 
                 # Run function
                 run_preprocessing(prm=args)
-                hash_print("End of script")
+                gutil.hash_print("End of script")
 
                 # Button to save metadata
                 button_save_metadata = Button(
@@ -3301,7 +3211,7 @@ class Interface:
                                 f"{self.preprocessing_folder}*preprocessing*.h5"),
                             key=os.path.getmtime)[-1]
 
-                        extract_metadata(
+                        gutil.extract_metadata(
                             scan_nb=self.Dataset.scan,
                             metadata_file=metadata_file,
                             gwaihir_dataset=self.Dataset,
@@ -3309,7 +3219,7 @@ class Interface:
                             + "metadata.csv"
                         )
                     except (IndexError, TypeError):
-                        hash_print(
+                        gutil.hash_print(
                             f"Could not find any .h5 file in {self.preprocessing_folder}")
 
                     # PyNX folder, refresh
@@ -3329,7 +3239,7 @@ class Interface:
         if not init_para:
             plt.close()
             clear_output(True)
-            hash_print("Cleared window.")
+            gutil.hash_print("Cleared window.")
 
     # Phase retrieval
 
@@ -3879,7 +3789,7 @@ class Interface:
                     for line in self.text_file:
                         v.write(line)
 
-                hash_print(
+                gutil.hash_print(
                     f"Saved parameters in: {self.Dataset.pynx_parameter_gui_file}")
 
                 if self.run_phase_retrieval == "batch":
@@ -3923,7 +3833,8 @@ class Interface:
 
             elif self.run_phase_retrieval == "operators":
                 # Extract data
-                hash_print("Log likelihood is updated every 50 iterations.")
+                gutil.hash_print(
+                    "Log likelihood is updated every 50 iterations.")
                 self.Dataset.calc_llk = 50  # TODO
 
                 # Keep a list of the resulting scans
@@ -4153,7 +4064,7 @@ class Interface:
 
                     # If filter, filter data
                     if self.Dataset.filter_criteria:
-                        filter_reconstructions(
+                        gutil.filter_reconstructions(
                             self.Dataset.parent_folder,
                             self.Dataset.nb_run,
                             self.Dataset.nb_run_keep,
@@ -4162,7 +4073,7 @@ class Interface:
 
                 except KeyboardInterrupt:
                     clear_output(True)
-                    hash_print("Phase retrieval stopped by user ...")
+                    gutil.hash_print("Phase retrieval stopped by user ...")
 
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
@@ -4170,7 +4081,7 @@ class Interface:
                 self.run_modes_decomposition(self.Dataset.parent_folder)
 
             elif self.run_pynx_tools == "filter":
-                filter_reconstructions(
+                gutil.filter_reconstructions(
                     folder=self.Dataset.parent_folder,
                     nb_run=None,
                     nb_run_keep=self.Dataset.nb_run_keep,
@@ -4179,7 +4090,7 @@ class Interface:
 
         # Clean output
         if not self.run_phase_retrieval and not self.run_pynx_tools:
-            hash_print("Cleared output.")
+            gutil.hash_print("Cleared output.")
             clear_output(True)
 
             # Refresh folders
@@ -4228,7 +4139,7 @@ class Interface:
                 )
             )
         except KeyboardInterrupt:
-            hash_print("Decomposition into modes stopped by user...")
+            gutil.hash_print("Decomposition into modes stopped by user...")
 
         finally:
             # Refresh folders
@@ -4712,7 +4623,7 @@ class Interface:
                         setattr(self.Dataset, p, literal_eval(
                             getattr(self.Dataset, p)))
             except ValueError:
-                hash_print(f"Wrong list syntax for {p}")
+                gutil.hash_print(f"Wrong list syntax for {p}")
 
             try:
                 for p in tuple_parameters:
@@ -4722,7 +4633,7 @@ class Interface:
                         setattr(self.Dataset, p, literal_eval(
                             getattr(self.Dataset, p)))
             except ValueError:
-                hash_print(f"Wrong tuple syntax for {p}")
+                gutil.hash_print(f"Wrong tuple syntax for {p}")
 
             # Empty parameters are set to None (bcdi syntax)
             if self.Dataset.output_size == []:
@@ -4759,7 +4670,7 @@ class Interface:
                 return
 
             try:
-                create_yaml_file(
+                gutil.create_yaml_file(
                     fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
                     scan=self.Dataset.scan,
                     root_folder=self.Dataset.root_folder,
@@ -4879,7 +4790,7 @@ class Interface:
 
                 # Run function
                 run_postprocessing(prm=args)
-                hash_print("End of script")
+                gutil.hash_print("End of script")
 
                 # Get data from saved file
                 phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
@@ -4902,7 +4813,7 @@ class Interface:
                 )
 
             except KeyboardInterrupt:
-                hash_print("Strain analysis stopped by user ...")
+                gutil.hash_print("Strain analysis stopped by user ...")
 
             finally:
                 # At the end of the function
@@ -4940,7 +4851,7 @@ class Interface:
             self.tab_data.children[1].value = self.preprocessing_folder
             self.plot_folder_handler(change=self.preprocessing_folder)
 
-            hash_print("Cleared window.")
+            gutil.hash_print("Cleared window.")
             clear_output(True)
 
     def init_facet_analysis(
@@ -5107,7 +5018,7 @@ class Interface:
                                         getattr(self.Facets, p)))
                                 # print(f"{p}:", getattr(self.Dataset, p))
                         except ValueError:
-                            hash_print(f"Wrong list syntax for {p}")
+                            gutil.hash_print(f"Wrong list syntax for {p}")
 
                         # Plot the chosen facet to help the user to pick the facets
                         # he wants to use to orient the particule
@@ -5205,12 +5116,12 @@ class Interface:
                                     # Create subfolder
                                     try:
                                         os.mkdir(
-                                            f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
+                                            f"{self.Dataset.root_folder}{self.Dataset.scan_name}/postprocessing/facets_analysis/")
                                         print(
-                                            f"Created {self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/")
+                                            f"Created {self.Dataset.root_folder}{self.Dataset.scan_name}/postprocessing/facets_analysis/")
                                     except (FileExistsError, PermissionError):
                                         print(
-                                            f"{self.Dataset.root_folder}{self.scan_name}/postprocessing/facets_analysis/ exists")
+                                            f"{self.Dataset.root_folder}{self.Dataset.scan_name}/postprocessing/facets_analysis/ exists")
 
                                     # Save data
                                     self.Facets.save_data(
@@ -5220,9 +5131,9 @@ class Interface:
                                         field_data_{self.Dataset.scan}.csv")
 
                                     self.Facets.to_hdf5(
-                                        f"{self.Dataset.scan_folder}{self.scan_name}.cxi")
+                                        f"{self.Dataset.scan_folder}{self.Dataset.scan_name}.cxi")
                                     print(
-                                        f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.scan_name}.cxi")
+                                        f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.scan_name}.cxi")
                                 except AttributeError:
                                     print(
                                         "Initialize the directories first to save the figures and data ...")
@@ -5239,12 +5150,12 @@ class Interface:
                 display(buttons_facets)
 
             except TypeError:
-                hash_print("Data type not supported.")
+                gutil.hash_print("Data type not supported.")
 
         if not load_data:
             self.tab_facet.children[1].disabled = False
             self.vtk_file_handler(parent_folder)
-            hash_print("Cleared window.")
+            gutil.hash_print("Cleared window.")
             clear_output(True)
 
     # Other tabs function
@@ -5274,7 +5185,7 @@ class Interface:
                     try:
                         logs = pd.read_csv(csv_file)
                     except ValueError:
-                        hash_print("Data type not supported.")
+                        gutil.hash_print("Data type not supported.")
                     # else:
                     #     print(
                     #         f"""
@@ -5307,7 +5218,7 @@ class Interface:
                     display(logs[list(cols)])
 
             except (FileNotFoundError, UnboundLocalError):
-                hash_print("Wrong path")
+                gutil.hash_print("Wrong path")
             except AttributeError:
                 print("You need to run the facet analysis in the dedicated tab first."
                       "Then this function will load the resulting DataFrame.")
@@ -5344,7 +5255,7 @@ class Interface:
 
             # Plot data
             for p in filename:
-                hash_print(f"Showing {p}")
+                gutil.hash_print(f"Showing {p}")
                 plot.Plotter(
                     folder + "/" + p,
                     plot=data_use,
@@ -5372,7 +5283,7 @@ class Interface:
 
             # Plot data
             for p in filename:
-                hash_print(f"Showing {p}")
+                gutil.hash_print(f"Showing {p}")
                 plot.Plotter(
                     folder + "/" + p,
                     plot=data_use,
@@ -5506,11 +5417,11 @@ class Interface:
 
             try:
                 for p in filename:
-                    hash_print(f"Showing {p}")
+                    gutil.hash_print(f"Showing {p}")
                     display(Image(filename=folder + "/" + p))
 
             except (FileNotFoundError, ValueError):
-                hash_print("Could not load image from file.")
+                gutil.hash_print("Could not load image from file.")
 
         elif data_use == "hf_glance":
             # Disable widgets
@@ -5520,17 +5431,17 @@ class Interface:
             # Show tree
             for p in filename:
                 try:
-                    hash_print(f"Showing {p}")
+                    gutil.hash_print(f"Showing {p}")
                     display(H5Glance(folder + "/" + filename[0]))
                 except TypeError:
-                    hash_print(
+                    gutil.hash_print(
                         "This tool supports .nxs, .cxi or .hdf5 files only.")
 
         elif data_use in [
             "3D", "create_support", "extract_support",
             "smooth_support",
         ] and len(filename) != 1:
-            hash_print("Please select only one file.")
+            gutil.hash_print("Please select only one file.")
 
         elif data_use == "delete":
             # Disable widgets
@@ -5550,10 +5461,10 @@ class Interface:
                 for p in filename:
                     try:
                         os.remove(folder + "/" + p)
-                        hash_print(f"Removed {p}")
+                        gutil.hash_print(f"Removed {p}")
 
                     except FileNotFoundError:
-                        hash_print(f"Could not remove {p}")
+                        gutil.hash_print(f"Could not remove {p}")
 
             display(button_delete_data)
 
@@ -5562,7 +5473,7 @@ class Interface:
             for w in self.tab_data.children[:-2]:
                 w.disabled = False
             self.plot_folder_handler(change=folder)
-            hash_print("Cleared window.")
+            gutil.hash_print("Cleared window.")
             clear_output(True)
 
     @ staticmethod
