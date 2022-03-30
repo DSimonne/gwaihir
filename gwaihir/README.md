@@ -1,22 +1,26 @@
 # Welcome to the gwaihir package
 
-The goal of the module is to provide a way to process and analyse BCDI data either via jupyter notebook or the command line.
+Requires the python packages `bcdi` and `pynx`
 
-It requires the python packages `bcdi` and `pynx`
+* Command line use of the package for fast analysis
+* GUI (Jupyter Notebook) to allow new users to understand each step during the process but also to allow experienced users to finelly tune their parameters and to offer a non "black-box" approach to the data analysis
 
-The idea is to allow command line use of the package for fast analysis but also to use a GUI (for jupyter notebooks) to allow new users to understand each step during the process but also to allow experienced users to finelly tune their parameters and to offer a non "black-box" approach to the data analysis
+For data visualisation, please do not hesitate to run the GUI only with visualisation tab:
+```python
+>>>from gwaihir.gui import Interface
+>>>Interface(plot_only=True)
+```
 
 ## GUI
 The use of python objects for the GUI and for the datasets could allow one to easily share the data analysis between one another.
 
 This means that:
-* A `Dataset` object can be reopened via the GUI, 
+* A `Dataset` object can be reopened via the GUI
 * The GUI presents several tabs, describing the data analysis (e.g. the parameters used during the analysis) so that one group could directly have a better understanding of the data history, these parameters would all be saved as attributes of the data object
-* Guidelines for the analysis are be provided in the GUI, in a README tab
-* These ideas apply the concept of thorondor, a similar package but for XANES data analysis (still in development)
-* All the parameters related to the different beamlines will be in the code. It will only require a single widget to change the beamline, while keeping the same output architecture and output format, making it much easier to share and compare the results. Most of the code will be common to all the beamlines. Python power!
+* Guidelines for the analysis are be provided in the GUI, in the README tab
+* These ideas apply the concept of thorondor, a similar package but for XANES data analysis
+* All the parameters related to the different beamlines will be in the code. It will only require a single widget to change the beamline, while keeping the same output architecture and output format, making it much easier to share and compare the results. Most of the code is common to all the beamlines.
 * Current hardcoded parameters (e.g. spec file location, ...) will not require the user to open scripts but just to edit a widget in notebook,
-* One GUI for all the data, one GUI to rule them all
 
 
 ## Current workflow for BCDI data analysis 

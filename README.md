@@ -2,9 +2,9 @@
 
 Contact : david.simonne@universite-paris-saclay.fr
 
-You can install gwaihir via the setup.py script, so that you can use via a package after in python, see below
+You can install gwaihir via the `setup.py` script (`pip install .`)
 
-Gwaihir is also avaible on pypi.org, each new version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
+Gwaihir is also avaible on pypi.org, each new stable version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
 On the contrary, if you follow the github changes on the you will have the latest updates.
 
 # GUI Preview:
@@ -31,8 +31,8 @@ An example file can be downloaded at: https://www.dsimonne.eu/Attachments/align_
 
 # Installing different packages
 
-First, I advise you to create a Packages directory to keep these.
-Secondly, I advise you to create a virtual environment to help with debogging, and so that once everything works, you don't update a package by mistake. To do so please follow the following steps:
+* First, I advise you to create a `/Packages` directory to keep these.
+* Secondly, I advise you to create a virtual environment to help with debogging, and so that once everything works, you don't update a package by mistake. To do so please follow the following steps:
 
 ## Create a virtual environment
 
@@ -57,7 +57,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `cd PyNX_install/`
 * `curl -O http://ftp.esrf.fr/pub/scisoft/PyNX/pynx-devel-nightly.tar.bz2`      # Installation details within install-pynx-venv.sh
 * `source_p9`
-* `pip install pynx-devel-nightly.tar.bz2[cuda,gui,mpi]`                        # Install avec les extras cuda, mpi, cdi
+* `pip install pynx-devel-nightly.tar.bz2[cuda,gui,mpi]`                  # Install with extras cuda, mpi, cdi
 * cite `PyNX: high-performance computing toolkit for coherent X-ray imaging based on operators is out: J. Appl. Cryst. 53 (2020), 1404`, also available as `arXiv:2008.11511`
 
 

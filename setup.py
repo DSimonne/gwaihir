@@ -1,6 +1,6 @@
 import setuptools
 
-with open("gwaihir/README.md", "r") as fh:
+with open("./gwaihir/README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
