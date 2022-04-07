@@ -608,6 +608,7 @@ def create_yaml_file(fname, **kwargs):
 
     file = os.path.basename(fname)
     directory = fname.strip(file)
+
     # Create directory
     if not os.path.isdir(directory):
         full_path = ""
@@ -618,6 +619,7 @@ def create_yaml_file(fname, **kwargs):
             except (FileExistsError, PermissionError):
                 pass
 
+    # Save in file
     with open(fname, "w") as v:
         for line in config_file:
             v.write(line + "\n")

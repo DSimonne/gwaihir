@@ -2209,6 +2209,7 @@ class Interface:
                     + glob.glob(os.getcwd() + "/*.npz")
                     + glob.glob(os.getcwd() + "/*.cxi")
                     + glob.glob(os.getcwd() + "/*.h5")
+                    + glob.glob(os.getcwd() + "/*.nxs")
                     + glob.glob(os.getcwd() + "/*.png"),
                     key=os.path.getmtime)],
                 rows=10,
@@ -5907,6 +5908,7 @@ class Interface:
                 + glob.glob(change.new + "/*.npz")
                 + glob.glob(change.new + "/*.cxi")
                 + glob.glob(change.new + "/*.h5")
+                + glob.glob(change.new + "/*.nxs")
                 + glob.glob(change.new + "/*.png"),
                 key=os.path.getmtime)
             ]
@@ -5917,6 +5919,7 @@ class Interface:
                 + glob.glob(change + "/*.npz")
                 + glob.glob(change + "/*.cxi")
                 + glob.glob(change + "/*.h5")
+                + glob.glob(change + "/*.nxs")
                 + glob.glob(change + "/*.png"),
                 key=os.path.getmtime)
             ]
