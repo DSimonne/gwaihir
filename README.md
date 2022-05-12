@@ -7,6 +7,10 @@ You can install gwaihir via the `setup.py` script (`pip install .`)
 Gwaihir is also avaible on pypi.org, each new stable version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
 On the contrary, if you follow the github changes on the you will have the latest updates.
 
+Here is a link to a poster that tries to present Gwaihir:
+[Poster_Gwaihir.pdf](https://www.dsimonne.eu/Attachments/Poster_Gwaihir.pdf)
+![Gwahir](https://user-images.githubusercontent.com/51970962/168030371-7212abe3-f8be-4fef-9231-8b1be87abc2e.png)
+
 # GUI Preview:
 ## Pre-processing data
 https://user-images.githubusercontent.com/51970962/154160601-f3e7878a-d2c6-4560-95e5-adf7087f59ab.mp4
