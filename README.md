@@ -11,6 +11,22 @@ Here is a link to a poster that tries to present Gwaihir:
 [Poster_Gwaihir.pdf](https://www.dsimonne.eu/Attachments/Poster_Gwaihir.pdf)
 ![Gwahir](https://user-images.githubusercontent.com/51970962/168030371-7212abe3-f8be-4fef-9231-8b1be87abc2e.png)
 
+To increase the width of the cells in Jupyter Notebook:
+
+```
+from IPython.core.display import display, HTML
+display(HTML("<style>.container { width:75% !important; }</style>"))
+```
+
+To avoid automatic cell scrolling:
+
+```
+%%javascript
+IPython.OutputArea.prototype._should_scroll = function(lines) {
+    return false;
+}
+```
+
 # GUI Preview:
 ## Pre-processing data
 https://user-images.githubusercontent.com/51970962/154160601-f3e7878a-d2c6-4560-95e5-adf7087f59ab.mp4

@@ -16,11 +16,15 @@ from IPython.display import display
 from datetime import datetime
 
 
-class Dataset():
-    """THE DATASETS CLASS IS MEANT TO BE READ VIA THE gwaihir.gui CLASS !!"""
+class Dataset:
+    """
+    Created for Gwaihir
+    Allows to save the dataset at a CXI file.
+    """
 
     def __init__(self, scan, sample_name, data_dir, root_folder):
-        """Initialiaze the Dataset class, some metadata can be associated as
+        """
+        Initialiaze the Dataset class, some metadata can be associated as
         well.
         """
         self.scan = scan

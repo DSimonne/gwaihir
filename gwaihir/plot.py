@@ -1,12 +1,14 @@
-from tornado.ioloop import PeriodicCallback
-from skimage.measure import marching_cubes
-from scipy.spatial.transform import Rotation
-from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import os
 import h5py as h5
 import tables as tb
 import glob
+
+from tornado.ioloop import PeriodicCallback
+
+from skimage.measure import marching_cubes
+from scipy.spatial.transform import Rotation
+from scipy.interpolate import RegularGridInterpolator
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -17,7 +19,6 @@ import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
 from IPython.display import Markdown, Latex, clear_output
 from IPython.core.display import display, HTML
-# import ipyfilechooser
 import ipyvolume as ipv
 
 from bokeh.plotting import figure, show, output_file
@@ -32,13 +33,10 @@ import bokeh.palettes as bp
 import warnings
 warnings.filterwarnings("ignore")
 
-output_notebook()
 
-# Classes
-
-
-class Plotter():
-    """Class based on interactive functions for plotting.
+class Plotter:
+    """
+    Class based on interactive functions for plotting.
     Gets data array from file and plot if specified
     """
 
@@ -273,7 +271,8 @@ class Plotter():
 
 
 class ThreeDViewer(widgets.Box):
-    """Widget to display 3D objects from CDI optimisation, loaded from a result
+    """
+    Widget to display 3D objects from CDI optimisation, loaded from a result
     CXI file or a mode file.
 
     Quickly adapted from @Vincent Favre Nicolin (ESRF)
@@ -807,7 +806,10 @@ def plot_data(
     cmap="YlGnBu_r",
     title=None,
 ):
-    """Create figure based on the data dimensions.
+    """
+    Create figure based on the data dimensions.
+    Data in 2D is here always plotted as an image
+    Data in 3D is plotted as 3 slices or directly in 3D
 
     :param data_array: np.ndarray to plot
     :param figsize: default (10, 10)
@@ -1036,6 +1038,7 @@ def plot_data(
                 # plt.tight_layout()
                 # plt.show()
                 # plt.close()
+                output_notebook()
 
                 ## BOKEH ##
                 TOOLTIPS = [
@@ -1142,18 +1145,18 @@ def plot_2d_image(
     x_label="x",
     y_label="y"
 ):
-    """Plot 2d image from 2d array.
+    """
+    Plot 2d image from 2d array.
 
     :param two_d_array: np.ndarray to plot, must be 2D
     :param fontsize: default to 15
     :param fig: plt.figure to plot in, default is None and
-     will create a figure
+     will create a figure, used to add 2d images to 3d figures
     :param ax: axes of figure, default is None and will create axes
     :param log: True to have a logarithmic scale, False to have a linear scale
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     :param title: str, title for this axe
-    :return: image
-
+    :return: image on ax (ax.imshow())
     """
 
     if not fig and not ax:
@@ -1167,10 +1170,6 @@ def plot_2d_image(
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
             cmap=cmap,
-            # cmap="cividis",
-            # extent=(0, 2, 0, 2),
-            # vmin=dmin,
-            # vmax=dmax,
         )
         ax.set_xlabel(x_label, fontsize=fontsize)
         ax.set_ylabel(y_label, fontsize=fontsize)
@@ -1180,7 +1179,6 @@ def plot_2d_image(
         return img
 
     except TypeError:
-        # plt.close()
         print("Using complex data, automatically switching to array module")
 
         img = ax.imshow(
@@ -1188,10 +1186,6 @@ def plot_2d_image(
             norm={"linear": None, "logarithmic": LogNorm()}[
                 scale],
             cmap=cmap,
-            # cmap="cividis",
-            # extent=(0, 2, 0, 2),
-            # vmin=dmin,
-            # vmax=dmax,
         )
         ax.set_xlabel(x_label, fontsize=fontsize)
         ax.set_ylabel(y_label, fontsize=fontsize)
@@ -1217,12 +1211,13 @@ def plot_3d_slices(
     cmap="YlGnBu_r",
     title=None
 ):
-    """Plot 3 slices for 3d data.
+    """
+    Plot 3 slices for 3d data.
 
-    :param data_array: np.ndarray to plotn must be 3D
+    :param data_array: np.ndarray to plot, must be 3D
     :param fontsize: default 15
     :param figsize: default (10, 10)
-    :param log: boolean (True, False) or anything else which
+    :param log: boolean (True, False) or, otherwise
      raises an interactive window
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     :param title: string to set as title for main plot or list of
@@ -1236,6 +1231,7 @@ def plot_3d_slices(
 
         fig, axs = plt.subplots(1, 3, figsize=figsize)
 
+        # Add titles
         if isinstance(title, str):
             fig.suptitle(title, fontsize=fontsize + 2)
             titles = [None, None, None]
@@ -1247,6 +1243,7 @@ def plot_3d_slices(
         # Each axis has a dimension
         shape = data_array.shape
 
+        # Plot first image
         two_d_array = data_array[shape[0]//2, :, :]
         img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
                               ax=axs[0], log=log, cmap=cmap, fontsize=fontsize,
@@ -1259,6 +1256,7 @@ def plot_3d_slices(
         # Create colorbar
         fig.colorbar(mappable=img_x, cax=cbar_ax)
 
+        # Plot second image
         two_d_array = data_array[:, shape[1]//2, :]
         img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
                               ax=axs[1], log=log, cmap=cmap, fontsize=fontsize,
@@ -1271,6 +1269,7 @@ def plot_3d_slices(
         # Create colorbar
         fig.colorbar(mappable=img_y, cax=cbar_ax)
 
+        # Plot third image
         two_d_array = data_array[:, :, shape[2]//2]
         img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
                               ax=axs[2], log=log, cmap=cmap, fontsize=fontsize,

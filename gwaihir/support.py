@@ -11,8 +11,9 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import gwaihir.plot as plot
 
 
-class SupportTools():
-    """Class that regroups the methods used to create/extract/optimize support
+class SupportTools:
+    """
+    Class that regroups the methods used to create/extract/optimize support
     in BCDI.
     """
 
@@ -22,7 +23,8 @@ class SupportTools():
         path_to_support=None,
         saving_directory=None
     ):
-        """Initialize the class with either a reconstructed object or the
+        """
+        Initialize the class with either a reconstructed object or the
         support of the reconstructed object.
 
         :param path_to_data: path to reconstructed object file
@@ -85,7 +87,8 @@ class SupportTools():
             hash_print("Set compute to true to continue")
 
     def gaussian_convolution(self, sigma, threshold, compute=True):
-        """Apply a gaussian convolution to the support, to avoid having holes
+        """
+        Apply a gaussian convolution to the support, to avoid having holes
         inside.
 
         :param sigma: parameter used in scipy.ndimage.gaussian_filter
@@ -132,7 +135,8 @@ class SupportTools():
             hash_print("Set compute to true to continue")
 
     def compute_support(self, threshold, compute=True):
-        """Create support from data, based on maximum value of electronic
+        """
+        Create support from data, based on maximum value of electronic
         density module, a threshold is applied.
 
         :param compute: True to run function
