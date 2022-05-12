@@ -69,9 +69,9 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `cd gwaihir`
 * `source_p9`
 * `pip install .`
+* cite <>
 
 ## Install PyNX
-* Send a thank you email to Vincent Favre-Nicolin =D
 * `cd /Packages`
 * `mkdir PyNX_install`
 * `cd PyNX_install/`
@@ -82,7 +82,6 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 
 
 ## Install bcdi
-* Send a thank you email to Jerome Carnis =D
 * `cd /Packages`
 * `git clone https://github.com/carnisj/bcdi.git`
 * `cd bcdi`
@@ -130,6 +129,8 @@ To do so:
 * `source_p9`
 * `ipython kernel install --name "p9_gwaihir --user`
 
+Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
+
 ## Connect with ssh without using password (mandatory for batch jobs)
 * Login into slurm (make sure that you asked for a GPU)
 * Open a terminal (new -> terminal)
@@ -142,9 +143,3 @@ Enter the following commands (replace `<username>` with your username, for me it
 
 You should not need a password anymore when login into slurm, make sure it is the case by typing
 * `ssh <username>@slurm-nice-devel`
-
-# Clusters at SOLEIL
-
-## GRADES
-
-## SixS3

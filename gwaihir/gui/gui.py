@@ -2529,7 +2529,8 @@ class Interface:
 
                         # Real space data
                         print(
-                            "\n#########################################################################################\n"
+                            "\n###########################################"
+                            "#############################################"
                         )
                         if os.path.isfile(self.Dataset.reconstruction_file):
                             self.Dataset.to_cxi(
@@ -2541,9 +2542,9 @@ class Interface:
                                 cxi_filename=self.cxi_filename,
                                 reconstruction_filename=False,
                             )
-
                         print(
-                            "\n#########################################################################################\n"
+                            "\n###########################################"
+                            "#############################################"
                         )
 
                     except (AttributeError, UnboundLocalError):
@@ -2563,9 +2564,9 @@ class Interface:
                             "Could not save facets' data, run the analysis in the `Facets` tab first.", hash_line_after=False)
 
                     print(
-                        "\n#########################################################################################\n"
+                        "\n###########################################"
+                        "#############################################"
                     )
-
         elif not run_dir_init:
             gutil.hash_print("Cleared window.")
             clear_output(True)
@@ -3168,14 +3169,12 @@ class Interface:
 
                 # Run bcdi_preprocess
                 print(
-                    "\n#########################################################################################\n"
-                )
-                print(
-                    f"Running: $ {self.path_scripts}/bcdi_preprocess_BCDI.py")
-                print(
-                    f"Config file: {self.preprocessing_folder}config_preprocessing.yml")
-                print(
-                    "\n#########################################################################################\n"
+                    "\n###########################################"
+                    "#############################################"
+                    f"\nRunning: $ {self.path_scripts}/bcdi_preprocess_BCDI.py"
+                    f"\nConfig file: {self.preprocessing_folder}config_preprocessing.yml"
+                    "\n###########################################"
+                    "#############################################"
                 )
 
                 # Construct the argument parser
@@ -3842,9 +3841,10 @@ class Interface:
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
                         print(
-                            "\n#########################################################################################"
+                            "\n###########################################"
+                            "#############################################"
+                            f"\nRun {i}"
                         )
-                        print(f"Run {i}")
 
                         # Initialise the cdi operator
                         cdi = self.initialize_cdi_operator()
@@ -4051,10 +4051,11 @@ class Interface:
 
                             self.reconstruction_file_list.append(fn)
                             cdi.save_obj_cxi(fn)
-                            print(f"\nSaved as {fn}.")
                             print(
-                                "#########################################################################################\n"
-                            )
+                                f"\nSaved as {fn}."
+                                "\n###########################################"
+                                "#############################################"
+                                )
 
                         except SupportTooLarge:
                             print(
@@ -4119,15 +4120,14 @@ class Interface:
         """
         try:
             print(
-                "\n#########################################################################################"
-            )
-            print(
-                f"Using {self.path_scripts}/pynx-cdi-analysis.py\n"
-                f"Using {folder}/*LLK* files.\n"
-                "Running: $ pynx-cdi-analysis.py *LLK* modes=1\n"
-                f"Output in {folder}/modes_gui.h5")
-            print(
-                "#########################################################################################\n"
+                "\n###########################################"
+                "#############################################"
+                f"\nUsing {self.path_scripts}/pynx-cdi-analysis.py"
+                f"\nUsing {folder}/*LLK* files."
+                f"\nRunning: $ pynx-cdi-analysis.py *LLK* modes=1"
+                f"\nOutput in {folder}/modes_gui.h5"
+                "\n###########################################"
+                "#############################################"
             )
             os.system(
                 "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
@@ -4768,13 +4768,15 @@ class Interface:
                 )
                 # Run bcdi_postprocessing
                 print(
-                    "\n#########################################################################################\n"
+                    "\n###########################################"
+                    "#############################################"
                 )
                 print(f"Running: $ {self.path_scripts}/bcdi_strain.py")
                 print(
                     f"Config file: {self.postprocessing_folder}/config_postprocessing.yml")
                 print(
-                    "\n#########################################################################################\n"
+                    "\n###########################################"
+                    "#############################################"
                 )
 
                 # Construct the argument parser
@@ -4801,13 +4803,21 @@ class Interface:
                 self.Dataset.strain_output_file = files[0]
 
                 print(
-                    "\n#########################################################################################"
+                    "\n###########################################"
+                    "#############################################"
+                    f"\nResult file used to extract results saved in the .cxi file:"
+                    f"\n{self.Dataset.strain_output_file}"
+                    "\nMake sure it is the latest one."
+                    "\n###########################################"
+                    "#############################################"
                 )
-                print(f"Result file used to extract results saved in the .cxi file:")
-                print(f"{self.Dataset.strain_output_file}")
-                print("\nMake sure it is the latest one.")
+
                 print(
-                    "##########################################################################################\n"
+                    "\n###########################################"
+                    "#############################################"
+                    "\nRemember to save your progress as a cxi file !"
+                    "\n###########################################"
+                    "#############################################"
                 )
 
             except KeyboardInterrupt:
@@ -5184,17 +5194,6 @@ class Interface:
                         logs = pd.read_csv(csv_file)
                     except ValueError:
                         gutil.hash_print("Data type not supported.")
-                    # else:
-                    #     print(
-                    #         f"""
-                    #         ###############################################################################
-                    #         For a more detailed analysis, please proceed as follows
-                    #         import pandas as pd
-                    #         df = pd.read_csv({self.csv_file})
-                    #         You can then work on the `df` dataframe as you please.
-                    #         ###############################################################################
-                    #         """
-                    #     )
 
                 # field data from facet analysis
                 elif show_logs == "load_field_data":
