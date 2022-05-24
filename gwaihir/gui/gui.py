@@ -755,7 +755,7 @@ class Interface:
                 sample circle (outer first). Convention: the sample offsets \
                 will be subtracted to the motor values"""),
 
-            sdd=widgets.FloatText(
+            detector_distance=widgets.FloatText(
                 value=1.18,
                 step=0.01,
                 description='Sample detector distance (m):',
@@ -2631,7 +2631,7 @@ class Interface:
         fill_value_mask,
         beam_direction,
         sample_offsets,
-        sdd,
+        detector_distance,
         energy,
         custom_motors,
         unused_label_xru,
@@ -2843,7 +2843,7 @@ class Interface:
          (outer first).
          convention: the sample offsets will be subtracted to the motor values.
          Leave None if there is no offset.
-        :param sdd: e.g. 0.50678
+        :param detector_distance: e.g. 0.50678
          in m, sample to detector distance in m
         :param energy: e.g. 9000
          X-ray energy in eV, it can be a number or a list in case of
@@ -2964,7 +2964,7 @@ class Interface:
             self.Dataset.fill_value_mask = fill_value_mask
             self.Dataset.beam_direction = beam_direction
             self.Dataset.sample_offsets = sample_offsets
-            self.Dataset.sdd = sdd
+            self.Dataset.detector_distance = detector_distance
             self.Dataset.energy = energy
             self.Dataset.custom_motors = custom_motors
             self.Dataset.align_q = align_q
@@ -3142,7 +3142,7 @@ class Interface:
                     fill_value_mask=self.Dataset.fill_value_mask,
                     beam_direction=self.Dataset.beam_direction,
                     sample_offsets=self.Dataset.sample_offsets,
-                    sdd=self.Dataset.sdd,
+                    detector_distance=self.Dataset.detector_distance,
                     energy=self.Dataset.energy,
                     custom_motors=self.Dataset.custom_motors,
                     # parameters when orthogonalizing the data before
@@ -3431,7 +3431,7 @@ class Interface:
                   mask=mask,
                   wavelength=self.Dataset.wavelength,
                   pixel_size_detector=self.Dataset.pixel_size_detector,
-                  detector_distance=self.Dataset.sdd,
+                  detector_distance=self.Dataset.detector_distance,
                   )
 
         if save_as_cxi:
@@ -3656,11 +3656,11 @@ class Interface:
 
         self.Dataset.energy = self._list_widgets_preprocessing.children[50].value
         self.Dataset.wavelength = 1.2399 * 1e-6 / self.Dataset.energy
-        self.Dataset.sdd = self._list_widgets_preprocessing.children[49].value
+        self.Dataset.detector_distance = self._list_widgets_preprocessing.children[49].value
 
         print("\tCXI input: Energy = %8.2f eV" % self.Dataset.energy)
         print(f"\tCXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
-        print("\tCXI input: detector distance = %8.2f m" % self.Dataset.sdd)
+        print("\tCXI input: detector distance = %8.2f m" % self.Dataset.detector_distance)
         print(
             f"\tCXI input: detector pixel size = {self.Dataset.pixel_size_detector} m")
 
@@ -3773,7 +3773,7 @@ class Interface:
                     f'rebin = {rebin}\n',
                     '\n',
                     '# Generic parameters\n',
-                    f'detector_distance = {self.Dataset.sdd}\n',
+                    f'detector_distance = {self.Dataset.detector_distance}\n',
                     f'pixel_size_detector = {self.Dataset.pixel_size_detector}\n',
                     f'wavelength = {self.Dataset.wavelength}\n',
                     f'verbose = {self.Dataset.verbose}\n',
@@ -4183,7 +4183,7 @@ class Interface:
         self.params = params
         self.params["data"] = self.Dataset.iobs
         self.params["wavelength"] = self.Dataset.wavelength
-        self.params["detector_distance"] = self.Dataset.sdd
+        self.params["detector_distance"] = self.Dataset.detector_distance
         self.params["pixel_size_detector"] = self.Dataset.pixel_size_detector
         self.params["wavelength"] = self.Dataset.wavelength
         self.params["verbose"] = self.Dataset.verbose
@@ -4707,7 +4707,7 @@ class Interface:
                     custom_images=self.Dataset.custom_images,
                     custom_monitor=self.Dataset.custom_monitor,
                     rocking_angle=self.Dataset.rocking_angle,
-                    sdd=self.Dataset.sdd,
+                    detector_distance=self.Dataset.detector_distance,
                     energy=self.Dataset.energy,
                     beam_direction=self.Dataset.beam_direction,
                     sample_offsets=self.Dataset.sample_offsets,

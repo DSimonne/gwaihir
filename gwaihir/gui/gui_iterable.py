@@ -378,8 +378,8 @@ class Dataset:
                 linearized_transformation_matrix.create_dataset(
                     "sample_offsets", data=self.sample_offsets)
                 linearized_transformation_matrix.create_dataset(
-                    "sdd", data=self.sdd)
-                linearized_transformation_matrix["sdd"].attrs['units'] = 'm'
+                    "detector_distance", data=self.detector_distance)
+                linearized_transformation_matrix["detector_distance"].attrs['units'] = 'm'
                 linearized_transformation_matrix.create_dataset(
                     "energy", data=self.energy)
                 linearized_transformation_matrix["energy"].attrs['units'] = 'keV'
