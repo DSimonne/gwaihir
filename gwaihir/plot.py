@@ -44,7 +44,7 @@ class Plotter:
         self,
         filename=None,
         data_array=None,
-        plot=False,
+        plot="slices",
         log=False,
         cmap="YlGnBu_r",
         figsize=(10, 10),
