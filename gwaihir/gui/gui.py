@@ -2124,7 +2124,7 @@ class Interface:
                 layout=Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
-            reconstruction_file=widgets.Dropdown(
+            reconstruction_files=widgets.Dropdown(
                 options=[""]\
                 + [os.path.basename(f) for f in sorted(
                     glob.glob(os.getcwd() + "/*.h5")
@@ -2532,10 +2532,10 @@ class Interface:
                             "\n###########################################"
                             "#############################################"
                         )
-                        if os.path.isfile(self.Dataset.reconstruction_file):
+                        if os.path.isfile(self.Dataset.reconstruction_files):
                             self.Dataset.to_cxi(
                                 cxi_filename=self.cxi_filename,
-                                reconstruction_filename=self.Dataset.reconstruction_file,
+                                reconstruction_filename=self.Dataset.reconstruction_files,
                             )
                         else:
                             self.Dataset.to_cxi(
@@ -3068,19 +3068,22 @@ class Interface:
 
                 # Change data_dir and root folder depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
+                    root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
-                    data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
+                    root_folder = self.Dataset.data_dir
+                    data_dir = None
 
                 elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
+                    root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
                 # Create config file
                 gutil.create_yaml_file(
                     fname=f"{self.preprocessing_folder}config_preprocessing.yml",
                     scans=self.Dataset.scan,
-                    root_folder=self.Dataset.root_folder,
+                    root_folder=root_folder,
                     save_dir=self.preprocessing_folder,
                     data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
@@ -4338,7 +4341,7 @@ class Interface:
         apodization_alpha,
         unused_label_strain,
         strain_folder,
-        reconstruction_file,
+        reconstruction_files,
         run_strain,
     ):
         """
@@ -4591,7 +4594,7 @@ class Interface:
         self.Dataset.apodization_mu = apodization_mu
         self.Dataset.apodization_sigma = apodization_sigma
         self.Dataset.apodization_alpha = apodization_alpha
-        self.Dataset.reconstruction_file = strain_folder + reconstruction_file
+        self.Dataset.reconstruction_files = strain_folder + reconstruction_files
 
         if run_strain:
             # Save directory
@@ -4647,12 +4650,15 @@ class Interface:
             try:
                 # Change data_dir and root folder depending on beamline
                 if self.Dataset.beamline == "SIXS_2019":
+                    root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
                 elif self.Dataset.beamline == "P10":
-                    data_dir = f"{self.Dataset.data_dir}{self.Dataset.sample_name}_{self.Dataset.scan:05d}/e4m/"
+                    root_folder = self.Dataset.data_dir
+                    data_dir = None
 
                 elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
+                    root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
             except AttributeError:
@@ -4670,13 +4676,13 @@ class Interface:
             try:
                 gutil.create_yaml_file(
                     fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
-                    scan=self.Dataset.scan,
-                    root_folder=self.Dataset.root_folder,
+                    scans=self.Dataset.scan,
+                    root_folder=root_folder,
                     save_dir=save_dir,
                     data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
-                    reconstruction_file=self.Dataset.reconstruction_file,
+                    reconstruction_files=self.Dataset.reconstruction_files,
                     backend=self.matplotlib_backend,
                     # parameters used when averaging several reconstruction #
                     sort_method=self.Dataset.sort_method,
@@ -5217,8 +5223,10 @@ class Interface:
             except (FileNotFoundError, UnboundLocalError):
                 gutil.hash_print("Wrong path")
             except AttributeError:
-                print("You need to run the facet analysis in the dedicated tab first."
-                      "Then this function will load the resulting DataFrame.")
+                print(
+                    "You need to run the facet analysis in the dedicated tab first."
+                     "\nThen this function will load the resulting DataFrame."
+                     )
 
         else:
             self.tab_data_frame.children[1].disabled = False
@@ -5541,11 +5549,10 @@ class Interface:
             display(Markdown("* Detector: `Eiger4M`"))
             display(Markdown("* Template imagefile: `_master.h5`"))
             display(Markdown("* Sample offsets: `(0, 0, 0, 0)`"))
-            display(Markdown("* Sample detector distance (m): `0.50678`"))
-            display(Markdown("* X-ray energy (eV): `9000`"))
+            display(Markdown("* Sample detector distance (m): `1.818`"))
+            display(Markdown("* X-ray energy (eV): `11294`"))
             display(Markdown("* Beamline: `P10`"))
-            display(Markdown(
-                "* specfile name: `/data/id01/inhouse/david/UM2022/ID01/CXIDB-I182/CH4760/l5.spec` (in my case, please use a direct path)"))
+            display(Markdown("* specfile name: `/` (in my case, please use a direct path)"))
             display(Markdown("* Rocking angle: `inplane`"))
             display(Markdown("* Pixel size (in phase retrieval): `75`"))
 
