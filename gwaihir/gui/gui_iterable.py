@@ -14,6 +14,7 @@ import shutil
 
 from IPython.display import display
 from datetime import datetime
+_gwaihir_version = get_git_version()
 
 
 class Dataset:
@@ -45,17 +46,27 @@ class Dataset:
         """
         Save all the parameters used in the data analysis with a specific
         architecture based on NeXuS.
+
+        :param cxi_filename: .cxi file used for data postprocessing.
+         Includes all the raw data and output from preprocessing
+         and phase retrieval.
+        :param reconstruction_filename: .h5 file, output of postprocessing.
         """
+
+        # Create final file name
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
-        shutil.copy(cxi_filename,
-                    final_data_path,
+
+        # Copy cxi file, and use it as starter for the end file
+        shutil.copy(cxi_filename, #src
+                    final_data_path, #dest
                     )
 
+        # Add info from postprocessing if possible
         if isinstance(reconstruction_filename, str):
             with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
                     h5py.File(final_data_path, "a") as final_file:
-                # Real space data is already here from PyNX
 
+                # Real space data is already here from PyNX
                 print("\nSaving phase retrieval output ...")
 
                 # Copy image_1 from reconstruction to entry_1.image_2
@@ -153,7 +164,10 @@ class Dataset:
 
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
-            # Parameters
+            # Save Gwaihir version
+            f.create_dataset("gwaihir_version", data="Gwaihir %s" % _gwaihir_version)
+
+            # Create parameter groups
             try:
                 data_3 = f.create_group("entry_1/data_3/")
                 f["entry_1"]["data_3"].attrs['NX_class'] = 'NXdata'

@@ -2464,11 +2464,11 @@ class Interface:
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
 
-            # Refresh csv file
-            self.tab_data_frame.children[1].options\
-                = [x[0] + "/" for x in os.walk(self.Dataset.root_folder)]
-            self.tab_data_frame.children[1].value = self.Dataset.root_folder+"/"
-            self.csv_file_handler(self.Dataset.root_folder)
+            # Refresh csv file,
+            # self.tab_data_frame.children[1].options\
+            #     = [x[0] + "/" for x in os.walk(self.Dataset.root_folder)]
+            # self.tab_data_frame.children[1].value = self.Dataset.root_folder+"/"
+            # self.csv_file_handler(self.Dataset.root_folder)
 
             # PyNX folder, refresh values
             self._list_widgets_phase_retrieval.children[1].value\
@@ -2515,7 +2515,7 @@ class Interface:
                 def action_button_save_as_cxi(selfbutton):
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
-                    display(buttons_init)
+                    display(button_save_as_cxi)
                     gutil.hash_print("Saving data, takes some time ...",
                                      hash_line_after=False)
 
@@ -3215,8 +3215,7 @@ class Interface:
                             scan_nb=self.Dataset.scan,
                             metadata_file=metadata_file,
                             gwaihir_dataset=self.Dataset,
-                            metadata_csv_file=self.Dataset.root_folder
-                            + "metadata.csv"
+                            metadata_csv_file=os.getcwd() + "metadata.csv"
                         )
                     except (IndexError, TypeError):
                         gutil.hash_print(
@@ -4075,7 +4074,25 @@ class Interface:
 
                 except KeyboardInterrupt:
                     clear_output(True)
-                    gutil.hash_print("Phase retrieval stopped by user ...")
+                    gutil.hash_print(
+                        "Phase retrieval stopped by user, cxi file list below."
+                        )
+
+                    cxi_file_list = sorted(
+                        glob.glob(self.preprocessing_folder + "*.cxi"),
+                        key = os.path.getmtime,
+                        reverse=True,
+                    )
+
+                    for f in cxi_file_list:
+                        print(
+                            "################################################"
+                            "################################################"
+                            f"\nFile: {os.path.basename(f)}"
+                            f"\nCreated: {datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')}"
+                            "\n################################################"
+                            "################################################\n"
+                            )
 
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
@@ -5201,7 +5218,7 @@ class Interface:
                     except ValueError:
                         gutil.hash_print("Data type not supported.")
 
-                # field data from facet analysis
+                # field data taken from facet analysis
                 elif show_logs == "load_field_data":
                     logs = self.Facets.field_data.copy()
 
@@ -5511,7 +5528,7 @@ class Interface:
                 facets.
                 """)
 
-        elif contents is "GUI":
+        elif contents == "GUI":
             display(Markdown("# Welcome to `Gwaihir`"))
             display(Markdown("Remember that a detailed tutorial on the installation of each package is "
                              " available on the [Github](https://github.com/DSimonne/gwaihir#welcome),"
@@ -5570,6 +5587,7 @@ class Interface:
                              " We are currently working on implementing a solution in Jupyter Notebook with Bokeh."))
             display(Markdown("* If you saved your data in the `.cxi` format, you can visualize it with JupyterLab !"
                              " Otherwise you can use [`silx`](http://www.silx.org/doc/silx/0.7.0/applications/view.html) from the terminal"))
+            display(Markdown("Link to the [`cxi` databank](https://cxidb.org/deposit.html)"))
 
             display(Markdown(
                 "## Type the following code to stop the scrolling in the output cell, then reload the cell."))
