@@ -14,7 +14,8 @@ import shutil
 
 from IPython.display import display
 from datetime import datetime
-_gwaihir_version = get_git_version()
+
+from ..version import get_git_version
 
 
 class Dataset:
@@ -32,6 +33,8 @@ class Dataset:
         self.sample_name = sample_name
         self.data_dir = data_dir
         self.root_folder = root_folder
+        self._gwaihir_version = get_git_version()
+        # bcdi version left
 
     def __repr__(self):
         return "Dataset {}{}.\n".format(
@@ -165,7 +168,7 @@ class Dataset:
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
             # Save Gwaihir version
-            f.create_dataset("gwaihir_version", data="Gwaihir %s" % _gwaihir_version)
+            f.create_dataset("gwaihir_version", data="Gwaihir %s" % self._gwaihir_version)
 
             # Create parameter groups
             try:
