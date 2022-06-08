@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import os
 import h5py as h5
@@ -32,7 +33,6 @@ import bokeh.palettes as bp
 import panel as pn
 pn.extension()
 
-import warnings
 warnings.filterwarnings("ignore")
 
 
@@ -924,7 +924,13 @@ def plot_data(
 
     elif data_dimensions == 3:
 
-        def get_data_slice(data, axis, index, data_type, scale):
+        def get_data_slice(
+            data,
+            axis="x",
+            index=0,
+            data_type="Module",
+            scale="linear",
+        ):
             # Project on specific index
             if axis == "x":
                 dt = data[index, :, :]
@@ -945,20 +951,15 @@ def plot_data(
 
             # Scale
             if scale == "logarithmic":
-                log_color_mapper.high = np.max(dt)
-                dt = np.nan_to_num(np.log(dt))
-                fig.right[0].visible = True
-                fig.right[1].visible = False
-            else:
-                lin_color_mapper.high = np.max(dt)
-                fig.right[0].visible = False
-                fig.right[1].visible = True
+                dt = np.where(dt > 0, np.log(dt), 0)
+
+            lin_color_mapper.high = np.max(dt)
 
             return dt
 
         output_notebook()
 
-        ## BOKEH ##
+        # Get bokeh palette from colormap
         TOOLTIPS = [
             ("x", "$x"),
             ("y", "$y"),
@@ -966,28 +967,17 @@ def plot_data(
         ]
 
         # List of compatible cmaps in bokeh
-        palette = "Viridis256"
         bokey_cmaps = [
             p for p in bp.__palettes__ if p.endswith("256")
         ]
-        for p in bokey_cmaps:
-            if cmap[1:] in p:  # skip capital letter
-                palette = p
-                print("Changing cmap to", p)
-
-        # Define source
-        source = ColumnDataSource(
-            data=dict(
-                data=[np.abs(data_array[0, :, :])],
-                slider_range = [data_array.shape[0]],
-                dw=[data_array.shape[1]],
-                dh=[data_array.shape[2]],
-                index=[0],
-                axis=["x"],
-                data_type = ["Module"],
-                scale = ["linear"],
-            )
-        )
+        palette = True
+        j = 0
+        while not isinstance(palette, str):
+            if cmap[1:] in bokey_cmaps[j]:  # skip capital letter
+                palette = bokey_cmaps[j]
+                print("Changing cmap to", palette)
+            else:
+                j += 1
 
         # Figure
         fig = figure(
@@ -1003,15 +993,28 @@ def plot_data(
             tooltips=TOOLTIPS
         )
 
+        # Define source
+        source = ColumnDataSource(
+            data=dict(
+                data=[np.abs(data_array[0, :, :])],
+                dw=[data_array.shape[1]],
+                dh=[data_array.shape[2]],
+                index=[0],
+                axis=["x"],
+                data_type=["Module"],
+                scale=["linear"],
+            )
+        )
+
         # Index
         def callback_change_index(attr, old, new):
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = source.data["axis"][0],
-                index = new,
-                data_type = source.data["data_type"][0],
-                scale = source.data["scale"][0],
+                data=data_array,
+                axis=source.data["axis"][0],
+                index=new,
+                data_type=source.data["data_type"][0],
+                scale=source.data["scale"][0],
             )
 
             # Save new values
@@ -1020,7 +1023,7 @@ def plot_data(
 
         slider_index = Slider(
             start=0,
-            end=300,
+            end=data_array.shape[0]-1,
             value=0,
             step=1,
             title="Position"
@@ -1034,11 +1037,11 @@ def plot_data(
 
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = new_axis,
-                index = source.data["index"][0],
-                data_type = source.data["data_type"][0],
-                scale = source.data["scale"][0],
+                data=data_array,
+                axis=new_axis,
+                index=source.data["index"][0],
+                data_type=source.data["data_type"][0],
+                scale=source.data["scale"][0],
             )
 
             # Save new values
@@ -1064,11 +1067,11 @@ def plot_data(
                 fig.axis[1].axis_label = "y"
 
             # Change slider range
-            slider_index.end = slider_range
+            slider_index.end = slider_range-1
 
         select_axis = RadioButtonGroup(
-            labels = ["x", "y", "z"],
-            active = 0,
+            labels=["x", "y", "z"],
+            active=0,
         )
         select_axis.on_change('active', callback_change_axis)
 
@@ -1079,11 +1082,11 @@ def plot_data(
 
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = source.data["axis"][0],
-                index = source.data["index"][0],
-                data_type = new_data_type,
-                scale = source.data["scale"][0],
+                data=data_array,
+                axis=source.data["axis"][0],
+                index=source.data["index"][0],
+                data_type=new_data_type,
+                scale=source.data["scale"][0],
             )
 
             # Save new values
@@ -1091,23 +1094,23 @@ def plot_data(
             source.data["data_type"] = [new_data_type]
 
         select_data_type = RadioButtonGroup(
-            labels = ["Real", "Imaginary", "Module", "Phase"],
-            active = 2,
+            labels=["Real", "Imaginary", "Module", "Phase"],
+            active=2,
         )
         select_data_type.on_change('active', callback_change_data_type)
 
         # Color bar
         def callback_change_cbar(attr, old, new):
             # Get new cbar
-            new_cbar= ["linear", "logarithmic"][new]
+            new_cbar = ["linear", "logarithmic"][new]
 
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = source.data["axis"][0],
-                index = source.data["index"][0],
-                data_type = source.data["data_type"],
-                scale = new_cbar,
+                data=data_array,
+                axis=source.data["axis"][0],
+                index=source.data["index"][0],
+                data_type=source.data["data_type"],
+                scale=new_cbar,
             )
 
             # Save new values
@@ -1115,8 +1118,8 @@ def plot_data(
             source.data["scale"] = [new_cbar]
 
         select_cbar = RadioButtonGroup(
-            labels = ["linear", "logarithmic"],
-            active = 0,
+            labels=["linear", "logarithmic"],
+            active=0,
         )
         select_cbar.on_change('active', callback_change_cbar)
 
@@ -1130,19 +1133,14 @@ def plot_data(
         fig.title.text_font_size = "15px"
 
         # Color bars
-        log_color_mapper = LogColorMapper(
-            palette=palette,
-            low=0.1,
-            high=np.max(source.data["data"][0]),
-        )
-
         lin_color_mapper = LinearColorMapper(
             palette=palette,
             low=0,
             high=np.max(source.data["data"][0]),
         )
-        log_color_bar = ColorBar(color_mapper=log_color_mapper)
         lin_color_bar = ColorBar(color_mapper=lin_color_mapper)
+
+        fig.add_layout(lin_color_bar, 'right')
 
         # Image
         image = fig.image(
@@ -1155,10 +1153,6 @@ def plot_data(
             color_mapper=lin_color_mapper,
         )
 
-        # Add boths
-        fig.add_layout(log_color_bar, 'right')
-        fig.add_layout(lin_color_bar, 'right')
-
         # Create app layout
         app = pn.pane.Bokeh(
             column(
@@ -1167,9 +1161,10 @@ def plot_data(
                 select_cbar,
                 slider_index,
                 fig)
-            )
+        )
 
         display(app)
+
 
 def plot_2d_image(
     two_d_array,

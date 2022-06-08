@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import h5py
 import shutil
+import os
 
 from IPython.display import display
 from datetime import datetime
@@ -57,7 +58,8 @@ class Dataset:
         :param cxi_filename: .cxi file that contains the preprocessed data,
          created thanks to PyNX.
          This file is used as base for the final cxi file.
-        :param reconstruction_filename: .cxi file, output of phase retrieval.
+        :param reconstruction_filename: .cxi or .h5 file, output of phase retrieval
+         chosen for postprocessing.
         :param strain_output_file: .h5 file, output from postprocessing
         """
 
@@ -65,8 +67,8 @@ class Dataset:
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
 
         # Copy cxi file, and use it as starter for the end file
-        shutil.copy(cxi_filename, #src
-                    final_data_path, #dest
+        shutil.copy(cxi_filename,  # src
+                    final_data_path,  # dest
                     )
 
         # Add info from postprocessing if possible
@@ -178,7 +180,8 @@ class Dataset:
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
             # Save Gwaihir version
-            f.create_dataset("gwaihir_version", data="Gwaihir %s" % self._gwaihir_version)
+            f.create_dataset("gwaihir_version", data="Gwaihir %s" %
+                             self._gwaihir_version)
 
             # Create parameter groups
             try:
@@ -607,8 +610,8 @@ class Dataset:
                 print("Could not save phase averaging apodization parameters")
 
             # Save strain output
-            if os.path.isfile(strain_output_file):
-                try:
+            try:
+                if os.path.isfile(strain_output_file):
                     image_3.create_dataset("strain_analysis_output_file",
                                            data=strain_output_file)
 
@@ -645,8 +648,8 @@ class Dataset:
 
                     image_3.attrs['signal'] = 'phase'
 
-                except AttributeError:
-                    print("Could not save strain output")
+            except (AttributeError, TypeError):
+                print("Could not save strain output")
 
             # Create data_3 link
             try:
