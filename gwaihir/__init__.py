@@ -9,4 +9,4 @@ The terminal scripts used for quick analysis are in the terminal_scripts
 folder
 """
 
-__all__ = ["gui", "scripts", "support", "plot", "utilities"]
+__all__ = ["gui", "scripts", "support", "plot", "utilities", "version"]
