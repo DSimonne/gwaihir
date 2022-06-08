@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 import os
 import h5py as h5
@@ -32,7 +33,6 @@ import bokeh.palettes as bp
 import panel as pn
 pn.extension()
 
-import warnings
 warnings.filterwarnings("ignore")
 
 
@@ -979,13 +979,13 @@ def plot_data(
         source = ColumnDataSource(
             data=dict(
                 data=[np.abs(data_array[0, :, :])],
-                slider_range = [data_array.shape[0]],
+                slider_range=[data_array.shape[0]],
                 dw=[data_array.shape[1]],
                 dh=[data_array.shape[2]],
                 index=[0],
                 axis=["x"],
-                data_type = ["Module"],
-                scale = ["linear"],
+                data_type=["Module"],
+                scale=["linear"],
             )
         )
 
@@ -1007,11 +1007,11 @@ def plot_data(
         def callback_change_index(attr, old, new):
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = source.data["axis"][0],
-                index = new,
-                data_type = source.data["data_type"][0],
-                scale = source.data["scale"][0],
+                data=data,
+                axis=source.data["axis"][0],
+                index=new,
+                data_type=source.data["data_type"][0],
+                scale=source.data["scale"][0],
             )
 
             # Save new values
@@ -1034,11 +1034,11 @@ def plot_data(
 
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = new_axis,
-                index = source.data["index"][0],
-                data_type = source.data["data_type"][0],
-                scale = source.data["scale"][0],
+                data=data,
+                axis=new_axis,
+                index=source.data["index"][0],
+                data_type=source.data["data_type"][0],
+                scale=source.data["scale"][0],
             )
 
             # Save new values
@@ -1067,8 +1067,8 @@ def plot_data(
             slider_index.end = slider_range
 
         select_axis = RadioButtonGroup(
-            labels = ["x", "y", "z"],
-            active = 0,
+            labels=["x", "y", "z"],
+            active=0,
         )
         select_axis.on_change('active', callback_change_axis)
 
@@ -1079,11 +1079,11 @@ def plot_data(
 
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = source.data["axis"][0],
-                index = source.data["index"][0],
-                data_type = new_data_type,
-                scale = source.data["scale"][0],
+                data=data,
+                axis=source.data["axis"][0],
+                index=source.data["index"][0],
+                data_type=new_data_type,
+                scale=source.data["scale"][0],
             )
 
             # Save new values
@@ -1091,23 +1091,23 @@ def plot_data(
             source.data["data_type"] = [new_data_type]
 
         select_data_type = RadioButtonGroup(
-            labels = ["Real", "Imaginary", "Module", "Phase"],
-            active = 2,
+            labels=["Real", "Imaginary", "Module", "Phase"],
+            active=2,
         )
         select_data_type.on_change('active', callback_change_data_type)
 
         # Color bar
         def callback_change_cbar(attr, old, new):
             # Get new cbar
-            new_cbar= ["linear", "logarithmic"][new]
+            new_cbar = ["linear", "logarithmic"][new]
 
             # Compute data
             dt = get_data_slice(
-                data = data,
-                axis = source.data["axis"][0],
-                index = source.data["index"][0],
-                data_type = source.data["data_type"],
-                scale = new_cbar,
+                data=data,
+                axis=source.data["axis"][0],
+                index=source.data["index"][0],
+                data_type=source.data["data_type"],
+                scale=new_cbar,
             )
 
             # Save new values
@@ -1115,8 +1115,8 @@ def plot_data(
             source.data["scale"] = [new_cbar]
 
         select_cbar = RadioButtonGroup(
-            labels = ["linear", "logarithmic"],
-            active = 0,
+            labels=["linear", "logarithmic"],
+            active=0,
         )
         select_cbar.on_change('active', callback_change_cbar)
 
@@ -1167,9 +1167,10 @@ def plot_data(
                 select_cbar,
                 slider_index,
                 fig)
-            )
+        )
 
         display(app)
+
 
 def plot_2d_image(
     two_d_array,

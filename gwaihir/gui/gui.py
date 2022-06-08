@@ -2534,7 +2534,7 @@ class Interface:
                         # Define cxi file with the data selected
                         # in the phase retrieval tab and save as cxi
                         cdi = self.initialize_cdi_operator(
-                            path_to_cxi = cxi_filename
+                            path_to_cxi=cxi_filename
                         )
 
                         # Real space data
@@ -3668,7 +3668,8 @@ class Interface:
 
         print("\tCXI input: Energy = %8.2f eV" % self.Dataset.energy)
         print(f"\tCXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
-        print("\tCXI input: detector distance = %8.2f m" % self.Dataset.detector_distance)
+        print("\tCXI input: detector distance = %8.2f m" %
+              self.Dataset.detector_distance)
         print(
             f"\tCXI input: detector pixel size = {self.Dataset.pixel_size_detector} m")
 
@@ -3855,14 +3856,14 @@ class Interface:
                         )
 
                         # Initialise the cdi operator
-                        if i==0:
+                        if i == 0:
                             cxi_filename = "{}/preprocessing/{}.cxi".format(
                                 self.Dataset.scan_folder,
                                 self.Dataset.iobs.split("/")[-1].split(".")[0]
                             )
 
                             cdi = self.initialize_cdi_operator(
-                                path_to_cxi = cxi_filename
+                                path_to_cxi=cxi_filename
                             )
 
                         else:
@@ -4074,7 +4075,7 @@ class Interface:
                                 f"\nSaved as {fn}."
                                 "\n###########################################"
                                 "#############################################"
-                                )
+                            )
 
                         except SupportTooLarge:
                             print(
@@ -4093,11 +4094,11 @@ class Interface:
                     clear_output(True)
                     gutil.hash_print(
                         "Phase retrieval stopped by user, cxi file list below."
-                        )
+                    )
 
                     cxi_file_list = sorted(
                         glob.glob(self.preprocessing_folder + "*.cxi"),
-                        key = os.path.getmtime,
+                        key=os.path.getmtime,
                         reverse=True,
                     )
 
@@ -4109,7 +4110,7 @@ class Interface:
                             f"\nCreated: {datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')}"
                             "\n################################################"
                             "################################################\n"
-                            )
+                        )
 
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
@@ -5259,8 +5260,8 @@ class Interface:
             except AttributeError:
                 print(
                     "You need to run the facet analysis in the dedicated tab first."
-                     "\nThen this function will load the resulting DataFrame."
-                     )
+                    "\nThen this function will load the resulting DataFrame."
+                )
 
         else:
             self.tab_data_frame.children[1].disabled = False
@@ -5586,7 +5587,8 @@ class Interface:
             display(Markdown("* Sample detector distance (m): `1.818`"))
             display(Markdown("* X-ray energy (eV): `11294`"))
             display(Markdown("* Beamline: `P10`"))
-            display(Markdown("* specfile name: `/` (in my case, please use a direct path)"))
+            display(
+                Markdown("* specfile name: `/` (in my case, please use a direct path)"))
             display(Markdown("* Rocking angle: `inplane`"))
             display(Markdown("* Pixel size (in phase retrieval): `75`"))
 
@@ -5604,7 +5606,8 @@ class Interface:
                              " We are currently working on implementing a solution in Jupyter Notebook with Bokeh."))
             display(Markdown("* If you saved your data in the `.cxi` format, you can visualize it with JupyterLab !"
                              " Otherwise you can use [`silx`](http://www.silx.org/doc/silx/0.7.0/applications/view.html) from the terminal"))
-            display(Markdown("Link to the [`cxi` databank](https://cxidb.org/deposit.html)"))
+            display(
+                Markdown("Link to the [`cxi` databank](https://cxidb.org/deposit.html)"))
 
             display(Markdown(
                 "## Type the following code to stop the scrolling in the output cell, then reload the cell."))

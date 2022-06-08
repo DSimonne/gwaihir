@@ -643,4 +643,3 @@ def hash_print(
 
     if new_line_after:
         print()
-

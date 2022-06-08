@@ -66,8 +66,8 @@ class Dataset:
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
 
         # Copy cxi file, and use it as starter for the end file
-        shutil.copy(cxi_filename, #src
-                    final_data_path, #dest
+        shutil.copy(cxi_filename,  # src
+                    final_data_path,  # dest
                     )
 
         # Add info from postprocessing if possible
@@ -179,7 +179,8 @@ class Dataset:
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
             # Save Gwaihir version
-            f.create_dataset("gwaihir_version", data="Gwaihir %s" % self._gwaihir_version)
+            f.create_dataset("gwaihir_version", data="Gwaihir %s" %
+                             self._gwaihir_version)
 
             # Create parameter groups
             try:
@@ -646,8 +647,8 @@ class Dataset:
 
                     image_3.attrs['signal'] = 'phase'
 
-                except (AttributeError,TypeError):
-                    print("Could not save strain output")
+            except (AttributeError, TypeError):
+                print("Could not save strain output")
 
             # Create data_3 link
             try:
