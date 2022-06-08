@@ -109,7 +109,6 @@ class Interface:
 
         # Initialize future attributes
         self.Dataset = None
-        self.cxi_filename = None
         self.run_phase_retrieval = False
         self.run_pynx_tools = False
         self.text_file = None
@@ -117,6 +116,8 @@ class Interface:
         self.Facets = None
         self.preprocessing_folder = None
         self.postprocessing_folder = None
+        self.reconstruction_files = None
+        self.strain_output_file = None
 
         # Widgets for initialization
         self._list_widgets_init_dir = interactive(
@@ -2524,24 +2525,30 @@ class Interface:
                         gutil.hash_print(
                             "Saving diffraction data and mask selected in the PyNX tab...")
 
-                        # Define cxi operator
-                        self.initialize_cdi_operator()
+                        # Define final cxi file name
+                        cxi_filename = "{}/preprocessing/{}.cxi".format(
+                            self.Dataset.scan_folder,
+                            self.Dataset.iobs.split("/")[-1].split(".")[0]
+                        )
+
+                        # Define cxi file with the data selected
+                        # in the phase retrieval tab and save as cxi
+                        cdi = self.initialize_cdi_operator(
+                            path_to_cxi = cxi_filename
+                        )
 
                         # Real space data
                         print(
                             "\n###########################################"
                             "#############################################"
                         )
-                        if os.path.isfile(self.Dataset.reconstruction_files):
-                            self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename,
-                                reconstruction_filename=self.Dataset.reconstruction_files,
-                            )
-                        else:
-                            self.Dataset.to_cxi(
-                                cxi_filename=self.cxi_filename,
-                                reconstruction_filename=False,
-                            )
+                        # We have performed phase retrieval and selected a file
+                        self.Dataset.to_cxi(
+                            cxi_filename=cxi_filename,
+                            reconstruction_filename=self.reconstruction_files,
+                            strain_output_file=self.strain_output_file
+                        )
+
                         print(
                             "\n###########################################"
                             "#############################################"
@@ -3242,15 +3249,16 @@ class Interface:
 
     # Phase retrieval
 
-    def initialize_cdi_operator(self, save_as_cxi=True):
+    def initialize_cdi_operator(self, path_to_cxi=False):
         """
         Initialize the cdi operator by processing the possible inputs:
             iobs, mask, support, obj
         Will also crop and center the data if specified.
         Loads phase retrieval tab parameters values.
+        Save the instanced cdi object as .cxi following the cxi convention
+        if `path_to_cxi` is a string.
 
-        :param save_as_cxi: e.g. True
-         Save the instanced cdi object as .cxi following the cxi convention
+        :param path_to_cxi: path to new file to be created.
 
         return: cdi operator
         """
@@ -3436,13 +3444,11 @@ class Interface:
                   detector_distance=self.Dataset.detector_distance,
                   )
 
-        if save_as_cxi:
-            # Save diffraction pattern
-            self.cxi_filename = "{}/preprocessing/{}.cxi".format(
-                self.Dataset.scan_folder,
-                self.Dataset.iobs.split("/")[-1].split(".")[0]
+        if isinstance(path_to_cxi, str):
+            self.save_as_cxi(
+                cdi_operator=cdi,
+                path_to_cxi=path_to_cxi
             )
-            self.save_as_cxi(cdi_operator=cdi, path_to_cxi=self.cxi_filename)
 
         return cdi
 
@@ -3849,7 +3855,18 @@ class Interface:
                         )
 
                         # Initialise the cdi operator
-                        cdi = self.initialize_cdi_operator()
+                        if i==0:
+                            cxi_filename = "{}/preprocessing/{}.cxi".format(
+                                self.Dataset.scan_folder,
+                                self.Dataset.iobs.split("/")[-1].split(".")[0]
+                            )
+
+                            cdi = self.initialize_cdi_operator(
+                                path_to_cxi = cxi_filename
+                            )
+
+                        else:
+                            cdi = self.initialize_cdi_operator()
 
                         if i > 4:
                             print("Stopping liveplot to go faster\n")
@@ -4611,7 +4628,7 @@ class Interface:
         self.Dataset.apodization_mu = apodization_mu
         self.Dataset.apodization_sigma = apodization_sigma
         self.Dataset.apodization_alpha = apodization_alpha
-        self.Dataset.reconstruction_files = strain_folder + reconstruction_files
+        self.reconstruction_files = strain_folder + reconstruction_files
 
         if run_strain:
             # Save directory
@@ -4699,7 +4716,7 @@ class Interface:
                     data_dir=data_dir,
                     sample_name=self.Dataset.sample_name,
                     comment=self.Dataset.comment,
-                    reconstruction_files=self.Dataset.reconstruction_files,
+                    reconstruction_files=self.reconstruction_files,
                     backend=self.matplotlib_backend,
                     # parameters used when averaging several reconstruction #
                     sort_method=self.Dataset.sort_method,
@@ -4823,13 +4840,13 @@ class Interface:
                         f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
                         recursive=True),
                     key=os.path.getmtime)
-                self.Dataset.strain_output_file = files[0]
+                self.strain_output_file = files[0]
 
                 print(
                     "\n###########################################"
                     "#############################################"
                     f"\nResult file used to extract results saved in the .cxi file:"
-                    f"\n{self.Dataset.strain_output_file}"
+                    f"\n{self.strain_output_file}"
                     "\nMake sure it is the latest one."
                     "\n###########################################"
                     "#############################################"

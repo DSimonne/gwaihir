@@ -127,8 +127,7 @@ You are not allowed to modify these environments but you should link a kernel if
 
 To do so:
 * `source_p9`
-* `ipython kernel install --name "p9_gwaihir --user`
-
+* `python3 -m ipykernel install --user --name p9.stable` [doc](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
 Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
 
 ## Connect with ssh without using password (mandatory for batch jobs)

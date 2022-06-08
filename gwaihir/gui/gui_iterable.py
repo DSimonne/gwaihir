@@ -15,6 +15,8 @@ import shutil
 from IPython.display import display
 from datetime import datetime
 
+from ..version import get_git_version
+
 
 class Dataset:
     """
@@ -31,6 +33,7 @@ class Dataset:
         self.sample_name = sample_name
         self.data_dir = data_dir
         self.root_folder = root_folder
+        self._gwaihir_version = get_git_version()
 
     def __repr__(self):
         return "Dataset {}{}.\n".format(
@@ -41,20 +44,35 @@ class Dataset:
     def __str__(self):
         return repr(self)
 
-    def to_cxi(self, cxi_filename, reconstruction_filename=False):
+    def to_cxi(
+        self,
+        cxi_filename,
+        reconstruction_filename=None,
+        strain_output_file=None,
+    ):
         """
         Save all the parameters used in the data analysis with a specific
         architecture based on NeXuS.
+
+        :param cxi_filename: .cxi file that contains the preprocessed data,
+         created thanks to PyNX.
+         This file is used as base for the final cxi file.
+        :param reconstruction_filename: .cxi file, output of phase retrieval.
+        :param strain_output_file: .h5 file, output from postprocessing
         """
+
+        # Create final file name
         final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
-        shutil.copy(cxi_filename,
-                    final_data_path,
+
+        # Copy cxi file, and use it as starter for the end file
+        shutil.copy(cxi_filename, #src
+                    final_data_path, #dest
                     )
 
-        if isinstance(reconstruction_filename, str):
+        # Add info from postprocessing if possible
+        if os.path.isfile(reconstruction_filename):
             with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
                     h5py.File(final_data_path, "a") as final_file:
-                # Real space data is already here from PyNX
 
                 print("\nSaving phase retrieval output ...")
 
@@ -68,6 +86,12 @@ class Dataset:
                     reconstruction_file.copy(
                         '/entry_1/image_1/', final_file["entry_1"],
                         name="image_2")
+
+                # Save file name
+                final_file["entry_1"]["image_2"].create_dataset(
+                    "reconstruction_filename",
+                    data=reconstruction_filename
+                )
 
                 # Update params if reconstruction file results
                 # from mode decomposition
@@ -153,7 +177,10 @@ class Dataset:
 
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
-            # Parameters
+            # Save Gwaihir version
+            f.create_dataset("gwaihir_version", data="Gwaihir %s" % self._gwaihir_version)
+
+            # Create parameter groups
             try:
                 data_3 = f.create_group("entry_1/data_3/")
                 f["entry_1"]["data_3"].attrs['NX_class'] = 'NXdata'
@@ -580,45 +607,46 @@ class Dataset:
                 print("Could not save phase averaging apodization parameters")
 
             # Save strain output
-            try:
-                image_3.create_dataset("strain_analysis_output_file",
-                                       data=self.strain_output_file)
+            if os.path.isfile(strain_output_file):
+                try:
+                    image_3.create_dataset("strain_analysis_output_file",
+                                           data=strain_output_file)
 
-                with h5py.File(self.strain_output_file, "r") as fi:
-                    image_3.create_dataset("amplitude",
-                                           data=fi["output"]["amp"][:],
-                                           chunks=True,
-                                           shuffle=True,
-                                           compression="gzip")
+                    with h5py.File(strain_output_file, "r") as fi:
+                        image_3.create_dataset("amplitude",
+                                               data=fi["output"]["amp"][:],
+                                               chunks=True,
+                                               shuffle=True,
+                                               compression="gzip")
 
-                    image_3.create_dataset("phase",
-                                           data=fi["output"]["phase"][:],
-                                           chunks=True,
-                                           shuffle=True,
-                                           compression="gzip")
+                        image_3.create_dataset("phase",
+                                               data=fi["output"]["phase"][:],
+                                               chunks=True,
+                                               shuffle=True,
+                                               compression="gzip")
 
-                    image_3.create_dataset("bulk",
-                                           data=fi["output"]["bulk"][:],
-                                           chunks=True,
-                                           shuffle=True,
-                                           compression="gzip")
+                        image_3.create_dataset("bulk",
+                                               data=fi["output"]["bulk"][:],
+                                               chunks=True,
+                                               shuffle=True,
+                                               compression="gzip")
 
-                    image_3.create_dataset("strain",
-                                           data=fi["output"]["strain"][:],
-                                           chunks=True,
-                                           shuffle=True,
-                                           compression="gzip")
+                        image_3.create_dataset("strain",
+                                               data=fi["output"]["strain"][:],
+                                               chunks=True,
+                                               shuffle=True,
+                                               compression="gzip")
 
-                    image_3.create_dataset("voxel_sizes",
-                                           data=fi["output"]["voxel_sizes"])
+                        image_3.create_dataset("voxel_sizes",
+                                               data=fi["output"]["voxel_sizes"])
 
-                    image_3.create_dataset("q_com",
-                                           data=fi["output"]["q_com"])
+                        image_3.create_dataset("q_com",
+                                               data=fi["output"]["q_com"])
 
-                image_3.attrs['signal'] = 'phase'
+                    image_3.attrs['signal'] = 'phase'
 
-            except AttributeError:
-                print("Could not save strain output")
+                except AttributeError:
+                    print("Could not save strain output")
 
             # Create data_3 link
             try:

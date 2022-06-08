@@ -16,7 +16,6 @@ from IPython.display import display, Markdown, Latex, clear_output, Image
 
 # gwaihir package
 import gwaihir
-from gwaihir.gui import gui_iterable
 
 # bcdi package
 from bcdi.preprocessing import ReadNxs3 as rd
@@ -644,3 +643,4 @@ def hash_print(
 
     if new_line_after:
         print()
+
