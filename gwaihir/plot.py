@@ -1152,13 +1152,22 @@ def plot_data(
         )
 
         # Create app layout
-        app = pn.pane.Bokeh(
-            column(
-                select_axis,
-                select_data_type,
-                select_cbar,
-                slider_index,
-                fig)
+        app = pn.Column(
+            pn.pane.Bokeh(
+                row(
+                    select_axis,
+                    select_cbar,
+                )
+            ),
+            pn.pane.Bokeh(
+                row(select_data_type)
+            ),
+            pn.pane.Bokeh(
+                row(
+                    fig,
+                    slider_index,
+                )
+            )
         )
 
         display(app)
