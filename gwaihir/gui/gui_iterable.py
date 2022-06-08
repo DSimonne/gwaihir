@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import h5py
 import shutil
+import os
 
 from IPython.display import display
 from datetime import datetime
@@ -607,8 +608,8 @@ class Dataset:
                 print("Could not save phase averaging apodization parameters")
 
             # Save strain output
-            if os.path.isfile(strain_output_file):
-                try:
+            try:
+                if os.path.isfile(strain_output_file):
                     image_3.create_dataset("strain_analysis_output_file",
                                            data=strain_output_file)
 
@@ -645,7 +646,7 @@ class Dataset:
 
                     image_3.attrs['signal'] = 'phase'
 
-                except AttributeError:
+                except (AttributeError,TypeError):
                     print("Could not save strain output")
 
             # Create data_3 link

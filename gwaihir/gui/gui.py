@@ -3686,7 +3686,7 @@ class Interface:
                     os.mkdir(
                         f"{self.preprocessing_folder}/gui_run/")
                     print(
-                        f"Created {self.preprocessing_folder}/gui_run/", end="\n\n")
+                        f"\tCreated {self.preprocessing_folder}/gui_run/", end="\n\n")
                 except (FileExistsError, PermissionError):
                     print(
                         f"{self.preprocessing_folder}/gui_run/ exists", end="\n\n")
