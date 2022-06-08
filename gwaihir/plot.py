@@ -970,14 +970,12 @@ def plot_data(
         bokey_cmaps = [
             p for p in bp.__palettes__ if p.endswith("256")
         ]
-        palette = True
-        j = 0
-        while not isinstance(palette, str):
-            if cmap[1:] in bokey_cmaps[j]:  # skip capital letter
-                palette = bokey_cmaps[j]
+
+        palette = "Magma256"
+        for p in bokey_cmaps:
+            if cmap[1:] in p:  # skip capital letter
+                palette = p
                 print("Changing cmap to", palette)
-            else:
-                j += 1
 
         # Figure
         fig = figure(
