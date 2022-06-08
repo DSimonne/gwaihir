@@ -26,9 +26,11 @@ from bokeh.layouts import row, column
 from bokeh.io import output_notebook
 from bokeh.models import ColumnDataSource, ColorBar, LogColorMapper, LinearColorMapper
 from bokeh.models import BoxEditTool, HoverTool, CrosshairTool, LassoSelectTool
-from bokeh.models import CustomJS, Slider, SaveTool
+from bokeh.models import CustomJS, Slider, SaveTool, Select, RadioButtonGroup
 from bokeh.models.widgets import Tabs, Panel
 import bokeh.palettes as bp
+import panel as pn
+pn.extension()
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -921,218 +923,253 @@ def plot_data(
                 plt.show()
 
     elif data_dimensions == 3:
-        @interact(
-            axplot=widgets.Dropdown(
-                options=[
-                    ("z", "xy"),
-                    ("x", "yz"),
-                    ("y", "xz")
-                ],
-                value="xy",
-                description='Slice along:',
-                style={'description_width': 'initial'}),
-            ComplexNumber=widgets.ToggleButtons(
-                options=["Real", "Imaginary", "Module", "Phase"],
-                value="Module",
-                description='Plotting options:',
-                tooltip=['Plot only contour or not', "", ""],
-                style={'description_width': 'initial'})
-        )
-        def plot_3d(
-            axplot,
-            ComplexNumber
-        ):
 
-            # Decide what we want to plot
-            if ComplexNumber == "Real":
-                data = np.real(data_array)
-            elif ComplexNumber == "Imaginary":
-                data = np.imag(data_array)
-            elif ComplexNumber == "Module":
-                data = np.abs(data_array)
-            elif ComplexNumber == "Phase":
-                data = np.angle(data_array)
+        def get_data_slice(data, axis, index, data_type, scale):
+            # Project on specific index
+            if axis == "x":
+                dt = data[index, :, :]
+            elif axis == "y":
+                dt = data[:, index, :]
+            elif axis == "z":
+                dt = data[:, :, index]
 
-            # Take the shape of that array along 2 axis
-            if axplot == "xy":
-                r = np.shape(data[0, 0, :])
+            # Data type
+            if data_type == "Real":
+                dt = np.real(dt)
+            elif data_type == "Imaginary":
+                dt = np.imag(dt)
+            elif data_type == "Module":
+                dt = np.abs(dt)
+            elif data_type == "Phase":
+                dt = np.angle(dt)
 
-            elif axplot == "yz":
-                r = np.shape(data[:, 0, 0])
+            # Scale
+            if scale == "logarithmic":
+                log_color_mapper.high = np.max(dt)
+                dt = np.nan_to_num(np.log(dt))
+                fig.right[0].visible = True
+                fig.right[1].visible = False
+            else:
+                lin_color_mapper.high = np.max(dt)
+                fig.right[0].visible = False
+                fig.right[1].visible = True
 
-            elif axplot == "xz":
-                r = np.shape(data[0, :, 0])
+            return dt
 
-            @interact(
-                i=widgets.IntSlider(
-                    min=0,
-                    max=r[0]-1,
-                    step=1,
-                    description=f'Index [0; {r[0]-1}]:',
-                    orientation='horizontal',
-                    continuous_update=False,
-                    readout=True,
-                    readout_format='d',
-                    layout=Layout(width='80%'),
-                    style={'description_width': 'initial'},
-                ),
-                # PlottingOptions=widgets.ToggleButtons(
-                #     options=[("2D image", "2D"),
-                #              ("2D image with contour", "2DC"),
-                #              # ("3D surface plot", "3D")
-                #              ],
-                #     value="2D",
-                #     description='Plotting options',
-                #     disabled=False,
-                #     button_style='',
-                #     tooltip=['Plot only contour or not', "", ""],
-                # ),
-                # scale=widgets.ToggleButtons(
-                #     options=["linear", "logarithmic"],
-                #     value="linear",
-                #     description='Scale',
-                #     disabled=False,
-                #     style={'description_width': 'initial'}),
+        output_notebook()
+
+        ## BOKEH ##
+        TOOLTIPS = [
+            ("x", "$x"),
+            ("y", "$y"),
+            ("value", "@data"),
+        ]
+
+        # List of compatible cmaps in bokeh
+        palette = "Viridis256"
+        bokey_cmaps = [
+            p for p in bp.__palettes__ if p.endswith("256")
+        ]
+        for p in bokey_cmaps:
+            if cmap[1:] in p:  # skip capital letter
+                palette = p
+                print("Changing cmap to", p)
+
+        # Define source
+        source = ColumnDataSource(
+            data=dict(
+                data=[np.abs(data_array[0, :, :])],
+                slider_range = [data_array.shape[0]],
+                dw=[data_array.shape[1]],
+                dh=[data_array.shape[2]],
+                index=[0],
+                axis=["x"],
+                data_type = ["Module"],
+                scale = ["linear"],
             )
-            def PickLastAxis(i,
-                             # PlottingOptions,
-                             # scale
-                             ):
-                if axplot == "xy":
-                    dt = data[:, :, i]
-                    x_label = "y"
-                    y_label = "x"
-                elif axplot == "yz":
-                    dt = data[i, :, :]
-                    x_label = "z"
-                    y_label = "y"
-                elif axplot == "xz":
-                    dt = data[:, i, :]
-                    x_label = "z"
-                    y_label = "x"
+        )
 
-                else:
-                    raise TypeError("Choose xy, yz or xz as axplot.")
-                ## No BOKEH ##
-                # # Create figure
-                # plt.close()
-                # print("Figure size defaulted to", figsize)
-                # fig, ax = plt.subplots(1, 1, figsize=figsize)
+        # Figure
+        fig = figure(
+            x_axis_label="x",
+            y_axis_label="y",
+            toolbar_location="above",
+            toolbar_sticky=False,
+            tools="pan, wheel_zoom, box_zoom, reset, undo, redo, crosshair, hover, save",
+            active_scroll="wheel_zoom",
+            active_tap="auto",
+            active_drag="box_zoom",
+            active_inspect="auto",
+            tooltips=TOOLTIPS
+        )
 
-                # # Get scale
-                # log = scale == "logarithmic"
+        # Index
+        def callback_change_index(attr, old, new):
+            # Compute data
+            dt = get_data_slice(
+                data = data,
+                axis = source.data["axis"][0],
+                index = new,
+                data_type = source.data["data_type"][0],
+                scale = source.data["scale"][0],
+            )
 
-                # # Plot 2D image in interactive environment
-                # img = plot_2d_image(two_d_array=dt, log=log, fontsize=fontsize,
-                #                     fig=fig, ax=ax, cmap=cmap, title=title,
-                #                     x_label=x_label, y_label=y_label)
+            # Save new values
+            source.data["data"] = [dt]
+            source.data["index"] = [new]
 
-                # # Create axis for colorbar
-                # cbar_ax = make_axes_locatable(ax).append_axes(
-                #     position='right', size='5%', pad=0.1)
+        slider_index = Slider(
+            start=0,
+            end=300,
+            value=0,
+            step=1,
+            title="Position"
+        )
+        slider_index.on_change('value', callback_change_index)
 
-                # # Create colorbar
-                # cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+        # Axis
+        def callback_change_axis(attr, old, new):
+            # Get axis for projection
+            new_axis = ["x", "y", "z"][new]
 
-                # # Show figure
-                # plt.tight_layout()
-                # plt.show()
-                # plt.close()
-                output_notebook()
+            # Compute data
+            dt = get_data_slice(
+                data = data,
+                axis = new_axis,
+                index = source.data["index"][0],
+                data_type = source.data["data_type"][0],
+                scale = source.data["scale"][0],
+            )
 
-                ## BOKEH ##
-                TOOLTIPS = [
-                    ("x", "$x"),
-                    ("y", "$y"),
-                    ("value", "@image"),
-                ]
+            # Save new values
+            source.data["data"] = [dt]
+            source.data["axis"] = [new_axis]
+            source.data["dw"][0] = dt.shape[0]
+            source.data["dh"][0] = dt.shape[1]
 
-                # List of compatible cmaps in bokeh
-                palette = "Viridis256"
-                bokey_cmaps = [
-                    p for p in bp.__palettes__ if p.endswith("256")
-                ]
-                for p in bokey_cmaps:
-                    if cmap[1:] in p:  # skip capital letter
-                        palette = p
-                        print("Changing cmap to", p)
+            # Get new axis names and slider range
+            if new_axis == "x":
+                slider_range = data.shape[0]
+                fig.axis[0].axis_label = "y"
+                fig.axis[1].axis_label = "z"
 
-                panels = []
+            elif new_axis == "y":
+                slider_range = data.shape[1]
+                fig.axis[0].axis_label = "x"
+                fig.axis[1].axis_label = "z"
 
-                for axis_type, cmapper in zip(
-                    ["Linear scale", "Logarithmic scale"],
-                    [LinearColorMapper, LogColorMapper]
-                ):
-                    # Figure
-                    fig = figure(
-                        title=f"Data slice on ({x_label}, {y_label}) for i={i}",
-                        x_axis_label=x_label,
-                        y_axis_label=y_label,
-                        toolbar_location="above",
-                        toolbar_sticky=False,
-                        tools="pan, wheel_zoom, box_zoom, reset, undo, redo, crosshair, hover, save",
-                        active_scroll="wheel_zoom",
-                        active_tap="auto",
-                        active_drag="box_zoom",
-                        active_inspect="auto",
-                        tooltips=TOOLTIPS,
-                        match_aspect=True,
-                    )
+            elif new_axis == "z":
+                slider_range = data.shape[2]
+                fig.axis[0].axis_label = "x"
+                fig.axis[1].axis_label = "y"
 
-                    # Color bar
-                    if axis_type == "Linear scale":
-                        low = np.min(dt)
-                    else:
-                        low = 0.1 if np.min(dt) == 0 else np.min(dt)
+            # Change slider range
+            slider_index.end = slider_range
 
-                    color_mapper = cmapper(
-                        palette=palette,
-                        low=low,
-                        high=np.max(dt),
-                    )
-                    color_bar = ColorBar(color_mapper=color_mapper)
-                    fig.add_layout(color_bar, 'right')
+        select_axis = RadioButtonGroup(
+            labels = ["x", "y", "z"],
+            active = 0,
+        )
+        select_axis.on_change('active', callback_change_axis)
 
-                    # Image
-                    image = fig.image(
-                        image=[dt],
-                        x=0,
-                        y=0,
-                        dw=dt.shape[0],
-                        dh=dt.shape[1],
-                        color_mapper=color_mapper,
-                    )
+        # Data type
+        def callback_change_data_type(attr, old, new):
+            # Get data type
+            new_data_type = ["Real", "Imaginary", "Module", "Phase"][new]
 
-                    # Background
-                    fig.background_fill_color = "white"
-                    fig.background_fill_alpha = 0.5
+            # Compute data
+            dt = get_data_slice(
+                data = data,
+                axis = source.data["axis"][0],
+                index = source.data["index"][0],
+                data_type = new_data_type,
+                scale = source.data["scale"][0],
+            )
 
-                    # Title
-                    # fig.title.text_color = "olive"
-                    fig.title.text_font = "futura"
-                    fig.title.text_font_style = "bold"
-                    fig.title.text_font_size = "15px"
+            # Save new values
+            source.data["data"] = [dt]
+            source.data["data_type"] = [new_data_type]
 
-                    panel = Panel(child=fig, title=axis_type)
-                    panels.append(panel)
+        select_data_type = RadioButtonGroup(
+            labels = ["Real", "Imaginary", "Module", "Phase"],
+            active = 2,
+        )
+        select_data_type.on_change('active', callback_change_data_type)
 
-                tabs = Tabs(tabs=panels)
+        # Color bar
+        def callback_change_cbar(attr, old, new):
+            # Get new cbar
+            new_cbar= ["linear", "logarithmic"][new]
 
-                show(tabs)
+            # Compute data
+            dt = get_data_slice(
+                data = data,
+                axis = source.data["axis"][0],
+                index = source.data["index"][0],
+                data_type = source.data["data_type"],
+                scale = new_cbar,
+            )
 
-                ## CONTOUR ##
+            # Save new values
+            source.data["data"] = [dt]
+            source.data["scale"] = [new_cbar]
 
-                # if PlottingOptions == "2D":
-                # elif PlottingOptions == "2DC":
-                #     # Show contour plot instead
+        select_cbar = RadioButtonGroup(
+            labels = ["linear", "logarithmic"],
+            active = 0,
+        )
+        select_cbar.on_change('active', callback_change_cbar)
 
-                #     plt.close()
+        # Background
+        fig.background_fill_color = "white"
+        fig.background_fill_alpha = 0.5
 
-                #     log = True if scale == "logarithmic"  else False
-                #     img = plot_2d_image_contour(two_d_array=dt, log=log)
+        # Title
+        fig.title.text_font = "futura"
+        fig.title.text_font_style = "bold"
+        fig.title.text_font_size = "15px"
 
-                #     plt.show()
+        # Color bars
+        log_color_mapper = LogColorMapper(
+            palette=palette,
+            low=0.1,
+            high=np.max(source.data["data"][0]),
+        )
 
+        lin_color_mapper = LinearColorMapper(
+            palette=palette,
+            low=0,
+            high=np.max(source.data["data"][0]),
+        )
+        log_color_bar = ColorBar(color_mapper=log_color_mapper)
+        lin_color_bar = ColorBar(color_mapper=lin_color_mapper)
+
+        # Image
+        image = fig.image(
+            image="data",
+            source=source,
+            x=0,
+            y=0,
+            dw="dw",
+            dh="dh",
+            color_mapper=lin_color_mapper,
+        )
+
+        # Add boths
+        fig.add_layout(log_color_bar, 'right')
+        fig.add_layout(lin_color_bar, 'right')
+
+        # Create app layout
+        app = pn.pane.Bokeh(
+            column(
+                select_axis,
+                select_data_type,
+                select_cbar,
+                slider_index,
+                fig)
+            )
+
+        display(app)
 
 def plot_2d_image(
     two_d_array,
