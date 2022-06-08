@@ -463,8 +463,8 @@ def extract_metadata(
      bcdi.preprocessing_BCDI.py script
     :param gwaihir_dataset: Dataset object in which the metadata is saved,
      optionnal
-    :param metadata_csv_file: csv file in which the metadata is saved. If
-     None, defaulted to gwaihir_dataset.root_folder + "/metadata.csv"
+    :param metadata_csv_file: csv file in which the metadata is saved.
+     If None, defaulted to os.getcwd() + "/metadata.csv"
     """
 
     # Open file

@@ -8,7 +8,7 @@ Gwaihir is also avaible on pypi.org, each new stable version from the master bra
 On the contrary, if you follow the github changes on the you will have the latest updates.
 
 Here is a link to a poster that tries to present Gwaihir:
-[Poster_Gwaihir.pdf](https://www.dsimonne.eu/Attachments/Poster_Gwaihir.pdf)
+[Poster_Gwaihir.pdf](https://www.dsimonne.eu/PhDAttachments/Poster_Gwaihir.pdf)
 ![Gwahir](https://user-images.githubusercontent.com/51970962/168030371-7212abe3-f8be-4fef-9231-8b1be87abc2e.png)
 
 To increase the width of the cells in Jupyter Notebook:
@@ -44,7 +44,7 @@ https://user-images.githubusercontent.com/51970962/154236802-24643473-1ee9-4d01-
 No video yet.
 
 ## CXI file
-An example file can be downloaded at: https://www.dsimonne.eu/Attachments/align_031968.cxi
+An example file can be downloaded at: https://www.dsimonne.eu/PhDAttachments/align_031968.cxi
 
 # Using `Gwaihir` only as a plotting tool in Jupyter Notebook
 ![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
