@@ -4107,7 +4107,7 @@ class Interface:
                             "################################################"
                             "################################################"
                             f"\nFile: {os.path.basename(f)}"
-                            f"\nCreated: {datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')}"
+                            f"\n\tCreated: {datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')}"
                             "\n################################################"
                             "################################################\n"
                         )
@@ -4848,7 +4848,8 @@ class Interface:
                     "#############################################"
                     f"\nResult file used to extract results saved in the .cxi file:"
                     f"\n{self.strain_output_file}"
-                    "\nMake sure it is the latest one."
+                    f"\n\tCreated: {datetime.fromtimestamp(os.path.getmtime(self.strain_output_file)).strftime('%Y-%m-%d %H:%M:%S')}"
+                    "\nMake sure it is the latest one!!"
                     "\n###########################################"
                     "#############################################"
                 )
