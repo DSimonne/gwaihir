@@ -3,6 +3,7 @@
 import pkg_resources
 __version__ = pkg_resources.require("Gwaihir")[0].version
 
+
 def get_git_version():
     """
     Get the full version name with git hash, e.g. "2020.1-65-g958b7254-dirty"

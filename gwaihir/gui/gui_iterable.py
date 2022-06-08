@@ -58,7 +58,8 @@ class Dataset:
         :param cxi_filename: .cxi file that contains the preprocessed data,
          created thanks to PyNX.
          This file is used as base for the final cxi file.
-        :param reconstruction_filename: .cxi file, output of phase retrieval.
+        :param reconstruction_filename: .cxi or .h5 file, output of phase retrieval
+         chosen for postprocessing.
         :param strain_output_file: .h5 file, output from postprocessing
         """
 
