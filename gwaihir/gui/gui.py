@@ -5803,7 +5803,7 @@ class Interface:
                 key=os.path.getmtime)]
 
             list_probable_iobs_files = [os.path.basename(f) for f in sorted(
-                glob.glob(change.new + "/*_pynx_align*.npz"),
+                glob.glob(change.new + "/*_pynx_*.npz"),
                 key=os.path.getmtime)]
 
             list_probable_mask_files = [os.path.basename(f) for f in sorted(
@@ -5825,7 +5825,7 @@ class Interface:
                 glob.glob(change + "/*.npz"), key=os.path.getmtime)]
 
             list_probable_iobs_files = [os.path.basename(f) for f in sorted(
-                glob.glob(change + "/*_pynx_align*.npz"), key=os.path.getmtime)]
+                glob.glob(change + "/*_pynx_*.npz"), key=os.path.getmtime)]
 
             list_probable_mask_files = [os.path.basename(f) for f in sorted(
                 glob.glob(change + "/*maskpynx*.npz"), key=os.path.getmtime)]
