@@ -3272,12 +3272,10 @@ class Interface:
                     print("\tCXI input: loading data")
                 except KeyError:
                     print("\t\"data\" key does not exist.")
+                    raise KeyboardInterrupt
 
             if self.Dataset.rebin != (1, 1, 1):
                 iobs = bin_data(iobs, self.Dataset.rebin)
-
-            # fft shift
-            iobs = fftshift(iobs)
 
         else:
             self.Dataset.iobs = None
@@ -4160,15 +4158,15 @@ class Interface:
             print(
                 "\n###########################################"
                 "#############################################"
-                f"\nUsing {self.path_scripts}/pynx-cdi-analysis.py"
+                f"\nUsing {self.path_scripts}/pynx-cdi-analysis"
                 f"\nUsing {folder}/*LLK* files."
-                f"\nRunning: $ pynx-cdi-analysis.py *LLK* modes=1"
+                f"\nRunning: $ pynx-cdi-analysis *LLK* modes=1"
                 f"\nOutput in {folder}/modes_gui.h5"
                 "\n###########################################"
                 "#############################################"
             )
             os.system(
-                "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+                "{}/pynx-cdi-analysis {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
                     quote(self.path_scripts),
                     quote(folder),
                     quote(folder),
