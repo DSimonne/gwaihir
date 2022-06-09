@@ -34,6 +34,7 @@ try:
 except PackageNotFoundError:
     gwaihir_version = None
 
+
 class Dataset:
     """
     Created for Gwaihir

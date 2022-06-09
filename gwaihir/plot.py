@@ -1024,7 +1024,8 @@ def plot_data(
             end=data_array.shape[0]-1,
             value=0,
             step=1,
-            title="Position"
+            title="Position",
+            orientation = "vertical",
         )
         slider_index.on_change('value', callback_change_index)
 
