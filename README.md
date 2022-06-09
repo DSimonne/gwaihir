@@ -60,6 +60,7 @@ An example file can be downloaded at: https://www.dsimonne.eu/PhDAttachments/ali
 * `cd py38-env/`
 * `python3.8 -m venv .`
 * `source bin/activate` # To activate the environment
+* Make sure `wheel` is installed: `pip install wheel`
 
 Then you should create an alias such as: `alias source_p9="source /home/user/py38-env/bin/activate"`
 
@@ -80,7 +81,6 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `pip install pynx-devel-nightly.tar.bz2[cuda,gui,mpi]`                  # Install with extras cuda, mpi, cdi
 * cite `PyNX: high-performance computing toolkit for coherent X-ray imaging based on operators is out: J. Appl. Cryst. 53 (2020), 1404`, also available as `arXiv:2008.11511`
 
-
 ## Install bcdi
 * `cd /Packages`
 * `git clone https://github.com/carnisj/bcdi.git`
@@ -88,6 +88,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `source_p9`
 * `pip install .`
 * cite `DOI: 10.5281/zenodo.3257616`
+* If `vtk` does not install (on slurm), you can type : `pip install --trusted-host www.silx.org --find-links http://www.silx.org/pub/wheelhouse vtk`, you may also need to remove the version requirements in `bcdi/setup.py`
 
 ## Install facet-analyser (Debian 11 only)
 * Send a thank you email to Fred Picca =D
@@ -119,8 +120,8 @@ Demande GPU
 
 ### Environments on slurm
 * python3: your personal environemnt
-* p9_3.8_dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/py38-dev/bin/activate`
-* p9_3.8_stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/py38-stable/bin/activate`
+* p9.dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/p9.dev/bin/activate`
+* p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
 * p9.pynx-devel : fonctionne pour pynx, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
 
 You are not allowed to modify these environments but you should link a kernel if you wish to use them in jupyter.

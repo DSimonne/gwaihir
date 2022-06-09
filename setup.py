@@ -62,6 +62,8 @@ setuptools.setup(
         "PyQt5",
         "h5py",
         "jupyter",
+        "bokeh",
+        "panel",
         #         "bcdi",
         #         "PyNX",
     ]
