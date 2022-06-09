@@ -17,7 +17,22 @@ from IPython.display import display
 from datetime import datetime
 
 from ..version import get_git_version
+from importlib.metadata import version, PackageNotFoundError
 
+try:
+    bcdi_version = version("bcdi")
+except PackageNotFoundError:
+    bcdi_version = None
+
+try:
+    pynx_version = version("pynx")
+except PackageNotFoundError:
+    pynx_version = None
+
+try:
+    gwaihir_version = version("gwaihir")
+except PackageNotFoundError:
+    gwaihir_version = None
 
 class Dataset:
     """

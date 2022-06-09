@@ -124,12 +124,17 @@ Demande GPU
 * p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
 * p9.pynx-devel : fonctionne pour pynx, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
 
-You are not allowed to modify these environments but you should link a kernel if you wish to use them in jupyter.
+You are not allowed to modify these environments but you can link a kernel if you wish to use them in jupyter.
 
 To do so:
 * `source_p9`
 * `python3 -m ipykernel install --user --name p9.stable` [doc](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
+
 Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
+
+To list the kernels you have installed: `jupyter kernelspec list`
+
+And to remove them: `jupyter kernelspec uninstall myKernalName`
 
 ## Connect with ssh without using password (mandatory for batch jobs)
 * Login into slurm (make sure that you asked for a GPU)
@@ -143,3 +148,47 @@ Enter the following commands (replace `<username>` with your username, for me it
 
 You should not need a password anymore when login into slurm, make sure it is the case by typing
 * `ssh <username>@slurm-nice-devel`
+
+## Quick navigation between `vtk` files in the GUI
+
+It is possible to automate the navigation in the GUI !
+
+Here I have a pandas DataFrame that contains data about my scans, I use to automate the navigation:
+
+```python
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import glob
+
+df = pd.read_csv("reconstructions/scans_data.csv")
+
+GUI.tab_facet.children[3].value = False
+GUI.window.selected_index = 0
+time.sleep(1)
+
+GUI._list_widgets_init_dir.children[7].value = False
+time.sleep(1)
+
+scan = 3600
+row = df[df.scan == scan]
+
+particle = row.particle.values[0]
+temp = row.temp_given.values[0]
+condition = row.condition.values[0]
+
+GUI._list_widgets_init_dir.children[2].value = scan
+GUI._list_widgets_init_dir.children[
+    3].value = f"/data/id01/inhouse/david/SIXS_June_2021/reconstructions/{temp}/{condition}/{particle}/S{scan}/data/"
+GUI._list_widgets_init_dir.children[
+    4].value = f"/data/id01/inhouse/david/SIXS_June_2021/reconstructions/{temp}/{condition}/{particle}/"
+time.sleep(1)
+GUI._list_widgets_init_dir.children[7].value = True
+
+time.sleep(1)
+
+GUI.window.selected_index = 9
+
+GUI.tab_facet.children[3].value = "load_csv"
+```
