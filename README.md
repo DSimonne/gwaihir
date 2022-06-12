@@ -128,6 +128,7 @@ You are not allowed to modify these environments but you can link a kernel if yo
 
 To do so:
 * `source_p9`
+* Make sure that you are on the p9 and not other clusters like rnice.
 * `python3 -m ipykernel install --user --name p9.stable` [doc](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
 
 Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
