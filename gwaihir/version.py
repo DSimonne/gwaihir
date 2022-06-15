@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import pkg_resources
-__version__ = pkg_resources.require("Gwaihir")[0].version
+from importlib.metadata import version, PackageNotFoundError
+__version__ = version("gwaihir")
 
 
 def get_git_version():

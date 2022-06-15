@@ -29,11 +29,6 @@ try:
 except PackageNotFoundError:
     pynx_version = None
 
-try:
-    gwaihir_version = version("gwaihir")
-except PackageNotFoundError:
-    gwaihir_version = None
-
 
 class Dataset:
     """
@@ -51,6 +46,8 @@ class Dataset:
         self.data_dir = data_dir
         self.root_folder = root_folder
         self._gwaihir_version = get_git_version()
+        self._bcdi_version = bcdi_version
+        self._pynx_version = pynx_version
 
     def __repr__(self):
         return "Dataset {}{}.\n".format(
@@ -195,9 +192,13 @@ class Dataset:
 
         # Add GUI data
         with h5py.File(final_data_path, "a") as f:
-            # Save Gwaihir version
-            f.create_dataset("gwaihir_version", data="Gwaihir %s" %
+            # Save packages version
+            f.create_dataset("gwaihir_version", data="gwaihir %s" %
                              self._gwaihir_version)
+            f.create_dataset("bcdi_version", data="bcdi %s" %
+                             self._bcdi_version)
+            f.create_dataset("pynx_version", data="pynx %s" %
+                             self._pynx_version)
 
             # Create parameter groups
             try:
