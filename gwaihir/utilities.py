@@ -625,7 +625,14 @@ def initialize_cdi_operator(
 
     return: cdi operator
     """
-    if iobs not in ("", None):
+
+    if iobs in ("", None) or not os.path.isfile(iobs):
+        # Dataset.iobs = None
+        iobs = None
+        print("At least iobs must exist.")
+        return None
+
+    else:
         if iobs.endswith(".npy"):
             iobs = np.load(iobs)
             print("\tCXI input: loading data")
@@ -643,11 +650,7 @@ def initialize_cdi_operator(
         # fft shift
         iobs = fftshift(iobs)
 
-    else:
-        # Dataset.iobs = None
-        iobs = None
-
-    if mask not in ("", None):  # , Dataset.parent_folder
+    if mask not in ("", None) or not os.path.isfile(mask):
         if mask.endswith(".npy"):
             mask = np.load(mask).astype(np.int8)
             nb = mask.sum()
@@ -673,7 +676,7 @@ def initialize_cdi_operator(
         # Dataset.mask = None
         mask = None
 
-    if support not in ("", None):  # Dataset.parent_folder
+    if support not in ("", None) or not os.path.isfile(support):
         if support.endswith(".npy"):
             support = np.load(support)
             print("\tCXI input: loading support")
@@ -709,7 +712,7 @@ def initialize_cdi_operator(
         # Dataset.support = None
         support = None
 
-    if obj not in ("", None):  # , Dataset.parent_folder
+    if obj not in ("", None) or not os.path.isfile(obj):
         if obj.endswith(".npy"):
             obj = np.load(obj)
             print("\tCXI input: loading object")
