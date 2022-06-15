@@ -46,10 +46,77 @@ No video yet.
 ## CXI file
 An example file can be downloaded at: https://www.dsimonne.eu/PhDAttachments/align_031968.cxi
 
-# Using `Gwaihir` only as a plotting tool in Jupyter Notebook
-![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
 
-# Installing different packages
+# Clusters at ESRF
+
+Gwaihir **only** works on slurm, while using the p9 GPUs, for phase retrieval.
+
+if you want to use it for data analysis, you can install `gwaihir` and `bcdi` on rnice.
+
+## slurm
+
+How to access:
+`ssh -X <login>@slurm-nice-devel`
+
+Ask for a GPU:
+`srun -N 1 --partition=p9gpu --gres=gpu:1 --time=01:00:00 --pty bash`
+
+### Environments on slurm
+* python3: your personal environemnt
+* p9.dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/p9.dev/bin/activate`
+* p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
+* p9.pynx-devel : pynx only, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
+
+You are not allowed to modify these environments but you can link a kernel if you wish to use them in jupyter.
+
+To do so:
+* `source_p9`
+* Make sure that you are on the p9 and not other clusters like rnice.
+* `python3 -m ipykernel install --user --name p9.stable` [doc](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
+
+Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
+
+To list the kernels you have installed: `jupyter kernelspec list`
+
+And to remove them: `jupyter kernelspec uninstall myKernalName`
+
+### Connect with ssh without using password (mandatory for batch jobs)
+* Login into slurm (make sure that you asked for a GPU)
+* Open a terminal (new -> terminal)
+
+Enter the following commands (replace `<username>` with your username, for me it is simonne)
+* `cd`
+* `ssh-keygen -t rsa` (press enter when prompted, ~ 3 times)
+* `ssh <username>@slurm-nice-devel mkdir -p .ssh`
+* `cat .ssh/id_rsa.pub | ssh <username>@slurm-nice-devel 'cat >> .ssh/authorized_keys'`
+
+You should not need a password anymore when login into slurm, make sure it is the case by typing
+* `ssh <username>@slurm-nice-devel`
+
+# Beamlines at SOLEIL
+
+To access SOLEIL from your personal computer, you must use NoMachine (easiest way, to the best of my knowledge).
+
+Otherwise you may use a remote desktop, the documentation can be found here (must be on SOLEIL network) http://confluence.synchrotron-soleil.fr/display/EG/Service%3A+Remote+Desktop
+
+* From hadar you can login to sixs: `ssh sixs`
+
+## SixS
+
+A GPU is installed on sixs3, a computer available on the beamline, for phase retrieval.
+
+Please respect the following steps:
+* Make sure that you are logged in as `com-sixs`
+* Activate the environment `source_py3.9` or `source /home/experiences/sixs/simonne/Documents/py39-env/bin/activate`, this environment is protected and you cannot modify it.
+* Launch `jupyter notebook`
+* Go to the test_data folder and then choose the beamline you want to test
+* Follow the instructions in the notebook
+
+## Crystal
+
+Gwaihir will soon be available at Crystal.
+
+# Installing different packages yoursel
 
 * First, I advise you to create a `/Packages` directory to keep these.
 * Secondly, I advise you to create a virtual environment to help with debogging, and so that once everything works, you don't update a package by mistake. To do so please follow the following steps:
@@ -109,46 +176,12 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * Feel free to add it to `/usr/bin/plugin` so that it is loaded automatically.
 * cite `Grothausmann, R. (2015). Facet Analyser : ParaView plugin for automated facet detection and measurement of interplanar angles of tomographic objects. March.`
 
-# Clusters at ESRF
 
-## slurm
-`ssh -X <login>@slurm-nice-devel`
+# To go further ...
 
-Demande GPU
+## Using `Gwaihir` only as a plotting tool in Jupyter Notebook
+![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
 
-`srun -N 1 --partition=p9gpu --gres=gpu:1 --time=01:00:00 --pty bash`
-
-### Environments on slurm
-* python3: your personal environemnt
-* p9.dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/p9.dev/bin/activate`
-* p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
-* p9.pynx-devel : fonctionne pour pynx, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
-
-You are not allowed to modify these environments but you can link a kernel if you wish to use them in jupyter.
-
-To do so:
-* `source_p9`
-* Make sure that you are on the p9 and not other clusters like rnice.
-* `python3 -m ipykernel install --user --name p9.stable` [doc](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
-
-Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
-
-To list the kernels you have installed: `jupyter kernelspec list`
-
-And to remove them: `jupyter kernelspec uninstall myKernalName`
-
-## Connect with ssh without using password (mandatory for batch jobs)
-* Login into slurm (make sure that you asked for a GPU)
-* Open a terminal (new -> terminal)
-
-Enter the following commands (replace `<username>` with your username, for me it is simonne)
-* `cd`
-* `ssh-keygen -t rsa` (press enter when prompted, ~ 3 times)
-* `ssh <username>@slurm-nice-devel mkdir -p .ssh`
-* `cat .ssh/id_rsa.pub | ssh <username>@slurm-nice-devel 'cat >> .ssh/authorized_keys'`
-
-You should not need a password anymore when login into slurm, make sure it is the case by typing
-* `ssh <username>@slurm-nice-devel`
 
 ## Quick navigation between `vtk` files in the GUI
 
