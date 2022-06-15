@@ -1025,7 +1025,7 @@ def list_reconstructions(
 
 def run_modes_decomposition(
     path_scripts,
-    scan_folder
+    folder,
 ):
     """
     Decomposes several phase retrieval solutions into modes, saves only
