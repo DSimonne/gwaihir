@@ -239,7 +239,7 @@ class Interface:
             beamline=widgets.Dropdown(
                 options=['ID01', 'SIXS_2018', 'SIXS_2019',
                          'CRISTAL', 'P10', 'NANOMAX', '34ID',
-                         "ID01BLISS"],
+                         "ID01BLISS", "ID27"],
                 value="SIXS_2019",
                 description='Beamline',
                 continuous_update=False,
