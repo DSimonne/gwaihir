@@ -525,6 +525,8 @@ class Dataset:
                 displacement_strain_calculation.create_dataset(
                     "isosurface_strain", data=self.isosurface_strain)
                 displacement_strain_calculation.create_dataset(
+                    "skip_unwrap", data=self.skip_unwrap)
+                displacement_strain_calculation.create_dataset(
                     "strain_method", data=self.strain_method)
                 displacement_strain_calculation.create_dataset(
                     "phase_offset", data=self.phase_offset)

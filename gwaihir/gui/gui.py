@@ -1742,6 +1742,14 @@ class Interface:
                     'description_width': 'initial'},
                 disabled=False),
 
+            skip_unwrap=widgets.Checkbox(
+                value=False,
+                description='Skip phase unwrap',
+                layout=Layout(width='15%'),
+                style={
+                    'description_width': 'initial'}
+            ),
+
             strain_method=widgets.ToggleButtons(
                 options=[
                     'default', 'defect'],
@@ -2160,26 +2168,26 @@ class Interface:
             widgets.HBox(self._list_widgets_strain.children[8:10]),
             self._list_widgets_strain.children[10],
             widgets.HBox(self._list_widgets_strain.children[11:13]),
-            widgets.HBox(self._list_widgets_strain.children[13:16]),
-            widgets.HBox(self._list_widgets_strain.children[16:20]),
-            self._list_widgets_strain.children[20],
-            widgets.HBox(self._list_widgets_strain.children[21:23]),
-            widgets.HBox(self._list_widgets_strain.children[23:26]),
-            self._list_widgets_strain.children[26],
-            widgets.HBox(self._list_widgets_strain.children[27:30]),
-            widgets.HBox(self._list_widgets_strain.children[30:32]),
-            widgets.HBox(self._list_widgets_strain.children[32:35]),
-            widgets.HBox(self._list_widgets_strain.children[35:37]),
-            self._list_widgets_strain.children[37],
-            widgets.HBox(self._list_widgets_strain.children[38:41]),
-            widgets.HBox(self._list_widgets_strain.children[41:43]),
-            self._list_widgets_strain.children[43],
-            widgets.HBox(self._list_widgets_strain.children[44:48]),
-            self._list_widgets_strain.children[48],
-            widgets.HBox(self._list_widgets_strain.children[49:51]),
-            self._list_widgets_strain.children[51],
-            widgets.HBox(self._list_widgets_strain.children[52:55]),
-            widgets.HBox(self._list_widgets_strain.children[55:58]),
+            widgets.HBox(self._list_widgets_strain.children[13:17]),
+            widgets.HBox(self._list_widgets_strain.children[17:21]),
+            self._list_widgets_strain.children[21],
+            widgets.HBox(self._list_widgets_strain.children[22:24]),
+            widgets.HBox(self._list_widgets_strain.children[24:27]),
+            self._list_widgets_strain.children[27],
+            widgets.HBox(self._list_widgets_strain.children[28:31]),
+            widgets.HBox(self._list_widgets_strain.children[31:33]),
+            widgets.HBox(self._list_widgets_strain.children[33:36]),
+            widgets.HBox(self._list_widgets_strain.children[36:38]),
+            self._list_widgets_strain.children[38],
+            widgets.HBox(self._list_widgets_strain.children[39:42]),
+            widgets.HBox(self._list_widgets_strain.children[42:44]),
+            self._list_widgets_strain.children[44],
+            widgets.HBox(self._list_widgets_strain.children[45:49]),
+            self._list_widgets_strain.children[49],
+            widgets.HBox(self._list_widgets_strain.children[50:52]),
+            self._list_widgets_strain.children[52],
+            widgets.HBox(self._list_widgets_strain.children[53:56]),
+            widgets.HBox(self._list_widgets_strain.children[56:59]),
             self._list_widgets_strain.children[-4],
             self._list_widgets_strain.children[-3],
             self._list_widgets_strain.children[-2],
@@ -4328,6 +4336,7 @@ class Interface:
         save_frame,
         ref_axis_q,
         isosurface_strain,
+        skip_unwrap,
         strain_method,
         phase_offset,
         phase_offset_origin,
@@ -4377,16 +4386,35 @@ class Interface:
         run_strain,
     ):
         """
+        Interpolate the output of the phase retrieval into an orthonormal frame,
+        and calculate the strain component along the direction of the
+        experimental diffusion vector q.
+
+        Input: complex amplitude array, output from a phase retrieval program.
+        Output: data in an orthonormal frame (laboratory or crystal frame),
+        amp_disp_strain array.The disp array should be divided by q to get the
+        displacement (disp = -1*phase here).
+
+        Laboratory frame: z downstream, y vertical, x outboard (CXI convention)
+        Crystal reciprocal frame: qx downstream, qz vertical, qy outboard
+        Detector convention: when out_of_plane angle=0   Y=-y , when in_plane
+        angle=0   X=x
+
+        In arrays, when plotting the first parameter is the row (vertical axis),
+        and the second the column (horizontal axis). Therefore the data
+        structure is data[qx, qz, qy] for reciprocal space, or data[z, y, x]
+        for real space.
+
         Loading argument from strain tab widgets but also values of
-        parameters used in preprocessing that are common Runs postprocessing
-        script from bcdi package to extract the strain from the reconstructed
-        phase. Also plots images depending on the given isosurface.
+        parameters used in preprocessing that are common.
 
         Parameters used when averaging several reconstruction:
 
         :param sort_method: e.g. "variance/mean"
          'mean_amplitude' or 'variance' or 'variance/mean' or 'volume',
          metric for averaging
+        :param averaging_space: e.g. "reciprocal_space" TODO
+         in which space to average, 'direct_space' or 'reciprocal_space'
         :param correlation_threshold: e.g. 0.90
          minimum correlation between two arrays to average them
 
@@ -4398,7 +4426,7 @@ class Interface:
         correct a roll of few pixels after the decomposition into modes in PyNX
         axis=(0, 1, 2)
 
-        Prameters relative to the FFT window and voxel sizes:
+        Parameters relative to the FFT window and voxel sizes:
 
         :param original_size: e.g. [150, 256, 500]
          size of the FFT array before binning. It will be modified to take
@@ -4450,6 +4478,9 @@ class Interface:
         :param isosurface_strain: e.g. 0.2
          threshold use for removing the outer layer (the strain is undefined
          at the exact surface voxel)
+        :param skip_unwrap: e.g. False
+         If 'skip_unwrap', it will not unwrap the phase. It can be used when there is a
+         defect and phase unwrapping does not work well.
         :param strain_method: e.g. "default"
          how to calculate the strain, available options:
 
@@ -4582,6 +4613,7 @@ class Interface:
         self.Dataset.save_frame = save_frame
         self.Dataset.ref_axis_q = ref_axis_q
         self.Dataset.isosurface_strain = isosurface_strain
+        self.Dataset.skip_unwrap = skip_unwrap
         self.Dataset.strain_method = strain_method
         self.Dataset.phase_offset = phase_offset
         self.Dataset.phase_offset_origin = phase_offset_origin
@@ -4735,6 +4767,7 @@ class Interface:
                     ref_axis_q=self.Dataset.ref_axis_q,
                     save_frame=self.Dataset.save_frame,
                     isosurface_strain=self.Dataset.isosurface_strain,
+                    skip_unwrap=self.Dataset.skip_unwrap,
                     strain_method=self.Dataset.strain_method,
                     # define beamline related parameters #
                     beamline=self.Dataset.beamline,
