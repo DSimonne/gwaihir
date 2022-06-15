@@ -135,15 +135,17 @@ filtering=${filtering/#=/}
 # fi
 
 # Old version, since the new one is kinda boggy
+echo "##############################"
 echo "Connecting to slurm-nice-devel"
-ssh $username@slurm-nice-devel << EOF
-  echo "Running sbatch /data/id01/inhouse/david/p9.stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering"
-  echo
-  sbatch /data/id01/inhouse/david/p9.stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
+echo "##############################"
+echo
 
+ssh $username@slurm-nice-devel << EOF
+  sbatch /data/id01/inhouse/david/p9.stable/bin/job_esrf.slurm $reconstruct $username $path $modes $filtering
   exit
 EOF
 
 echo
-echo "You may follow the evolution of the job by typing: 'tail -f job_esrf.slurm-XXXXX.out'"
-echo "Replace XXXXX by the previous job number, the job file should be in your home directory or in $path"
+printf "You may follow the evolution of the job by typing:\n\t 'tail -f job_esrf.slurm-XXXXX.out'\n"
+echo "Replace XXXXX by the previous job number."
+echo "The job file should be in your home directory or in $path"

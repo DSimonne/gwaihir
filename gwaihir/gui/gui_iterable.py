@@ -60,7 +60,8 @@ class Dataset:
 
     def to_cxi(
         self,
-        cxi_filename,
+        raw_data_cxi_filename,
+        final_cxi_filename,
         reconstruction_filename=None,
         strain_output_file=None,
     ):
@@ -68,26 +69,25 @@ class Dataset:
         Save all the parameters used in the data analysis with a specific
         architecture based on NeXuS.
 
-        :param cxi_filename: .cxi file that contains the preprocessed data,
-         created thanks to PyNX.
+        :param cxi_filename: path to .cxi file that contains the preprocessed
+         data, created thanks to PyNX.
          This file is used as base for the final cxi file.
-        :param reconstruction_filename: .cxi or .h5 file, output of phase retrieval
-         chosen for postprocessing.
-        :param strain_output_file: .h5 file, output from postprocessing
+        :param final_cxi_filename: path to .cxi file that will regroup all the
+         data and parameters of the Dataset object.
+        :param reconstruction_filename: path to .cxi or .h5 file, output of
+         phase retrieval chosen for postprocessing.
+        :param strain_output_file: path to .h5 file, output from postprocessing
         """
-
-        # Create final file name
-        final_data_path = f"{self.scan_folder}{self.sample_name}{self.scan}.cxi"
 
         # Copy cxi file, and use it as starter for the end file
         shutil.copy(cxi_filename,  # src
-                    final_data_path,  # dest
+                    final_cxi_filename,  # dest
                     )
 
         # Add info from postprocessing if possible
         if os.path.isfile(reconstruction_filename):
             with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
-                    h5py.File(final_data_path, "a") as final_file:
+                    h5py.File(final_cxi_filename, "a") as final_file:
 
                 print("\nSaving phase retrieval output ...")
 
@@ -191,7 +191,7 @@ class Dataset:
                             name="modes_percentage")
 
         # Add GUI data
-        with h5py.File(final_data_path, "a") as f:
+        with h5py.File(final_cxi_filename, "a") as f:
             # Save packages version
             f.create_dataset("gwaihir_version", data="gwaihir %s" %
                              self._gwaihir_version)

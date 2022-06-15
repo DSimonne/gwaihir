@@ -14,6 +14,14 @@ import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
 from IPython.display import display, Markdown, Latex, clear_output, Image
 
+try:
+    from pynx.cdi import CDI
+    from pynx.cdi.runner.id01 import params
+    from pynx.utils.math import smaller_primes
+    pynx_import = True
+except ModuleNotFoundError:
+    pynx_import = False
+
 # gwaihir package
 import gwaihir
 
@@ -578,6 +586,350 @@ def extract_metadata(
         hash_print(f"Saved logs in {metadata_csv_file}")
 
 
+def initialize_cdi_operator(
+    iobs,
+    mask=None,
+    support=None,
+    obj=None,
+    rebin=(1, 1, 1),
+    auto_center_resize=False,
+    max_size=None,
+    wavelength=None,
+    pixel_size_detector=None,
+    detector_distance=None,
+):
+    """
+    Initialize the cdi operator by processing the possible inputs:
+        - iobs
+        - mask
+        - support
+        - obj
+    Will also crop and center the data if specified.
+
+    :param iobs: path to npz or npy that stores this array
+    :param mask: path to npz or npy that stores this array
+    :param support: path to npz or npy that stores this array
+    :param obj: path to npz or npy that stores this array
+    :param rebin: e.g. (1, 1, 1), applied to all the arrays
+    :param auto_center_resize:
+    :param max_size:
+    :param wavelength:
+    :param pixel_size_detector:
+    :param detector_distance:
+
+    return: cdi operator
+    """
+    if iobs not in ("", None):
+        if iobs.endswith(".npy"):
+            iobs = np.load(iobs)
+            print("\tCXI input: loading data")
+        elif iobs.endswith(".npz"):
+            try:
+                iobs = np.load(iobs)["data"]
+                print("\tCXI input: loading data")
+            except KeyError:
+                print("\t\"data\" key does not exist.")
+                raise KeyboardInterrupt
+
+        if rebin != (1, 1, 1):
+            iobs = bin_data(iobs, rebin)
+
+    else:
+        # Dataset.iobs = None
+        iobs = None
+
+    if mask not in ("", None):  # , Dataset.parent_folder
+        if mask.endswith(".npy"):
+            mask = np.load(mask).astype(np.int8)
+            nb = mask.sum()
+            print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                nb, nb * 100 / mask.size))
+        elif mask.endswith(".npz"):
+            try:
+                mask = np.load(mask)[
+                    "mask"].astype(np.int8)
+                nb = mask.sum()
+                print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
+                    nb, nb * 100 / mask.size))
+            except KeyError:
+                print("\t\"mask\" key does not exist.")
+
+        if rebin != (1, 1, 1):
+            mask = bin_data(mask, rebin)
+
+        # fft shift
+        mask = fftshift(mask)
+
+    else:
+        # Dataset.mask = None
+        mask = None
+
+    if support not in ("", None):  # Dataset.parent_folder
+        if support.endswith(".npy"):
+            support = np.load(support)
+            print("\tCXI input: loading support")
+        elif support.endswith(".npz"):
+            try:
+                support = np.load(support)["data"]
+                print("\tCXI input: loading support")
+            except (FileNotFoundError, ValueError):
+                print("\tFile not supported or does not exist.")
+            except KeyError:
+                print("\t\"data\" key does not exist.")
+                try:
+                    support = np.load(support)["support"]
+                    print("\tCXI input: loading support")
+                except KeyError:
+                    print("\t\"support\" key does not exist.")
+                    try:
+                        support = np.load(support)["obj"]
+                        print("\tCXI input: loading support")
+                    except KeyError:
+                        print(
+                            "\t\"obj\" key does not exist."
+                            "\t--> Could not load support array."
+                        )
+
+        if rebin != (1, 1, 1):
+            support = bin_data(support, rebin)
+
+        # fft shift
+        support = fftshift(support)
+
+    else:
+        # Dataset.support = None
+        support = None
+
+    if obj not in ("", None):  # , Dataset.parent_folder
+        if obj.endswith(".npy"):
+            obj = np.load(obj)
+            print("\tCXI input: loading object")
+        elif obj.endswith(".npz"):
+            try:
+                obj = np.load(obj)["data"]
+                print("\tCXI input: loading object")
+            except KeyError:
+                print("\t\"data\" key does not exist.")
+
+        if rebin != (1, 1, 1):
+            obj = bin_data(obj, ebin)
+
+        # fft shift
+        obj = fftshift(obj)
+
+    else:
+        # Dataset.obj = None
+        obj = None
+
+    # Center and crop data
+    if auto_center_resize:
+        if iobs.ndim == 3:
+            nz0, ny0, nx0 = iobs.shape
+
+            # Find center of mass
+            z0, y0, x0 = center_of_mass(iobs)
+            print("Center of mass at:", z0, y0, x0)
+            iz0, iy0, ix0 = int(round(z0)), int(
+                round(y0)), int(round(x0))
+
+            # Max symmetrical box around center of mass
+            nx = 2 * min(ix0, nx0 - ix0)
+            ny = 2 * min(iy0, ny0 - iy0)
+            nz = 2 * min(iz0, nz0 - iz0)
+
+            if max_size is not None:
+                nx = min(nx, max_size)
+                ny = min(ny, max_size)
+                nz = min(nz, max_size)
+
+            # Crop data to fulfill FFT size requirements
+            nz1, ny1, nx1 = smaller_primes(
+                (nz, ny, nx), maxprime=7, required_dividers=(2,))
+
+            print("Centering & reshaping data: (%d, %d, %d) -> \
+                (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+            iobs = iobs[
+                iz0 - nz1 // 2:iz0 + nz1 // 2,
+                iy0 - ny1 // 2:iy0 + ny1 // 2,
+                ix0 - nx1 // 2:ix0 + nx1 // 2]
+            if mask is not None:
+                mask = mask[
+                    iz0 - nz1 // 2:iz0 + nz1 // 2,
+                    iy0 - ny1 // 2:iy0 + ny1 // 2,
+                    ix0 - nx1 // 2:ix0 + nx1 // 2]
+                print("Centering & reshaping mask: (%d, %d, %d) -> \
+                    (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+
+        else:
+            ny0, nx0 = iobs.shape
+
+            # Find center of mass
+            y0, x0 = center_of_mass(iobs)
+            iy0, ix0 = int(round(y0)), int(round(x0))
+            print("Center of mass (rounded) at:", iy0, ix0)
+
+            # Max symmetrical box around center of mass
+            nx = 2 * min(ix0, nx0 - ix0)
+            ny = 2 * min(iy0, ny0 - iy0)
+            if max_size is not None:
+                nx = min(nx, max_size)
+                ny = min(ny, max_size)
+                nz = min(nz, max_size)
+
+            # Crop data to fulfill FFT size requirements
+            ny1, nx1 = smaller_primes(
+                (ny, nx), maxprime=7, required_dividers=(2,))
+
+            print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
+                  (ny0, nx0, ny1, nx1))
+            iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
+                        2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+            if mask is not None:
+                mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
+                            2, ix0 - nx1 // 2:ix0 + nx1 // 2]
+
+    # Create cdi object with data and mask, load the main parameters
+    cdi = CDI(
+        iobs,
+        support=support,
+        obj=obj,
+        mask=mask,
+        wavelength=wavelength,
+        pixel_size_detector=pixel_size_detector,
+        detector_distance=detector_distance,
+    )
+
+    return cdi
+
+
+def save_cdi_operator_as_cxi(
+    gwaihir_dataset,
+    cdi_operator,
+    path_to_cxi,
+):
+    """
+    We need to create a dictionnary with the parameters to save in the
+    cxi file.
+
+    :param cdi_operator: cdi object
+     created with PyNX
+    :param path_to_cxi: path to future cxi data
+     Below are parameters that are saved in the cxi file
+        - filename: the file name to save the data to
+        - iobs: the observed intensity
+        - wavelength: the wavelength of the experiment (in meters)
+        - detector_distance: the detector distance (in meters)
+        - pixel_size_detector: the pixel size of the detector (in meters)
+        - mask: the mask indicating valid (=0) and bad pixels (>0)
+        - sample_name: optional, the sample name
+        - experiment_id: the string identifying the experiment, e.g.:
+          'HC1234: Siemens star calibration tests'
+        - instrument: the string identifying the instrument, e.g.:
+         'ESRF id10'
+        - iobs_is_fft_shifted: if true, input iobs (and mask if any)
+        have their origin in (0,0[,0]) and will be shifted back to
+        centered-versions before being saved.
+        - process_parameters: a dictionary of parameters which will
+          be saved as a NXcollection
+
+    :return: Nothing, a CXI file is created.
+    """
+    cdi_parameters = params
+    cdi_parameters["data"] = gwaihir_dataset.iobs
+    cdi_parameters["wavelength"] = gwaihir_dataset.wavelength
+    cdi_parameters["detector_distance"] = gwaihir_dataset.detector_distance
+    cdi_parameters["pixel_size_detector"] = gwaihir_dataset.pixel_size_detector
+    cdi_parameters["wavelength"] = gwaihir_dataset.wavelength
+    cdi_parameters["verbose"] = gwaihir_dataset.verbose
+    cdi_parameters["live_plot"] = gwaihir_dataset.live_plot
+    # cdi_parameters["gpu"] = gwaihir_dataset.gpu
+    cdi_parameters["auto_center_resize"] = gwaihir_dataset.auto_center_resize
+    # cdi_parameters["roi_user"] = gwaihir_dataset.roi_user
+    # cdi_parameters["roi_final"] = gwaihir_dataset.roi_final
+    cdi_parameters["nb_run"] = gwaihir_dataset.nb_run
+    cdi_parameters["max_size"] = gwaihir_dataset.max_size
+    # cdi_parameters["data2cxi"] = gwaihir_dataset.data2cxi
+    cdi_parameters["output_format"] = "cxi"
+    cdi_parameters["mask"] = gwaihir_dataset.mask
+    cdi_parameters["support"] = gwaihir_dataset.support
+    # cdi_parameters["support_autocorrelation_threshold"]\
+    # = gwaihir_dataset.support_autocorrelation_threshold
+    cdi_parameters["support_only_shrink"] = gwaihir_dataset.support_only_shrink
+    cdi_parameters["object"] = gwaihir_dataset.obj
+    cdi_parameters["support_update_period"] = gwaihir_dataset.support_update_period
+    cdi_parameters["support_smooth_width_begin"] = gwaihir_dataset.support_smooth_width[0]
+    cdi_parameters["support_smooth_width_end"] = gwaihir_dataset.support_smooth_width[1]
+    # cdi_parameters["support_smooth_width_relax_n"] = \
+    # gwaihir_dataset.support_smooth_width_relax_n
+    # cdi_parameters["support_size"] = gwaihir_dataset.support_size
+    cdi_parameters["support_threshold"] = gwaihir_dataset.support_threshold
+    cdi_parameters["positivity"] = gwaihir_dataset.positivity
+    cdi_parameters["beta"] = gwaihir_dataset.beta
+    cdi_parameters["crop_output"] = 0
+    cdi_parameters["rebin"] = gwaihir_dataset.rebin
+    # cdi_parameters["support_update_border_n"] \
+    # = gwaihir_dataset.support_update_border_n
+    # cdi_parameters["support_threshold_method"] \
+    # = gwaihir_dataset.support_threshold_method
+    cdi_parameters["support_post_expand"] = gwaihir_dataset.support_post_expand
+    cdi_parameters["psf"] = gwaihir_dataset.psf
+    # cdi_parameters["note"] = gwaihir_dataset.note
+    try:
+        cdi_parameters["instrument"] = gwaihir_dataset.beamline
+    except AttributeError:
+        cdi_parameters["instrument"] = None
+    cdi_parameters["sample_name"] = gwaihir_dataset.sample_name
+    # cdi_parameters["fig_num"] = gwaihir_dataset.fig_num
+    # cdi_parameters["algorithm"] = gwaihir_dataset.algorithm
+    cdi_parameters["zero_mask"] = "auto"
+    cdi_parameters["nb_run_keep"] = gwaihir_dataset.nb_run_keep
+    # cdi_parameters["save"] = gwaihir_dataset.save
+    # cdi_parameters["gps_inertia"] = gwaihir_dataset.gps_inertia
+    # cdi_parameters["gps_t"] = gwaihir_dataset.gps_t
+    # cdi_parameters["gps_s"] = gwaihir_dataset.gps_s
+    # cdi_parameters["gps_sigma_f"] = gwaihir_dataset.gps_sigma_f
+    # cdi_parameters["gps_sigma_o"] = gwaihir_dataset.gps_sigma_o
+    # cdi_parameters["iobs_saturation"] = gwaihir_dataset.iobs_saturation
+    # cdi_parameters["free_pixel_mask"] = gwaihir_dataset.free_pixel_mask
+    # cdi_parameters["support_formula"] = gwaihir_dataset.support_formula
+    # cdi_parameters["mpi"] = "run"
+    # cdi_parameters["mask_interp"] = gwaihir_dataset.mask_interp
+    # cdi_parameters["confidence_interval_factor_mask_min"] \
+    # = gwaihir_dataset.confidence_interval_factor_mask_min
+    # cdi_parameters["confidence_interval_factor_mask_max"] \
+    # = gwaihir_dataset.confidence_interval_factor_mask_max
+    # cdi_parameters["save_plot"] = gwaihir_dataset.save_plot
+    # cdi_parameters["support_fraction_min"] \
+    # = gwaihir_dataset.support_fraction_min
+    # cdi_parameters["support_fraction_max"] \
+    # = gwaihir_dataset.support_fraction_max
+    # cdi_parameters["support_threshold_auto_tune_factor"] \
+    # = gwaihir_dataset.support_threshold_auto_tune_factor
+    # cdi_parameters["nb_run_keep_max_obj2_out"] \
+    # = gwaihir_dataset.nb_run_keep_max_obj2_out
+    # cdi_parameters["flatfield"] = gwaihir_dataset.flatfield
+    # cdi_parameters["psf_filter"] = gwaihir_dataset.psf_filter
+    cdi_parameters["detwin"] = gwaihir_dataset.detwin
+    cdi_parameters["nb_raar"] = gwaihir_dataset.nb_raar
+    cdi_parameters["nb_hio"] = gwaihir_dataset.nb_hio
+    cdi_parameters["nb_er"] = gwaihir_dataset.nb_er
+    cdi_parameters["nb_ml"] = gwaihir_dataset.nb_ml
+    try:
+        cdi_parameters["specfile"] = gwaihir_dataset.specfile_name
+    except AttributeError:
+        pass
+    # cdi_parameters["imgcounter"] = gwaihir_dataset.imgcounter
+    # cdi_parameters["imgname"] = gwaihir_dataset.imgname
+    cdi_parameters["scan"] = gwaihir_dataset.scan
+
+    print("\nSaving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
+    cdi_operator.save_data_cxi(
+        filename=path_to_cxi,
+        process_parameters=cdi_parameters,
+    )
+
+
 def create_yaml_file(fname, **kwargs):
     """
     Create yaml file storing all keywords arguments given in input.
@@ -646,10 +998,11 @@ def list_reconstructions(folder, scan_name):
         )
         if j != len(cxi_file_list)-1:
             print("")
-    print(
-        "################################################"
-        "################################################"
-    )
+        else:
+            print(
+                "################################################"
+                "################################################"
+            )
 
 
 def hash_print(

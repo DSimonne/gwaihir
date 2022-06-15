@@ -50,8 +50,9 @@ try:
 except ModuleNotFoundError:
     pynx_import = False
     print(
-        "Could not load PyNX, the phase retrieval tab will be disabled.\n"
-        "Make sure you have the right version of PyNX installed.")
+        "Could not load PyNX, the phase retrieval tab will be disabled."
+        "\nMake sure you have the right version of PyNX installed."
+    )
 
 
 class Interface:
@@ -2524,34 +2525,63 @@ class Interface:
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(button_save_as_cxi)
-                    gutil.hash_print("Saving data, takes some time ...",
-                                     hash_line_after=False)
+                    gutil.hash_print(
+                        "Saving data ...",
+                        hash_line_after=False
+                    )
 
                     try:
                         # Reciprocal space data
-                        gutil.hash_print(
-                            "Saving diffraction data and mask selected in the PyNX tab...")
-
-                        # Define final cxi file name
+                        # Define path to .cxi file that will contain the
+                        # preprocessed data, created thanks to PyNX.
                         cxi_filename = "{}/preprocessing/{}.cxi".format(
                             self.Dataset.scan_folder,
                             self.Dataset.iobs.split("/")[-1].split(".")[0]
                         )
 
-                        # Define cxi file with the data selected
-                        # in the phase retrieval tab and save as cxi
-                        cdi = self.initialize_cdi_operator(
-                            path_to_cxi=cxi_filename
-                        )
+                        # Check if this file already exists or not
+                        if not os.path.isfile(cxi_filename):
+                            gutil.hash_print(
+                                "Saving diffraction data and mask selected in the PyNX tab..."
+                            )
+
+                            # Define cxi file with the data selected
+                            # in the phase retrieval tab and save as cxi
+                            cdi = gutil.initialize_cdi_operator(
+                                iobs=self.Dataset.iobs,
+                                mask=self.Dataset.mask,
+                                support=self.Dataset.support,
+                                obj=self.Dataset.obj,
+                                rebin=self.Dataset.rebin,
+                                auto_center_resize=self.Dataset.auto_center_resize,
+                                max_size=self.Dataset.max_size,
+                                wavelength=self.Dataset.wavelength,
+                                pixel_size_detector=self.Dataset.pixel_size_detector,
+                                detector_distance=self.Dataset.detector_distance,
+                            )
+
+                            gutil.save_cdi_operator_as_cxi(
+                                Dataset=self.Dataset,
+                                cdi_operator=cdi,
+                                path_to_cxi=cxi_filename,
+                            )
 
                         # Real space data
                         print(
                             "\n###########################################"
                             "#############################################"
                         )
-                        # We have performed phase retrieval and selected a file
+
+                        # Path to final file
+                        final_cxi_filename = "{}{}{}.cxi".format(
+                            self.scan_folder,
+                            self.sample_name,
+                            self.scan,
+                        )
+
                         self.Dataset.to_cxi(
                             cxi_filename=cxi_filename,
+                            final_cxi_filename=final_cxi_filename,
                             reconstruction_filename=self.reconstruction_files,
                             strain_output_file=self.strain_output_file
                         )
@@ -3252,207 +3282,6 @@ class Interface:
 
     # Phase retrieval
 
-    def initialize_cdi_operator(self, path_to_cxi=False):
-        """
-        Initialize the cdi operator by processing the possible inputs:
-            iobs, mask, support, obj
-        Will also crop and center the data if specified.
-        Loads phase retrieval tab parameters values.
-        Save the instanced cdi object as .cxi following the cxi convention
-        if `path_to_cxi` is a string.
-
-        :param path_to_cxi: path to new file to be created.
-
-        return: cdi operator
-        """
-        if self.Dataset.iobs not in ("", None):
-            if self.Dataset.iobs.endswith(".npy"):
-                iobs = np.load(self.Dataset.iobs)
-                print("\tCXI input: loading data")
-            elif self.Dataset.iobs.endswith(".npz"):
-                try:
-                    iobs = np.load(self.Dataset.iobs)["data"]
-                    print("\tCXI input: loading data")
-                except KeyError:
-                    print("\t\"data\" key does not exist.")
-                    raise KeyboardInterrupt
-
-            if self.Dataset.rebin != (1, 1, 1):
-                iobs = bin_data(iobs, self.Dataset.rebin)
-
-        else:
-            self.Dataset.iobs = None
-            iobs = None
-
-        if self.Dataset.mask not in ("", None, self.Dataset.parent_folder):
-            if self.Dataset.mask.endswith(".npy"):
-                mask = np.load(self.Dataset.mask).astype(np.int8)
-                nb = mask.sum()
-                print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                    nb, nb * 100 / mask.size))
-            elif self.Dataset.mask.endswith(".npz"):
-                try:
-                    mask = np.load(self.Dataset.mask)[
-                        "mask"].astype(np.int8)
-                    nb = mask.sum()
-                    print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                        nb, nb * 100 / mask.size))
-                except KeyError:
-                    print("\t\"mask\" key does not exist.")
-
-            if self.Dataset.rebin != (1, 1, 1):
-                mask = bin_data(mask, self.Dataset.rebin)
-
-            # fft shift
-            mask = fftshift(mask)
-
-        else:
-            self.Dataset.mask = None
-            mask = None
-
-        if self.Dataset.support not in ("", None, self.Dataset.parent_folder):
-            if self.Dataset.support.endswith(".npy"):
-                support = np.load(self.Dataset.support)
-                print("\tCXI input: loading support")
-            elif self.Dataset.support.endswith(".npz"):
-                try:
-                    support = np.load(self.Dataset.support)["data"]
-                    print("\tCXI input: loading support")
-                except (FileNotFoundError, ValueError):
-                    print("\tFile not supported or does not exist.")
-                except KeyError:
-                    print("\t\"data\" key does not exist.")
-                    try:
-                        support = np.load(self.Dataset.support)["support"]
-                        print("\tCXI input: loading support")
-                    except KeyError:
-                        print("\t\"support\" key does not exist.")
-                        try:
-                            support = np.load(self.Dataset.support)["obj"]
-                            print("\tCXI input: loading support")
-                        except KeyError:
-                            print(
-                                "\t\"obj\" key does not exist."
-                                "\t--> Could not load support array."
-                            )
-
-            if self.Dataset.rebin != (1, 1, 1):
-                support = bin_data(support, self.Dataset.rebin)
-
-            # fft shift
-            support = fftshift(support)
-
-        else:
-            self.Dataset.support = None
-            support = None
-
-        if self.Dataset.obj not in ("", None, self.Dataset.parent_folder):
-            if self.Dataset.obj.endswith(".npy"):
-                obj = np.load(self.Dataset.obj)
-                print("\tCXI input: loading object")
-            elif self.Dataset.obj.endswith(".npz"):
-                try:
-                    obj = np.load(self.Dataset.obj)["data"]
-                    print("\tCXI input: loading object")
-                except KeyError:
-                    print("\t\"data\" key does not exist.")
-
-            if self.Dataset.rebin != (1, 1, 1):
-                obj = bin_data(obj, self.Dataset.rebin)
-
-            # fft shift
-            obj = fftshift(obj)
-
-        else:
-            self.Dataset.obj = None
-            obj = None
-
-        # Center and crop data
-        if self.Dataset.auto_center_resize:
-            if iobs.ndim == 3:
-                nz0, ny0, nx0 = iobs.shape
-
-                # Find center of mass
-                z0, y0, x0 = center_of_mass(iobs)
-                print("Center of mass at:", z0, y0, x0)
-                iz0, iy0, ix0 = int(round(z0)), int(
-                    round(y0)), int(round(x0))
-
-                # Max symmetrical box around center of mass
-                nx = 2 * min(ix0, nx0 - ix0)
-                ny = 2 * min(iy0, ny0 - iy0)
-                nz = 2 * min(iz0, nz0 - iz0)
-
-                if self.Dataset.max_size is not None:
-                    nx = min(nx, self.Dataset.max_size)
-                    ny = min(ny, self.Dataset.max_size)
-                    nz = min(nz, self.Dataset.max_size)
-
-                # Crop data to fulfill FFT size requirements
-                nz1, ny1, nx1 = smaller_primes(
-                    (nz, ny, nx), maxprime=7, required_dividers=(2,))
-
-                print("Centering & reshaping data: (%d, %d, %d) -> \
-                    (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
-                iobs = iobs[
-                    iz0 - nz1 // 2:iz0 + nz1 // 2,
-                    iy0 - ny1 // 2:iy0 + ny1 // 2,
-                    ix0 - nx1 // 2:ix0 + nx1 // 2]
-                if mask is not None:
-                    mask = mask[
-                        iz0 - nz1 // 2:iz0 + nz1 // 2,
-                        iy0 - ny1 // 2:iy0 + ny1 // 2,
-                        ix0 - nx1 // 2:ix0 + nx1 // 2]
-                    print("Centering & reshaping mask: (%d, %d, %d) -> \
-                        (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
-
-            else:
-                ny0, nx0 = iobs.shape
-
-                # Find center of mass
-                y0, x0 = center_of_mass(iobs)
-                iy0, ix0 = int(round(y0)), int(round(x0))
-                print("Center of mass (rounded) at:", iy0, ix0)
-
-                # Max symmetrical box around center of mass
-                nx = 2 * min(ix0, nx0 - ix0)
-                ny = 2 * min(iy0, ny0 - iy0)
-                if self.Dataset.max_size is not None:
-                    nx = min(nx, self.Dataset.max_size)
-                    ny = min(ny, self.Dataset.max_size)
-                    nz = min(nz, self.Dataset.max_size)
-
-                # Crop data to fulfill FFT size requirements
-                ny1, nx1 = smaller_primes(
-                    (ny, nx), maxprime=7, required_dividers=(2,))
-
-                print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
-                      (ny0, nx0, ny1, nx1))
-                iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
-                            2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-
-                if mask is not None:
-                    mask = mask[iy0 - ny1 // 2:iy0 + ny1 //
-                                2, ix0 - nx1 // 2:ix0 + nx1 // 2]
-
-        # Create cdi object with data and mask, load the main parameters
-        cdi = CDI(iobs,
-                  support=support,
-                  obj=obj,
-                  mask=mask,
-                  wavelength=self.Dataset.wavelength,
-                  pixel_size_detector=self.Dataset.pixel_size_detector,
-                  detector_distance=self.Dataset.detector_distance,
-                  )
-
-        if isinstance(path_to_cxi, str):
-            self.save_as_cxi(
-                cdi_operator=cdi,
-                path_to_cxi=path_to_cxi
-            )
-
-        return cdi
-
     def initialize_phase_retrieval(
         self,
         unused_label_data,
@@ -3857,18 +3686,31 @@ class Interface:
                         )
 
                         # Initialise the cdi operator
+                        cdi = gutil.initialize_cdi_operator(
+                            iobs=self.Dataset.iobs,
+                            mask=self.Dataset.mask,
+                            support=self.Dataset.support,
+                            obj=self.Dataset.obj,
+                            rebin=self.Dataset.rebin,
+                            auto_center_resize=self.Dataset.auto_center_resize,
+                            max_size=self.Dataset.max_size,
+                            wavelength=self.Dataset.wavelength,
+                            pixel_size_detector=self.Dataset.pixel_size_detector,
+                            detector_distance=self.Dataset.detector_distance,
+                        )
+
+                        # Save instance
                         if i == 0:
                             cxi_filename = "{}/preprocessing/{}.cxi".format(
                                 self.Dataset.scan_folder,
                                 self.Dataset.iobs.split("/")[-1].split(".")[0]
                             )
 
-                            cdi = self.initialize_cdi_operator(
-                                path_to_cxi=cxi_filename
+                            gutil.save_cdi_operator_as_cxi(
+                                Dataset=self.Dataset,
+                                cdi_operator=cdi,
+                                path_to_cxi=cxi_filename,
                             )
-
-                        else:
-                            cdi = self.initialize_cdi_operator()
 
                         if i > 4:
                             print("Stopping liveplot to go faster\n")
@@ -4184,128 +4026,6 @@ class Interface:
             self.tab_data.children[1].value = self.preprocessing_folder
             self.plot_folder_handler(
                 change=self.preprocessing_folder)
-
-    def save_as_cxi(self, cdi_operator, path_to_cxi):
-        """
-        We need to create a dictionnary with the parameters to save in the
-        cxi file.
-
-        :param cdi_operator: cdi object
-         created with PyNX
-        :param path_to_cxi: path to future
-         cxi data
-         Below are parameters that are saved in the cxi file
-        :param filename: the file name to save the data to
-        :param iobs: the observed intensity
-        :param wavelength: the wavelength of the experiment (in meters)
-        :param detector_distance: the detector distance (in meters)
-        :param pixel_size_detector: the pixel size of the detector (in meters)
-        :param mask: the mask indicating valid (=0) and bad pixels (>0)
-        :param sample_name: optional, the sample name
-        :param experiment_id: the string identifying the experiment, e.g.:
-         'HC1234: Siemens star calibration tests'
-        :param instrument: the string identifying the instrument, e.g.:
-         'ESRF id10'
-        :param iobs_is_fft_shifted: if true, input iobs (and mask if any)
-         have their origin in (0,0[,0]) and will be shifted back to
-         centered-versions before being saved.
-        :param process_parameters: a dictionary of parameters which will
-         be saved as a NXcollection
-        :return: Nothing. a CXI file is created
-        """
-        self.params = params
-        self.params["data"] = self.Dataset.iobs
-        self.params["wavelength"] = self.Dataset.wavelength
-        self.params["detector_distance"] = self.Dataset.detector_distance
-        self.params["pixel_size_detector"] = self.Dataset.pixel_size_detector
-        self.params["wavelength"] = self.Dataset.wavelength
-        self.params["verbose"] = self.Dataset.verbose
-        self.params["live_plot"] = self.Dataset.live_plot
-        # self.params["gpu"] = self.Dataset.gpu
-        self.params["auto_center_resize"] = self.Dataset.auto_center_resize
-        # self.params["roi_user"] = self.Dataset.roi_user
-        # self.params["roi_final"] = self.Dataset.roi_final
-        self.params["nb_run"] = self.Dataset.nb_run
-        self.params["max_size"] = self.Dataset.max_size
-        # self.params["data2cxi"] = self.Dataset.data2cxi
-        self.params["output_format"] = "cxi"
-        self.params["mask"] = self.Dataset.mask
-        self.params["support"] = self.Dataset.support
-        # self.params["support_autocorrelation_threshold"]\
-        # = self.Dataset.support_autocorrelation_threshold
-        self.params["support_only_shrink"] = self.Dataset.support_only_shrink
-        self.params["object"] = self.Dataset.obj
-        self.params["support_update_period"] = self.Dataset.support_update_period
-        self.params["support_smooth_width_begin"] = self.Dataset.support_smooth_width[0]
-        self.params["support_smooth_width_end"] = self.Dataset.support_smooth_width[1]
-        # self.params["support_smooth_width_relax_n"] = \
-        # self.Dataset.support_smooth_width_relax_n
-        # self.params["support_size"] = self.Dataset.support_size
-        self.params["support_threshold"] = self.Dataset.support_threshold
-        self.params["positivity"] = self.Dataset.positivity
-        self.params["beta"] = self.Dataset.beta
-        self.params["crop_output"] = 0
-        self.params["rebin"] = self.Dataset.rebin
-        # self.params["support_update_border_n"] \
-        # = self.Dataset.support_update_border_n
-        # self.params["support_threshold_method"] \
-        # = self.Dataset.support_threshold_method
-        self.params["support_post_expand"] = self.Dataset.support_post_expand
-        self.params["psf"] = self.Dataset.psf
-        # self.params["note"] = self.Dataset.note
-        try:
-            self.params["instrument"] = self.Dataset.beamline
-        except AttributeError:
-            self.params["instrument"] = None
-        self.params["sample_name"] = self.Dataset.sample_name
-        # self.params["fig_num"] = self.Dataset.fig_num
-        # self.params["algorithm"] = self.Dataset.algorithm
-        self.params["zero_mask"] = "auto"
-        self.params["nb_run_keep"] = self.Dataset.nb_run_keep
-        # self.params["save"] = self.Dataset.save
-        # self.params["gps_inertia"] = self.Dataset.gps_inertia
-        # self.params["gps_t"] = self.Dataset.gps_t
-        # self.params["gps_s"] = self.Dataset.gps_s
-        # self.params["gps_sigma_f"] = self.Dataset.gps_sigma_f
-        # self.params["gps_sigma_o"] = self.Dataset.gps_sigma_o
-        # self.params["iobs_saturation"] = self.Dataset.iobs_saturation
-        # self.params["free_pixel_mask"] = self.Dataset.free_pixel_mask
-        # self.params["support_formula"] = self.Dataset.support_formula
-        # self.params["mpi"] = "run"
-        # self.params["mask_interp"] = self.Dataset.mask_interp
-        # self.params["confidence_interval_factor_mask_min"] \
-        # = self.Dataset.confidence_interval_factor_mask_min
-        # self.params["confidence_interval_factor_mask_max"] \
-        # = self.Dataset.confidence_interval_factor_mask_max
-        # self.params["save_plot"] = self.Dataset.save_plot
-        # self.params["support_fraction_min"] \
-        # = self.Dataset.support_fraction_min
-        # self.params["support_fraction_max"] \
-        # = self.Dataset.support_fraction_max
-        # self.params["support_threshold_auto_tune_factor"] \
-        # = self.Dataset.support_threshold_auto_tune_factor
-        # self.params["nb_run_keep_max_obj2_out"] \
-        # = self.Dataset.nb_run_keep_max_obj2_out
-        # self.params["flatfield"] = self.Dataset.flatfield
-        # self.params["psf_filter"] = self.Dataset.psf_filter
-        self.params["detwin"] = self.Dataset.detwin
-        self.params["nb_raar"] = self.Dataset.nb_raar
-        self.params["nb_hio"] = self.Dataset.nb_hio
-        self.params["nb_er"] = self.Dataset.nb_er
-        self.params["nb_ml"] = self.Dataset.nb_ml
-        try:
-            self.params["specfile"] = self.Dataset.specfile_name
-        except AttributeError:
-            pass
-        # self.params["imgcounter"] = self.Dataset.imgcounter
-        # self.params["imgname"] = self.Dataset.imgname
-        self.params["scan"] = self.Dataset.scan
-
-        print("\nSaving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
-        cdi_operator.save_data_cxi(
-            filename=path_to_cxi,
-            process_parameters=self.params,
-        )
 
     # Postprocessing
 
