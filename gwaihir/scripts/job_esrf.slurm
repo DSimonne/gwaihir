@@ -10,6 +10,9 @@
 #SBATCH --output=%x-%j.out
 #SBATCH --export=NONE
 
+# Script is launched like this:
+# job_esrf.slurm gui simonne /data/id01/inhouse/david/SIXS_June_2021/reconstructions/25/Air/B-7/S3116/preprocessing/ true 10
+
 # Arguments needed
 reconstruct=$1         # if launched via the gui or terminal
 username=$2    # username, if not specified, default to simonne
@@ -33,8 +36,8 @@ scontrol --details show jobs \$SLURM_JOBID |grep RES
 # Moving to pynxraw directory
 cd $path
 echo "Moved to " $path
-source /data/id01/inhouse/david/p9.stable/bin/activate
-echo "Working with /data/id01/inhouse/david/p9.stable/ environment"
+# source /data/id01/inhouse/david/p9.stable/bin/activate
+# echo "Working with /data/id01/inhouse/david/p9.stable/ environment"
 
 # Running phase retrieval
 echo 
@@ -51,9 +54,9 @@ if [[ $reconstruct = "gui" ]]; then
     mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/p9.stable/bin/pynx-id01cdi.py pynx_run_gui.txt |& tee README_pynx_gui.md
 
     # Moving the results in gui_run/ sub-directory
-    echo "Moving all the .cxi files in /gui_run subdirectory..."
+    echo "Creating a subdirector gui_run/ and moving all the .cxi files there..."
     mv S*LLK*.cxi gui_run/
-    mv README_pynx*.md gui_run/
+    mv README_pynx_gui.md gui_run/
     cd gui_run/
     echo "################################################################################################################"
     echo
@@ -69,17 +72,18 @@ elif [[ $reconstruct = "terminal" ]]; then
     echo "Creating a subdirector terminal_run/ and moving all the .cxi files there..."
     mkdir terminal_run/
     mv S*LLK*.cxi terminal_run/
-    mv README_pynx*.md terminal_run/
+    mv README_pynx_terminal.md terminal_run/
     cd terminal_run/
     echo "################################################################################################################"
     echo
 fi
 
-if [[ $filtering == ?(-)+([0-9]) ]]; then # Verify that it is an integer
-    # Apply a standard deviation filter
-    echo "Applying a standard deviation filter"
-    run_std_filter.py $filtering
-fi
+# Does not exist anymore
+# if [[ $filtering == ?(-)+([0-9]) ]]; then # Verify that it is an integer
+#     # Apply a standard deviation filter
+#     echo "Applying a standard deviation filter"
+#     run_std_filter.py $filtering
+# fi
 
 if [[ $modes = true ]]; then
     echo "################################################################################################################"
@@ -90,6 +94,7 @@ if [[ $modes = true ]]; then
     echo
 
     if [[ $reconstruct = "terminal" ]]; then
+        # Nothing here yet
         echo "################################################################################################################"
         echo "Running strain analysis"
         # ssh username@rnice9 << EOF
