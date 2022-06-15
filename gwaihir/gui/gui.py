@@ -2520,10 +2520,7 @@ class Interface:
                     """Create button to save Dataset object as .cxi file."""
                     clear_output(True)
                     display(button_save_as_cxi)
-                    gutil.hash_print(
-                        "Saving data ...",
-                        hash_line_after=False
-                    )
+                    gutil.hash_print("Saving data ...")
 
                     try:
                         # Reciprocal space data
@@ -2562,11 +2559,6 @@ class Interface:
                             )
 
                         # Real space data
-                        print(
-                            "\n###########################################"
-                            "#############################################"
-                        )
-
                         # Path to final file
                         final_cxi_filename = "{}{}{}.cxi".format(
                             self.Dataset.scan_folder,
@@ -2579,11 +2571,6 @@ class Interface:
                             final_cxi_filename=final_cxi_filename,
                             reconstruction_filename=self.reconstruction_files,
                             strain_output_file=self.strain_output_file
-                        )
-
-                        print(
-                            "\n###########################################"
-                            "#############################################"
                         )
 
                     except (AttributeError, UnboundLocalError):
@@ -3673,6 +3660,20 @@ class Interface:
                 self.reconstruction_file_list = []
 
                 try:
+                    # Initialise the cdi operator
+                    raw_cdi = gutil.initialize_cdi_operator(
+                        iobs=self.Dataset.iobs,
+                        mask=self.Dataset.mask,
+                        support=self.Dataset.support,
+                        obj=self.Dataset.obj,
+                        rebin=self.Dataset.rebin,
+                        auto_center_resize=self.Dataset.auto_center_resize,
+                        max_size=self.Dataset.max_size,
+                        wavelength=self.Dataset.wavelength,
+                        pixel_size_detector=self.Dataset.pixel_size_detector,
+                        detector_distance=self.Dataset.detector_distance,
+                    )
+
                     # Run phase retrieval for nb_run
                     for i in range(self.Dataset.nb_run):
                         print(
@@ -3681,19 +3682,8 @@ class Interface:
                             f"\nRun {i}"
                         )
 
-                        # Initialise the cdi operator
-                        cdi = gutil.initialize_cdi_operator(
-                            iobs=self.Dataset.iobs,
-                            mask=self.Dataset.mask,
-                            support=self.Dataset.support,
-                            obj=self.Dataset.obj,
-                            rebin=self.Dataset.rebin,
-                            auto_center_resize=self.Dataset.auto_center_resize,
-                            max_size=self.Dataset.max_size,
-                            wavelength=self.Dataset.wavelength,
-                            pixel_size_detector=self.Dataset.pixel_size_detector,
-                            detector_distance=self.Dataset.detector_distance,
-                        )
+                        # Make a copy to gain time
+                        cdi = raw_cdi.copy()
 
                         # Save instance
                         if i == 0:
@@ -3703,7 +3693,7 @@ class Interface:
                             )
 
                             gutil.save_cdi_operator_as_cxi(
-                                Dataset=self.Dataset,
+                                gwaihir_dataset=self.Dataset,
                                 cdi_operator=cdi,
                                 path_to_cxi=cxi_filename,
                             )
@@ -3915,6 +3905,8 @@ class Interface:
                                 "\n###########################################"
                                 "#############################################"
                             )
+
+                            del cdi
 
                         except SupportTooLarge:
                             print(
