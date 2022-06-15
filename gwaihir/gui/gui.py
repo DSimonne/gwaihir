@@ -26,7 +26,6 @@ from gwaihir.gui import gui_iterable
 import gwaihir.utilities as gutil
 
 # bcdi package
-from bcdi.utils.utilities import bin_data
 from bcdi.postprocessing import facet_analysis
 from bcdi.preprocessing import ReadNxs3 as rd
 from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
@@ -35,10 +34,6 @@ from bcdi.utils.parser import ConfigParser
 import argparse
 
 # PyNX package
-import h5py
-from numpy.fft import fftshift
-from scipy.ndimage.measurements import center_of_mass
-from scipy.ndimage import gaussian_filter
 try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
@@ -2574,13 +2569,13 @@ class Interface:
 
                         # Path to final file
                         final_cxi_filename = "{}{}{}.cxi".format(
-                            self.scan_folder,
-                            self.sample_name,
-                            self.scan,
+                            self.Dataset.scan_folder,
+                            self.Dataset.sample_name,
+                            self.Dataset.scan,
                         )
 
                         self.Dataset.to_cxi(
-                            cxi_filename=cxi_filename,
+                            raw_data_cxi_filename=cxi_filename,
                             final_cxi_filename=final_cxi_filename,
                             reconstruction_filename=self.reconstruction_files,
                             strain_output_file=self.strain_output_file
@@ -2593,9 +2588,10 @@ class Interface:
 
                     except (AttributeError, UnboundLocalError):
                         print(
-                            "Could not save reciprocal space data, select the\
-                            \n intensity and the mask files in the phase\
-                            \n retrieval tab first")
+                            "Could not save reciprocal space data, select the"
+                            "intensity and the mask files in the phase"
+                            "retrieval tab first"
+                        )
 
                     # Facets analysis output
                     try:

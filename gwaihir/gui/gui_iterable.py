@@ -69,7 +69,7 @@ class Dataset:
         Save all the parameters used in the data analysis with a specific
         architecture based on NeXuS.
 
-        :param cxi_filename: path to .cxi file that contains the preprocessed
+        :param raw_data_cxi_filename: path to .cxi file that contains the preprocessed
          data, created thanks to PyNX.
          This file is used as base for the final cxi file.
         :param final_cxi_filename: path to .cxi file that will regroup all the
@@ -80,7 +80,7 @@ class Dataset:
         """
 
         # Copy cxi file, and use it as starter for the end file
-        shutil.copy(cxi_filename,  # src
+        shutil.copy(raw_data_cxi_filename,  # src
                     final_cxi_filename,  # dest
                     )
 

@@ -8,12 +8,15 @@ from datetime import datetime
 import tables as tb
 import h5py
 import shutil
+from numpy.fft import fftshift
+from scipy.ndimage import center_of_mass
 
 # Widgets
 import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive, fixed
 from IPython.display import display, Markdown, Latex, clear_output, Image
 
+# PyNX
 try:
     from pynx.cdi import CDI
     from pynx.cdi.runner.id01 import params
@@ -27,6 +30,7 @@ import gwaihir
 
 # bcdi package
 from bcdi.preprocessing import ReadNxs3 as rd
+from bcdi.utils.utilities import bin_data
 
 
 def init_directories(
