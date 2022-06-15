@@ -2569,18 +2569,14 @@ class Interface:
 
                     # Facets analysis output
                     try:
-                        gutil.hash_print("Saving Facets class data",
-                                         hash_line_after=False)
+                        gutil.hash_print("Saving Facets class data")
                         self.Facets.to_hdf5(
                             f"{self.Dataset.scan_folder}{self.Dataset.scan_name}.cxi")
                     except AttributeError:
                         gutil.hash_print(
-                            "Could not save facets' data, run the analysis in the `Facets` tab first.", hash_line_after=False)
+                            "Could not save facets' data, run the analysis in the `Facets` tab first.",
+                        )
 
-                    print(
-                        "\n###########################################"
-                        "#############################################"
-                    )
         elif not run_dir_init:
             gutil.hash_print("Cleared window.")
             clear_output(True)
@@ -4101,21 +4097,10 @@ class Interface:
                         "Phase retrieval stopped by user, cxi file list below."
                     )
 
-                    cxi_file_list = sorted(
-                        glob.glob(self.preprocessing_folder + "*.cxi"),
-                        key=os.path.getmtime,
-                        reverse=True,
-                    )
-
-                    for f in cxi_file_list:
-                        print(
-                            "################################################"
-                            "################################################"
-                            f"\nFile: {os.path.basename(f)}"
-                            f"\n\tCreated: {datetime.fromtimestamp(os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')}"
-                            "\n################################################"
-                            "################################################\n"
-                        )
+                gutil.list_reconstructions(
+                    folder=self.preprocessing_folder,
+                    scan_name=self.Dataset.scan_name
+                )
 
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
@@ -4134,6 +4119,11 @@ class Interface:
         if not self.run_phase_retrieval and not self.run_pynx_tools:
             gutil.hash_print("Cleared output.")
             clear_output(True)
+
+            gutil.list_reconstructions(
+                folder=self.preprocessing_folder,
+                scan_name=self.Dataset.scan_name
+            )
 
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)

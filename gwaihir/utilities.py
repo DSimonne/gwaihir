@@ -625,6 +625,33 @@ def create_yaml_file(fname, **kwargs):
             v.write(line + "\n")
 
 
+def list_reconstructions(folder, scan_name):
+    """"""
+    cxi_file_list = [f for f in sorted(
+        glob.glob(folder + "*.cxi"),
+        key=os.path.getmtime,
+        reverse=True,
+    ) if not os.path.basename(f).startswith(scan_name)]
+
+    print(
+        "################################################"
+        "################################################"
+    )
+    for j, f in enumerate(cxi_file_list):
+        file_timestamp = datetime.fromtimestamp(
+            os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
+        print(
+            f"File: {os.path.basename(f)}"
+            f"\n\tCreated: {file_timestamp}"
+        )
+        if j != len(cxi_file_list)-1:
+            print("")
+    print(
+        "################################################"
+        "################################################"
+    )
+
+
 def hash_print(
     string_to_print,
     hash_line_before=True,
