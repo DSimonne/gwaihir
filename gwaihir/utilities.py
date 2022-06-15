@@ -1009,6 +1009,39 @@ def list_reconstructions(folder, scan_name):
             )
 
 
+def run_modes_decomposition(path_scripts, folder):
+    """
+    Decomposes several phase retrieval solutions into modes, saves only
+    the first mode to save space.
+
+    :param path_scripts: absolute path to script containing
+     folder
+    :param folder: path to folder in which are stored
+     the .cxi files, all files corresponding to
+     *LLK* pattern are loaded
+    """
+    try:
+        print(
+            "\n###########################################"
+            "#############################################"
+            f"\nUsing {path_scripts}/pynx-cdi-analysis"
+            f"\nUsing {folder}/*LLK* files."
+            f"\nRunning: $ pynx-cdi-analysis *LLK* modes=1"
+            f"\nOutput in {folder}/modes_gui.h5"
+            "\n###########################################"
+            "#############################################"
+        )
+        os.system(
+            "{}/pynx-cdi-analysis {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+                quote(path_scripts),
+                quote(folder),
+                quote(folder),
+            )
+        )
+    except KeyboardInterrupt:
+        gutil.hash_print("Decomposition into modes stopped by user...")
+
+
 def hash_print(
     string_to_print,
     hash_line_before=True,

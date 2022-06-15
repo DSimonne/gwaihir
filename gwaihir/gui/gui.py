@@ -3935,12 +3935,15 @@ class Interface:
         # Modes decomposition and solution filtering
         if self.run_pynx_tools and not self.run_phase_retrieval:
             if self.run_pynx_tools == "modes":
-                self.run_modes_decomposition(self.Dataset.parent_folder)
+                gutil.run_modes_decomposition(
+                    path_scripts=self.path_scripts,
+                    folder=self.Dataset.parent_folder,
+                )
 
             elif self.run_pynx_tools == "filter":
                 gutil.filter_reconstructions(
                     folder=self.Dataset.parent_folder,
-                    nb_run=None,
+                    nb_run=None,  # Will take the amount of cxi files found
                     nb_run_keep=self.Dataset.nb_run_keep,
                     filter_criteria=self.Dataset.filter_criteria
                 )
@@ -3958,11 +3961,6 @@ class Interface:
             # Refresh folders
             self.sub_directories_handler(change=self.Dataset.scan_folder)
 
-            # PyNX folder, refresh values
-            # self._list_widgets_phase_retrieval.children[1].value\
-            #     = self.preprocessing_folder
-            # self.pynx_folder_handler(change=self.preprocessing_folder)
-
             # Plot folder, refresh values
             self.tab_data.children[1].value = self.preprocessing_folder
             self.plot_folder_handler(change=self.preprocessing_folder)
@@ -3971,49 +3969,6 @@ class Interface:
             self._list_widgets_strain.children[-4].value\
                 = self.preprocessing_folder
             self.strain_folder_handler(change=self.preprocessing_folder)
-
-    def run_modes_decomposition(self, folder,):
-        """
-        Decomposes several phase retrieval solutions into modes, saves only
-        the first mode to save space.
-
-        :param folder: path to folder in which are stored
-         the .cxi files, all files corresponding to
-         *LLK* pattern are loaded
-        """
-        try:
-            print(
-                "\n###########################################"
-                "#############################################"
-                f"\nUsing {self.path_scripts}/pynx-cdi-analysis"
-                f"\nUsing {folder}/*LLK* files."
-                f"\nRunning: $ pynx-cdi-analysis *LLK* modes=1"
-                f"\nOutput in {folder}/modes_gui.h5"
-                "\n###########################################"
-                "#############################################"
-            )
-            os.system(
-                "{}/pynx-cdi-analysis {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
-                    quote(self.path_scripts),
-                    quote(folder),
-                    quote(folder),
-                )
-            )
-        except KeyboardInterrupt:
-            gutil.hash_print("Decomposition into modes stopped by user...")
-
-        finally:
-            # Refresh folders
-            self.sub_directories_handler(change=self.Dataset.scan_folder)
-
-            # PyNX folder, refresh values
-            self._list_widgets_phase_retrieval.children[1].value\
-                = self.preprocessing_folder
-            self.pynx_folder_handler(change=self.preprocessing_folder)
-
-            self.tab_data.children[1].value = self.preprocessing_folder
-            self.plot_folder_handler(
-                change=self.preprocessing_folder)
 
     # Postprocessing
 
