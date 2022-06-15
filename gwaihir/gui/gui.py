@@ -2415,7 +2415,7 @@ class Interface:
          "Qt5Agg"
         """
         if run_dir_init:
-            # Create Dataset attribute
+            # Create Dataset Class
             self.Dataset = gui_iterable.Dataset(
                 scan=scan, sample_name=sample_name,
                 data_dir=data_dir, root_folder=root_folder)
@@ -2432,7 +2432,6 @@ class Interface:
             # Assign scan folder
             self.Dataset.scan_folder = self.Dataset.root_folder \
                 + self.Dataset.scan_name + "/"
-            print("Scan folder:", self.Dataset.scan_folder)
 
             # Assign preprocessing folder
             self.preprocessing_folder = self.Dataset.scan_folder \
@@ -2450,9 +2449,9 @@ class Interface:
             )
 
             # Try and find SixS data, will also rotate the data
-            template_imagefile, self.Dataset.data_dir = gutil.find_move_sixs_data(
+            template_imagefile, self.Dataset.data_dir, self.Dataset.path_to_nxs_data = gutil.find_and_copy_raw_data(
                 scan=self.Dataset.scan,
-                scan_name=self.Dataset.scan_name,
+                sample_name=self.Dataset.sample_name,
                 root_folder=self.Dataset.root_folder,
                 data_dir=self.Dataset.data_dir,
             )

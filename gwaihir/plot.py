@@ -1025,7 +1025,7 @@ def plot_data(
             value=0,
             step=1,
             title="Position",
-            orientation = "vertical",
+            orientation="vertical",
         )
         slider_index.on_change('value', callback_change_index)
 

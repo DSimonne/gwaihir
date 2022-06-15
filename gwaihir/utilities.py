@@ -104,18 +104,18 @@ def init_directories(
             pass
 
 
-def rotate_sixs_data(path_to_sixs_data):
+def rotate_sixs_data(path_to_nxs_data):
     """
     Python script to rotate the data when using the vertical configuration.
     Should work on a copy of the data !! Never use the OG data !!
 
-    :param path_to_sixs_data: absolute path to nexus file
+    :param path_to_nxs_data: absolute path to nexus file
     """
     # Define save folder
-    save_folder = os.path.dirname(path_to_sixs_data)
+    save_folder = os.path.dirname(path_to_nxs_data)
 
     # Check if already rotated
-    with h5py.File(path_to_sixs_data, "a") as f:
+    with h5py.File(path_to_nxs_data, "a") as f:
         try:
             f.create_dataset("rotation", data=True)
             data_already_rotated = False
@@ -124,7 +124,7 @@ def rotate_sixs_data(path_to_sixs_data):
 
     if not data_already_rotated:
         hash_print("Rotating SIXS data ...")
-        with tb.open_file(path_to_sixs_data, "a") as f:
+        with tb.open_file(path_to_nxs_data, "a") as f:
             # Get data
             try:
                 # if rocking_angle == "omega":
@@ -187,54 +187,55 @@ def rotate_sixs_data(path_to_sixs_data):
         hash_print("Data already rotated ...")
 
 
-def find_move_sixs_data(
+def find_and_copy_raw_data(
     scan,
-    scan_name,
+    sample_name,
     root_folder,
     data_dir,
 ):
     """
-    If a file is indeed found:
-        template_imagefile parameter updated to match it
-        copy of the file is saved in scan_folder + "data/"
-        data_dir parameter is changed to scan_folder + "data/" to work with the
-        copy of the original data file
+    If a file is found:
+        - template_imagefile parameter updated to match it for bcdi scripts
+        - a copy of the raw data file is saved in scan_folder + "data/"
+        - data_dir parameter is changed to scan_folder + "data/" to work with
+          the copy of the raw data file
     This method allows us not to work with the original data of SixS, since we
     need to rotate the data when working with the vertical configuration.
 
-    :param scan: scan number
-    :param scan_name: str, scan name, e.g. 'S1322'
+    :param scan: int, scan number
+    :param sample_name: str, sample name, e.g. 'S'
     :param root_folder: root folder of the experiment
-    :param data_dir: original data directory
+    :param data_dir: directory with all the raw data
 
     returns:
     :template_imagefile: empty string if no file or string updated to match the
      file found
     :data_dir: updated
-    :path_to_sixs_data: empty string if no file or full path to file found
+    :param path_to_sixs_data: absolute path to nexus file to have metadata
+     access
     """
 
     # Assign scan folder
-    scan_folder = root_folder + "/" + scan_name + "/"
-    path_to_sixs_data = ""
+    scan_folder = root_folder + "/" + sample_name + str(scan) + "/"
+    path_to_nxs_data = ""
     template_imagefile = ""
 
-    # Get path_to_sixs_data from data in data_dir
+    # Get path_to_nxs_data from data in data_dir
     try:
         # Try and find a mu scan
-        path_to_sixs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
+        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
     except IndexError:
         try:
             # Try and find an omega scan
-            path_to_sixs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
+            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
         except IndexError:
             print("Could not find data, please specify template.")
 
-    # Get template_imagefile from path_to_sixs_data
-    if path_to_sixs_data != "":
+    # Get template_imagefile from path_to_nxs_data
+    if path_to_nxs_data != "":
         try:
-            print("File path:", path_to_sixs_data)
-            template_imagefile = os.path.basename(path_to_sixs_data).split(
+            print("File path:", path_to_nxs_data)
+            template_imagefile = os.path.basename(path_to_nxs_data).split(
                 "%05d" % scan)[0] + "%05d.nxs"
             print(f"File template: {template_imagefile}\n\n")
 
@@ -243,35 +244,35 @@ def find_move_sixs_data(
 
         # Move data file to scan_folder + "data/"
         try:
-            shutil.copy2(path_to_sixs_data, scan_folder + "data/")
-            print(f"Copied {path_to_sixs_data} to {data_dir}")
+            shutil.copy2(path_to_nxs_data, scan_folder + "data/")
+            print(f"Copied {path_to_nxs_data} to {data_dir}")
 
             # Change data_dir, only if copy successful
             data_dir = scan_folder + "data/"
 
-            # Change path_to_sixs_data, only if copy successful
-            path_to_sixs_data = data_dir + os.path.basename(path_to_sixs_data)
+            # Change path_to_nxs_data, only if copy successful
+            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
 
             # Rotate the data
-            rotate_sixs_data(path_to_sixs_data)
+            rotate_sixs_data(path_to_nxs_data)
 
         except (FileExistsError, PermissionError, shutil.SameFileError):
             print(f"File exists in {scan_folder}data/")
 
-            # Change data_dir, only if copy successful
+            # Change data_dir, since data already copied
             data_dir = scan_folder + "data/"
 
-            # Change path_to_sixs_data, only if copy successful
-            path_to_sixs_data = data_dir + os.path.basename(path_to_sixs_data)
+            # Change path_to_nxs_data, since data already copied
+            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
 
             # Rotate the data
-            rotate_sixs_data(path_to_sixs_data)
+            rotate_sixs_data(path_to_nxs_data)
 
         except (AttributeError, FileNotFoundError):
             print("Could not move the data file.")
             pass
 
-    return template_imagefile, data_dir
+    return template_imagefile, data_dir, path_to_nxs_data
 
 
 def filter_reconstructions(
@@ -535,7 +536,7 @@ def extract_metadata(
 
             # Extra metadata for SixS to save in df
             if gwaihir_dataset.beamline == "SIXS_2019":
-                data = rd.DataSet(gwaihir_dataset.path_to_sixs_data)
+                data = rd.DataSet(gwaihir_dataset.path_to_nxs_data)
                 try:
                     temp_df["x"] = data.x[0]
                     temp_df["y"] = data.y[0]
