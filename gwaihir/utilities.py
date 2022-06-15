@@ -116,7 +116,9 @@ def init_directories(
             pass
 
 
-def rotate_sixs_data(path_to_nxs_data):
+def rotate_sixs_data(
+    path_to_nxs_data
+):
     """
     Python script to rotate the data when using the vertical configuration.
     Should work on a copy of the data !! Never use the OG data !!
@@ -638,6 +640,9 @@ def initialize_cdi_operator(
         if rebin != (1, 1, 1):
             iobs = bin_data(iobs, rebin)
 
+        # fft shift
+        iobs = fftshift(iobs)
+
     else:
         # Dataset.iobs = None
         iobs = None
@@ -934,7 +939,10 @@ def save_cdi_operator_as_cxi(
     )
 
 
-def create_yaml_file(fname, **kwargs):
+def create_yaml_file(
+    fname,
+    **kwargs
+):
     """
     Create yaml file storing all keywords arguments given in input.
     Used for bcdi scripts.
@@ -981,7 +989,10 @@ def create_yaml_file(fname, **kwargs):
             v.write(line + "\n")
 
 
-def list_reconstructions(folder, scan_name):
+def list_reconstructions(
+    folder,
+    scan_name
+):
     """"""
     cxi_file_list = [f for f in sorted(
         glob.glob(folder + "*.cxi"),
@@ -1009,7 +1020,10 @@ def list_reconstructions(folder, scan_name):
             )
 
 
-def run_modes_decomposition(path_scripts, folder):
+def run_modes_decomposition(
+    path_scripts,
+    scan_folder
+):
     """
     Decomposes several phase retrieval solutions into modes, saves only
     the first mode to save space.

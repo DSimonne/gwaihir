@@ -44,8 +44,7 @@ class Plotter:
 
     def __init__(
         self,
-        filename=None,
-        data_array=None,
+        data,
         plot="slices",
         log=False,
         cmap="YlGnBu_r",
@@ -69,8 +68,8 @@ class Plotter:
         :param figsize: default (10, 10)
         :param fontsize: default 15
         """
-        self.filename = filename
-        self.data_array = data_array
+        self.filename = None
+        self.data_array = None
         self.plot = plot
         self.log = log
         self.cmap = cmap
@@ -82,10 +81,12 @@ class Plotter:
         self.interact_scale = False
 
         # Get data array from any of the supported files
-        if isinstance(filename, str) and not data_array:
+        if isinstance(data, str):
+            self.filename = data
             self.get_data_array()
 
-        elif isinstance(data_array, np.ndarray) and not filename:
+        elif isinstance(data, np.ndarray):
+            self.data_array = data
             # Plot data
             if self.plot == "2D":
                 self.plot_data(figsize=self.figsize, fontsize=self.fontsize,
