@@ -1,4 +1,4 @@
-#!/home/david/Documents/py39-env/bin/python3.9
+#!/usr/bin/python
 import shutil
 import sys
 import ast
