@@ -10,6 +10,7 @@ import h5py
 import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
+from shlex import quote
 
 # Widgets
 import ipywidgets as widgets
