@@ -3615,9 +3615,15 @@ class Interface:
                     # Runs modes directly and saves all data in a "gui_run"
                     # subdir, filter based on LLK
                     print(
-                        f"\nRunning: $ {self.path_scripts}/run_slurm_job.sh --reconstruct gui --username {self.user_name} --path {self.preprocessing_folder} --filtering {nb_run_keep_std} --modes true")
+                        f"\nRunning: $ {self.path_scripts}/run_slurm_job.sh "
+                        f"--reconstruct gui --username {self.user_name} "
+                        f"--path {self.preprocessing_folder} "
+                        f"--filtering {nb_run_keep_std} --modes true"
+                    )
                     print(
-                        "\nSolution filtering and modes decomposition are automatically applied at the end of the batch job.")
+                        "\nSolution filtering and modes decomposition are "
+                        "automatically applied at the end of the batch job."
+                    )
                     os.system(
                         "{}/run_slurm_job.sh \
                         --reconstruct gui \
@@ -3639,7 +3645,8 @@ class Interface:
                 elif self.run_phase_retrieval == "local_script":
                     try:
                         print(
-                            f"\nRunning: $ {self.path_scripts}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
+                            f"\nRunning: $ {self.path_scripts}/pynx-id01cdi.py "
+                            "pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
                             end="\n\n")
                         os.system(
                             "cd {}; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
