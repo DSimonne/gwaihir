@@ -676,6 +676,7 @@ def initialize_cdi_operator(
         # Dataset.mask = None
         mask = None
 
+    print(support)
     if support not in ("", None) or not os.path.isfile(support):
         if support.endswith(".npy"):
             support = np.load(support)
@@ -706,12 +707,16 @@ def initialize_cdi_operator(
             support = bin_data(support, rebin)
 
         # fft shift
-        support = fftshift(support)
+        try:
+            support = fftshift(support)
+        except ValueError:
+            support=None
 
     else:
         # Dataset.support = None
         support = None
 
+    print(obj)
     if obj not in ("", None) or not os.path.isfile(obj):
         if obj.endswith(".npy"):
             obj = np.load(obj)
@@ -727,8 +732,11 @@ def initialize_cdi_operator(
             obj = bin_data(obj, ebin)
 
         # fft shift
-        obj = fftshift(obj)
-
+        try:
+            obj = fftshift(obj)
+        except ValueError:
+            obj=None
+        
     else:
         # Dataset.obj = None
         obj = None
