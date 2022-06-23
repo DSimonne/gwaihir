@@ -629,7 +629,7 @@ def initialize_cdi_operator(
         # Dataset.iobs = None
         iobs = None
         print("At least iobs must exist.")
-        return None # stop function directly
+        return None  # stop function directly
 
     if iobs.endswith(".npy"):
         iobs = np.load(iobs)

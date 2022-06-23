@@ -37,7 +37,8 @@ save_as = dirname + "/" + f"{scan_number}_fa_fixed.vtk"
 ########################################################## Start script ##########################################################
 
 # load plugin
-LoadPlugin('/usr/lib/x86_64-linux-gnu/paraview-5.10/plugins/FacetAnalyser/FacetAnalyser.so', remote=False, ns=globals())
+LoadPlugin('/usr/lib/x86_64-linux-gnu/paraview-5.10/plugins/FacetAnalyser/FacetAnalyser.so',
+           remote=False, ns=globals())
 
 # create a new 'XML Image Data Reader'
 amp_disp_strain_fixed_supportvti = XMLImageDataReader(

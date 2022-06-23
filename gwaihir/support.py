@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from gwaihir.plot import plot_3d_slices
 from gwaihir.utilities import hash_print
 
+
 class SupportTools:
     """
     Class that regroups the methods used to create/extract/optimize support
