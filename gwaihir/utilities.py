@@ -47,7 +47,6 @@ def init_directories(
     :param scan_name: str, scan name, e.g. 'S1322'
     :param root_folder: root folder of the experiment
     """
-
     # Assign scan folder
     scan_folder = root_folder + "/" + scan_name + "/"
     print("Scan folder:", scan_folder)
@@ -224,7 +223,6 @@ def find_and_copy_raw_data(
     :param path_to_sixs_data: absolute path to nexus file to have metadata
      access
     """
-
     # Assign scan folder
     scan_folder = root_folder + "/" + sample_name + str(scan) + "/"
     path_to_nxs_data = ""
@@ -313,7 +311,6 @@ def filter_reconstructions(
      possible values are ("standard_deviation", "LLK",
      "standard_deviation_LLK", "LLK_standard_deviation")
     """
-
     # Sorting functions depending on filtering criteria
     def filter_by_std(cxi_files, nb_run_keep):
         """Use the standard deviation of the reconstructed object as
@@ -361,7 +358,8 @@ def filter_reconstructions(
         )
 
     def filter_by_LLK(cxi_files, nb_run_keep):
-        """Use the free log-likelihood values of the reconstructed object
+        """
+        Use the free log-likelihood values of the reconstructed object
         as filtering criteria.
 
         The lowest standard deviations are best. See PyNX for
@@ -496,7 +494,6 @@ def extract_metadata(
     :param metadata_csv_file: csv file in which the metadata is saved.
      If None, defaulted to os.getcwd() + "/metadata.csv"
     """
-
     # Open file
     with tb.open_file(metadata_file, "r") as f:
 
@@ -641,7 +638,6 @@ def initialize_cdi_operator(
 
     return: cdi operator
     """
-
     if iobs in ("", None) or not os.path.isfile(iobs):
         # Dataset.iobs = None
         iobs = None
@@ -1022,7 +1018,7 @@ def list_reconstructions(
     folder,
     scan_name
 ):
-    """"""
+    """List all cxi files in the folder and sort by creation time"""
     cxi_file_list = [f for f in sorted(
         glob.glob(folder + "*.cxi"),
         key=os.path.getmtime,

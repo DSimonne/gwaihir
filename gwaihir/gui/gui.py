@@ -3380,7 +3380,7 @@ class Interface:
         :param wavelength: experiment wavelength (meters)
         :param detector_distance: detector distance (meters)
         """
-
+        # Assign attributes
         self.Dataset.parent_folder = parent_folder
         self.Dataset.iobs = parent_folder + iobs
         if mask != "":
@@ -4221,7 +4221,6 @@ class Interface:
         :param save: e.g. True
          True to save amp.npz, phase.npz, strain.npz and vtk files
         """
-
         # Save parameter values
         # parameters used when averaging several reconstruction #
         self.Dataset.sort_method = sort_method
@@ -4892,7 +4891,6 @@ class Interface:
         :param csv_file: path to csv file
         :param show_logs: True to display dataframe
         """
-
         # Load data
         if show_logs in ("load_csv", "load_field_data"):
             self.tab_data_frame.children[1].disabled = True
@@ -4919,8 +4917,7 @@ class Interface:
                         Ctrl + click:',
                     )
                 )
-                def pick_columns(
-                        cols):
+                def pick_columns(cols):
                     display(logs[list(cols)])
 
             except (FileNotFoundError, UnboundLocalError):
@@ -4955,7 +4952,6 @@ class Interface:
          Can be "2D", "3D", "slices", "create_support", "extract_support",
          "smooth_support", "show_image", "hf_glance", "delete"
         """
-
         if data_use == "2D":
             # Disable widgets
             for w in self.tab_data.children[:-3]:

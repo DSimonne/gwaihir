@@ -1205,7 +1205,6 @@ def plot_2d_image(
     :param title: str, title for this axe
     :return: image on ax (ax.imshow())
     """
-
     if not fig and not ax:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
