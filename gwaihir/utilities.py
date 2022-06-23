@@ -707,7 +707,7 @@ def initialize_cdi_operator(
         try:
             support = fftshift(support)
         except ValueError:
-            support=None
+            support = None
 
     else:
         # Dataset.support = None
@@ -732,8 +732,8 @@ def initialize_cdi_operator(
         try:
             obj = fftshift(obj)
         except ValueError:
-            obj=None
-        
+            obj = None
+
     else:
         # Dataset.obj = None
         obj = None
