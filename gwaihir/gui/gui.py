@@ -6,12 +6,9 @@ import os
 from shlex import quote
 import shutil
 from ast import literal_eval
-import operator as operator_lib
 import getpass
 from datetime import datetime
 import inspect
-import time
-import tables as tb
 from h5glance import H5Glance
 
 # Widgets
@@ -27,7 +24,6 @@ import gwaihir.utilities as gutil
 
 # bcdi package
 from bcdi.postprocessing import facet_analysis
-from bcdi.preprocessing import ReadNxs3 as rd
 from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
 from bcdi.utils.parser import ConfigParser
@@ -37,10 +33,8 @@ import argparse
 try:
     # This imports all necessary operators. GPU will be auto-selected
     print("Importing pynx ...")
-    from pynx.cdi import CDI, SupportUpdate, ScaleObj, AutoCorrelationSupport,\
+    from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport,\
         InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
-    from pynx.cdi.runner.id01 import params
-    from pynx.utils.math import smaller_primes
     pynx_import = True
 except ModuleNotFoundError:
     pynx_import = False

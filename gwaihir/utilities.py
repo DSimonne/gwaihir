@@ -11,11 +11,7 @@ import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
-
-# Widgets
-import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import display, Markdown, Latex, clear_output, Image
+from IPython.display import display
 
 # PyNX
 try:

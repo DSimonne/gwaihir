@@ -1,9 +1,6 @@
 import warnings
 import numpy as np
-import os
 import h5py as h5
-import tables as tb
-import glob
 
 from tornado.ioloop import PeriodicCallback
 
@@ -17,18 +14,15 @@ from matplotlib.colors import LogNorm, Normalize
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import Markdown, Latex, clear_output
+from ipywidgets import interact, fixed
 from IPython.core.display import display, HTML
 import ipyvolume as ipv
 
-from bokeh.plotting import figure, show, output_file
-from bokeh.layouts import row, column
+from bokeh.plotting import figure
+from bokeh.layouts import row
 from bokeh.io import output_notebook
-from bokeh.models import ColumnDataSource, ColorBar, LogColorMapper, LinearColorMapper
-from bokeh.models import BoxEditTool, HoverTool, CrosshairTool, LassoSelectTool
-from bokeh.models import CustomJS, Slider, SaveTool, Select, RadioButtonGroup
-from bokeh.models.widgets import Tabs, Panel
+from bokeh.models import ColumnDataSource, ColorBar, LinearColorMapper
+from bokeh.models import Slider, RadioButtonGroup
 import bokeh.palettes as bp
 import panel as pn
 pn.extension()

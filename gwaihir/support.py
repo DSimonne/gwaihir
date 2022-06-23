@@ -1,12 +1,10 @@
-import glob
 import numpy as np
 import tables as tb
 
 from scipy.ndimage import gaussian_filter
-from IPython.display import display, Markdown, Latex, clear_output
+from IPython.display import clear_output
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 import gwaihir.plot as plot
 
