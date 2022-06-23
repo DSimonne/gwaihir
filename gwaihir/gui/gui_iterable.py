@@ -6,15 +6,9 @@
 """Regroups all the possible classes that can be used used as iterable in the
 Interface class For now only Dataset.
 """
-
-import numpy as np
-import pandas as pd
 import h5py
 import shutil
 import os
-
-from IPython.display import display
-from datetime import datetime
 
 from ..version import get_git_version
 from importlib.metadata import version, PackageNotFoundError

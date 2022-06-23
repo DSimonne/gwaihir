@@ -11,11 +11,7 @@ import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
-
-# Widgets
-import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive, fixed
-from IPython.display import display, Markdown, Latex, clear_output, Image
+from IPython.display import display
 
 # PyNX
 try:
@@ -711,7 +707,7 @@ def initialize_cdi_operator(
         try:
             support = fftshift(support)
         except ValueError:
-            support=None
+            support = None
 
     else:
         # Dataset.support = None
@@ -736,8 +732,8 @@ def initialize_cdi_operator(
         try:
             obj = fftshift(obj)
         except ValueError:
-            obj=None
-        
+            obj = None
+
     else:
         # Dataset.obj = None
         obj = None
