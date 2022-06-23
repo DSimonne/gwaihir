@@ -114,7 +114,7 @@ Please respect the following steps:
 * Go to the test_data folder and then choose the beamline you want to test
 * Follow the instructions in the notebook
 
-## Crystal
+## Cristal
 
 A GPU is installed on cristal4, a computer available on the beamline, for phase retrieval.
 

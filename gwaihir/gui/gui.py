@@ -1454,7 +1454,7 @@ class Interface:
             run_phase_retrieval=widgets.ToggleButtons(
                 options=[
                     ('No phase retrieval', False),
-                    ('Run batch job', "batch"),
+                    ('Run batch job (slurm)', "batch"),
                     ("Run script locally",
                         "local_script"),
                     ("Use operators",
