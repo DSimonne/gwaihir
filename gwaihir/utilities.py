@@ -336,7 +336,9 @@ def filter_reconstructions(
                 amp = np.abs(data)
                 # Skip values near 0
                 meaningful_data = amp[amp > 0.05 * amp.max()]
-                filtering_criteria_value[filename] = np.std(amp)
+                filtering_criteria_value[filename] = np.std(
+                    meaningful_data
+                )
 
         # Sort files
         sorted_dict = sorted(
@@ -434,8 +436,8 @@ def filter_reconstructions(
                     filter_by_LLK(cxi_files, nb_run_keep)
 
             # LLK then standard_deviation
-            elif filter_criteria == "LLK_standard_deviation":
-                if nb_run == None:
+            elif filter_criteria is "LLK_standard_deviation":
+                if nb_run is None:
                     nb_run = len(cxi_files)
 
                 filter_by_LLK(cxi_files, nb_run_keep +
@@ -627,25 +629,24 @@ def initialize_cdi_operator(
         # Dataset.iobs = None
         iobs = None
         print("At least iobs must exist.")
-        return None
+        return None # stop function directly
 
-    else:
-        if iobs.endswith(".npy"):
-            iobs = np.load(iobs)
+    if iobs.endswith(".npy"):
+        iobs = np.load(iobs)
+        print("\tCXI input: loading data")
+    elif iobs.endswith(".npz"):
+        try:
+            iobs = np.load(iobs)["data"]
             print("\tCXI input: loading data")
-        elif iobs.endswith(".npz"):
-            try:
-                iobs = np.load(iobs)["data"]
-                print("\tCXI input: loading data")
-            except KeyError:
-                print("\t\"data\" key does not exist.")
-                raise KeyboardInterrupt
+        except KeyError:
+            print("\t\"data\" key does not exist.")
+            raise KeyboardInterrupt
 
-        if rebin != (1, 1, 1):
-            iobs = bin_data(iobs, rebin)
+    if rebin != (1, 1, 1):
+        iobs = bin_data(iobs, rebin)
 
-        # fft shift
-        iobs = fftshift(iobs)
+    # fft shift
+    iobs = fftshift(iobs)
 
     if mask not in ("", None) or not os.path.isfile(mask):
         if mask.endswith(".npy"):
@@ -726,7 +727,7 @@ def initialize_cdi_operator(
                 print("\t\"data\" key does not exist.")
 
         if rebin != (1, 1, 1):
-            obj = bin_data(obj, ebin)
+            obj = bin_data(obj, rebin)
 
         # fft shift
         try:
@@ -1061,7 +1062,7 @@ def run_modes_decomposition(
             )
         )
     except KeyboardInterrupt:
-        gutil.hash_print("Decomposition into modes stopped by user...")
+        hash_print("Decomposition into modes stopped by user...")
 
 
 def hash_print(

@@ -18,7 +18,8 @@ from IPython.display import display, Markdown, clear_output, Image
 
 # gwaihir package
 import gwaihir
-from gwaihir import plot, support
+from gwaihir.plot import Plotter
+from gwaihir.support import SupportTools
 from gwaihir.gui import gui_iterable
 import gwaihir.utilities as gutil
 
@@ -2547,7 +2548,7 @@ class Interface:
                             )
 
                             gutil.save_cdi_operator_as_cxi(
-                                Dataset=self.Dataset,
+                                gwaihir_dataset=self.Dataset,
                                 cdi_operator=cdi,
                                 path_to_cxi=cxi_filename,
                             )
@@ -4981,7 +4982,7 @@ class Interface:
             # Plot data
             for p in filename:
                 gutil.hash_print(f"Showing {p}")
-                plot.Plotter(
+                Plotter(
                     folder + "/" + p,
                     plot=data_use,
                     log="interact",
@@ -4994,7 +4995,7 @@ class Interface:
                 w.disabled = True
 
             # Plot data
-            plot.Plotter(
+            Plotter(
                 folder + "/" + filename[0],
                 plot=data_use,
                 log="interact",
@@ -5009,7 +5010,7 @@ class Interface:
             # Plot data
             for p in filename:
                 gutil.hash_print(f"Showing {p}")
-                plot.Plotter(
+                Plotter(
                     folder + "/" + p,
                     plot=data_use,
                     log="interact",
@@ -5022,7 +5023,7 @@ class Interface:
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(
+            sup = SupportTools(
                 path_to_data=folder + "/" + filename[0])
 
             # Interactive function to loadt threshold value
@@ -5070,7 +5071,7 @@ class Interface:
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(
+            sup = SupportTools(
                 path_to_data=folder + "/" + filename[0])
 
             # Extract the support from the data file and save it as npz
@@ -5085,7 +5086,7 @@ class Interface:
                 w.disabled = True
 
             # Initialize class
-            sup = support.SupportTools(
+            sup = SupportTools(
                 path_to_support=folder + "/" + filename[0])
 
             # Interactive function to loadt threshold value

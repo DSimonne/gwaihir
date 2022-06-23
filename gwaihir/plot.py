@@ -368,7 +368,7 @@ class ThreeDViewer(widgets.Box):
             value="",
             description="",
             tooltips='Plane equation')
-        hbox_plane = widgets.HBox([self.toggle_plane, self.plane_text])
+        # hbox_plane = widgets.HBox([self.toggle_plane, self.plane_text])
 
         # Clip widgets
         self.clipx = widgets.FloatSlider(
@@ -875,7 +875,7 @@ def plot_data(
                 position='right', size='5%', pad=0.1)
 
             # Create colorbar
-            cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+            fig.colorbar(mappable=img, cax=cbar_ax)
 
             # Show figure
             plt.tight_layout()
@@ -911,7 +911,7 @@ def plot_data(
                     position='right', size='5%', pad=0.1)
 
                 # Create colorbar
-                cbar = fig.colorbar(mappable=img, cax=cbar_ax)
+                fig.colorbar(mappable=img, cax=cbar_ax)
 
                 # Show figure
                 plt.tight_layout()
@@ -919,6 +919,7 @@ def plot_data(
 
     elif data_dimensions == 3:
 
+        # Define function used to get data slice
         def get_data_slice(
             data,
             axis="x",
@@ -926,6 +927,18 @@ def plot_data(
             data_type="Module",
             scale="linear",
         ):
+            """
+            Function used when using widgets with callbacks
+            on the 3D image
+
+            :param data: 3D data array
+            :param axis: axis on which the data is projected
+             in ("x", "y", "z")
+            :param index: index along param axis
+            :param data_type: plot module, phase,
+             real or imaginary part of the data
+            :param scale: log or lin
+            """
             # Project on specific index
             if axis == "x":
                 dt = data[index, :, :]
@@ -1046,17 +1059,17 @@ def plot_data(
 
             # Get new axis names and slider range
             if new_axis == "x":
-                slider_range = data.shape[0]
+                slider_range = data_array.shape[0]
                 fig.axis[0].axis_label = "y"
                 fig.axis[1].axis_label = "z"
 
             elif new_axis == "y":
-                slider_range = data.shape[1]
+                slider_range = data_array.shape[1]
                 fig.axis[0].axis_label = "x"
                 fig.axis[1].axis_label = "z"
 
             elif new_axis == "z":
-                slider_range = data.shape[2]
+                slider_range = data_array.shape[2]
                 fig.axis[0].axis_label = "x"
                 fig.axis[1].axis_label = "y"
 
@@ -1137,7 +1150,7 @@ def plot_data(
         fig.add_layout(lin_color_bar, 'right')
 
         # Image
-        image = fig.image(
+        fig.image(
             image="data",
             source=source,
             x=0,
