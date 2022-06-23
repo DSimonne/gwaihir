@@ -6,8 +6,8 @@ from IPython.display import clear_output
 
 import matplotlib.pyplot as plt
 
-import gwaihir.plot as plot
-
+from gwaihir.plot import plot_3d_slices
+from gwaihir.utilities import hash_print
 
 class SupportTools:
     """
@@ -71,7 +71,7 @@ class SupportTools:
                         print(
                             "##########################################################################################\n"
                         )
-                        plot.plot_3d_slices(support, log="interact")
+                        plot_3d_slices(support, log="interact")
                 except tb.NoSuchNodeError:
                     hash_print("Data type not supported")
 
@@ -123,7 +123,7 @@ class SupportTools:
                     "##########################################################################################\n"
                 )
 
-                plot.plot_3d_slices(conv_support, log="interact")
+                plot_3d_slices(conv_support, log="interact")
 
             except UnboundLocalError:
                 pass
@@ -180,30 +180,10 @@ class SupportTools:
                         "##########################################################################################\n"
                     )
 
-                    plot.plot_3d_slices(support, log="interact")
+                    plot_3d_slices(support, log="interact")
             except tb.HDF5ExtError:
                 hash_print("Data type not supported")
 
         else:
             clear_output(True)
             hash_print("Set compute to true to continue")
-
-
-def hash_print(
-    string_to_print,
-    hash_line_before=True,
-    hash_line_after=True,
-    new_line_before=True,
-    new_line_after=True
-):
-    if new_line_before:
-        print()
-    hash_line = "#" * len(string_to_print)
-    if hash_line_before:
-        print(hash_line)
-    print(string_to_print)
-    if hash_line_after:
-        print(hash_line)
-
-    if new_line_after:
-        print()
