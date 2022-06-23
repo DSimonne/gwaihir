@@ -733,7 +733,6 @@ class ThreeDViewer(widgets.Box):
         self.threshold.observe(self.on_update_plot)
         self.colormap_range.observe(self.on_update_plot)
 
-        # print(abs(self.d).max(), self.threshold.value)
         nz, ny, nx = self.d.shape
         z, y, x = np.arange(nz), np.arange(ny), np.arange(nx)
 
@@ -1333,7 +1332,6 @@ def plot_3d_slices(
         # Show figure
         fig.tight_layout()
         fig.show()
-        # plt.close()
 
     else:
         @interact(

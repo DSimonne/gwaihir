@@ -138,14 +138,13 @@ def rotate_sixs_data(
         with tb.open_file(path_to_nxs_data, "a") as f:
             # Get data
             try:
-                # if rocking_angle == "omega":
+                # Omega scan
                 data_og = f.root.com.scan_data.data_02[:]
                 index = 2
-                if np.ndim(data_og) == 1:
+                if np.ndim(data_og) is 1:
                     data_og = f.root.com.scan_data.data_10[:]
                     index = 10
-                # elif rocking_angle == "mu":
-                #     data_og = f.root.com.scan_data.merlin_image[:]
+                # Mu scan
                 print("Calling merlin the enchanter in SBS...")
                 scan_type = "SBS"
             except tb.NoSuchNodeError:
@@ -185,11 +184,11 @@ def rotate_sixs_data(
 
             # Overwrite data in copied file
             try:
-                if scan_type == "SBS" and index == 2:
+                if scan_type is "SBS" and index is 2:
                     f.root.com.scan_data.data_02[:] = data
-                elif scan_type == "SBS" and index == 10:
+                elif scan_type is "SBS" and index is 10:
                     f.root.com.scan_data.data_10[:] = data
-                elif scan_type == "FLY":
+                elif scan_type is "FLY":
                     f.root.com.scan_data.test_image[:] = data
             except tb.NoSuchNodeError:
                 print("Could not overwrite data ><")
@@ -326,7 +325,10 @@ def filter_reconstructions(
         filtering_criteria_value = {}
 
         print(
-            "\n#########################################################################################"
+            "\n###################"
+            "#####################"
+            "#####################"
+            "#####################"
         )
         print("Computing standard deviation of object modulus for scans:")
         for filename in cxi_files:
@@ -352,7 +354,10 @@ def filter_reconstructions(
             print(f"\t{os.path.basename(filename)}")
             os.remove(filename)
         print(
-            "#########################################################################################\n"
+            "#####################"
+            "#####################"
+            "#####################"
+            "###################\n"
         )
 
     def filter_by_LLK(cxi_files, nb_run_keep):
@@ -366,7 +371,10 @@ def filter_reconstructions(
         filtering_criteria_value = {}
 
         print(
-            "\n#########################################################################################"
+            "\n###################"
+            "#####################"
+            "#####################"
+            "#####################"
         )
         print("Extracting LLK value (poisson statistics) for scans:")
         for filename in cxi_files:
@@ -388,19 +396,28 @@ def filter_reconstructions(
             print(f"\t{os.path.basename(filename)}")
             os.remove(filename)
         print(
-            "#########################################################################################\n"
+            "#####################"
+            "#####################"
+            "#####################"
+            "###################\n"
         )
 
     # Main function supporting different cases
     try:
         print(
-            "\n#########################################################################################"
+            "\n###################"
+            "#####################"
+            "#####################"
+            "#####################"
         )
-        print(f"Iterating on files matching:")
+        print("Iterating on files matching:")
         print(f"\t{folder}/*LLK*.cxi")
         cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
         print(
-            "#########################################################################################\n"
+            "#####################"
+            "#####################"
+            "#####################"
+            "###################\n"
         )
 
         if cxi_files == []:
@@ -408,16 +425,16 @@ def filter_reconstructions(
 
         else:
             # only standard_deviation
-            if filter_criteria == "standard_deviation":
+            if filter_criteria is "standard_deviation":
                 filter_by_std(cxi_files, nb_run_keep)
 
             # only LLK
-            elif filter_criteria == "LLK":
+            elif filter_criteria is "LLK":
                 filter_by_LLK(cxi_files, nb_run_keep)
 
             # standard_deviation then LLK
-            elif filter_criteria == "standard_deviation_LLK":
-                if nb_run == None:
+            elif filter_criteria is "standard_deviation_LLK":
+                if nb_run is None:
                     nb_run = len(cxi_files)
 
                 filter_by_std(cxi_files, nb_run_keep +
@@ -548,7 +565,7 @@ def extract_metadata(
                 pass
 
             # Extra metadata for SixS to save in df
-            if gwaihir_dataset.beamline == "SIXS_2019":
+            if gwaihir_dataset.beamline is "SIXS_2019":
                 data = rd.DataSet(gwaihir_dataset.path_to_nxs_data)
                 try:
                     temp_df["x"] = data.x[0]
@@ -671,7 +688,6 @@ def initialize_cdi_operator(
         mask = fftshift(mask)
 
     else:
-        # Dataset.mask = None
         mask = None
 
     print(support)
@@ -711,7 +727,6 @@ def initialize_cdi_operator(
             support = None
 
     else:
-        # Dataset.support = None
         support = None
 
     print(obj)
@@ -736,12 +751,11 @@ def initialize_cdi_operator(
             obj = None
 
     else:
-        # Dataset.obj = None
         obj = None
 
     # Center and crop data
     if auto_center_resize:
-        if iobs.ndim == 3:
+        if iobs.ndim is 3:
             nz0, ny0, nx0 = iobs.shape
 
             # Find center of mass
@@ -941,7 +955,10 @@ def save_cdi_operator_as_cxi(
     # cdi_parameters["imgname"] = gwaihir_dataset.imgname
     cdi_parameters["scan"] = gwaihir_dataset.scan
 
-    print("\nSaving phase retrieval parameters selected in the PyNX tab in the cxi file ...")
+    print(
+        "\nSaving phase retrieval parameters selected "
+        "in the PyNX tab in the cxi file ..."
+    )
     cdi_operator.save_data_cxi(
         filename=path_to_cxi,
         process_parameters=cdi_parameters,
@@ -993,9 +1010,12 @@ def create_yaml_file(
                 pass
 
     # Save in file
-    with open(fname, "w") as v:
-        for line in config_file:
-            v.write(line + "\n")
+    if fname.endswith('.yaml') or fname.endswith('.yml'):
+        with open(fname, "w") as v:
+            for line in config_file:
+                v.write(line + "\n")
+    else:
+        raise FileError("Parameter fname must end with .yaml or .yml")
 
 
 def list_reconstructions(

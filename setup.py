@@ -39,17 +39,8 @@ setuptools.setup(
     install_requires=[
         "numpy",
         "pandas",
-        # "glob",
-        # "os",
-        # "shutil",
         "datetime",
-        # "time",
         "argparse",
-        # "shlex",
-        # "operator",
-        # "ast",
-        # "getpass",
-        # "inspect",
         "matplotlib",
         "ipywidgets",
         "ipython",
@@ -64,7 +55,5 @@ setuptools.setup(
         "jupyter",
         "bokeh",
         "panel",
-        #         "bcdi",
-        #         "PyNX",
     ]
 )

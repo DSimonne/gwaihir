@@ -28,7 +28,6 @@ from bcdi.postprocessing import facet_analysis
 from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
 from bcdi.utils.parser import ConfigParser
-import argparse
 
 # PyNX package
 try:
@@ -185,8 +184,6 @@ class Interface:
                 continuous_update=False,
                 layout=Layout(
                     width='60%'),
-                # tooltip="Name of the beamline, used for data loading and \
-                # normalization by monitor",
                 style={'description_width': 'initial'}),
 
             run_dir_init=widgets.ToggleButton(
@@ -689,10 +686,6 @@ class Interface:
                 description='Orthogonalize data',
                 disabled=True,
                 indent=False,
-                # button_style = '',
-                # # 'success',
-                # 'info', 'warning',
-                # 'danger' or ''
                 tooltip='False for using data gridded in laboratory frame/ \
                 True for using data in detector frame',
                 icon='check'),
@@ -704,7 +697,6 @@ class Interface:
                 continuous_update=False,
                 description='Interpolation method',
                 disabled=True,
-                # tooltip = "",
                 style={'description_width': 'initial'}),
 
             fill_value_mask=widgets.Dropdown(
@@ -986,8 +978,6 @@ class Interface:
             self.bragg_peak_centering_handler, names="value")
         self._list_widgets_preprocessing.children[25].observe(
             self.reload_data_handler, names="value")
-        # self._list_widgets_preprocessing.children[44].observe(
-        #     self.orthogonalisation_handler, names="value")
         self._list_widgets_preprocessing.children[-2].observe(
             self.preprocess_handler, names="value")
 
@@ -1661,7 +1651,6 @@ class Interface:
                 description='Keep the initial array size for orthogonalization\
                  (slower)',
                 layout=Layout(width='45%'),
-                # icon = 'check',
                 style={'description_width': 'initial'}),
 
             fix_voxel=widgets.BoundedIntText(
@@ -1803,7 +1792,6 @@ class Interface:
             correct_refraction=widgets.Checkbox(
                 value=False,
                 description='Correct refraction',
-                # icon = 'check',
                 style={
                     'description_width': 'initial'}
             ),
@@ -2498,16 +2486,6 @@ class Interface:
                     style={'description_width': 'initial'},
                     icon='step-forward')
 
-                # Button to reload data
-                button_reload_previous_data = Button(
-                    description="Reload previous data (.cxi) from target \
-                    directory ...",
-                    continuous_update=False,
-                    button_style='',
-                    layout=Layout(width='40%'),
-                    style={'description_width': 'initial'},
-                    icon='step-forward')
-
                 display(button_save_as_cxi)
 
                 @ button_save_as_cxi.on_click
@@ -3020,7 +2998,6 @@ class Interface:
                     else:
                         setattr(self.Dataset, p, literal_eval(
                             getattr(self.Dataset, p)))
-                    # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 gutil.hash_print(f"Wrong list syntax for {p}")
 
@@ -3031,7 +3008,6 @@ class Interface:
                     else:
                         setattr(self.Dataset, p, literal_eval(
                             getattr(self.Dataset, p)))
-                    # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 gutil.hash_print(f"Wrong tuple syntax for {p}")
 
@@ -3045,7 +3021,6 @@ class Interface:
                         else:
                             setattr(self.Dataset, p, literal_eval(
                                 getattr(self.Dataset, p)))
-                    # print(f"{p}:", getattr(self.Dataset, p))
             except ValueError:
                 gutil.hash_print(f"Wrong dict syntax for {p}")
 
@@ -3093,7 +3068,7 @@ class Interface:
                     root_folder = self.Dataset.data_dir
                     data_dir = None
 
-                elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
+                else:
                     root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
@@ -3197,9 +3172,6 @@ class Interface:
                     "\n###########################################"
                     "#############################################"
                 )
-
-                # Construct the argument parser
-                ap = argparse.ArgumentParser()
 
                 # Load the config file
                 config_file = self.preprocessing_folder + "/config_preprocessing.yml"
@@ -3908,8 +3880,6 @@ class Interface:
                                 "#############################################"
                             )
 
-                            del cdi
-
                         except SupportTooLarge:
                             print(
                                 "Threshold value probably too low, support too large too continue")
@@ -4376,7 +4346,7 @@ class Interface:
                     root_folder = self.Dataset.data_dir
                     data_dir = None
 
-                elif self.Dataset.beamline in ("ID01", "ID01BLISS"):
+                else:
                     root_folder = self.Dataset.root_folder
                     data_dir = self.Dataset.data_dir
 
@@ -4505,9 +4475,6 @@ class Interface:
                     "#############################################"
                 )
 
-                # Construct the argument parser
-                ap = argparse.ArgumentParser()
-
                 # Load the config file
                 config_file = self.postprocessing_folder + "/config_postprocessing.yml"
                 parser = ConfigParser(config_file)
@@ -4523,17 +4490,23 @@ class Interface:
 
                 files = sorted(
                     glob.glob(
-                        f"{self.postprocessing_folder}/**/S{self.Dataset.scan}_amp{phase_fieldname}strain*{self.Dataset.comment}.h5",
+                        f"{self.postprocessing_folder}/**/"
+                        f"S{self.Dataset.scan}_amp{phase_fieldname}"
+                        f"strain*{self.Dataset.comment}.h5",
                         recursive=True),
                     key=os.path.getmtime)
                 self.strain_output_file = files[0]
+
+                creation_time = datetime.fromtimestamp(
+                    os.path.getmtime(self.strain_output_file)
+                ).strftime('%Y-%m-%d %H:%M:%S')
 
                 print(
                     "\n###########################################"
                     "#############################################"
                     f"\nResult file used to extract results saved in the .cxi file:"
                     f"\n{self.strain_output_file}"
-                    f"\n\tCreated: {datetime.fromtimestamp(os.path.getmtime(self.strain_output_file)).strftime('%Y-%m-%d %H:%M:%S')}"
+                    f"\n\tCreated: {creation_time}"
                     "\nMake sure it is the latest one!!"
                     "\n###########################################"
                     "#############################################"
@@ -4675,28 +4648,24 @@ class Interface:
                             placeholder="[1, 1, 1]",
                             description='Vector perpendicular to facet a:',
                             continuous_update=False,
-                            # layout = Layout(width='20%'),
                             style={'description_width': 'initial'},),
                         v0=widgets.Text(
                             value="[1, -1, 0]",
                             placeholder="[1, -1, 0]",
                             description='Vector perpendicular to facet b:',
                             continuous_update=False,
-                            # layout = Layout(width='20%'),
                             style={'description_width': 'initial'},),
                         w0=widgets.Text(
                             value="[1, 1, -2]",
                             placeholder="[1, 1, -2]",
                             description='Cross product of u0 and v0:',
                             continuous_update=False,
-                            # layout = Layout(width='20%'),
                             style={'description_width': 'initial'},),
                         hkl_reference=widgets.Text(
                             value="[1, 1, 1]",
                             placeholder="[1, 1, 1]",
                             description='Reference for interplanar angles:',
                             continuous_update=False,
-                            # layout = Layout(width='20%'),
                             style={'description_width': 'initial'},),
                         elev=widgets.BoundedIntText(
                             value=90,
@@ -4751,7 +4720,6 @@ class Interface:
                                 else:
                                     setattr(self.Facets, p, literal_eval(
                                         getattr(self.Facets, p)))
-                                # print(f"{p}:", getattr(self.Dataset, p))
                         except ValueError:
                             gutil.hash_print(f"Wrong list syntax for {p}")
 
@@ -4851,27 +4819,41 @@ class Interface:
                                     # Create subfolder
                                     try:
                                         os.mkdir(
-                                            f"{self.Dataset.root_folder}{self.Dataset.scan_name}/postprocessing/facets_analysis/")
+                                            f"{self.Dataset.root_folder}{self.Dataset.scan_name}"
+                                            "/postprocessing/facets_analysis/"
+                                        )
                                         print(
-                                            f"Created {self.Dataset.root_folder}{self.Dataset.scan_name}/postprocessing/facets_analysis/")
+                                            f"Created {self.Dataset.root_folder}{self.Dataset.scan_name}"
+                                            "/postprocessing/facets_analysis/"
+                                        )
                                     except (FileExistsError, PermissionError):
                                         print(
-                                            f"{self.Dataset.root_folder}{self.Dataset.scan_name}/postprocessing/facets_analysis/ exists")
+                                            f"{self.Dataset.root_folder}{self.Dataset.scan_name}"
+                                            "/postprocessing/facets_analysis/ exists"
+                                        )
 
                                     # Save data
                                     self.Facets.save_data(
-                                        f"{self.Dataset.scan_folder}/postprocessing/facets_analysis/field_data_{self.Dataset.scan}.csv")
+                                        f"{self.Dataset.scan_folder}/postprocessing/"
+                                        f"facets_analysis/field_data_{self.Dataset.scan}.csv"
+                                    )
                                     print(
-                                        f"Saved field data as {self.Dataset.scan_folder}/postprocessing/facets_analysis/\
-                                        field_data_{self.Dataset.scan}.csv")
+                                        f"Saved field data as {self.Dataset.scan_folder}/"
+                                        "postprocessing/facets_analysis/"
+                                        f"field_data_{self.Dataset.scan}.csv"
+                                    )
 
                                     self.Facets.to_hdf5(
                                         f"{self.Dataset.scan_folder}{self.Dataset.scan_name}.cxi")
                                     print(
-                                        f"Saved Facets class attributes in {self.Dataset.scan_folder}{self.Dataset.scan_name}.cxi")
+                                        f"Saved Facets class attributes in {self.Dataset.scan_folder}"
+                                        f"{self.Dataset.scan_name}.cxi"
+                                    )
                                 except AttributeError:
                                     print(
-                                        "Initialize the directories first to save the figures and data ...")
+                                        "Initialize the directories first to "
+                                        "save the figures and data ..."
+                                    )
 
                 @ button_view_particle.on_click
                 def action_button_view_particle(selfbutton):
@@ -5175,7 +5157,7 @@ class Interface:
                 w.disabled = True
 
             button_delete_data = Button(
-                description=f"Delete files ?",
+                description="Delete files ?",
                 button_style='',
                 layout=Layout(width='70%'),
                 style={'description_width': 'initial'},
@@ -5329,8 +5311,6 @@ class Interface:
                 change=self._list_widgets_preprocessing.children[13].value)
             self.reload_data_handler(
                 change=self._list_widgets_preprocessing.children[25].value)
-            # self.orthogonalisation_handler(
-            #     change=self._list_widgets_preprocessing.children[44].value)
 
     def sub_directories_handler(self, change):
         """Handles changes linked to root_folder subdirectories"""
@@ -5434,8 +5414,6 @@ class Interface:
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
                     change=self._list_widgets_preprocessing.children[25].value)
-                # self.orthogonalisation_handler(
-                #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change.new:
                 self._list_widgets_init_dir.children[8].disabled = True
@@ -5456,8 +5434,6 @@ class Interface:
                     change=self._list_widgets_preprocessing.children[13].value)
                 self.reload_data_handler(
                     change=self._list_widgets_preprocessing.children[25].value)
-                # self.orthogonalisation_handler(
-                #     change=self._list_widgets_preprocessing.children[44].value)
 
             if change:
                 self._list_widgets_init_dir.children[8].disabled = True

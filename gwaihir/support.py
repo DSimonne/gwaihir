@@ -4,8 +4,6 @@ import tables as tb
 from scipy.ndimage import gaussian_filter
 from IPython.display import clear_output
 
-import matplotlib.pyplot as plt
-
 from gwaihir.plot import plot_3d_slices
 from gwaihir.utilities import hash_print
 
@@ -63,14 +61,20 @@ class SupportTools:
 
                         # Save support
                         print(
-                            "\n##########################################################################################"
+                            "\n###################"
+                            "#####################"
+                            "#####################"
+                            "#####################"
                         )
                         np.savez_compressed(self.saving_directory +
                                             "extracted_support.npz", support=support)
                         print(f"Saved support in {self.saving_directory} as:")
-                        print(f"\textracted_support.npz")
+                        print("\textracted_support.npz")
                         print(
-                            "##########################################################################################\n"
+                            "#####################"
+                            "#####################"
+                            "#####################"
+                            "###################\n"
                         )
                         plot_3d_slices(support, log="interact")
                 except tb.NoSuchNodeError:
@@ -112,7 +116,10 @@ class SupportTools:
                 conv_support = np.where(gaussian_filter(
                     bigdata, sigma) > threshold, 1, 0)
                 print(
-                    "\n##########################################################################################"
+                    "\n###################"
+                    "#####################"
+                    "#####################"
+                    "#####################"
                 )
                 np.savez_compressed(
                     f"{self.saving_directory}filter_sig{sigma}_t{threshold}",
@@ -121,7 +128,10 @@ class SupportTools:
                 print(f"Saved support in {self.saving_directory} as:")
                 print(f"\tfilter_sig{sigma}_t{threshold}")
                 print(
-                    "##########################################################################################\n"
+                    "#####################"
+                    "#####################"
+                    "#####################"
+                    "###################\n"
                 )
 
                 plot_3d_slices(conv_support, log="interact")
@@ -153,7 +163,10 @@ class SupportTools:
                         electronic_density = f.root.entry_1.data_1.data[:][0]
 
                     print(
-                        "\n##########################################################################################"
+                        "\n###################"
+                        "#####################"
+                        "#####################"
+                        "#####################"
                     )
                     print("Shape of real space complex electronic density array:")
                     print(f"\t{np.shape(electronic_density)}")
@@ -176,9 +189,12 @@ class SupportTools:
                     np.savez_compressed(self.saving_directory +
                                         "computed_support.npz", support=support)
                     print(f"Saved support in {self.saving_directory} as:")
-                    print(f"\tcomputed_support.npz")
+                    print("\tcomputed_support.npz")
                     print(
-                        "##########################################################################################\n"
+                        "#####################"
+                        "#####################"
+                        "#####################"
+                        "###################\n"
                     )
 
                     plot_3d_slices(support, log="interact")
