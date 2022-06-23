@@ -61,8 +61,8 @@ How to access:
 Ask for a GPU:
 `srun -N 1 --partition=p9gpu --gres=gpu:1 --time=01:00:00 --pty bash`
 
-### Environments on slurm
-* python3: your personal environemnt
+#### Environments on slurm
+* `/usr/bin/python3`: your personal environemnt
 * p9.dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/p9.dev/bin/activate`
 * p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
 * p9.pynx-devel : pynx only, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
@@ -70,15 +70,19 @@ Ask for a GPU:
 You are not allowed to modify these environments but you can link a kernel if you wish to use them in jupyter.
 
 To do so:
-* `source_p9`
-* Make sure that you are on the p9 and not other clusters like rnice.
-* `python3 -m ipykernel install --user --name p9.stable` [doc](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
+* Source the environment; e.g. `source /data/id01/inhouse/david/p9.dev/bin/activate`
+* Make sure that:
+    * you are on slurm
+    * you requested a GPU
+* Create the kernel:
+    * `python3 -m ipykernel install --user --name p9.stable`
+* [Documentation](https://ipython.readthedocs.io/en/stable/install/kernel_install.html)
 
 Once you feel confident, you should create your own environment, to avoid sudden updates that may impact your work!
 
 To list the kernels you have installed: `jupyter kernelspec list`
 
-And to remove them: `jupyter kernelspec uninstall myKernalName`
+And to remove them: `jupyter kernelspec uninstall <kernelname>`
 
 ### Connect with ssh without using password (mandatory for batch jobs)
 * Login into slurm (make sure that you asked for a GPU)
@@ -112,9 +116,15 @@ Please respect the following steps:
 
 ## Crystal
 
-Gwaihir will soon be available at Crystal.
+A GPU is installed on cristal4, a computer available on the beamline, for phase retrieval.
 
-# Installing different packages yoursel
+Please respect the following steps:
+* Make sure that you are logged in as `com-cristal`
+* Activate the environment `source_py3.9` or `source /home/experiences/sixs/simonne/py39-env/bin/activate`, this environment is protected and you cannot modify it.
+* Launch `jupyter notebook`
+* Go to the test_data folder and then choose the beamline you want to test
+* Follow the instructions in the notebook
+# Installing different packages yourself
 
 * First, I advise you to create a `/Packages` directory to keep these.
 * Secondly, I advise you to create a virtual environment to help with debogging, and so that once everything works, you don't update a package by mistake. To do so please follow the following steps:
@@ -129,7 +139,16 @@ Gwaihir will soon be available at Crystal.
 
 Then you should create an alias such as: `alias source_p9="source /home/user/py38-env/bin/activate"`
 
-## Install gwaihir
+## 1) Install PyNX
+* `cd /Packages`
+* `mkdir PyNX_install`
+* `cd PyNX_install/`
+* `curl -O http://ftp.esrf.fr/pub/scisoft/PyNX/pynx-devel-nightly.tar.bz2` # Installation details within install-pynx-venv.sh
+* `source_p9`
+* `pip install pynx-devel-nightly.tar.bz2[cuda,gui,mpi]` # Install with extras cuda, mpi, cdi
+* cite `PyNX: high-performance computing toolkit for coherent X-ray imaging based on operators is out: J. Appl. Cryst. 53 (2020), 1404`, also available as `arXiv:2008.11511`
+
+## 2) Install gwaihir
 * `cd /Packages`
 * `git clone https://github.com/DSimonne/gwaihir.git`
 * `cd gwaihir`
@@ -137,16 +156,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `pip install .`
 * cite <>
 
-## Install PyNX
-* `cd /Packages`
-* `mkdir PyNX_install`
-* `cd PyNX_install/`
-* `curl -O http://ftp.esrf.fr/pub/scisoft/PyNX/pynx-devel-nightly.tar.bz2`      # Installation details within install-pynx-venv.sh
-* `source_p9`
-* `pip install pynx-devel-nightly.tar.bz2[cuda,gui,mpi]`                  # Install with extras cuda, mpi, cdi
-* cite `PyNX: high-performance computing toolkit for coherent X-ray imaging based on operators is out: J. Appl. Cryst. 53 (2020), 1404`, also available as `arXiv:2008.11511`
-
-## Install bcdi
+## 3) Install bcdi
 * `cd /Packages`
 * `git clone https://github.com/carnisj/bcdi.git`
 * `cd bcdi`
@@ -155,7 +165,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * cite `DOI: 10.5281/zenodo.3257616`
 * If `vtk` does not install (on slurm), you can type : `pip install --trusted-host www.silx.org --find-links http://www.silx.org/pub/wheelhouse vtk`, you may also need to remove the version requirements in `bcdi/setup.py`
 
-## Install facet-analyser (Debian 11 only)
+## 4) Install facet-analyser (Debian 11 only)
 * Send a thank you email to Fred Picca =D
 * `cd /Packages`
 * `git clone https://salsa.debian.org/science-team/facet-analyser.git`
