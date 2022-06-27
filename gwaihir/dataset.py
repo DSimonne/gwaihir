@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-"""Regroups all the possible classes that can be used used as iterable in the
-Interface class For now only Dataset.
-"""
 import h5py
 import shutil
 import os
@@ -27,7 +19,7 @@ except PackageNotFoundError:
 class Dataset:
     """
     Created for Gwaihir
-    Allows to save the dataset at a CXI file.
+    Allows to save the dataset as a CXI file.
     """
 
     def __init__(self, scan, sample_name, data_dir, root_folder):
@@ -222,7 +214,8 @@ class Dataset:
             # Preprocessing
             preprocessing = parameters.create_group("preprocessing")
             print(
-                "\n###############################################################################\n")
+                "\n#######################################"
+                "########################################\n")
             print("Saving parameters used in preprocessing ...")
 
             # Masking
@@ -400,7 +393,8 @@ class Dataset:
 
             # Orthogonalisation
             print(
-                "\n###############################################################################\n")
+                "\n#######################################"
+                "########################################\n")
             print("Saving orthogonalisation parameters ...")
             orthogonalisation = parameters.create_group("orthogonalisation")
 
@@ -474,7 +468,8 @@ class Dataset:
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
             print(
-                "\n###############################################################################\n")
+                "\n#######################################"
+                "########################################\n")
             print("Saving parameters used in postprocessing ...")
 
             # Averaging reconstructions
