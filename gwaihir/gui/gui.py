@@ -298,7 +298,7 @@ class Interface:
 
             rocking_angle=widgets.Dropdown(
                 options=[
-                    'inplane', 'outofplane'],
+                    'inplane', 'outofplane', "energy"],
                 value="inplane",
                 continuous_update=False,
                 description='Rocking angle',
