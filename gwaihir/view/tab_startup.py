@@ -116,7 +116,7 @@ class TabReadme(widgets.Box):
         self._list_widgets.children[8].observe(
             self.init_handler, names="value")
 
-    # Create handlers
+    # Define handlers
     def init_handler(self, change):
         """Handles changes on the widget used for the initialization."""
         if not change.new:

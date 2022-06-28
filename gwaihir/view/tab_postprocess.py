@@ -611,7 +611,7 @@ class TabPostprocessing(widgets.Box):
         self._list_widgets.children[-4].observe(
             self.strain_folder_handler, names="value")
 
-    # Handlers
+    # Define handlers
     def strain_folder_handler(self, change):
         """Handles changes on the widget used to load a data file."""
         try:

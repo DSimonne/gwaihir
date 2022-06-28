@@ -58,7 +58,7 @@ class TabDataFrame(widgets.Box):
         self._list_widgets.children[1].observe(
             self.csv_file_handler, names="value")
 
-    # Handler
+    # Define handlers
     def csv_file_handler(self, change):
         """List all .csv files in change subdirectories"""
         csv_files = []
@@ -74,4 +74,4 @@ class TabDataFrame(widgets.Box):
                                     key=os.path.getmtime)
 
         finally:
-            self.window.children[2].options = csv_files
+            self._list_widgets.children[2].options = csv_files

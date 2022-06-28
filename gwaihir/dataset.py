@@ -2,19 +2,8 @@ import h5py
 import shutil
 import os
 
-from ..version import get_git_version
+from version import get_git_version
 from importlib.metadata import version, PackageNotFoundError
-
-try:
-    bcdi_version = version("bcdi")
-except PackageNotFoundError:
-    bcdi_version = None
-
-try:
-    pynx_version = version("pynx")
-except PackageNotFoundError:
-    pynx_version = None
-
 
 class Dataset:
     """
@@ -32,8 +21,16 @@ class Dataset:
         self.data_dir = data_dir
         self.root_folder = root_folder
         self._gwaihir_version = get_git_version()
-        self._bcdi_version = bcdi_version
-        self._pynx_version = pynx_version
+
+        try:
+            self._bcdi_version = version("bcdi")
+        except PackageNotFoundError:
+            self._bcdi_version = None
+
+        try:
+            self._pynx_version = version("pynx")
+        except PackageNotFoundError:
+            self._pynx_version = None
 
     def __repr__(self):
         return "Dataset {}{}.\n".format(

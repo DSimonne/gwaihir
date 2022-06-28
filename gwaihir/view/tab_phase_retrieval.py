@@ -501,6 +501,7 @@ class TabPhaseRetrieval(widgets.Box):
         self._list_widgets.children[-2].observe(
             self.run_pynx_handler, names="value")
 
+    # Define handlers
     def pynx_folder_handler(self, change):
         """Handles changes on the widget used to load a data file."""
         try:

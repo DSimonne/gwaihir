@@ -8,7 +8,7 @@ class TabPlotData(widgets.Box):
 
     """
 
-    def __init__(self):
+    def __init__(self, plot_tab_only=False):
         """
 
         """
@@ -94,8 +94,7 @@ class TabPlotData(widgets.Box):
         self._list_widgets.children[1].observe(
             self.plot_folder_handler, names="value")
 
-    # Handler
-
+    # Define handlers
     def plot_folder_handler(self, change):
         """Handles changes on the widget used to load a data file."""
         try:
@@ -121,10 +120,10 @@ class TabPlotData(widgets.Box):
             ]
 
         finally:
-            self.tab_data.children[2].options = [os.path.basename(f)
+            self._list_widgets.children[2].options = [os.path.basename(f)
                                                  for f in options]
 
-            if self.plot_only:
-                self.tab_data.children[1].options = [
+            if plot_tab_only:
+                self._list_widgets.children[1].options = [
                     x[0] + "/" for x in os.walk(os.getcwd())
                 ]

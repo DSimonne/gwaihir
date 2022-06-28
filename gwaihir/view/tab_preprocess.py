@@ -15,8 +15,6 @@ class TabPreprocess(widgets.Box):
         super(TabPreProcess, self).__init__()
 
         self._list_widgets = widgets.VBox(
-
-            # Define beamline related parameters
             unused_label_beamline=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
                 Parameters specific to the beamline",
@@ -98,7 +96,7 @@ class TabPreprocess(widgets.Box):
 
             rocking_angle=widgets.Dropdown(
                 options=[
-                    'inplane', 'outofplane'],
+                    'inplane', 'outofplane', 'energy'],
                 value="inplane",
                 continuous_update=False,
                 description='Rocking angle',
@@ -458,7 +456,7 @@ class TabPreprocess(widgets.Box):
         self._list_widgets.children[-2].observe(
             self.preprocess_handler, names="value")
 
-    # Create handlers
+    # Define handlers
     def beamline_handler(self, change):
         """Handles changes on the widget used for the beamline."""
         try:

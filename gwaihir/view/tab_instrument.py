@@ -15,8 +15,6 @@ class TabInstrument(widgets.Box):
         super(TabInstrument, self).__init__()
 
         self._list_widgets = widgets.VBox(
-            # Define parameters below if you want to orthogonalize the data
-            # before phasing
             unused_label_ortho=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
                 Parameters to define the data orthogonalization</p>",
@@ -113,8 +111,6 @@ class TabInstrument(widgets.Box):
                     'description_width': 'initial'},
                 tooltip="Use this to declare motor positions"),
 
-            # Parameters for xrayutilities to orthogonalize the data
-            # before phasing
             unused_label_xru=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
                 Parameters used in xrayutilities to orthogonalize the data \
@@ -315,24 +311,25 @@ class TabInstrument(widgets.Box):
         ])
 
         # Assign handlers
+        self._list_widgets.children[1].observe.observe(
+            self.orthogonalisation_handler, names="value")
 
-    # Handler
-
+    # Define handlers
     def orthogonalisation_handler(self, change):
         """Handles changes related to data orthogonalisation."""
         try:
             if change.new:
-                for w in self._list_widgets.children[45:68]:
+                for w in self._list_widgets.children[2:]:
                     w.disabled = False
 
             if not change.new:
-                for w in self._list_widgets.children[45:68]:
+                for w in self._list_widgets.children[2:]:
                     w.disabled = True
         except AttributeError:
             if change:
-                for w in self._list_widgets.children[45:68]:
+                for w in self._list_widgets.children[2:]:
                     w.disabled = False
 
             if not change:
-                for w in self._list_widgets.children[45:68]:
+                for w in self._list_widgets.children[2:]:
                     w.disabled = True

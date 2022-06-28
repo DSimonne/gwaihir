@@ -57,7 +57,7 @@ class TabFacet(widgets.Box):
         self._list_widgets.children[1].observe(
             self.vtk_file_handler, names="value")
 
-    # Handler
+    # Define handlers
     def vtk_file_handler(self, change):
         """List all .vtk files in change subdirectories"""
         vtk_files = []
@@ -73,4 +73,4 @@ class TabFacet(widgets.Box):
                                     key=os.path.getmtime)
 
         finally:
-            self.tab_facet.children[2].options = vtk_files
+            self._list_widgets.children[2].options = vtk_files
