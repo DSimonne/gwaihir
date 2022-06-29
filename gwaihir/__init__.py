@@ -6,4 +6,4 @@
 """
 """
 
-__all__ = []
+__all__ = ["dataset", "gui", "plot", "version"]
