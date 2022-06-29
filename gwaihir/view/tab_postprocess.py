@@ -1,14 +1,14 @@
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
+import os
+import glob
 
 
-class TabPostprocessing(widgets.Box):
+class TabPostprocessing(widgets.VBox):
     """
 
     """
 
-    def __init__(self):
+    def __init__(self, box_style=""):
         """
 
         """
@@ -16,6 +16,7 @@ class TabPostprocessing(widgets.Box):
 
         # Brief header describing the tab
         self.header = 'Postprocess'
+        self.box_style = box_style
 
         # Create tab widgets
         self._list_widgets = widgets.VBox(
@@ -24,7 +25,7 @@ class TabPostprocessing(widgets.Box):
                 Parameters used when averaging several reconstruction",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             sort_method=widgets.Dropdown(
                 options=['mean_amplitude', 'variance',
@@ -42,19 +43,19 @@ class TabPostprocessing(widgets.Box):
                 description='Correlation threshold:',
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             unused_label_FFT=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
                 Parameters relative to the FFT window and voxel sizes",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             original_size=widgets.Text(
                 placeholder="[256, 512, 512]",
                 description='FFT shape before PyNX binning in PyNX',
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -63,7 +64,7 @@ class TabPostprocessing(widgets.Box):
                 placeholder="(1, 1, 1)",
                 description='Binning factor used in phase retrieval',
                 continuous_update=False,
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 style={
                     'description_width': 'initial'},
             ),
@@ -73,7 +74,7 @@ class TabPostprocessing(widgets.Box):
                 placeholder="(1, 1, 1)",
                 description='Binning factors used in preprocessing',
                 continuous_update=False,
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 style={
                     'description_width': 'initial'},
             ),
@@ -88,7 +89,7 @@ class TabPostprocessing(widgets.Box):
                 value=False,
                 description='Keep the initial array size for orthogonalization\
                  (slower)',
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 style={'description_width': 'initial'}),
 
             fix_voxel=widgets.BoundedIntText(
@@ -106,7 +107,7 @@ class TabPostprocessing(widgets.Box):
                 Parameters related to displacement and strain calculation",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             data_frame=widgets.ToggleButtons(
                 options=[
@@ -127,7 +128,7 @@ class TabPostprocessing(widgets.Box):
                 value="y",
                 description='Ref axis q',
                 continuous_update=False,
-                layout=Layout(width='15%'),
+                layout=widgets.Layout(width='15%'),
                 tooltip="q will be aligned along that axis",
                 style={'description_width': 'initial'}),
 
@@ -155,15 +156,15 @@ class TabPostprocessing(widgets.Box):
                 tooltip="Threshold use for removing the outer layer (strain is\
                  undefined at the exact surface voxel)",
                 readout=True,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             skip_unwrap=widgets.Checkbox(
                 value=False,
                 description='Skip phase unwrap',
-                layout=Layout(width='15%'),
+                layout=widgets.Layout(width='15%'),
                 style={
                     'description_width': 'initial'}
             ),
@@ -188,17 +189,17 @@ class TabPostprocessing(widgets.Box):
                 max=360,
                 continuous_update=False,
                 description='Phase offset:',
-                layout=Layout(width='15%'),
+                layout=widgets.Layout(width='15%'),
                 readout=True,
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             phase_offset_origin=widgets.Text(
                 placeholder="(x, y, z), leave None for automatic.",
                 description='Phase offset origin',
                 continuous_update=False,
-                layout=Layout(width='40%'),
+                layout=widgets.Layout(width='40%'),
                 style={
                     'description_width': 'initial'},
             ),
@@ -208,7 +209,7 @@ class TabPostprocessing(widgets.Box):
                 value="mean",
                 description='Offset method:',
                 continuous_update=False,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 style={'description_width': 'initial'}),
 
             centering_method=widgets.Dropdown(
@@ -217,7 +218,7 @@ class TabPostprocessing(widgets.Box):
                 value="max_com",
                 description='Centering method:',
                 continuous_update=False,
-                layout=Layout(width='25%'),
+                layout=widgets.Layout(width='25%'),
                 style={'description_width': 'initial'}),
 
             unused_label_refraction=widgets.HTML(
@@ -225,7 +226,7 @@ class TabPostprocessing(widgets.Box):
                 Parameters related to the refraction correction",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             correct_refraction=widgets.Checkbox(
                 value=False,
@@ -281,12 +282,12 @@ class TabPostprocessing(widgets.Box):
                 Options",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             simulation=widgets.Checkbox(
                 value=False,
                 description='Simulated data',
-                layout=Layout(width='33%'),
+                layout=widgets.Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
             ),
@@ -294,7 +295,7 @@ class TabPostprocessing(widgets.Box):
             invert_phase=widgets.Checkbox(
                 value=True,
                 description='Invert phase',
-                layout=Layout(width='33%'),
+                layout=widgets.Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
             ),
@@ -302,7 +303,7 @@ class TabPostprocessing(widgets.Box):
             flip_reconstruction=widgets.Checkbox(
                 value=False,
                 description='Get conjugated object',
-                layout=Layout(width='33%'),
+                layout=widgets.Layout(width='33%'),
                 style={
                     'description_width': 'initial'}
             ),
@@ -323,7 +324,7 @@ class TabPostprocessing(widgets.Box):
                 readout=True,
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             save_raw=widgets.Checkbox(
                 value=False,
@@ -358,7 +359,7 @@ class TabPostprocessing(widgets.Box):
                 placeholder="(0, 0, 0)",
                 description='Roll modes',
                 continuous_update=False,
-                layout=Layout(width='30%'),
+                layout=widgets.Layout(width='30%'),
                 style={
                     'description_width': 'initial'},
             ),
@@ -368,7 +369,7 @@ class TabPostprocessing(widgets.Box):
                 Parameters related to data visualization",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             align_axis=widgets.Checkbox(
                 value=False,
@@ -382,7 +383,7 @@ class TabPostprocessing(widgets.Box):
                 value="y",
                 description='Ref axis for align axis',
                 continuous_update=False,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 tooltip="q will be aligned along that axis",
                 style={'description_width': 'initial'}),
 
@@ -401,7 +402,7 @@ class TabPostprocessing(widgets.Box):
                 readout=True,
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             phase_range=widgets.FloatText(
                 value=np.round(np.pi, 3),
@@ -411,12 +412,12 @@ class TabPostprocessing(widgets.Box):
                 readout=True,
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             grey_background=widgets.Checkbox(
                 value=True,
                 description='Grey background in plots',
-                layout=Layout(width='25%'),
+                layout=widgets.Layout(width='25%'),
                 style={
                     'description_width': 'initial'}
             ),
@@ -426,7 +427,7 @@ class TabPostprocessing(widgets.Box):
                 description='Tick spacing:',
                 min=0,
                 max=5000,
-                layout=Layout(width='25%'),
+                layout=widgets.Layout(width='25%'),
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -435,7 +436,7 @@ class TabPostprocessing(widgets.Box):
                     "out", "in", "inout"],
                 value="inout",
                 description='Tick direction:',
-                layout=Layout(width='25%'),
+                layout=widgets.Layout(width='25%'),
                 continuous_update=False,
                 style={'description_width': 'initial'}),
 
@@ -445,7 +446,7 @@ class TabPostprocessing(widgets.Box):
                 min=0,
                 max=50,
                 continuous_update=False,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 style={'description_width': 'initial'}),
 
             tick_width=widgets.BoundedIntText(
@@ -454,7 +455,7 @@ class TabPostprocessing(widgets.Box):
                 min=0,
                 max=10,
                 continuous_update=False,
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 style={'description_width': 'initial'}),
 
             unused_label_average=widgets.HTML(
@@ -462,7 +463,7 @@ class TabPostprocessing(widgets.Box):
                 Parameters for averaging several reconstructed objects",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             averaging_space=widgets.Dropdown(
                 options=[
@@ -480,14 +481,14 @@ class TabPostprocessing(widgets.Box):
                 readout=True,
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             unused_label_apodize=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
                 Setup for phase averaging or apodization",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             apodize=widgets.Checkbox(
                 value=True,
@@ -511,7 +512,7 @@ class TabPostprocessing(widgets.Box):
                 readout=True,
                 style={
                     'description_width': 'initial'},
-                disabled=False),
+            )
 
             apodization_mu=widgets.Text(
                 value="[0.0, 0.0, 0.0]",
@@ -539,7 +540,7 @@ class TabPostprocessing(widgets.Box):
                 Path to file",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             strain_folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
@@ -547,7 +548,7 @@ class TabPostprocessing(widgets.Box):
                 placeholder=os.getcwd() + "/",
                 description='Data folder:',
                 continuous_update=False,
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             reconstruction_files=widgets.Dropdown(
@@ -559,7 +560,7 @@ class TabPostprocessing(widgets.Box):
                     + glob.glob(os.getcwd() + "/*.npz"),
                     key=os.path.getmtime)],
                 description='Compatible file list',
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             run_strain=widgets.ToggleButtons(
@@ -571,7 +572,7 @@ class TabPostprocessing(widgets.Box):
                 description='Run strain analysis',
                 button_style='',
                 icon='fast-forward',
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
         )
 

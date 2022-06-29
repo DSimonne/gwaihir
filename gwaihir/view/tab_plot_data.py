@@ -1,14 +1,14 @@
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
+import os
+import glob
 
 
-class TabPlotData(widgets.Box):
+class TabPlotData(widgets.VBox):
     """
 
     """
 
-    def __init__(self, plot_tab_only=False):
+    def __init__(self, plot_tab_only=False, box_style=""):
         """
 
         """
@@ -16,6 +16,7 @@ class TabPlotData(widgets.Box):
 
         # Brief header describing the tab
         self.header = 'Plot data'
+        self.box_style = box_style
 
         # Create tab widgets
         self._list_widgets = widgets.VBox(
@@ -23,7 +24,7 @@ class TabPlotData(widgets.Box):
                 description="<p style='font-weight: bold;font-size:1.2em'>\
                 Loads data files and displays it in the GUI",
                 style={'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             folder=widgets.Dropdown(
                 options=[x[0] + "/" for x in os.walk(os.getcwd())],
@@ -31,7 +32,7 @@ class TabPlotData(widgets.Box):
                 placeholder=os.getcwd() + "/",
                 description='Data folder:',
                 continuous_update=False,
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             filename=widgets.SelectMultiple(
@@ -46,7 +47,7 @@ class TabPlotData(widgets.Box):
                     key=os.path.getmtime)],
                 rows=10,
                 description='Compatible file list',
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             cmap=widgets.Dropdown(
@@ -54,7 +55,7 @@ class TabPlotData(widgets.Box):
                 value="jet",
                 description="Color map:",
                 continuous_update=False,
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
 
             data_use=widgets.ToggleButtons(
@@ -87,7 +88,7 @@ class TabPlotData(widgets.Box):
                 ],
                 button_style='',
                 icon='fast-forward',
-                layout=Layout(width='90%'),
+                layout=widgets.Layout(width='90%'),
                 style={'description_width': 'initial'}),
         )
 

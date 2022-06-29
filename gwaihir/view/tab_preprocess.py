@@ -1,14 +1,12 @@
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
 
 
-class TabPreprocess(widgets.Box):
+class TabPreprocess(widgets.VBox):
     """
 
     """
 
-    def __init__(self):
+    def __init__(self, box_style=""):
         """
 
         """
@@ -16,6 +14,7 @@ class TabPreprocess(widgets.Box):
 
         # Brief header describing the tab
         self.header = 'Preprocess'
+        self.box_style = box_style
 
         # Create tab widgets
         self._list_widgets = widgets.VBox(
@@ -24,7 +23,7 @@ class TabPreprocess(widgets.Box):
                 Parameters specific to the beamline",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             beamline=widgets.Dropdown(
                 options=['ID01', 'SIXS_2018', 'SIXS_2019',
@@ -94,7 +93,7 @@ class TabPreprocess(widgets.Box):
                 description='Specfile name',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -107,7 +106,7 @@ class TabPreprocess(widgets.Box):
                 disabled=True,
                 tooltip="Name of the beamline, used for data loading and \
                 normalization by monitor",
-                layout=Layout(
+                layout=widgets.Layout(
                     height="50px"),
                 style={'description_width': 'initial'}),
 
@@ -118,7 +117,7 @@ class TabPreprocess(widgets.Box):
                 Parameters used in masking",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             flag_interact=widgets.Checkbox(
                 value=False,
@@ -127,7 +126,7 @@ class TabPreprocess(widgets.Box):
                 disabled=True,
                 indent=False,
                 tooltip='True to interact with plots and manually mask points',
-                layout=Layout(
+                layout=widgets.Layout(
                     height="50px"),
                 icon='check'),
 
@@ -138,7 +137,7 @@ class TabPreprocess(widgets.Box):
                 min=0,
                 continuous_update=False,
                 description='Background plot:',
-                layout=Layout(
+                layout=widgets.Layout(
                     width='30%', height="50px"),
                 tooltip="In level of grey in [0,1], 0 being dark. For visual \
                 comfort during masking",
@@ -154,7 +153,7 @@ class TabPreprocess(widgets.Box):
                 Parameters related to data cropping/padding/centering</p>",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             centering_method=widgets.Dropdown(
                 options=[
@@ -163,7 +162,7 @@ class TabPreprocess(widgets.Box):
                 description='Centering of Bragg peak method:',
                 continuous_update=False,
                 disabled=True,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='45%'),
                 tooltip="Bragg peak determination: 'max' or 'com', 'max' is \
                 better usually. It will be overridden by 'bragg_peak' if \
@@ -175,7 +174,7 @@ class TabPreprocess(widgets.Box):
                 description='Bragg peak position',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='45%'),
                 style={'description_width': 'initial'}),
 
@@ -184,7 +183,7 @@ class TabPreprocess(widgets.Box):
                 description='Fix array size',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='45%'),
                 style={'description_width': 'initial'}),
 
@@ -196,7 +195,7 @@ class TabPreprocess(widgets.Box):
                 value="crop_sym_ZYX",
                 description='Center FFT',
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     height="50px"),
                 disabled=True,
                 style={'description_width': 'initial'}),
@@ -206,7 +205,7 @@ class TabPreprocess(widgets.Box):
                 description='Array size after padding',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='50%', height="50px"),
                 style={'description_width': 'initial'}),
 
@@ -218,7 +217,7 @@ class TabPreprocess(widgets.Box):
                 description='Normalize flux',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     height="50px"),
                 tooltip='Monitor to normalize the intensity by the default \
                 monitor values, skip to do nothing',
@@ -231,7 +230,7 @@ class TabPreprocess(widgets.Box):
                 Parameters for data filtering</p>""",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             mask_zero_event=widgets.Checkbox(
                 value=False,
@@ -272,7 +271,7 @@ class TabPreprocess(widgets.Box):
                 description='Binning for phasing',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='20%', height="50px"),
                 style={
                     'description_width': 'initial'},
@@ -285,7 +284,7 @@ class TabPreprocess(widgets.Box):
                 Parameters used when reloading processed data</p>",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             reload_previous=widgets.Checkbox(
                 value=False,
@@ -293,7 +292,7 @@ class TabPreprocess(widgets.Box):
                 continuous_update=False,
                 disabled=True,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     height="50px"),
                 tooltip='True to resume a previous masking (load data\
                 and mask)',
@@ -305,7 +304,7 @@ class TabPreprocess(widgets.Box):
                 continuous_update=False,
                 disabled=True,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     height="50px"),
                 tooltip='True if the reloaded data is already intepolated \
                 in an orthonormal frame',
@@ -317,7 +316,7 @@ class TabPreprocess(widgets.Box):
                 description='Binning used in data to be reloaded',
                 disabled=True,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='30%', height="50px"),
                 style={
                     'description_width': 'initial'},
@@ -330,7 +329,7 @@ class TabPreprocess(widgets.Box):
                 Parameters used when saving the data</p>",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             save_rawdata=widgets.Checkbox(
                 value=False,
@@ -338,7 +337,7 @@ class TabPreprocess(widgets.Box):
                 disabled=True,
                 continuous_update=False,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width="15%", height="50px"),
                 tooltip='Save also the raw data when use_rawdata is False',
                 icon='check'),
@@ -349,7 +348,7 @@ class TabPreprocess(widgets.Box):
                 disabled=True,
                 continuous_update=False,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width="15%", height="50px"),
                 tooltip='True to save the processed data in npz format',
                 icon='check'),
@@ -360,7 +359,7 @@ class TabPreprocess(widgets.Box):
                 disabled=True,
                 continuous_update=False,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width="15%", height="50px"),
                 tooltip='True to save also in .mat format',
                 icon='check'),
@@ -371,7 +370,7 @@ class TabPreprocess(widgets.Box):
                 continuous_update=False,
                 disabled=True,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width="15%", height="50px"),
                 tooltip='Save the orthogonalized diffraction pattern to \
                 VTK file',
@@ -383,7 +382,7 @@ class TabPreprocess(widgets.Box):
                 continuous_update=False,
                 disabled=True,
                 indent=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width="15%", height="50px"),
                 tooltip='if True, the result will be saved as an array of \
                 integers (save space)',
@@ -395,7 +394,7 @@ class TabPreprocess(widgets.Box):
                 Click below to run the data processing before phasing</p>",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             init_para=widgets.ToggleButton(
                 value=False,
@@ -403,7 +402,7 @@ class TabPreprocess(widgets.Box):
                 disabled=True,
                 continuous_update=False,
                 button_style='',
-                layout=Layout(
+                layout=widgets.Layout(
                     width='40%'),
                 style={
                     'description_width': 'initial'},

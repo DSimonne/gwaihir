@@ -1,14 +1,12 @@
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
 
 
-class TabReadme(widgets.Box):
+class TabReadme(widgets.VBox):
     """
 
     """
 
-    def __init__(self):
+    def __init__(self, box_style=""):
         """
 
         """
@@ -16,6 +14,7 @@ class TabReadme(widgets.Box):
 
         # Brief header describing the tab
         self.header = 'README'
+        self.box_style = box_style
 
         # Create tab widgets
         self._list_widgets = widgets.VBox(

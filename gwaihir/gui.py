@@ -131,7 +131,7 @@ class Interface:
 
         # Set tab names
         for j, Tab in enumerate(self.window.children)
-            self.window.set_title(j, Tab.header)
+        self.window.set_title(j, Tab.header)
 
         # Display the final window
         display(self.window)

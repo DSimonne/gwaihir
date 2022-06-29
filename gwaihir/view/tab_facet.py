@@ -1,15 +1,14 @@
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
 import os
 import glob
 
-class TabFacet(widgets.Box):
+
+class TabFacet(widgets.VBox):
     """
 
     """
 
-    def __init__(self):
+    def __init__(self, box_style=""):
         """
 
         """
@@ -17,65 +16,67 @@ class TabFacet(widgets.Box):
 
         # Brief header describing the tab
         self.header = 'Facet analysis'
+        self.box_style = box_style
 
-        # Create tab widgets
-        self._list_widgets = widgets.VBox(
-            unused_label_facet=widgets.HTML(
-                description="<p style='font-weight: bold;font-size:1.2em'>\
-                 Extract facet specific data from vtk file",
-                style={
-                    'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+        # Define widgets
+        self.unused_label_facet = widgets.HTML(
+            description="<p style='font-weight: bold;font-size:1.2em'>\
+             Extract facet specific data from vtk file",
+            style={
+                'description_width': 'initial'},
+            layout=widgets.Layout(width='90%', height="35px"))
 
-            parent_folder=widgets.Dropdown(
-                options=[x[0] + "/" for x in os.walk(os.getcwd())],
-                value=os.getcwd() + "/",
-                placeholder=os.getcwd() + "/",
-                description='Parent folder:',
-                continuous_update=False,
-                layout=Layout(width='90%'),
-                style={'description_width': 'initial'}),
+        self.parent_folder = widgets.Dropdown(
+            options=[x[0] + "/" for x in os.walk(os.getcwd())],
+            value=os.getcwd() + "/",
+            placeholder=os.getcwd() + "/",
+            description='Parent folder:',
+            continuous_update=False,
+            layout=widgets.Layout(width='90%'),
+            style={'description_width': 'initial'})
 
-            vtk_file=widgets.Dropdown(
-                options=sorted(glob.glob(os.getcwd()+"*.vtk"),
-                               key=os.path.getmtime),
-                description='vtk file in subdirectories:',
-                layout=Layout(width='90%'),
-                style={'description_width': 'initial'}),
+        self.vtk_file = widgets.Dropdown(
+            options=sorted(glob.glob(os.getcwd()+"*.vtk"),
+                           key=os.path.getmtime),
+            description='vtk file in subdirectories:',
+            layout=widgets.Layout(width='90%'),
+            style={'description_width': 'initial'})
 
-            load_data=widgets.ToggleButtons(
-                options=[
-                    ("Clear/ Reload folder", False),
-                    ('Load .vtk file', "load_csv"),
-                ],
-                value=False,
-                description='Load vtk data',
-                button_style='',
-                layout=Layout(width='90%'),
-                style={'description_width': 'initial'}),
+        self.load_data = widgets.ToggleButtons(
+            options=[
+                ("Clear/ Reload folder", False),
+                ('Load .vtk file', "load_csv"),
+            ],
+            value=False,
+            description='Load vtk data',
+            button_style='',
+            layout=widgets.Layout(width='90%'),
+            style={'description_width': 'initial'})
+
+        # Define children
+        self.children = (
+            self.unused_label_facet,
+            self.parent_folder,
+            self.vtk_file,
+            self.load_data,
         )
 
-        # Create window
-        self.window = self._list_widgets
-
         # Assign handlers
-        self._list_widgets.children[1].observe(
+        self.parent_folder.observe(
             self.vtk_file_handler, names="value")
 
     # Define handlers
     def vtk_file_handler(self, change):
         """List all .vtk files in change subdirectories"""
         vtk_files = []
+        if hasattr(change, "new"):
+            change = change.new
 
-        try:
-            for x in os.walk(change.new):
-                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
-                                    key=os.path.getmtime)
+        for x in os.walk(change):
+            vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
+                                key=os.path.getmtime)
 
-        except AttributeError:
-            for x in os.walk(change):
-                vtk_files += sorted(glob.glob(f"{x[0]}/*.vtk"),
-                                    key=os.path.getmtime)
+        self.vtk_file.options = vtk_files
 
-        finally:
-            self._list_widgets.children[2].options = vtk_files
+    def __str__(self):
+        return "Facet tab"

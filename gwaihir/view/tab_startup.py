@@ -1,14 +1,13 @@
 import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
+import os
 
 
-class TabStartup(widgets.Box):
+class TabStartup(widgets.VBox):
     """
 
     """
 
-    def __init__(self):
+    def __init__(self, box_style=""):
         """
 
         """
@@ -16,6 +15,7 @@ class TabStartup(widgets.Box):
 
         # Brief header describing the tab
         self.header = 'Initialization'
+        self.box_style = box_style
 
         # Create tab widgets
         self._list_widgets = widgets.VBox(
@@ -24,14 +24,14 @@ class TabStartup(widgets.Box):
                 Define working directory and scan number",
                 style={
                     'description_width': 'initial'},
-                layout=Layout(width='90%', height="35px")),
+                layout=widgets.Layout(width='90%', height="35px")),
 
             sample_name=widgets.Text(
                 value="S",
                 placeholder="",
                 description='Sample Name',
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='45%'),
                 style={'description_width': 'initial'}),
 
@@ -41,7 +41,7 @@ class TabStartup(widgets.Box):
                 min=0,
                 max=9999999,
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='45%'),
                 style={'description_width': 'initial'}),
 
@@ -50,7 +50,7 @@ class TabStartup(widgets.Box):
                 placeholder="Path to data directory",
                 description='Data directory',
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -59,7 +59,7 @@ class TabStartup(widgets.Box):
                 placeholder="Root folder (parent to all scan directories)",
                 description='Target directory (root_folder)',
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='90%'),
                 style={'description_width': 'initial'}),
 
@@ -67,7 +67,7 @@ class TabStartup(widgets.Box):
                 value="",
                 description='Comment',
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='90%'),
                 placeholder="Comment regarding Dataset...",
                 style={'description_width': 'initial'}),
@@ -87,7 +87,7 @@ class TabStartup(widgets.Box):
                 value="module://matplotlib_inline.backend_inline",
                 description='Matplotlib backend for scripts:',
                 continuous_update=False,
-                layout=Layout(
+                layout=widgets.Layout(
                     width='60%'),
                 style={'description_width': 'initial'}),
 
@@ -96,7 +96,7 @@ class TabStartup(widgets.Box):
                 description='Initialize directories ...',
                 button_style='',
                 icon='step-forward',
-                layout=Layout(
+                layout=widgets.Layout(
                     width='45%'),
                 style={'description_width': 'initial'}),
         )
