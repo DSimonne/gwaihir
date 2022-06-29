@@ -83,27 +83,33 @@ def initialize_directories(
 
         # Save template_imagefile in GUI
         if template_imagefile != "":
-            interface.TabPreprocess.window[42].value\
+            interface.TabPreprocess._list_widgets[42].value\
                 = template_imagefile
 
         # Refresh folders
-        interface.sub_directories_handler(change=Dataset.scan_folder)
+        interface.TabStartup.sub_directories_handler(
+            change=interface.Dataset.scan_folder
+        )
 
-        # PyNX folder, refresh values
-        interface._list_widgets_phase_retrieval.children[1].value\
-            = preprocessing_folder
-        interface.pynx_folder_handler(change=preprocessing_folder)
+        # PyNX folder
+        interface.TabPhaseRetrieval._list_widgets.children[1].value\
+            = interface.preprocessing_folder
+        interface.TabPhaseRetrieval.pynx_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
-        # Plot folder, refresh values
-        interface.tab_data.children[1].value = preprocessing_folder
-        interface.plot_folder_handler(change=preprocessing_folder)
+        # Plot folder
+        interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData.plot_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
         # Strain folder, refresh values
-        interface._list_widgets_strain.children[-4].value = preprocessing_folder
+        interface.TabPostprocess._list_widgets.children[-4].value = preprocessing_folder
         interface.strain_folder_handler(change=preprocessing_folder)
 
         # Facet folder, refresh values
-        interface.tab_facet.children[1].value = postprocessing_folder
+        interface.TabFacet._list_widgets.children[1].value = postprocessing_folder
         interface.vtk_file_handler(change=postprocessing_folder)
 
         return Dataset, matplotlib_backend, preprocessing_folder, postprocessing_folder

@@ -19,7 +19,7 @@ def display_data_frame(
     """
     # Load data
     if show_logs in ("load_csv", "load_field_data"):
-        interface.tab_data_frame.children[1].disabled = True
+        interface.TabDataFrame._list_widgets.children[1].disabled = True
         try:
             # csv data
             if show_logs == "load_csv":
@@ -55,6 +55,6 @@ def display_data_frame(
             )
 
     else:
-        interface.tab_data_frame.children[1].disabled = False
+        interface.TabDataFrame._list_widgets.children[1].disabled = False
         interface.csv_file_handler(parent_folder)
         clear_output(True)

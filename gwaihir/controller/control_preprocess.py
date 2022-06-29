@@ -844,8 +844,8 @@ def initialize_preprocessing(
                 )
 
                 # Plot folder
-                interface.TabData.children[1].value = interface.preprocessing_folder
-                interface.TabData.plot_folder_handler(
+                interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+                interface.TabPlotData.plot_folder_handler(
                     change=interface.preprocessing_folder
                 )
 

@@ -33,7 +33,7 @@ def load_data(
     """
     if data_use == "2D":
         # Disable widgets
-        for w in interface.TabData.children[:-3]:
+        for w in interface.TabPlotData._list_widgets.children[:-3]:
             w.disabled = True
 
         # Plot data
@@ -48,7 +48,7 @@ def load_data(
 
     if data_use == "3D" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         # Plot data
@@ -61,7 +61,7 @@ def load_data(
 
     if data_use == "slices":
         # Disable widgets
-        for w in interface.TabData.children[:-3]:
+        for w in interface.TabPlotData._list_widgets.children[:-3]:
             w.disabled = True
 
         # Plot data
@@ -76,7 +76,7 @@ def load_data(
 
     elif data_use == "create_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         # Initialize class
@@ -125,7 +125,7 @@ def load_data(
 
     elif data_use == "extract_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         # Initialize class
@@ -141,7 +141,7 @@ def load_data(
 
     elif data_use == "smooth_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         # Initialize class
@@ -198,7 +198,7 @@ def load_data(
 
     elif data_use == "show_image":
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         try:
@@ -211,7 +211,7 @@ def load_data(
 
     elif data_use == "hf_glance":
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         # Show tree
@@ -231,7 +231,7 @@ def load_data(
 
     elif data_use == "delete":
         # Disable widgets
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = True
 
         button_delete_data = Button(
@@ -256,9 +256,9 @@ def load_data(
 
     elif data_use is False:
         plt.close()
-        for w in interface.TabData.children[:-2]:
+        for w in interface.TabPlotData._list_widgets.children[:-2]:
             w.disabled = False
-        interface.tab_plot_data.plot_folder_handler(change=folder)
+        interface.TabPlotData.plot_folder_handler(change=folder)
         print("Cleared window.")
         clear_output(True)
 

@@ -29,7 +29,7 @@ def init_facet_analysis(
     """
     if load_data:
         # Disable text widget to avoid bugs
-        interface.TabFacet.children[1].disabled = True
+        interface.TabFacet._list_widgets.children[1].disabled = True
         try:
             interface.Dataset.facet_filename = vtk_file
         except AttributeError:
@@ -315,7 +315,7 @@ def init_facet_analysis(
             gutil.hash_print("Data type not supported.")
 
     if not load_data:
-        interface.TabFacet.children[1].disabled = False
+        interface.TabFacet._list_widgets.children[1].disabled = False
         interface.TabFacet.vtk_file_handler(parent_folder)
         gutil.hash_print("Cleared window.")
         clear_output(True)

@@ -348,10 +348,10 @@ def initialize_postprocessing(
         save_dir = f"{interface.postprocessing_folder}/result_{interface.Dataset.save_frame}/"
 
         # Disable all widgets until the end of the program
-        for w in interface.TabPostprocess.list_widgets.children[:-1]:
+        for w in interface.TabPostprocess._list_widgets.children[:-1]:
             w.disabled = True
 
-        for w in interface.TabPreprocess.list_widgets.children[:-2]:
+        for w in interface.TabPreprocess._list_widgets.children[:-2]:
             w.disabled = True
 
         # Extract dict, list and tuple from strings
@@ -409,10 +409,10 @@ def initialize_postprocessing(
                 data_dir = interface.Dataset.data_dir
 
         except AttributeError:
-            for w in interface.TabPostprocess.list_widgets.children[:-1]:
+            for w in interface.TabPostprocess._list_widgets.children[:-1]:
                 w.disabled = False
 
-            for w in interface.TabPreprocess.list_widgets.children[:-2]:
+            for w in interface.TabPreprocess._list_widgets.children[:-2]:
                 w.disabled = False
 
             print("You need to initialize all the parameters with the \
@@ -583,7 +583,7 @@ def initialize_postprocessing(
 
         finally:
             # At the end of the function
-            interface.TabPostprocess.list_widgets.children[-2].disabled = False
+            interface.TabPostprocess._list_widgets.children[-2].disabled = False
 
             # Refresh folders
             interface.TabStartup.sub_directories_handler(
@@ -598,16 +598,16 @@ def initialize_postprocessing(
             )
 
             # Plot folder
-            interface.TabData.children[1].value = interface.preprocessing_folder
-            interface.TabData.plot_folder_handler(
+            interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+            interface.TabPlotData.plot_folder_handler(
                 change=interface.preprocessing_folder
             )
 
     if not run_strain:
-        for w in interface.TabPostprocess.list_widgets.children[:-1]:
+        for w in interface.TabPostprocess._list_widgets.children[:-1]:
             w.disabled = False
 
-        for w in interface.TabPreprocess.list_widgets.children[:-2]:
+        for w in interface.TabPreprocess._list_widgets.children[:-2]:
             w.disabled = False
 
         # Refresh folders
@@ -616,7 +616,7 @@ def initialize_postprocessing(
         )
 
         # Plot folder
-        interface.TabData.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
         interface.TabPlotData.plot_folder_handler(
             change=interface.preprocessing_folder
         )
