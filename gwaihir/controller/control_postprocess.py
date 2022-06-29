@@ -1,37 +1,10 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import glob
 import os
-import operator as operator_lib
 from datetime import datetime
-import tables as tb
-import h5py
-import shutil
-from numpy.fft import fftshift
-from scipy.ndimage import center_of_mass
-from shlex import quote
-from IPython.display import display
-
-# PyNX
-try:
-    from pynx.cdi import CDI
-    from pynx.cdi.runner.id01 import params
-    from pynx.utils.math import smaller_primes
-    pynx_import = True
-except ModuleNotFoundError:
-    pynx_import = False
-
-# gwaihir package
-import gwaihir
-
-# bcdi package
-from bcdi.preprocessing import ReadNxs3 as rd
-from bcdi.utils.utilities import bin_data
 
 
 def initialize_postprocessing(
-    self,
+    interface,
     unused_label_averaging,
     sort_method,
     correlation_threshold,
@@ -309,76 +282,76 @@ def initialize_postprocessing(
     """
     # Save parameter values
     # parameters used when averaging several reconstruction #
-    self.Dataset.sort_method = sort_method
-    self.Dataset.correlation_threshold = correlation_threshold
+    interface.Dataset.sort_method = sort_method
+    interface.Dataset.correlation_threshold = correlation_threshold
     # parameters relative to the FFT window and voxel sizes #
-    self.Dataset.phasing_binning = phasing_binning
-    self.Dataset.original_size = original_size
-    self.Dataset.preprocessing_binning = preprocessing_binning
-    self.Dataset.output_size = output_size
-    self.Dataset.keep_size = keep_size
-    self.Dataset.fix_voxel = fix_voxel
+    interface.Dataset.phasing_binning = phasing_binning
+    interface.Dataset.original_size = original_size
+    interface.Dataset.preprocessing_binning = preprocessing_binning
+    interface.Dataset.output_size = output_size
+    interface.Dataset.keep_size = keep_size
+    interface.Dataset.fix_voxel = fix_voxel
     # parameters related to displacement and strain calculation #
-    self.Dataset.data_frame = data_frame
-    self.Dataset.save_frame = save_frame
-    self.Dataset.ref_axis_q = ref_axis_q
-    self.Dataset.isosurface_strain = isosurface_strain
-    self.Dataset.skip_unwrap = skip_unwrap
-    self.Dataset.strain_method = strain_method
-    self.Dataset.phase_offset = phase_offset
-    self.Dataset.phase_offset_origin = phase_offset_origin
-    self.Dataset.offset_method = offset_method
-    self.Dataset.centering_method = centering_method
+    interface.Dataset.data_frame = data_frame
+    interface.Dataset.save_frame = save_frame
+    interface.Dataset.ref_axis_q = ref_axis_q
+    interface.Dataset.isosurface_strain = isosurface_strain
+    interface.Dataset.skip_unwrap = skip_unwrap
+    interface.Dataset.strain_method = strain_method
+    interface.Dataset.phase_offset = phase_offset
+    interface.Dataset.phase_offset_origin = phase_offset_origin
+    interface.Dataset.offset_method = offset_method
+    interface.Dataset.centering_method = centering_method
     # parameters related to the refraction correction
-    self.Dataset.correct_refraction = correct_refraction
-    self.Dataset.optical_path_method = optical_path_method
-    self.Dataset.dispersion = dispersion
-    self.Dataset.absorption = absorption
-    self.Dataset.threshold_unwrap_refraction\
+    interface.Dataset.correct_refraction = correct_refraction
+    interface.Dataset.optical_path_method = optical_path_method
+    interface.Dataset.dispersion = dispersion
+    interface.Dataset.absorption = absorption
+    interface.Dataset.threshold_unwrap_refraction\
         = threshold_unwrap_refraction
     # options #
-    self.Dataset.simulation = simulation
-    self.Dataset.invert_phase = invert_phase
-    self.Dataset.flip_reconstruction = flip_reconstruction
-    self.Dataset.phase_ramp_removal = phase_ramp_removal
-    self.Dataset.threshold_gradient = threshold_gradient
-    self.Dataset.save_raw = save_raw
-    self.Dataset.save_support = save_support
-    self.Dataset.save = save
-    self.Dataset.debug = debug
-    self.Dataset.roll_modes = roll_modes
+    interface.Dataset.simulation = simulation
+    interface.Dataset.invert_phase = invert_phase
+    interface.Dataset.flip_reconstruction = flip_reconstruction
+    interface.Dataset.phase_ramp_removal = phase_ramp_removal
+    interface.Dataset.threshold_gradient = threshold_gradient
+    interface.Dataset.save_raw = save_raw
+    interface.Dataset.save_support = save_support
+    interface.Dataset.save = save
+    interface.Dataset.debug = debug
+    interface.Dataset.roll_modes = roll_modes
     # parameters related to data visualization #
-    self.Dataset.align_axis = align_axis
-    self.Dataset.ref_axis = ref_axis
-    self.Dataset.axis_to_align = axis_to_align
-    self.Dataset.strain_range = strain_range
-    self.Dataset.phase_range = phase_range
-    self.Dataset.grey_background = grey_background
-    self.Dataset.tick_spacing = tick_spacing
-    self.Dataset.tick_direction = tick_direction
-    self.Dataset.tick_length = tick_length
-    self.Dataset.tick_width = tick_width
+    interface.Dataset.align_axis = align_axis
+    interface.Dataset.ref_axis = ref_axis
+    interface.Dataset.axis_to_align = axis_to_align
+    interface.Dataset.strain_range = strain_range
+    interface.Dataset.phase_range = phase_range
+    interface.Dataset.grey_background = grey_background
+    interface.Dataset.tick_spacing = tick_spacing
+    interface.Dataset.tick_direction = tick_direction
+    interface.Dataset.tick_length = tick_length
+    interface.Dataset.tick_width = tick_width
     # parameters for averaging several reconstructed objects #
-    self.Dataset.averaging_space = averaging_space
-    self.Dataset.threshold_avg = threshold_avg
+    interface.Dataset.averaging_space = averaging_space
+    interface.Dataset.threshold_avg = threshold_avg
     # setup for phase averaging or apodization
-    self.Dataset.half_width_avg_phase = half_width_avg_phase
-    self.Dataset.apodize = apodize
-    self.Dataset.apodization_window = apodization_window
-    self.Dataset.apodization_mu = apodization_mu
-    self.Dataset.apodization_sigma = apodization_sigma
-    self.Dataset.apodization_alpha = apodization_alpha
-    self.reconstruction_files = strain_folder + reconstruction_files
+    interface.Dataset.half_width_avg_phase = half_width_avg_phase
+    interface.Dataset.apodize = apodize
+    interface.Dataset.apodization_window = apodization_window
+    interface.Dataset.apodization_mu = apodization_mu
+    interface.Dataset.apodization_sigma = apodization_sigma
+    interface.Dataset.apodization_alpha = apodization_alpha
+    interface.reconstruction_files = strain_folder + reconstruction_files
 
     if run_strain:
         # Save directory
-        save_dir = f"{self.postprocessing_folder}/result_{self.Dataset.save_frame}/"
+        save_dir = f"{interface.postprocessing_folder}/result_{interface.Dataset.save_frame}/"
 
         # Disable all widgets until the end of the program
-        for w in self._list_widgets_strain.children[:-1]:
+        for w in interface.TabPostprocess.list_widgets.children[:-1]:
             w.disabled = True
 
-        for w in self._list_widgets_preprocessing.children[:-2]:
+        for w in interface.TabPreprocess.list_widgets.children[:-2]:
             w.disabled = True
 
         # Extract dict, list and tuple from strings
@@ -392,54 +365,54 @@ def initialize_postprocessing(
 
         try:
             for p in list_parameters:
-                if getattr(self.Dataset, p) == "":
-                    setattr(self.Dataset, p, [])
+                if getattr(interface.Dataset, p) == "":
+                    setattr(interface.Dataset, p, [])
                 else:
-                    setattr(self.Dataset, p, literal_eval(
-                        getattr(self.Dataset, p)))
+                    setattr(interface.Dataset, p, literal_eval(
+                        getattr(interface.Dataset, p)))
         except ValueError:
             gutil.hash_print(f"Wrong list syntax for {p}")
 
         try:
             for p in tuple_parameters:
-                if getattr(self.Dataset, p) == "":
-                    setattr(self.Dataset, p, ())
+                if getattr(interface.Dataset, p) == "":
+                    setattr(interface.Dataset, p, ())
                 else:
-                    setattr(self.Dataset, p, literal_eval(
-                        getattr(self.Dataset, p)))
+                    setattr(interface.Dataset, p, literal_eval(
+                        getattr(interface.Dataset, p)))
         except ValueError:
             gutil.hash_print(f"Wrong tuple syntax for {p}")
 
         # Empty parameters are set to None (bcdi syntax)
-        if self.Dataset.output_size == []:
-            self.Dataset.output_size = None
+        if interface.Dataset.output_size == []:
+            interface.Dataset.output_size = None
 
-        if self.Dataset.fix_voxel == 0:
-            self.Dataset.fix_voxel = None
+        if interface.Dataset.fix_voxel == 0:
+            interface.Dataset.fix_voxel = None
 
-        if self.Dataset.phase_offset_origin == ():
-            self.Dataset.phase_offset_origin = (None)
+        if interface.Dataset.phase_offset_origin == ():
+            interface.Dataset.phase_offset_origin = (None)
 
         # Check beamline for save folder
         try:
             # Change data_dir and root folder depending on beamline
-            if self.Dataset.beamline == "SIXS_2019":
-                root_folder = self.Dataset.root_folder
-                data_dir = self.Dataset.data_dir
+            if interface.Dataset.beamline == "SIXS_2019":
+                root_folder = interface.Dataset.root_folder
+                data_dir = interface.Dataset.data_dir
 
-            elif self.Dataset.beamline == "P10":
-                root_folder = self.Dataset.data_dir
+            elif interface.Dataset.beamline == "P10":
+                root_folder = interface.Dataset.data_dir
                 data_dir = None
 
             else:
-                root_folder = self.Dataset.root_folder
-                data_dir = self.Dataset.data_dir
+                root_folder = interface.Dataset.root_folder
+                data_dir = interface.Dataset.data_dir
 
         except AttributeError:
-            for w in self._list_widgets_strain.children[:-1]:
+            for w in interface.TabPostprocess.list_widgets.children[:-1]:
                 w.disabled = False
 
-            for w in self._list_widgets_preprocessing.children[:-2]:
+            for w in interface.TabPreprocess.list_widgets.children[:-2]:
                 w.disabled = False
 
             print("You need to initialize all the parameters with the \
@@ -449,119 +422,119 @@ def initialize_postprocessing(
 
         try:
             gutil.create_yaml_file(
-                fname=f"{self.postprocessing_folder}/config_postprocessing.yml",
-                scans=self.Dataset.scan,
+                fname=f"{interface.postprocessing_folder}/config_postprocessing.yml",
+                scans=interface.Dataset.scan,
                 root_folder=root_folder,
                 save_dir=save_dir,
                 data_dir=data_dir,
-                sample_name=self.Dataset.sample_name,
-                comment=self.Dataset.comment,
-                reconstruction_files=self.reconstruction_files,
-                backend=self.matplotlib_backend,
+                sample_name=interface.Dataset.sample_name,
+                comment=interface.Dataset.comment,
+                reconstruction_files=interface.reconstruction_files,
+                backend=interface.matplotlib_backend,
                 # parameters used when averaging several reconstruction #
-                sort_method=self.Dataset.sort_method,
-                averaging_space=self.Dataset.averaging_space,
-                correlation_threshold=self.Dataset.correlation_threshold,
+                sort_method=interface.Dataset.sort_method,
+                averaging_space=interface.Dataset.averaging_space,
+                correlation_threshold=interface.Dataset.correlation_threshold,
                 # parameters related to centering #
-                centering_method=self.Dataset.centering_method,
-                roll_modes=self.Dataset.roll_modes,
+                centering_method=interface.Dataset.centering_method,
+                roll_modes=interface.Dataset.roll_modes,
                 # parameters relative to the FFT window and voxel sizes #
-                original_size=self.Dataset.original_size,
-                phasing_binning=self.Dataset.phasing_binning,
-                preprocessing_binning=self.Dataset.preprocessing_binning,
-                output_size=self.Dataset.output_size,
-                keep_size=self.Dataset.keep_size,
-                fix_voxel=self.Dataset.fix_voxel,
+                original_size=interface.Dataset.original_size,
+                phasing_binning=interface.Dataset.phasing_binning,
+                preprocessing_binning=interface.Dataset.preprocessing_binning,
+                output_size=interface.Dataset.output_size,
+                keep_size=interface.Dataset.keep_size,
+                fix_voxel=interface.Dataset.fix_voxel,
                 # parameters related to the strain calculation #
-                data_frame=self.Dataset.data_frame,
-                ref_axis_q=self.Dataset.ref_axis_q,
-                save_frame=self.Dataset.save_frame,
-                isosurface_strain=self.Dataset.isosurface_strain,
-                skip_unwrap=self.Dataset.skip_unwrap,
-                strain_method=self.Dataset.strain_method,
+                data_frame=interface.Dataset.data_frame,
+                ref_axis_q=interface.Dataset.ref_axis_q,
+                save_frame=interface.Dataset.save_frame,
+                isosurface_strain=interface.Dataset.isosurface_strain,
+                skip_unwrap=interface.Dataset.skip_unwrap,
+                strain_method=interface.Dataset.strain_method,
                 # define beamline related parameters #
-                beamline=self.Dataset.beamline,
-                is_series=self.Dataset.is_series,
-                actuators=self.Dataset.actuators,
+                beamline=interface.Dataset.beamline,
+                is_series=interface.Dataset.is_series,
+                actuators=interface.Dataset.actuators,
                 # setup for custom scans #
-                custom_scan=self.Dataset.custom_scan,
-                custom_images=self.Dataset.custom_images,
-                custom_monitor=self.Dataset.custom_monitor,
-                rocking_angle=self.Dataset.rocking_angle,
-                detector_distance=self.Dataset.detector_distance,
-                energy=self.Dataset.energy,
-                beam_direction=self.Dataset.beam_direction,
-                sample_offsets=self.Dataset.sample_offsets,
-                tilt_angle=self.Dataset.tilt_angle,
-                direct_beam=self.Dataset.direct_beam,
-                dirbeam_detector_angles=self.Dataset.dirbeam_detector_angles,
-                bragg_peak=self.Dataset.bragg_peak,
-                outofplane_angle=self.Dataset.outofplane_angle,
-                inplane_angle=self.Dataset.inplane_angle,
-                specfile_name=self.Dataset.specfile_name,
+                custom_scan=interface.Dataset.custom_scan,
+                custom_images=interface.Dataset.custom_images,
+                custom_monitor=interface.Dataset.custom_monitor,
+                rocking_angle=interface.Dataset.rocking_angle,
+                detector_distance=interface.Dataset.detector_distance,
+                energy=interface.Dataset.energy,
+                beam_direction=interface.Dataset.beam_direction,
+                sample_offsets=interface.Dataset.sample_offsets,
+                tilt_angle=interface.Dataset.tilt_angle,
+                direct_beam=interface.Dataset.direct_beam,
+                dirbeam_detector_angles=interface.Dataset.dirbeam_detector_angles,
+                bragg_peak=interface.Dataset.bragg_peak,
+                outofplane_angle=interface.Dataset.outofplane_angle,
+                inplane_angle=interface.Dataset.inplane_angle,
+                specfile_name=interface.Dataset.specfile_name,
                 # detector related parameters #
-                detector=self.Dataset.detector,
-                roi_detector=self.Dataset.roi_detector,
-                template_imagefile=self.Dataset.template_imagefile,
+                detector=interface.Dataset.detector,
+                roi_detector=interface.Dataset.roi_detector,
+                template_imagefile=interface.Dataset.template_imagefile,
                 # parameters related to the refraction correction #
-                correct_refraction=self.Dataset.correct_refraction,
-                optical_path_method=self.Dataset.optical_path_method,
-                dispersion=self.Dataset.dispersion,
-                absorption=self.Dataset.absorption,
-                threshold_unwrap_refraction=self.Dataset.threshold_unwrap_refraction,
+                correct_refraction=interface.Dataset.correct_refraction,
+                optical_path_method=interface.Dataset.optical_path_method,
+                dispersion=interface.Dataset.dispersion,
+                absorption=interface.Dataset.absorption,
+                threshold_unwrap_refraction=interface.Dataset.threshold_unwrap_refraction,
                 # parameters related to the phase #
-                simulation=self.Dataset.simulation,
-                invert_phase=self.Dataset.invert_phase,
-                flip_reconstruction=self.Dataset.flip_reconstruction,
-                phase_ramp_removal=self.Dataset.phase_ramp_removal,
-                threshold_gradient=self.Dataset.threshold_gradient,
-                phase_offset=self.Dataset.phase_offset,
-                phase_offset_origin=self.Dataset.phase_offset_origin,
-                offset_method=self.Dataset.offset_method,
+                simulation=interface.Dataset.simulation,
+                invert_phase=interface.Dataset.invert_phase,
+                flip_reconstruction=interface.Dataset.flip_reconstruction,
+                phase_ramp_removal=interface.Dataset.phase_ramp_removal,
+                threshold_gradient=interface.Dataset.threshold_gradient,
+                phase_offset=interface.Dataset.phase_offset,
+                phase_offset_origin=interface.Dataset.phase_offset_origin,
+                offset_method=interface.Dataset.offset_method,
                 # parameters related to data visualization #
-                debug=self.Dataset.debug,
-                align_axis=self.Dataset.align_axis,
-                ref_axis=self.Dataset.ref_axis,
-                axis_to_align=self.Dataset.axis_to_align,
-                strain_range=self.Dataset.strain_range,
-                phase_range=self.Dataset.phase_range,
-                grey_background=self.Dataset.grey_background,
-                tick_spacing=self.Dataset.tick_spacing,
-                tick_direction=self.Dataset.tick_direction,
-                tick_length=self.Dataset.tick_length,
-                tick_width=self.Dataset.tick_width,
+                debug=interface.Dataset.debug,
+                align_axis=interface.Dataset.align_axis,
+                ref_axis=interface.Dataset.ref_axis,
+                axis_to_align=interface.Dataset.axis_to_align,
+                strain_range=interface.Dataset.strain_range,
+                phase_range=interface.Dataset.phase_range,
+                grey_background=interface.Dataset.grey_background,
+                tick_spacing=interface.Dataset.tick_spacing,
+                tick_direction=interface.Dataset.tick_direction,
+                tick_length=interface.Dataset.tick_length,
+                tick_width=interface.Dataset.tick_width,
                 # parameters for temperature estimation #
-                # get_temperature=self.Dataset.get_temperature,
-                # reflection=self.Dataset.reflection,
-                # reference_spacing=self.Dataset.reference_spacing,
-                # reference_temperature=self.Dataset.reference_temperature,
+                # get_temperature=interface.Dataset.get_temperature,
+                # reflection=interface.Dataset.reflection,
+                # reference_spacing=interface.Dataset.reference_spacing,
+                # reference_temperature=interface.Dataset.reference_temperature,
                 # parameters for phase averaging or apodization #
-                half_width_avg_phase=self.Dataset.half_width_avg_phase,
-                apodize=self.Dataset.apodize,
-                apodization_window=self.Dataset.apodization_window,
-                apodization_mu=self.Dataset.apodization_mu,
-                apodization_sigma=self.Dataset.apodization_sigma,
-                apodization_alpha=self.Dataset.apodization_alpha,
+                half_width_avg_phase=interface.Dataset.half_width_avg_phase,
+                apodize=interface.Dataset.apodize,
+                apodization_window=interface.Dataset.apodization_window,
+                apodization_mu=interface.Dataset.apodization_mu,
+                apodization_sigma=interface.Dataset.apodization_sigma,
+                apodization_alpha=interface.Dataset.apodization_alpha,
                 # parameters related to saving #
-                save_rawdata=self.Dataset.save_rawdata,
-                save_support=self.Dataset.save_support,
-                save=self.Dataset.save,
+                save_rawdata=interface.Dataset.save_rawdata,
+                save_support=interface.Dataset.save_support,
+                save=interface.Dataset.save,
             )
             # Run bcdi_postprocessing
             print(
                 "\n###########################################"
                 "#############################################"
             )
-            print(f"Running: $ {self.path_scripts}/bcdi_strain.py")
+            print(f"Running: $ {interface.path_scripts}/bcdi_strain.py")
             print(
-                f"Config file: {self.postprocessing_folder}/config_postprocessing.yml")
+                f"Config file: {interface.postprocessing_folder}/config_postprocessing.yml")
             print(
                 "\n###########################################"
                 "#############################################"
             )
 
             # Load the config file
-            config_file = self.postprocessing_folder + "/config_postprocessing.yml"
+            config_file = interface.postprocessing_folder + "/config_postprocessing.yml"
             parser = ConfigParser(config_file)
             args = parser.load_arguments()
             args["time"] = f"{datetime.now()}"
@@ -571,26 +544,26 @@ def initialize_postprocessing(
             gutil.hash_print("End of script")
 
             # Get data from saved file
-            phase_fieldname = "disp" if self.Dataset.invert_phase else "phase"
+            phase_fieldname = "disp" if interface.Dataset.invert_phase else "phase"
 
             files = sorted(
                 glob.glob(
-                    f"{self.postprocessing_folder}/**/"
-                    f"S{self.Dataset.scan}_amp{phase_fieldname}"
-                    f"strain*{self.Dataset.comment}.h5",
+                    f"{interface.postprocessing_folder}/**/"
+                    f"S{interface.Dataset.scan}_amp{phase_fieldname}"
+                    f"strain*{interface.Dataset.comment}.h5",
                     recursive=True),
                 key=os.path.getmtime)
-            self.strain_output_file = files[0]
+            interface.strain_output_file = files[0]
 
             creation_time = datetime.fromtimestamp(
-                os.path.getmtime(self.strain_output_file)
+                os.path.getmtime(interface.strain_output_file)
             ).strftime('%Y-%m-%d %H:%M:%S')
 
             print(
                 "\n###########################################"
                 "#############################################"
                 f"\nResult file used to extract results saved in the .cxi file:"
-                f"\n{self.strain_output_file}"
+                f"\n{interface.strain_output_file}"
                 f"\n\tCreated: {creation_time}"
                 "\nMake sure it is the latest one!!"
                 "\n###########################################"
@@ -610,39 +583,51 @@ def initialize_postprocessing(
 
         finally:
             # At the end of the function
-            self._list_widgets_strain.children[-2].disabled = False
+            interface.TabPostprocess.list_widgets.children[-2].disabled = False
 
             # Refresh folders
-            self.sub_directories_handler(change=self.Dataset.scan_folder)
+            interface.TabStartup.sub_directories_handler(
+                change=interface.Dataset.scan_folder
+            )
 
-            # PyNX folder, refresh values
-            self._list_widgets_phase_retrieval.children[1].value\
-                = self.preprocessing_folder
-            self.pynx_folder_handler(change=self.preprocessing_folder)
+            # PyNX folder
+            interface.TabPhaseRetrieval._list_widgets.children[1].value\
+                = interface.preprocessing_folder
+            interface.TabPhaseRetrieval.pynx_folder_handler(
+                change=interface.preprocessing_folder
+            )
 
-            self.tab_data.children[1].value = self.preprocessing_folder
-            self.plot_folder_handler(
-                change=self.preprocessing_folder)
+            # Plot folder
+            interface.TabData.children[1].value = interface.preprocessing_folder
+            interface.TabData.plot_folder_handler(
+                change=interface.preprocessing_folder
+            )
 
     if not run_strain:
-        plt.close()
-        for w in self._list_widgets_strain.children[:-1]:
+        for w in interface.TabPostprocess.list_widgets.children[:-1]:
             w.disabled = False
 
-        for w in self._list_widgets_preprocessing.children[:-2]:
+        for w in interface.TabPreprocess.list_widgets.children[:-2]:
             w.disabled = False
 
         # Refresh folders
-        self.sub_directories_handler(change=self.Dataset.scan_folder)
+        interface.TabStartup.sub_directories_handler(
+            change=interface.Dataset.scan_folder
+        )
 
-        # PyNX folder, refresh values
-        self._list_widgets_phase_retrieval.children[1].value\
-            = self.preprocessing_folder
-        self.pynx_folder_handler(change=self.preprocessing_folder)
+        # Plot folder
+        interface.TabData.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData.plot_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
-        # Plot folder, refresh values
-        self.tab_data.children[1].value = self.preprocessing_folder
-        self.plot_folder_handler(change=self.preprocessing_folder)
+        # PyNX folder
+        interface.TabPhaseRetrieval._list_widgets.children[1].value\
+            = interface.preprocessing_folder
+        interface.TabPhaseRetrieval.pynx_folder_handler(
+            change=interface.preprocessing_folder
+        )
+
 
         gutil.hash_print("Cleared window.")
         clear_output(True)

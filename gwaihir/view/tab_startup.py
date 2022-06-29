@@ -3,7 +3,7 @@ from ipywidgets import interact, Button, Layout, interactive
 from IPython.display import display, Markdown, clear_output, Image
 
 
-class TabReadme(widgets.Box):
+class TabStartup(widgets.Box):
     """
 
     """
@@ -12,7 +12,7 @@ class TabReadme(widgets.Box):
         """
 
         """
-        super(TabReadme, self).__init__()
+        super(TabStartup, self).__init__()
 
         self._list_widgets = widgets.VBox(
             unused_label_scan=widgets.HTML(

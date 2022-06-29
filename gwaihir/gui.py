@@ -47,8 +47,6 @@ class Interface:
 
         # Initialize future attributes
         self.Dataset = None
-        self.run_phase_retrieval = False
-        self.run_pynx_tools = False
         self.text_file = None
         self.params = None
         self.Facets = None

@@ -1,17 +1,13 @@
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import glob
 import os
 import operator as operator_lib
 from datetime import datetime
 import tables as tb
-import h5py
 import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
-from IPython.display import display
 
 # PyNX
 try:
@@ -22,16 +18,12 @@ try:
 except ModuleNotFoundError:
     pynx_import = False
 
-# gwaihir package
-import gwaihir
 
-# bcdi package
-from bcdi.preprocessing import ReadNxs3 as rd
 from bcdi.utils.utilities import bin_data
 
 
 def initialize_phase_retrieval(
-    self,
+    interface,
     unused_label_data,
     parent_folder,
     iobs,
@@ -179,113 +171,110 @@ def initialize_phase_retrieval(
     :param detector_distance: detector distance (meters)
     """
     # Assign attributes
-    self.Dataset.parent_folder = parent_folder
-    self.Dataset.iobs = parent_folder + iobs
+    interface.Dataset.parent_folder = parent_folder
+    interface.Dataset.iobs = parent_folder + iobs
     if mask != "":
-        self.Dataset.mask = parent_folder + mask
+        interface.Dataset.mask = parent_folder + mask
     else:
-        self.Dataset.mask = ""
+        interface.Dataset.mask = ""
     if support != "":
-        self.Dataset.support = parent_folder + support
+        interface.Dataset.support = parent_folder + support
     else:
-        self.Dataset.support = ""
+        interface.Dataset.support = ""
     if obj != "":
-        self.Dataset.obj = parent_folder + obj
+        interface.Dataset.obj = parent_folder + obj
     else:
-        self.Dataset.obj = ""
-    self.Dataset.auto_center_resize = auto_center_resize
-    self.Dataset.max_size = max_size
-    self.Dataset.support_threshold = support_threshold
-    self.Dataset.support_only_shrink = support_only_shrink
-    self.Dataset.support_update_period = support_update_period
-    self.Dataset.support_smooth_width = support_smooth_width
-    self.Dataset.support_post_expand = support_post_expand
-    self.Dataset.psf = psf
-    self.Dataset.psf_model = psf_model
-    self.Dataset.fwhm = fwhm
-    self.Dataset.eta = eta
-    self.Dataset.update_psf = update_psf
-    self.Dataset.nb_raar = nb_raar
-    self.Dataset.nb_hio = nb_hio
-    self.Dataset.nb_er = nb_er
-    self.Dataset.nb_ml = nb_ml
-    self.Dataset.nb_run = nb_run
-    self.Dataset.filter_criteria = filter_criteria
-    self.Dataset.nb_run_keep = nb_run_keep
-    self.Dataset.live_plot = live_plot
-    # To do
-    # self.Dataset.zero_mask = zero_mask
-    # self.Dataset.crop_output = crop_output
-    self.Dataset.positivity = positivity
-    self.Dataset.beta = beta
-    self.Dataset.detwin = detwin
-    self.Dataset.rebin = rebin
-    self.Dataset.verbose = verbose
-    self.Dataset.pixel_size_detector = np.round(
+        interface.Dataset.obj = ""
+    interface.Dataset.auto_center_resize = auto_center_resize
+    interface.Dataset.max_size = max_size
+    interface.Dataset.support_threshold = support_threshold
+    interface.Dataset.support_only_shrink = support_only_shrink
+    interface.Dataset.support_update_period = support_update_period
+    interface.Dataset.support_smooth_width = support_smooth_width
+    interface.Dataset.support_post_expand = support_post_expand
+    interface.Dataset.psf = psf
+    interface.Dataset.psf_model = psf_model
+    interface.Dataset.fwhm = fwhm
+    interface.Dataset.eta = eta
+    interface.Dataset.update_psf = update_psf
+    interface.Dataset.nb_raar = nb_raar
+    interface.Dataset.nb_hio = nb_hio
+    interface.Dataset.nb_er = nb_er
+    interface.Dataset.nb_ml = nb_ml
+    interface.Dataset.nb_run = nb_run
+    interface.Dataset.filter_criteria = filter_criteria
+    interface.Dataset.nb_run_keep = nb_run_keep
+    interface.Dataset.live_plot = live_plot
+    # interface.Dataset.zero_mask = zero_mask # TODO
+    # interface.Dataset.crop_output = crop_output # TODO
+    interface.Dataset.positivity = positivity
+    interface.Dataset.beta = beta
+    interface.Dataset.detwin = detwin
+    interface.Dataset.rebin = rebin
+    interface.Dataset.verbose = verbose
+    interface.Dataset.pixel_size_detector = np.round(
         pixel_size_detector * 1e-6, 6)
-    self.run_phase_retrieval = run_phase_retrieval
-    self.run_pynx_tools = run_pynx_tools
 
     # Extract dict, list and tuple from strings
-    self.Dataset.support_threshold = literal_eval(
-        self.Dataset.support_threshold)
-    self.Dataset.support_smooth_width = literal_eval(
-        self.Dataset.support_smooth_width)
-    self.Dataset.support_post_expand = literal_eval(
-        self.Dataset.support_post_expand)
-    self.Dataset.rebin = literal_eval(self.Dataset.rebin)
+    interface.Dataset.support_threshold = literal_eval(
+        interface.Dataset.support_threshold)
+    interface.Dataset.support_smooth_width = literal_eval(
+        interface.Dataset.support_smooth_width)
+    interface.Dataset.support_post_expand = literal_eval(
+        interface.Dataset.support_post_expand)
+    interface.Dataset.rebin = literal_eval(interface.Dataset.rebin)
 
-    if self.Dataset.live_plot == 0:
-        self.Dataset.live_plot = False
+    if interface.Dataset.live_plot == 0:
+        interface.Dataset.live_plot = False
 
-    print("Scan n°", self.Dataset.scan)
+    print("Scan n°", interface.Dataset.scan)
 
-    self.Dataset.energy = self._list_widgets_preprocessing.children[50].value
-    self.Dataset.wavelength = 1.2399 * 1e-6 / self.Dataset.energy
-    self.Dataset.detector_distance = self._list_widgets_preprocessing.children[49].value
+    interface.Dataset.energy = interface.TabPreprocess._list_widgets.children[50].value
+    interface.Dataset.wavelength = 1.2399 * 1e-6 / interface.Dataset.energy
+    interface.Dataset.detector_distance = interface.TabPreprocess._list_widgets.children[49].value
 
-    print("\tCXI input: Energy = %8.2f eV" % self.Dataset.energy)
-    print(f"\tCXI input: Wavelength = {self.Dataset.wavelength*1e10} A")
+    print("\tCXI input: Energy = %8.2f eV" % interface.Dataset.energy)
+    print(f"\tCXI input: Wavelength = {interface.Dataset.wavelength*1e10} A")
     print("\tCXI input: detector distance = %8.2f m" %
-          self.Dataset.detector_distance)
+          interface.Dataset.detector_distance)
     print(
-        f"\tCXI input: detector pixel size = {self.Dataset.pixel_size_detector} m")
+        f"\tCXI input: detector pixel size = {interface.Dataset.pixel_size_detector} m")
 
     # PyNX arguments text files
-    self.Dataset.pynx_parameter_gui_file = self.preprocessing_folder\
+    interface.Dataset.pynx_parameter_gui_file = interface.preprocessing_folder\
         + "/pynx_run_gui.txt"
-    self.Dataset.pynx_parameter_cli_file = self.preprocessing_folder\
+    interface.Dataset.pynx_parameter_cli_file = interface.preprocessing_folder\
         + "/pynx_run.txt"
 
     # Phase retrieval
-    if self.run_phase_retrieval and not self.run_pynx_tools:
-        if self.run_phase_retrieval in ("batch", "local_script"):
+    if run_phase_retrieval and not run_pynx_tools:
+        if run_phase_retrieval in ("batch", "local_script"):
             # Create /gui_run/ directory
             try:
                 os.mkdir(
-                    f"{self.preprocessing_folder}/gui_run/")
+                    f"{interface.preprocessing_folder}/gui_run/")
                 print(
-                    f"\tCreated {self.preprocessing_folder}/gui_run/", end="\n\n")
+                    f"\tCreated {interface.preprocessing_folder}/gui_run/", end="\n\n")
             except (FileExistsError, PermissionError):
                 print(
-                    f"{self.preprocessing_folder}/gui_run/ exists", end="\n\n")
+                    f"{interface.preprocessing_folder}/gui_run/ exists", end="\n\n")
 
-            self.text_file = []
-            self.Dataset.live_plot = False
+            interface.text_file = []
+            interface.Dataset.live_plot = False
 
             # Load files
-            self.text_file.append("# Parameters\n")
+            interface.text_file.append("# Parameters\n")
             for file, parameter in [
-                    (self.Dataset.iobs, "data"),
-                    (self.Dataset.mask, "mask"),
-                    (self.Dataset.obj, "object")
+                    (interface.Dataset.iobs, "data"),
+                    (interface.Dataset.mask, "mask"),
+                    (interface.Dataset.obj, "object")
             ]:
                 if file != "":
-                    self.text_file.append(f"{parameter} = \"{file}\"\n")
+                    interface.text_file.append(f"{parameter} = \"{file}\"\n")
 
             if support != "":
-                self.text_file += [
-                    f"support = \"{self.Dataset.support}\"\n",
+                interface.text_file += [
+                    f"support = \"{interface.Dataset.support}\"\n",
                     '\n']
             # else no support, just don't write it
 
@@ -295,40 +284,40 @@ def initialize_phase_retrieval(
             support_threshold = support_threshold.replace(" ", "")
 
             # Other support parameters
-            self.text_file += [
+            interface.text_file += [
                 f'support_threshold= {support_threshold}\n',
-                f'support_only_shrink = {self.Dataset.support_only_shrink}\n',
-                f'support_update_period = {self.Dataset.support_update_period}\n',
-                f'support_smooth_width_begin = {self.Dataset.support_smooth_width[0]}\n',
-                f'support_smooth_width_end = {self.Dataset.support_smooth_width[1]}\n',
-                f'support_post_expand = {self.Dataset.support_post_expand}\n'
+                f'support_only_shrink = {interface.Dataset.support_only_shrink}\n',
+                f'support_update_period = {interface.Dataset.support_update_period}\n',
+                f'support_smooth_width_begin = {interface.Dataset.support_smooth_width[0]}\n',
+                f'support_smooth_width_end = {interface.Dataset.support_smooth_width[1]}\n',
+                f'support_post_expand = {interface.Dataset.support_post_expand}\n'
                 '\n',
             ]
 
             # PSF
-            if self.Dataset.psf:
-                if self.Dataset.psf_model != "pseudo-voigt":
-                    self.text_file.append(
-                        f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm}\"\n")
+            if interface.Dataset.psf:
+                if interface.Dataset.psf_model != "pseudo-voigt":
+                    interface.text_file.append(
+                        f"psf = \"{interface.Dataset.psf_model},{interface.Dataset.fwhm}\"\n")
 
-                if self.Dataset.psf_model == "pseudo-voigt":
-                    self.text_file.append(
-                        f"psf = \"{self.Dataset.psf_model},{self.Dataset.fwhm},{self.Dataset.eta}\"\n")
+                if interface.Dataset.psf_model == "pseudo-voigt":
+                    interface.text_file.append(
+                        f"psf = \"{interface.Dataset.psf_model},{interface.Dataset.fwhm},{interface.Dataset.eta}\"\n")
             # no PSF, just don't write anything
 
             # Filtering the reconstructions
-            if self.Dataset.filter_criteria == "LLK":
-                nb_run_keep_LLK = self.Dataset.nb_run_keep
+            if interface.Dataset.filter_criteria == "LLK":
+                nb_run_keep_LLK = interface.Dataset.nb_run_keep
                 nb_run_keep_std = False
 
-            elif self.Dataset.filter_criteria == "std":
-                nb_run_keep_LLK = self.Dataset.nb_run
-                nb_run_keep_std = self.Dataset.nb_run_keep
+            elif interface.Dataset.filter_criteria == "std":
+                nb_run_keep_LLK = interface.Dataset.nb_run
+                nb_run_keep_std = interface.Dataset.nb_run_keep
 
-            elif self.Dataset.filter_criteria == "LLK_standard_deviation":
-                nb_run_keep_LLK = self.Dataset.nb_run_keep + \
-                    (self.Dataset.nb_run - self.Dataset.nb_run_keep) // 2
-                nb_run_keep_std = self.Dataset.nb_run_keep
+            elif interface.Dataset.filter_criteria == "LLK_standard_deviation":
+                nb_run_keep_LLK = interface.Dataset.nb_run_keep + \
+                    (interface.Dataset.nb_run - interface.Dataset.nb_run_keep) // 2
+                nb_run_keep_std = interface.Dataset.nb_run_keep
 
             # Clean rebin syntax
             rebin = rebin.replace("(", "")
@@ -336,53 +325,53 @@ def initialize_phase_retrieval(
             rebin = rebin.replace(" ", "")
 
             # Other parameters
-            self.text_file += [
+            interface.text_file += [
                 'data2cxi = True\n',
-                f'auto_center_resize = {self.Dataset.auto_center_resize}\n',
+                f'auto_center_resize = {interface.Dataset.auto_center_resize}\n',
                 '\n',
-                f'nb_raar = {self.Dataset.nb_raar}\n',
-                f'nb_hio = {self.Dataset.nb_hio}\n',
-                f'nb_er = {self.Dataset.nb_er}\n',
-                f'nb_ml = {self.Dataset.nb_ml}\n',
+                f'nb_raar = {interface.Dataset.nb_raar}\n',
+                f'nb_hio = {interface.Dataset.nb_hio}\n',
+                f'nb_er = {interface.Dataset.nb_er}\n',
+                f'nb_ml = {interface.Dataset.nb_ml}\n',
                 '\n',
-                f'nb_run = {self.Dataset.nb_run}\n',
+                f'nb_run = {interface.Dataset.nb_run}\n',
                 f'nb_run_keep = {nb_run_keep_LLK}\n',
                 '\n',
-                f'# max_size = {self.Dataset.max_size}\n',
+                f'# max_size = {interface.Dataset.max_size}\n',
                 'zero_mask = auto # masked pixels will start from imposed 0 and then let free\n',
                 'crop_output= 0 # set to 0 to avoid cropping the output in the .cxi\n',
                 "mask_interp=8,2\n"
                 "confidence_interval_factor_mask=0.5,1.2\n"
                 '\n',
-                f'positivity = {self.Dataset.positivity}\n',
-                f'beta = {self.Dataset.beta}\n',
-                f'detwin = {self.Dataset.detwin}\n',
+                f'positivity = {interface.Dataset.positivity}\n',
+                f'beta = {interface.Dataset.beta}\n',
+                f'detwin = {interface.Dataset.detwin}\n',
                 f'rebin = {rebin}\n',
                 '\n',
                 '# Generic parameters\n',
-                f'detector_distance = {self.Dataset.detector_distance}\n',
-                f'pixel_size_detector = {self.Dataset.pixel_size_detector}\n',
-                f'wavelength = {self.Dataset.wavelength}\n',
-                f'verbose = {self.Dataset.verbose}\n',
+                f'detector_distance = {interface.Dataset.detector_distance}\n',
+                f'pixel_size_detector = {interface.Dataset.pixel_size_detector}\n',
+                f'wavelength = {interface.Dataset.wavelength}\n',
+                f'verbose = {interface.Dataset.verbose}\n',
                 "output_format= 'cxi'\n",
-                f'live_plot = {self.Dataset.live_plot}\n',
+                f'live_plot = {interface.Dataset.live_plot}\n',
                 "mpi=run\n",
             ]
 
-            with open(self.Dataset.pynx_parameter_gui_file, "w") as v:
-                for line in self.text_file:
+            with open(interface.Dataset.pynx_parameter_gui_file, "w") as v:
+                for line in interface.text_file:
                     v.write(line)
 
-            gutil.hash_print(
-                f"Saved parameters in: {self.Dataset.pynx_parameter_gui_file}")
+            print(
+                f"Saved parameters in: {interface.Dataset.pynx_parameter_gui_file}")
 
-            if self.run_phase_retrieval == "batch":
+            if run_phase_retrieval == "batch":
                 # Runs modes directly and saves all data in a "gui_run"
                 # subdir, filter based on LLK
                 print(
-                    f"\nRunning: $ {self.path_scripts}/run_slurm_job.sh "
-                    f"--reconstruct gui --username {self.user_name} "
-                    f"--path {self.preprocessing_folder} "
+                    f"\nRunning: $ {interface.path_scripts}/run_slurm_job.sh "
+                    f"--reconstruct gui --username {interface.user_name} "
+                    f"--path {interface.preprocessing_folder} "
                     f"--filtering {nb_run_keep_std} --modes true"
                 )
                 print(
@@ -396,58 +385,58 @@ def initialize_phase_retrieval(
                     --path {} \
                     --filtering {} \
                     --modes true".format(
-                        quote(self.path_scripts),
-                        quote(self.user_name),
-                        quote(self.preprocessing_folder),
+                        quote(interface.path_scripts),
+                        quote(interface.user_name),
+                        quote(interface.preprocessing_folder),
                         quote(str(nb_run_keep_std)),
                     )
                 )
 
                 # Copy Pynx parameter file in folder
-                shutil.copyfile(self.Dataset.pynx_parameter_gui_file,
-                                f"{self.preprocessing_folder}/gui_run/pynx_run_gui.txt")
+                shutil.copyfile(interface.Dataset.pynx_parameter_gui_file,
+                                f"{interface.preprocessing_folder}/gui_run/pynx_run_gui.txt")
 
-            elif self.run_phase_retrieval == "local_script":
+            elif run_phase_retrieval == "local_script":
                 try:
                     print(
-                        f"\nRunning: $ {self.path_scripts}/pynx-id01cdi.py "
+                        f"\nRunning: $ {interface.path_scripts}/pynx-id01cdi.py "
                         "pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
                         end="\n\n")
                     os.system(
                         "cd {}; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
-                            quote(self.preprocessing_folder),
-                            quote(self.path_scripts),
+                            quote(interface.preprocessing_folder),
+                            quote(interface.path_scripts),
                         )
                     )
                 except KeyboardInterrupt:
                     print("Phase retrieval stopped by user ...")
 
-        elif self.run_phase_retrieval == "operators":
+        elif run_phase_retrieval == "operators":
             # Extract data
-            gutil.hash_print(
+            print(
                 "Log likelihood is updated every 50 iterations.")
-            self.Dataset.calc_llk = 50  # TODO
+            interface.Dataset.calc_llk = 50  # TODO
 
             # Keep a list of the resulting scans
-            self.reconstruction_file_list = []
+            interface.reconstruction_file_list = []
 
             try:
                 # Initialise the cdi operator
-                raw_cdi = gutil.initialize_cdi_operator(
-                    iobs=self.Dataset.iobs,
-                    mask=self.Dataset.mask,
-                    support=self.Dataset.support,
-                    obj=self.Dataset.obj,
-                    rebin=self.Dataset.rebin,
-                    auto_center_resize=self.Dataset.auto_center_resize,
-                    max_size=self.Dataset.max_size,
-                    wavelength=self.Dataset.wavelength,
-                    pixel_size_detector=self.Dataset.pixel_size_detector,
-                    detector_distance=self.Dataset.detector_distance,
+                raw_cdi = initialize_cdi_operator(
+                    iobs=interface.Dataset.iobs,
+                    mask=interface.Dataset.mask,
+                    support=interface.Dataset.support,
+                    obj=interface.Dataset.obj,
+                    rebin=interface.Dataset.rebin,
+                    auto_center_resize=interface.Dataset.auto_center_resize,
+                    max_size=interface.Dataset.max_size,
+                    wavelength=interface.Dataset.wavelength,
+                    pixel_size_detector=interface.Dataset.pixel_size_detector,
+                    detector_distance=interface.Dataset.detector_distance,
                 )
 
                 # Run phase retrieval for nb_run
-                for i in range(self.Dataset.nb_run):
+                for i in range(interface.Dataset.nb_run):
                     print(
                         "\n###########################################"
                         "#############################################"
@@ -460,38 +449,38 @@ def initialize_phase_retrieval(
                     # Save instance
                     if i == 0:
                         cxi_filename = "{}/preprocessing/{}.cxi".format(
-                            self.Dataset.scan_folder,
-                            self.Dataset.iobs.split("/")[-1].split(".")[0]
+                            interface.Dataset.scan_folder,
+                            interface.Dataset.iobs.split("/")[-1].split(".")[0]
                         )
 
-                        gutil.save_cdi_operator_as_cxi(
-                            gwaihir_dataset=self.Dataset,
+                        save_cdi_operator_as_cxi(
+                            gwaihir_dataset=interface.Dataset,
                             cdi_operator=cdi,
                             path_to_cxi=cxi_filename,
                         )
 
                     if i > 4:
                         print("Stopping liveplot to go faster\n")
-                        self.Dataset.live_plot = False
+                        interface.Dataset.live_plot = False
 
                     # Change support threshold for supports update
-                    if isinstance(self.Dataset.support_threshold, float):
-                        self.Dataset.threshold_relative\
-                            = self.Dataset.support_threshold
-                    elif isinstance(self.Dataset.support_threshold, tuple):
-                        self.Dataset.threshold_relative = np.random.uniform(
-                            self.Dataset.support_threshold[0],
-                            self.Dataset.support_threshold[1]
+                    if isinstance(interface.Dataset.support_threshold, float):
+                        interface.Dataset.threshold_relative\
+                            = interface.Dataset.support_threshold
+                    elif isinstance(interface.Dataset.support_threshold, tuple):
+                        interface.Dataset.threshold_relative = np.random.uniform(
+                            interface.Dataset.support_threshold[0],
+                            interface.Dataset.support_threshold[1]
                         )
-                    print(f"Threshold: {self.Dataset.threshold_relative}")
+                    print(f"Threshold: {interface.Dataset.threshold_relative}")
 
                     # Create support object
                     sup = SupportUpdate(
-                        threshold_relative=self.Dataset.threshold_relative,
-                        smooth_width=self.Dataset.support_smooth_width,
-                        force_shrink=self.Dataset.support_only_shrink,
+                        threshold_relative=interface.Dataset.threshold_relative,
+                        smooth_width=interface.Dataset.support_smooth_width,
+                        force_shrink=interface.Dataset.support_only_shrink,
                         method='rms',
-                        post_expand=self.Dataset.support_post_expand,
+                        post_expand=interface.Dataset.support_post_expand,
                     )
 
                     # Initialize the free pixels for LLK
@@ -499,9 +488,9 @@ def initialize_phase_retrieval(
 
                     # Initialize the support with autocorrelation, if no
                     # support given
-                    if not self.Dataset.support:
+                    if not interface.Dataset.support:
                         sup_init = "autocorrelation"
-                        if isinstance(self.Dataset.live_plot, int):
+                        if isinstance(interface.Dataset.live_plot, int):
                             if i > 4:
                                 cdi = ScaleObj() * AutoCorrelationSupport(
                                     threshold=0.1,  # extra argument
@@ -524,153 +513,153 @@ def initialize_phase_retrieval(
                     # updates
                     try:
                         # update_psf = 0 probably enough but not sure
-                        if self.Dataset.psf:
-                            if self.Dataset.support_update_period == 0:
+                        if interface.Dataset.psf:
+                            if interface.Dataset.support_update_period == 0:
                                 cdi = HIO(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                ) ** self.Dataset.nb_hio * cdi
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                ) ** (self.Dataset.nb_raar // 2) * cdi
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                ) ** (interface.Dataset.nb_raar // 2) * cdi
 
                                 # PSF is introduced at 66% of HIO and RAAR
                                 if psf_model != "pseudo-voigt":
                                     cdi = InitPSF(
-                                        model=self.Dataset.psf_model,
-                                        fwhm=self.Dataset.fwhm,
+                                        model=interface.Dataset.psf_model,
+                                        fwhm=interface.Dataset.fwhm,
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
                                     cdi = InitPSF(
-                                        model=self.Dataset.psf_model,
-                                        fwhm=self.Dataset.fwhm,
-                                        eta=self.Dataset.eta,
+                                        model=interface.Dataset.psf_model,
+                                        fwhm=interface.Dataset.fwhm,
+                                        eta=interface.Dataset.eta,
                                     ) * cdi
 
                                 cdi = RAAR(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot,
-                                    update_psf=self.Dataset.update_psf
-                                ) ** (self.Dataset.nb_raar // 2) * cdi
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot,
+                                    update_psf=interface.Dataset.update_psf
+                                ) ** (interface.Dataset.nb_raar // 2) * cdi
                                 cdi = ER(
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot,
-                                    update_psf=self.Dataset.update_psf
-                                ) ** self.Dataset.nb_er * cdi
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot,
+                                    update_psf=interface.Dataset.update_psf
+                                ) ** interface.Dataset.nb_er * cdi
 
                             else:
-                                hio_power = self.Dataset.nb_hio \
-                                    // self.Dataset.support_update_period
+                                hio_power = interface.Dataset.nb_hio \
+                                    // interface.Dataset.support_update_period
                                 raar_power = (
-                                    self.Dataset.nb_raar // 2) \
-                                    // self.Dataset.support_update_period
-                                er_power = self.Dataset.nb_er \
-                                    // self.Dataset.support_update_period
+                                    interface.Dataset.nb_raar // 2) \
+                                    // interface.Dataset.support_update_period
+                                er_power = interface.Dataset.nb_er \
+                                    // interface.Dataset.support_update_period
 
                                 cdi = (sup * HIO(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                )**self.Dataset.support_update_period
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                )**self.Dataset.support_update_period
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
 
                                 # PSF is introduced at 66% of HIO and RAAR
                                 # so from cycle n°924
                                 if psf_model != "pseudo-voigt":
                                     cdi = InitPSF(
-                                        model=self.Dataset.psf_model,
-                                        fwhm=self.Dataset.fwhm,
+                                        model=interface.Dataset.psf_model,
+                                        fwhm=interface.Dataset.fwhm,
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
                                     cdi = InitPSF(
-                                        model=self.Dataset.psf_model,
-                                        fwhm=self.Dataset.fwhm,
-                                        eta=self.Dataset.eta,
+                                        model=interface.Dataset.psf_model,
+                                        fwhm=interface.Dataset.fwhm,
+                                        eta=interface.Dataset.eta,
                                     ) * cdi
 
                                 cdi = (sup * RAAR(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot,
-                                    update_psf=self.Dataset.update_psf
-                                )**self.Dataset.support_update_period
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot,
+                                    update_psf=interface.Dataset.update_psf
+                                )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot,
-                                    update_psf=self.Dataset.update_psf
-                                )**self.Dataset.support_update_period
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot,
+                                    update_psf=interface.Dataset.update_psf
+                                )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
-                        if not self.Dataset.psf:
-                            if self.Dataset.support_update_period == 0:
+                        if not interface.Dataset.psf:
+                            if interface.Dataset.support_update_period == 0:
 
                                 cdi = HIO(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                ) ** self.Dataset.nb_hio * cdi
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                ) ** self.Dataset.nb_raar * cdi
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                ) ** interface.Dataset.nb_raar * cdi
                                 cdi = ER(
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                ) ** self.Dataset.nb_er * cdi
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                ) ** interface.Dataset.nb_er * cdi
 
                             else:
-                                hio_power = self.Dataset.nb_hio \
-                                    // self.Dataset.support_update_period
-                                raar_power = self.Dataset.nb_raar \
-                                    // self.Dataset.support_update_period
-                                er_power = self.Dataset.nb_er \
-                                    // self.Dataset.support_update_period
+                                hio_power = interface.Dataset.nb_hio \
+                                    // interface.Dataset.support_update_period
+                                raar_power = interface.Dataset.nb_raar \
+                                    // interface.Dataset.support_update_period
+                                er_power = interface.Dataset.nb_er \
+                                    // interface.Dataset.support_update_period
 
                                 cdi = (sup * HIO(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                )**self.Dataset.support_update_period
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
-                                    beta=self.Dataset.beta,
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                )**self.Dataset.support_update_period
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
-                                    calc_llk=self.Dataset.calc_llk,
-                                    show_cdi=self.Dataset.live_plot
-                                )**self.Dataset.support_update_period
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot
+                                )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
                         fn = "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
-                            self.Dataset.parent_folder,
-                            self.Dataset.scan,
+                            interface.Dataset.parent_folder,
+                            interface.Dataset.scan,
                             i,
                             cdi.get_llk()[0],
-                            self.Dataset.threshold_relative,
+                            interface.Dataset.threshold_relative,
                             cdi.iobs.shape[0],
                             cdi.iobs.shape[1],
                             cdi.iobs.shape[2],
                             sup_init,
                         )
 
-                        self.reconstruction_file_list.append(fn)
+                        interface.reconstruction_file_list.append(fn)
                         cdi.save_obj_cxi(fn)
                         print(
                             f"\nSaved as {fn}."
@@ -683,62 +672,68 @@ def initialize_phase_retrieval(
                             "Threshold value probably too low, support too large too continue")
 
                 # If filter, filter data
-                if self.Dataset.filter_criteria:
-                    gutil.filter_reconstructions(
-                        self.Dataset.parent_folder,
-                        self.Dataset.nb_run,
-                        self.Dataset.nb_run_keep,
-                        self.Dataset.filter_criteria
+                if interface.Dataset.filter_criteria:
+                    filter_reconstructions(
+                        interface.Dataset.parent_folder,
+                        interface.Dataset.nb_run,
+                        interface.Dataset.nb_run_keep,
+                        interface.Dataset.filter_criteria
                     )
 
             except KeyboardInterrupt:
                 clear_output(True)
-                gutil.hash_print(
+                print(
                     "Phase retrieval stopped by user, cxi file list below."
                 )
 
-            gutil.list_reconstructions(
-                folder=self.preprocessing_folder,
-                scan_name=self.Dataset.scan_name
+            list_reconstructions(
+                folder=interface.preprocessing_folder,
+                scan_name=interface.Dataset.scan_name
             )
 
     # Modes decomposition and solution filtering
-    if self.run_pynx_tools and not self.run_phase_retrieval:
-        if self.run_pynx_tools == "modes":
-            gutil.run_modes_decomposition(
-                path_scripts=self.path_scripts,
-                folder=self.Dataset.parent_folder,
+    if run_pynx_tools and not run_phase_retrieval:
+        if run_pynx_tools == "modes":
+            run_modes_decomposition(
+                path_scripts=interface.path_scripts,
+                folder=interface.Dataset.parent_folder,
             )
 
-        elif self.run_pynx_tools == "filter":
-            gutil.filter_reconstructions(
-                folder=self.Dataset.parent_folder,
+        elif run_pynx_tools == "filter":
+            filter_reconstructions(
+                folder=interface.Dataset.parent_folder,
                 nb_run=None,  # Will take the amount of cxi files found
-                nb_run_keep=self.Dataset.nb_run_keep,
-                filter_criteria=self.Dataset.filter_criteria
+                nb_run_keep=interface.Dataset.nb_run_keep,
+                filter_criteria=interface.Dataset.filter_criteria
             )
 
     # Clean output
-    if not self.run_phase_retrieval and not self.run_pynx_tools:
-        gutil.hash_print("Cleared output.")
+    if not run_phase_retrieval and not run_pynx_tools:
+        print("Cleared output.")
         clear_output(True)
 
-        gutil.list_reconstructions(
-            folder=self.preprocessing_folder,
-            scan_name=self.Dataset.scan_name
+        list_reconstructions(
+            folder=interface.preprocessing_folder,
+            scan_name=interface.Dataset.scan_name
         )
 
         # Refresh folders
-        self.sub_directories_handler(change=self.Dataset.scan_folder)
+        interface.TabStartup.sub_directories_handler(
+            change=interface.Dataset.scan_folder
+        )
 
-        # Plot folder, refresh values
-        self.tab_data.children[1].value = self.preprocessing_folder
-        self.plot_folder_handler(change=self.preprocessing_folder)
+        # Plot folder
+        interface.TabData.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData.plot_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
-        # Strain folder, refresh values
-        self._list_widgets_strain.children[-4].value\
-            = self.preprocessing_folder
-        self.strain_folder_handler(change=self.preprocessing_folder)
+        # Strain folder
+        interface.TabPostprocess._list_widgets.children[-4].value\
+            = interface.preprocessing_folder
+        interface.TabPostprocess.strain_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
 
 def filter_reconstructions(
@@ -756,8 +751,7 @@ def filter_reconstructions(
     function will filter nb_run_keep/2 files by the first criteria, and the
     remaining files by the second criteria.
 
-    The parameters are specified in the phase retrieval tab, and
-    their values saved through self.initialize_phase_retrieval()
+    The parameters are specified in the phase retrieval tab
 
     .param folder: parent folder to cxi files
     :param nb_run_keep: number of best run results to keep in the end,
