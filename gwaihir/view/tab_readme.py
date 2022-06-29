@@ -14,6 +14,10 @@ class TabReadme(widgets.Box):
         """
         super(TabReadme, self).__init__()
 
+        # Brief header describing the tab
+        self.header = 'README'
+
+        # Create tab widgets
         self._list_widgets = widgets.VBox(
             contents=widgets.ToggleButtons(
                 options=[

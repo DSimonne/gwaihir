@@ -14,6 +14,10 @@ class TabPreprocess(widgets.Box):
         """
         super(TabPreProcess, self).__init__()
 
+        # Brief header describing the tab
+        self.header = 'Preprocess'
+
+        # Create tab widgets
         self._list_widgets = widgets.VBox(
             unused_label_beamline=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\

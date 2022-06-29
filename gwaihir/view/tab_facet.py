@@ -1,7 +1,8 @@
 import ipywidgets as widgets
 from ipywidgets import interact, Button, Layout, interactive
 from IPython.display import display, Markdown, clear_output, Image
-
+import os
+import glob
 
 class TabFacet(widgets.Box):
     """
@@ -14,6 +15,10 @@ class TabFacet(widgets.Box):
         """
         super(TabFacet, self).__init__()
 
+        # Brief header describing the tab
+        self.header = 'Facet analysis'
+
+        # Create tab widgets
         self._list_widgets = widgets.VBox(
             unused_label_facet=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\

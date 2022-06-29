@@ -14,6 +14,10 @@ class TabPostprocessing(widgets.Box):
         """
         super(TabPostProcessing, self).__init__()
 
+        # Brief header describing the tab
+        self.header = 'Postprocess'
+
+        # Create tab widgets
         self._list_widgets = widgets.VBox(
             unused_label_averaging=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\

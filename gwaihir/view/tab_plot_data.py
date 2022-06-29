@@ -14,6 +14,10 @@ class TabPlotData(widgets.Box):
         """
         super(TabPlotData, self).__init__()
 
+        # Brief header describing the tab
+        self.header = 'Plot data'
+
+        # Create tab widgets
         self._list_widgets = widgets.VBox(
             unused_label_plot=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\

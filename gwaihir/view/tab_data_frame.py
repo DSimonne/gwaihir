@@ -14,6 +14,10 @@ class TabDataFrame(widgets.Box):
         """
         super(TabDataFrame, self).__init__()
 
+        # Brief header describing the tab
+        self.header = 'Display DataFrames'
+
+        # Create tab widgets
         self._list_widgets = widgets.VBox(
             unused_label_logs=widgets.HTML(
                 description="<p style='font-weight: bold;font-size:1.2em'>\
