@@ -121,7 +121,7 @@ class TabPlotData(widgets.Box):
 
         finally:
             self._list_widgets.children[2].options = [os.path.basename(f)
-                                                 for f in options]
+                                                      for f in options]
 
             if plot_tab_only:
                 self._list_widgets.children[1].options = [

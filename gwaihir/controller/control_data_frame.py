@@ -1,6 +1,7 @@
 import pandas as pd
 from IPython.display import display
 
+
 def display_data_frame(
     interface,
     unused_label_logs,

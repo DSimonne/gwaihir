@@ -628,6 +628,5 @@ def initialize_postprocessing(
             change=interface.preprocessing_folder
         )
 
-
         gutil.hash_print("Cleared window.")
         clear_output(True)

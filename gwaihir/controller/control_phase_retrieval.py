@@ -231,7 +231,8 @@ def initialize_phase_retrieval(
 
     interface.Dataset.energy = interface.TabPreprocess._list_widgets.children[50].value
     interface.Dataset.wavelength = 1.2399 * 1e-6 / interface.Dataset.energy
-    interface.Dataset.detector_distance = interface.TabPreprocess._list_widgets.children[49].value
+    interface.Dataset.detector_distance = interface.TabPreprocess._list_widgets.children[
+        49].value
 
     print("\tCXI input: Energy = %8.2f eV" % interface.Dataset.energy)
     print(f"\tCXI input: Wavelength = {interface.Dataset.wavelength*1e10} A")

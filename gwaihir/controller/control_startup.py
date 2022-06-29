@@ -7,6 +7,8 @@ import h5py
 import shutil
 from IPython.display import display
 
+import gwaihir.dataset as gd
+
 
 def initialize_directories(
     unused_label_scan,
@@ -44,7 +46,7 @@ def initialize_directories(
     """
     if run_dir_init:
         # Create Dataset Class
-        Dataset = gui_iterable.Dataset(
+        Dataset = gd.Dataset(
             scan=scan,
             sample_name=sample_name,
             data_dir=data_dir,

@@ -126,7 +126,7 @@ def extract_metadata(
             pass
 
         # Save metadata in the Dataset object
-        if isinstance(gwaihir_dataset, gwaihir.gui.gui_iterable.Dataset):
+        if isinstance(gwaihir_dataset, gwaihir.dataset.Dataset):
 
             gwaihir_dataset.bragg_peak = f.root.output.bragg_peak[...]
             gwaihir_dataset.q = f.root.output.q[...]
