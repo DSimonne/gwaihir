@@ -3,7 +3,8 @@ import os
 import glob
 import numpy as np
 
-class TabPostprocessing(widgets.VBox):
+
+class TabPostprocess(widgets.VBox):
     """
 
     """
@@ -12,14 +13,14 @@ class TabPostprocessing(widgets.VBox):
         """
 
         """
-        super(TabPostprocessing, self).__init__()
+        super(TabPostprocess, self).__init__()
 
         # Brief header describing the tab
         self.header = 'Postprocess'
         self.box_style = box_style
 
         # Define widgets
-        self.unused_label_averaging=widgets.HTML(
+        self.unused_label_averaging = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters used when averaging several reconstruction",
             style={
@@ -27,7 +28,7 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.sort_method=widgets.Dropdown(
+        self.sort_method = widgets.Dropdown(
             options=['mean_amplitude', 'variance',
                      'variance/mean', 'volume'],
             value="variance/mean",
@@ -35,7 +36,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.correlation_threshold=widgets.FloatText(
+        self.correlation_threshold = widgets.FloatText(
             value=0.9,
             step=0.01,
             max=1,
@@ -46,7 +47,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_FFT=widgets.HTML(
+        self.unused_label_FFT = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters relative to the FFT window and voxel sizes",
             style={
@@ -54,7 +55,7 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.original_size=widgets.Text(
+        self.original_size = widgets.Text(
             placeholder="[256, 512, 512]",
             description='FFT shape before PyNX binning in PyNX',
             layout=widgets.Layout(width='45%'),
@@ -62,7 +63,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.phasing_binning=widgets.Text(
+        self.phasing_binning = widgets.Text(
             value="(1, 1, 1)",
             placeholder="(1, 1, 1)",
             description='Binning factor used in phase retrieval',
@@ -72,7 +73,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.preprocessing_binning=widgets.Text(
+        self.preprocessing_binning = widgets.Text(
             value="(1, 1, 1)",
             placeholder="(1, 1, 1)",
             description='Binning factors used in preprocessing',
@@ -82,14 +83,14 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.output_size=widgets.Text(
+        self.output_size = widgets.Text(
             placeholder="[256, 512, 512]",
             description='Output size',
             continuous_update=False,
             style={'description_width': 'initial'}
         )
 
-        self.keep_size=widgets.Checkbox(
+        self.keep_size = widgets.Checkbox(
             value=False,
             description='Keep the initial array size for orthogonalization\
              (slower)',
@@ -97,7 +98,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.fix_voxel=widgets.BoundedIntText(
+        self.fix_voxel = widgets.BoundedIntText(
             placeholder="10",
             description='Fix voxel size, put 0 to set free:',
             min=0,
@@ -106,7 +107,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_disp_strain=widgets.HTML(
+        self.unused_label_disp_strain = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters related to displacement and strain calculation",
             style={
@@ -114,7 +115,7 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.data_frame=widgets.ToggleButtons(
+        self.data_frame = widgets.ToggleButtons(
             options=[
                 'detector', 'crystal', "laboratory"],
             value="detector",
@@ -129,7 +130,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.ref_axis_q=widgets.Dropdown(
+        self.ref_axis_q = widgets.Dropdown(
             options=["x", "y", "z"],
             value="y",
             description='Ref axis q',
@@ -139,7 +140,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.save_frame=widgets.ToggleButtons(
+        self.save_frame = widgets.ToggleButtons(
             options=[
                 'crystal', 'laboratory', "lab_flat_sample"],
             value="lab_flat_sample",
@@ -154,7 +155,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.isosurface_strain=widgets.FloatText(
+        self.isosurface_strain = widgets.FloatText(
             value=0.3,
             step=0.01,
             max=1,
@@ -169,7 +170,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.skip_unwrap=widgets.Checkbox(
+        self.skip_unwrap = widgets.Checkbox(
             value=False,
             description='Skip phase unwrap',
             layout=widgets.Layout(width='15%'),
@@ -177,7 +178,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.strain_method=widgets.ToggleButtons(
+        self.strain_method = widgets.ToggleButtons(
             options=[
                 'default', 'defect'],
             value="default",
@@ -191,7 +192,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.phase_offset=widgets.FloatText(
+        self.phase_offset = widgets.FloatText(
             value=0,
             step=0.01,
             min=0,
@@ -204,7 +205,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.phase_offset_origin=widgets.Text(
+        self.phase_offset_origin = widgets.Text(
             placeholder="(x, y, z), leave None for automatic.",
             description='Phase offset origin',
             continuous_update=False,
@@ -213,7 +214,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.offset_method=widgets.Dropdown(
+        self.offset_method = widgets.Dropdown(
             options=["COM", "mean"],
             value="mean",
             description='Offset method:',
@@ -222,7 +223,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.centering_method=widgets.Dropdown(
+        self.centering_method = widgets.Dropdown(
             options=[
                 "COM", "max", "max_com"],
             value="max_com",
@@ -232,7 +233,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_refraction=widgets.HTML(
+        self.unused_label_refraction = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters related to the refraction correction",
             style={
@@ -240,14 +241,14 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.correct_refraction=widgets.Checkbox(
+        self.correct_refraction = widgets.Checkbox(
             value=False,
             description='Correct refraction',
             style={
                 'description_width': 'initial'}
         )
 
-        self.optical_path_method=widgets.ToggleButtons(
+        self.optical_path_method = widgets.ToggleButtons(
             options=[
                 'threshold', 'defect'],
             value="threshold",
@@ -262,7 +263,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.dispersion=widgets.FloatText(
+        self.dispersion = widgets.FloatText(
             value=0.000050328,
             continuous_update=False,
             description='Dispersion (delta):',
@@ -272,7 +273,7 @@ class TabPostprocessing(widgets.VBox):
             disabled=True
         )
 
-        self.absorption=widgets.FloatText(
+        self.absorption = widgets.FloatText(
             value=0.000050328,
             continuous_update=False,
             description='Absorption (beta):',
@@ -282,7 +283,7 @@ class TabPostprocessing(widgets.VBox):
             disabled=True
         )
 
-        self.threshold_unwrap_refraction=widgets.FloatText(
+        self.threshold_unwrap_refraction = widgets.FloatText(
             value=0.05,
             step=0.01,
             continuous_update=False,
@@ -293,7 +294,7 @@ class TabPostprocessing(widgets.VBox):
             disabled=True
         )
 
-        self.unused_label_options=widgets.HTML(
+        self.unused_label_options = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Options",
             style={
@@ -301,7 +302,7 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.simulation=widgets.Checkbox(
+        self.simulation = widgets.Checkbox(
             value=False,
             description='Simulated data',
             layout=widgets.Layout(width='33%'),
@@ -309,7 +310,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.invert_phase=widgets.Checkbox(
+        self.invert_phase = widgets.Checkbox(
             value=True,
             description='Invert phase',
             layout=widgets.Layout(width='33%'),
@@ -317,7 +318,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.flip_reconstruction=widgets.Checkbox(
+        self.flip_reconstruction = widgets.Checkbox(
             value=False,
             description='Get conjugated object',
             layout=widgets.Layout(width='33%'),
@@ -325,7 +326,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.phase_ramp_removal=widgets.Dropdown(
+        self.phase_ramp_removal = widgets.Dropdown(
             options=[
                 "gradient", "upsampling"],
             value="gradient",
@@ -334,7 +335,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.threshold_gradient=widgets.FloatText(
+        self.threshold_gradient = widgets.FloatText(
             value=1.0,
             step=0.01,
             continuous_update=False,
@@ -344,35 +345,35 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.save_raw=widgets.Checkbox(
+        self.save_raw = widgets.Checkbox(
             value=False,
             description='Save raw data',
             style={
                 'description_width': 'initial'}
         )
 
-        self.save_support=widgets.Checkbox(
+        self.save_support = widgets.Checkbox(
             value=False,
             description='Save support',
             style={
                 'description_width': 'initial'}
         )
 
-        self.save=widgets.Checkbox(
+        self.save = widgets.Checkbox(
             value=True,
             description='Save output',
             style={
                 'description_width': 'initial'}
         )
 
-        self.debug=widgets.Checkbox(
+        self.debug = widgets.Checkbox(
             value=False,
             description='Debug',
             style={
                 'description_width': 'initial'}
         )
 
-        self.roll_modes=widgets.Text(
+        self.roll_modes = widgets.Text(
             value="(0, 0, 0)",
             placeholder="(0, 0, 0)",
             description='Roll modes',
@@ -382,7 +383,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_data_vis=widgets.HTML(
+        self.unused_label_data_vis = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters related to data visualization",
             style={
@@ -390,14 +391,14 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.align_axis=widgets.Checkbox(
+        self.align_axis = widgets.Checkbox(
             value=False,
             description='Align axis',
             style={
                 'description_width': 'initial'}
         )
 
-        self.ref_axis=widgets.Dropdown(
+        self.ref_axis = widgets.Dropdown(
             options=["x", "y", "z"],
             value="y",
             description='Ref axis for align axis',
@@ -407,7 +408,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.axis_to_align=widgets.Text(
+        self.axis_to_align = widgets.Text(
             value="[0.0, 0.0, 0.0]",
             placeholder="[0.0, 0.0, 0.0]",
             description='Axis to align for ref axis',
@@ -415,7 +416,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.strain_range=widgets.FloatText(
+        self.strain_range = widgets.FloatText(
             value=0.002,
             step=0.00001,
             continuous_update=False,
@@ -425,7 +426,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.phase_range=widgets.FloatText(
+        self.phase_range = widgets.FloatText(
             value=np.round(np.pi, 3),
             step=0.001,
             continuous_update=False,
@@ -435,7 +436,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.grey_background=widgets.Checkbox(
+        self.grey_background = widgets.Checkbox(
             value=True,
             description='Grey background in plots',
             layout=widgets.Layout(width='25%'),
@@ -443,7 +444,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.tick_spacing=widgets.BoundedIntText(
+        self.tick_spacing = widgets.BoundedIntText(
             value="100",
             description='Tick spacing:',
             min=0,
@@ -453,7 +454,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.tick_direction=widgets.Dropdown(
+        self.tick_direction = widgets.Dropdown(
             options=[
                 "out", "in", "inout"],
             value="inout",
@@ -463,7 +464,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.tick_length=widgets.BoundedIntText(
+        self.tick_length = widgets.BoundedIntText(
             value="3",
             description='Tick length:',
             min=0,
@@ -473,7 +474,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.tick_width=widgets.BoundedIntText(
+        self.tick_width = widgets.BoundedIntText(
             value="1",
             description='Tick width:',
             min=0,
@@ -483,7 +484,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_average=widgets.HTML(
+        self.unused_label_average = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters for averaging several reconstructed objects",
             style={
@@ -491,7 +492,7 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.averaging_space=widgets.Dropdown(
+        self.averaging_space = widgets.Dropdown(
             options=[
                 "reciprocal_space", "real_space"],
             value="reciprocal_space",
@@ -500,7 +501,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.threshold_avg=widgets.FloatText(
+        self.threshold_avg = widgets.FloatText(
             value=0.90,
             step=0.01,
             continuous_update=False,
@@ -510,7 +511,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_apodize=widgets.HTML(
+        self.unused_label_apodize = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Setup for phase averaging or apodization",
             style={
@@ -518,14 +519,14 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.apodize=widgets.Checkbox(
+        self.apodize = widgets.Checkbox(
             value=True,
             description='Multiply diffraction pattern by filtering window',
             style={
                 'description_width': 'initial'}
         )
 
-        self.apodization_window=widgets.Dropdown(
+        self.apodization_window = widgets.Dropdown(
             options=[
                 "normal", "tukey", "blackman"],
             value="blackman",
@@ -534,7 +535,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.half_width_avg_phase=widgets.BoundedIntText(
+        self.half_width_avg_phase = widgets.BoundedIntText(
             value=1,
             continuous_update=False,
             description='Width of apodizing window:',
@@ -543,7 +544,7 @@ class TabPostprocessing(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.apodization_mu=widgets.Text(
+        self.apodization_mu = widgets.Text(
             value="[0.0, 0.0, 0.0]",
             placeholder="[0.0, 0.0, 0.0]",
             description='Mu of gaussian window',
@@ -551,7 +552,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.apodization_sigma=widgets.Text(
+        self.apodization_sigma = widgets.Text(
             value="[0.30, 0.30, 0.30]",
             placeholder="[0.30, 0.30, 0.30]",
             description='Sigma of gaussian window',
@@ -559,7 +560,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.apodization_alpha=widgets.Text(
+        self.apodization_alpha = widgets.Text(
             value="[1.0, 1.0, 1.0]",
             placeholder="[1.0, 1.0, 1.0]",
             description='Alpha of gaussian window',
@@ -567,7 +568,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_strain=widgets.HTML(
+        self.unused_label_strain = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Path to file",
             style={
@@ -575,7 +576,7 @@ class TabPostprocessing(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.strain_folder=widgets.Dropdown(
+        self.strain_folder = widgets.Dropdown(
             options=[x[0] + "/" for x in os.walk(os.getcwd())],
             value=os.getcwd() + "/",
             placeholder=os.getcwd() + "/",
@@ -585,8 +586,8 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.reconstruction_files=widgets.Dropdown(
-            options=[""]\
+        self.reconstruction_files = widgets.Dropdown(
+            options=[""]
             + [os.path.basename(f) for f in sorted(
                 glob.glob(os.getcwd() + "/*.h5")
                 + glob.glob(os.getcwd() + "/*.cxi")
@@ -598,7 +599,7 @@ class TabPostprocessing(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.run_strain=widgets.ToggleButtons(
+        self.run_strain = widgets.ToggleButtons(
             options=[
                 ("Clear/ Reload folder", False),
                 ("Run postprocessing", "run"),
@@ -631,9 +632,11 @@ class TabPostprocessing(widgets.VBox):
             ]),
             self.unused_label_refraction,
             widgets.HBox([self.correct_refraction, self.optical_path_method]),
-            widgets.HBox([self.dispersion, self.absorption, self.threshold_unwrap_refraction]),
+            widgets.HBox([self.dispersion, self.absorption,
+                         self.threshold_unwrap_refraction]),
             self.unused_label_options,
-            widgets.HBox([self.simulation, self.invert_phase, self.flip_reconstruction]),
+            widgets.HBox([self.simulation, self.invert_phase,
+                         self.flip_reconstruction]),
             widgets.HBox([self.phase_ramp_removal, self.threshold_gradient]),
             widgets.HBox([self.save_raw, self.save_support, self.save]),
             widgets.HBox([self.debug, self.roll_modes]),
@@ -641,12 +644,15 @@ class TabPostprocessing(widgets.VBox):
             widgets.HBox([self.align_axis, self.ref_axis, self.axis_to_align]),
             widgets.HBox([self.strain_range, self.phase_range]),
             self.grey_background,
-            widgets.HBox([self.tick_spacing, self.tick_direction, self.tick_length, self.tick_width]),
+            widgets.HBox([self.tick_spacing, self.tick_direction,
+                         self.tick_length, self.tick_width]),
             self.unused_label_average,
             widgets.HBox([self.averaging_space, self.threshold_avg]),
             self.unused_label_apodize,
-            widgets.HBox([self.apodize, self.apodization_window, self.half_width_avg_phase]),
-            widgets.HBox([self.apodization_mu, self.apodization_sigma, self.apodization_alpha]),
+            widgets.HBox([self.apodize, self.apodization_window,
+                         self.half_width_avg_phase]),
+            widgets.HBox(
+                [self.apodization_mu, self.apodization_sigma, self.apodization_alpha]),
             self.unused_label_strain,
             self.strain_folder,
             self.reconstruction_files,

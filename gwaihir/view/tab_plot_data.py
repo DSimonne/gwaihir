@@ -3,6 +3,7 @@ import os
 import glob
 import matplotlib.pyplot as plt
 
+
 class TabPlotData(widgets.VBox):
     """
 
@@ -20,14 +21,14 @@ class TabPlotData(widgets.VBox):
         self.box_style = box_style
 
         # Define widgets
-        self.unused_label_plot=widgets.HTML(
+        self.unused_label_plot = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Loads data files and displays it in the GUI",
             style={'description_width': 'initial'},
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.folder=widgets.Dropdown(
+        self.folder = widgets.Dropdown(
             options=[x[0] + "/" for x in os.walk(os.getcwd())],
             value=os.getcwd() + "/",
             placeholder=os.getcwd() + "/",
@@ -37,7 +38,7 @@ class TabPlotData(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.filename=widgets.SelectMultiple(
+        self.filename = widgets.SelectMultiple(
             options=[""]
             + [os.path.basename(f) for f in sorted(
                 glob.glob(os.getcwd() + "/*.npy")
@@ -53,7 +54,7 @@ class TabPlotData(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.cmap=widgets.Dropdown(
+        self.cmap = widgets.Dropdown(
             options=plt.colormaps(),
             value="jet",
             description="Color map:",
@@ -62,7 +63,7 @@ class TabPlotData(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.data_use=widgets.ToggleButtons(
+        self.data_use = widgets.ToggleButtons(
             options=[
                 ("Clear/ Reload folder", False),
                 ('2D plot', "2D"),
@@ -126,7 +127,7 @@ class TabPlotData(widgets.VBox):
         ]
 
         self.filename.options = [os.path.basename(f)
-            for f in options]
+                                 for f in options]
 
         if self.plot_tab_only:
             self.folder.options = [

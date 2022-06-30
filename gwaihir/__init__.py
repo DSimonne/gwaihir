@@ -6,4 +6,4 @@
 """
 """
 
-__all__ = ["dataset", "gui", "plot", "version"]
+__all__ = ["dataset", "gui", "plot", "version", "controller", "view"]

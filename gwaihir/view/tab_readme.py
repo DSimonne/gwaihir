@@ -17,7 +17,7 @@ class TabReadme(widgets.VBox):
         self.box_style = box_style
 
         # Define widgets
-        self.contents=widgets.ToggleButtons(
+        self.contents = widgets.ToggleButtons(
             options=[
                 "GUI",
                 'Preprocessing', 'Phase retrieval',

@@ -5,13 +5,14 @@ import glob
 import os
 import tables as tb
 from IPython.display import display, clear_output
+import ipywidgets as widgets
 
 from scipy.ndimage import gaussian_filter
 
 from gwaihir.plot import plot_3d_slices
 
 
-def load_data(
+def init_plot_data_tab(
     interface,
     unused_label_plot,
     folder,
@@ -33,8 +34,9 @@ def load_data(
     """
     if data_use == "2D":
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-3]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-3]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Plot data
         for p in filename:
@@ -48,8 +50,9 @@ def load_data(
 
     if data_use == "3D" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Plot data
         Plotter(
@@ -61,8 +64,9 @@ def load_data(
 
     if data_use == "slices":
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-3]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-3]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Plot data
         for p in filename:
@@ -76,8 +80,9 @@ def load_data(
 
     elif data_use == "create_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Initialize class
         sup = SupportTools(
@@ -125,8 +130,9 @@ def load_data(
 
     elif data_use == "extract_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Initialize class
         sup = SupportTools(
@@ -141,8 +147,9 @@ def load_data(
 
     elif data_use == "smooth_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Initialize class
         sup = SupportTools(
@@ -198,8 +205,9 @@ def load_data(
 
     elif data_use == "show_image":
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         try:
             for p in filename:
@@ -211,8 +219,9 @@ def load_data(
 
     elif data_use == "hf_glance":
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Show tree
         for p in filename:
@@ -231,8 +240,9 @@ def load_data(
 
     elif data_use == "delete":
         # Disable widgets
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         button_delete_data = Button(
             description="Delete files ?",
@@ -256,8 +266,9 @@ def load_data(
 
     elif data_use is False:
         plt.close()
-        for w in interface.TabPlotData._list_widgets.children[:-2]:
-            w.disabled = False
+        for w in interface.TabPlotData.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = False
         interface.TabPlotData.plot_folder_handler(change=folder)
         print("Cleared window.")
         clear_output(True)

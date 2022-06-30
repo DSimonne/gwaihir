@@ -1,9 +1,11 @@
-import ipywidgets as widgets
 from IPython.display import display, Markdown, clear_output
-import gwaihir
+from bcdi.postprocessing import facet_analysis
+from gwaihir.controller import control_preprocess
+from gwaihir.controller import control_phase_retrieval
+from gwaihir.controller import control_postprocess
+import ipywidgets as widgets
 
-
-def display_readme(contents):
+def init_readme_tab(contents):
     """
     Help text about different steps in data analysis workflow.
 
@@ -13,15 +15,15 @@ def display_readme(contents):
     """
     if contents == "Preprocessing":
         clear_output(True)
-        print(help(gwaihir.gui.gui.Interface.initialize_preprocessing))
+        print(help(control_preprocess.init_preprocess_tab))
 
     elif contents == "Phase retrieval":
         clear_output(True)
-        print(help(gwaihir.gui.gui.Interface.initialize_phase_retrieval))
+        print(help(control_phase_retrieval.init_phase_retrieval_tab))
 
     elif contents == "Postprocessing":
         clear_output(True)
-        print(help(gwaihir.gui.gui.Interface.initialize_postprocessing))
+        print(help(control_postprocess.init_postprocess_tab))
 
     elif contents == "Facet analysis":
         clear_output(True)

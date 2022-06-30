@@ -17,7 +17,7 @@ class TabPreprocess(widgets.VBox):
         self.box_style = box_style
 
         # Define widgets
-        self.unused_label_beamline=widgets.HTML(
+        self.unused_label_beamline = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters specific to the beamline",
             style={
@@ -25,7 +25,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.beamline=widgets.Dropdown(
+        self.beamline = widgets.Dropdown(
             options=['ID01', 'SIXS_2018', 'SIXS_2019',
                      'CRISTAL', 'P10', 'NANOMAX', '34ID',
                      "ID01BLISS", "ID27"],
@@ -38,7 +38,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.actuators=widgets.Text(
+        self.actuators = widgets.Text(
             value="{}",
             placeholder="{}",
             continuous_update=False,
@@ -52,7 +52,7 @@ class TabPreprocess(widgets.VBox):
             disabled=True
         )
 
-        self.is_series=widgets.Checkbox(
+        self.is_series = widgets.Checkbox(
             value=False,
             description='Is series (P10)',
             disabled=True,
@@ -61,7 +61,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.custom_scan=widgets.Checkbox(
+        self.custom_scan = widgets.Checkbox(
             value=False,
             description='Custom scan',
             continuous_update=False,
@@ -73,7 +73,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.custom_images=widgets.Text(
+        self.custom_images = widgets.Text(
             value="[]",
             description='Custom images',
             continuous_update=False,
@@ -81,7 +81,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.custom_monitor=widgets.IntText(
+        self.custom_monitor = widgets.IntText(
             value=0,
             description='Custom monitor',
             continuous_update=False,
@@ -89,7 +89,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.specfile_name=widgets.Text(
+        self.specfile_name = widgets.Text(
             placeholder="alias_dict_2019.txt",
             value="",
             description='Specfile name',
@@ -100,7 +100,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.rocking_angle=widgets.Dropdown(
+        self.rocking_angle = widgets.Dropdown(
             options=[
                 'inplane', 'outofplane', 'energy'],
             value="inplane",
@@ -114,7 +114,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_masking=widgets.HTML(
+        self.unused_label_masking = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters used in masking",
             style={
@@ -122,7 +122,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.flag_interact=widgets.Checkbox(
+        self.flag_interact = widgets.Checkbox(
             value=False,
             description='Manual masking',
             continuous_update=False,
@@ -134,7 +134,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.background_plot=widgets.FloatText(
+        self.background_plot = widgets.FloatText(
             value=0.5,
             step=0.01,
             max=1,
@@ -151,7 +151,7 @@ class TabPreprocess(widgets.VBox):
             disabled=True
         )
 
-        self.unused_label_centering=widgets.HTML(
+        self.unused_label_centering = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters related to data cropping/padding/centering</p>",
             style={
@@ -159,7 +159,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.centering_method=widgets.Dropdown(
+        self.centering_method = widgets.Dropdown(
             options=[
                 "max", "com", "manual"],
             value="max",
@@ -174,7 +174,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.bragg_peak=widgets.Text(
+        self.bragg_peak = widgets.Text(
             placeholder="[z_bragg, y_bragg, x_bragg]",
             description='Bragg peak position',
             disabled=True,
@@ -184,7 +184,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.fix_size=widgets.Text(
+        self.fix_size = widgets.Text(
             placeholder="[zstart, zstop, ystart, ystop, xstart, xstop]",
             description='Fix array size',
             disabled=True,
@@ -194,7 +194,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.center_fft=widgets.Dropdown(
+        self.center_fft = widgets.Dropdown(
             options=[
                 'crop_sym_ZYX', 'crop_asym_ZYX', 'pad_asym_Z_crop_sym_YX',
                 'pad_sym_Z_crop_asym_YX', 'pad_sym_Z', 'pad_asym_Z',
@@ -208,7 +208,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.pad_size=widgets.Text(
+        self.pad_size = widgets.Text(
             placeholder="[256, 512, 512]",
             description='Array size after padding',
             disabled=True,
@@ -218,7 +218,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.normalize_flux=widgets.Dropdown(
+        self.normalize_flux = widgets.Dropdown(
             options=[
                 "skip", "monitor"],
             value="skip",
@@ -232,7 +232,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_filtering=widgets.HTML(
+        self.unused_label_filtering = widgets.HTML(
             description="""<p style='font-weight: bold;font-size:1.2em'>\
             Parameters for data filtering</p>""",
             style={
@@ -240,7 +240,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.mask_zero_event=widgets.Checkbox(
+        self.mask_zero_event = widgets.Checkbox(
             value=False,
             description='Mask zero event',
             disabled=True,
@@ -251,7 +251,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.median_filter=widgets.Dropdown(
+        self.median_filter = widgets.Dropdown(
             options=[
                 'skip', 'median', 'interp_isolated', 'mask_isolated'],
             value="skip",
@@ -266,7 +266,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.median_filter_order=widgets.IntText(
+        self.median_filter_order = widgets.IntText(
             value=7,
             description='Med filter order:',
             disabled=True,
@@ -276,7 +276,7 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.phasing_binning=widgets.Text(
+        self.phasing_binning = widgets.Text(
             value="(1, 1, 1)",
             placeholder="(1, 1, 1)",
             description='Binning for phasing',
@@ -290,7 +290,7 @@ class TabPreprocess(widgets.VBox):
             dimension, detector vertical axis, detector horizontal axis)"
         )
 
-        self.unused_label_reload=widgets.HTML(
+        self.unused_label_reload = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters used when reloading processed data</p>",
             style={
@@ -298,7 +298,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.reload_previous=widgets.Checkbox(
+        self.reload_previous = widgets.Checkbox(
             value=False,
             description='Reload previous',
             continuous_update=False,
@@ -311,7 +311,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.reload_orthogonal=widgets.Checkbox(
+        self.reload_orthogonal = widgets.Checkbox(
             value=False,
             description='Reload orthogonal',
             continuous_update=False,
@@ -324,7 +324,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.preprocessing_binning=widgets.Text(
+        self.preprocessing_binning = widgets.Text(
             value="(1, 1, 1)",
             placeholder="(1, 1, 1)",
             description='Binning used in data to be reloaded',
@@ -338,7 +338,7 @@ class TabPreprocess(widgets.VBox):
             dimension, detector vertical axis, detector horizontal axis)"
         )
 
-        self.unused_label_saving=widgets.HTML(
+        self.unused_label_saving = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Parameters used when saving the data</p>",
             style={
@@ -346,7 +346,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.save_rawdata=widgets.Checkbox(
+        self.save_rawdata = widgets.Checkbox(
             value=False,
             description='Save raw data',
             disabled=True,
@@ -358,7 +358,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.save_to_npz=widgets.Checkbox(
+        self.save_to_npz = widgets.Checkbox(
             value=True,
             description='Save to npz',
             disabled=True,
@@ -370,7 +370,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.save_to_mat=widgets.Checkbox(
+        self.save_to_mat = widgets.Checkbox(
             value=False,
             description='Save to mat',
             disabled=True,
@@ -382,7 +382,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.save_to_vti=widgets.Checkbox(
+        self.save_to_vti = widgets.Checkbox(
             value=False,
             description='Save to vti',
             continuous_update=False,
@@ -395,7 +395,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.save_as_int=widgets.Checkbox(
+        self.save_as_int = widgets.Checkbox(
             value=False,
             description='Save as int',
             continuous_update=False,
@@ -408,7 +408,7 @@ class TabPreprocess(widgets.VBox):
             icon='check'
         )
 
-        self.unused_label_preprocess=widgets.HTML(
+        self.unused_label_preprocess = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Click below to run the data processing before phasing</p>",
             style={
@@ -416,7 +416,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.init_para=widgets.ToggleButton(
+        self.init_para = widgets.ToggleButton(
             value=False,
             description='Initialize parameters ...',
             disabled=True,
@@ -434,7 +434,8 @@ class TabPreprocess(widgets.VBox):
             self.unused_label_beamline,
             self.beamline,
             widgets.HBox([self.actuators, self.is_series]),
-            widgets.HBox([self.custom_scan, self.custom_images, self.custom_monitor]),
+            widgets.HBox(
+                [self.custom_scan, self.custom_images, self.custom_monitor]),
             self.specfile_name,
             self.rocking_angle,
             self.unused_label_masking,
@@ -444,16 +445,20 @@ class TabPreprocess(widgets.VBox):
             self.unused_label_centering,
             widgets.HBox([self.centering_method, self.bragg_peak]),
             self.fix_size,
-            widgets.HBox([self.center_fft, self.pad_size, self.normalize_flux]),
+            widgets.HBox(
+                [self.center_fft, self.pad_size, self.normalize_flux]),
             self.unused_label_filtering,
-            widgets.HBox([self.mask_zero_event, self.median_filter, self.median_filter_order]),
+            widgets.HBox(
+                [self.mask_zero_event, self.median_filter, self.median_filter_order]),
             self.phasing_binning,
 
             # Parameters used when reloading processed data
             self.unused_label_reload,
-            widgets.HBox([self.reload_previous, self.reload_orthogonal, self.preprocessing_binning]),
+            widgets.HBox(
+                [self.reload_previous, self.reload_orthogonal, self.preprocessing_binning]),
             self.unused_label_saving,
-            widgets.HBox([self.save_rawdata, self.save_to_npz, self.save_to_mat, self.save_to_vti, self.save_as_int]),
+            widgets.HBox([self.save_rawdata, self.save_to_npz,
+                         self.save_to_mat, self.save_to_vti, self.save_as_int]),
             self.unused_label_preprocess,
             self.init_para,
         )
@@ -517,7 +522,7 @@ class TabPreprocess(widgets.VBox):
             change = change.new
 
         if not change:
-            self._list_widgets_init_dir.children[8].disabled = False # TODO
+            self._list_widgets_init_dir.children[8].disabled = False  # TODO
 
             for w in self.children[:-2]:
                 w.disabled = False
@@ -530,7 +535,7 @@ class TabPreprocess(widgets.VBox):
                 change=self.reload_previous.value)
 
         if change:
-            self._list_widgets_init_dir.children[8].disabled = True # TODO
+            self._list_widgets_init_dir.children[8].disabled = True  # TODO
 
             for w in self.children[:-2]:
                 w.disabled = True

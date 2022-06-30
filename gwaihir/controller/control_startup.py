@@ -6,13 +6,14 @@ import tables as tb
 import h5py
 import shutil
 from IPython.display import display
+import ipywidgets as widgets
 
 import gwaihir.dataset as gd
 
 
-def initialize_directories(
-    unused_label_scan,
+def init_startup_tab(
     interface,
+    unused_label_scan,
     sample_name,
     scan,
     data_dir,
@@ -122,7 +123,8 @@ def initialize_directories(
 
 
 def save_dataset():
-
+    """
+    """
     # Only allow to save data if PyNX is imported to avoid errors
     if pynx_import:
         # Button to save data

@@ -18,7 +18,7 @@ class TabStartup(widgets.VBox):
         self.box_style = box_style
 
         # Define widgets
-        self.unused_label_scan=widgets.HTML(
+        self.unused_label_scan = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Define working directory and scan number",
             style={
@@ -26,7 +26,7 @@ class TabStartup(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.sample_name=widgets.Text(
+        self.sample_name = widgets.Text(
             value="S",
             placeholder="",
             description='Sample Name',
@@ -36,7 +36,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.scan=widgets.BoundedIntText(
+        self.scan = widgets.BoundedIntText(
             value="01415",
             description='Scan nb:',
             min=0,
@@ -47,7 +47,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.data_dir=widgets.Text(
+        self.data_dir = widgets.Text(
             value=os.getcwd() + "/data_dir/",
             placeholder="Path to data directory",
             description='Data directory',
@@ -57,7 +57,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.root_folder=widgets.Text(
+        self.root_folder = widgets.Text(
             value=os.getcwd() + "/TestGui/",
             placeholder="Root folder (parent to all scan directories)",
             description='Target directory (root_folder)',
@@ -67,7 +67,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.comment=widgets.Text(
+        self.comment = widgets.Text(
             value="",
             description='Comment',
             continuous_update=False,
@@ -77,7 +77,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.debug=widgets.Checkbox(
+        self.debug = widgets.Checkbox(
             value=False,
             description='Debug scripts',
             tooltip='True to interact with plots, False to close it \
@@ -87,7 +87,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.matplotlib_backend=widgets.Dropdown(
+        self.matplotlib_backend = widgets.Dropdown(
             options=[('Agg - No plots (faster)', 'Agg'), ('Qt5Agg - Interactive plots', 'Qt5Agg'),
                      ("ipympl- Plots in notebook output", "module://matplotlib_inline.backend_inline")],
             value="module://matplotlib_inline.backend_inline",
@@ -98,7 +98,7 @@ class TabStartup(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.run_dir_init=widgets.ToggleButton(
+        self.run_dir_init = widgets.ToggleButton(
             value=False,
             description='Initialize directories ...',
             button_style='',
@@ -142,11 +142,11 @@ class TabStartup(widgets.VBox):
             for w in self._list_widgets_preprocessing.children[:-1]:
                 w.disabled = False
 
-            self.beamline_handler(# TODO
+            self.beamline_handler(  # TODO
                 change=self._list_widgets_preprocessing.children[1].value)
-            self.bragg_peak_centering_handler(# TODO
+            self.bragg_peak_centering_handler(  # TODO
                 change=self._list_widgets_preprocessing.children[13].value)
-            self.reload_data_handler(# TODO
+            self.reload_data_handler(  # TODO
                 change=self._list_widgets_preprocessing.children[25].value)
 
     def sub_directories_handler(self, change):
@@ -155,7 +155,7 @@ class TabStartup(widgets.VBox):
             change = change.new
         sub_dirs = [x[0] + "/" for x in os.walk(change)]
 
-        if self.run_dir_init.value: # TODO
+        if self.run_dir_init.value:  # TODO
             self._list_widgets_strain.children[-4].options = sub_dirs
             self.tab_data.children[1].options = sub_dirs
             self.tab_facet.children[1].options = sub_dirs

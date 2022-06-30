@@ -8,6 +8,7 @@ import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
+import ipywidgets as widgets
 
 # PyNX
 try:
@@ -22,7 +23,7 @@ except ModuleNotFoundError:
 from bcdi.utils.utilities import bin_data
 
 
-def initialize_phase_retrieval(
+def init_phase_retrieval_tab(
     interface,
     unused_label_data,
     parent_folder,

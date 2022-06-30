@@ -1,9 +1,10 @@
 import glob
 import os
 from datetime import datetime
+import ipywidgets as widgets
 
 
-def initialize_postprocessing(
+def init_postprocess_tab(
     interface,
     unused_label_averaging,
     sort_method,

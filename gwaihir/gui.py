@@ -1,11 +1,9 @@
-import glob
 import os
 import inspect
 import getpass
 
-import ipywidgets as widgets
-from ipywidgets import interact, Button, Layout, interactive
-from IPython.display import display, Markdown, clear_output, Image
+from ipywidgets import interactive, fixed, Tab
+from IPython.display import display
 
 # Try to import all necessary operators for PyNX to see if it is available
 # GPU will be auto-selected
@@ -130,8 +128,8 @@ class Interface:
                     ])
 
         # Set tab names
-        for j, Tab in enumerate(self.window.children)
-        self.window.set_title(j, Tab.header)
+        for j, Tab in enumerate(self.window.children):
+            self.window.set_title(j, Tab.header)
 
         # Display the final window
         display(self.window)

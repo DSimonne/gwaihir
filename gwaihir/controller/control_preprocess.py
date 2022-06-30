@@ -6,195 +6,14 @@ import os
 from datetime import datetime
 import tables as tb
 from IPython.display import display
+import ipywidgets as widgets
 
 import gwaihir
 
 from bcdi.preprocessing import ReadNxs3 as rd
 
 
-def create_yaml_file(
-    fname,
-    **kwargs
-):
-    """
-    Create yaml file storing all keywords arguments given in input.
-    Used for bcdi scripts.
-
-    :param fname: path to created yaml file
-    :param kwargs: kwargs to store in file
-    """
-    config_file = []
-
-    for k, v in kwargs.items():
-        if isinstance(v, str):
-            config_file.append(f"{k}: \"{v}\"")
-        elif isinstance(v, tuple):
-            if v:
-                config_file.append(f"{k}: {list(v)}")
-            else:
-                config_file.append(f"{k}: None")
-        elif isinstance(v, np.ndarray):
-            config_file.append(f"{k}: {list(v)}")
-        elif isinstance(v, list):
-            if v:
-                config_file.append(f"{k}: {v}")
-            else:
-                config_file.append(f"{k}: None")
-        else:
-            config_file.append(f"{k}: {v}")
-
-    file = os.path.basename(fname)
-    directory = fname.strip(file)
-
-    # Create directory
-    if not os.path.isdir(directory):
-        full_path = ""
-        for d in directory.split("/"):
-            full_path += d + "/"
-            try:
-                os.mkdir(full_path)
-            except (FileExistsError, PermissionError):
-                pass
-
-    # Save in file
-    if fname.endswith('.yaml') or fname.endswith('.yml'):
-        with open(fname, "w") as v:
-            for line in config_file:
-                v.write(line + "\n")
-    else:
-        raise FileError("Parameter fname must end with .yaml or .yml")
-
-
-def extract_metadata(
-    scan_nb,
-    metadata_file,
-    gwaihir_dataset=None,
-    metadata_csv_file=None,
-):
-    """
-    Extract meaningful data from bcdi script output files and saves them
-    in a csv file as well as in the Dataset object to allow comparison.
-
-    :param scan_nb: int, nb of scan, used for indexing in csv file.
-    :param metadata_file: absolute path to metadata file (.h5) created by
-     bcdi.preprocessing_BCDI.py script
-    :param gwaihir_dataset: Dataset object in which the metadata is saved,
-     optionnal
-    :param metadata_csv_file: csv file in which the metadata is saved.
-     If None, defaulted to os.getcwd() + "/metadata.csv"
-    """
-    # Open file
-    with tb.open_file(metadata_file, "r") as f:
-
-        # Save metadata in a pd.DataFrame
-        temp_df = pd.DataFrame([[
-            scan_nb,
-            f.root.output.q[...][0],
-            f.root.output.q[...][1],
-            f.root.output.q[...][2],
-            f.root.output.qnorm[...],
-            f.root.output.dist_plane[...],
-            f.root.output.bragg_inplane[...],
-            f.root.output.bragg_outofplane[...],
-            f.root.output.bragg_peak[...],
-        ]],
-            columns=[
-                "scan",
-                "qx",
-                "qy",
-                "qz",
-                "q_norm",
-                "d_hkl",
-                "inplane_angle",
-                "out_of_plane_angle",
-                "bragg_peak",
-        ])
-
-        # Extra metadata that is not always computed
-        try:
-            temp_df["COM_rocking_curve"] = f.root.output.COM_rocking_curve[...]
-            temp_df["interp_fwhm"] = f.root.output.interp_fwhm[...]
-
-            tilt_angle = np.round(
-                np.mean(f.root.output.tilt_values[...][1:]
-                        - f.root.output.tilt_values[...][:-1]),
-                4)
-            temp_df["tilt_angle"] = tilt_angle
-
-        except tb.NoSuchNodeError:
-            # No angle correction during preprocess
-            pass
-
-        # Save metadata in the Dataset object
-        if isinstance(gwaihir_dataset, gwaihir.dataset.Dataset):
-
-            gwaihir_dataset.bragg_peak = f.root.output.bragg_peak[...]
-            gwaihir_dataset.q = f.root.output.q[...]
-            gwaihir_dataset.qnorm = f.root.output.qnorm[...]
-            gwaihir_dataset.dist_plane = f.root.output.dist_plane[...]
-            gwaihir_dataset.bragg_inplane = f.root.output.bragg_inplane[...]
-            gwaihir_dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
-
-            # Extra metadata that is not always computed
-            try:
-                gwaihir_dataset.tilt_values = f.root.output.tilt_values[...]
-                gwaihir_dataset.rocking_curve = f.root.output.rocking_curve[...]
-                gwaihir_dataset.interp_tilt = f.root.output.interp_tilt[...]
-                gwaihir_dataset.interp_curve = f.root.output.interp_curve[...]
-                gwaihir_dataset.detector_data_COM = f.root.output.detector_data_COM[...]
-                gwaihir_dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
-                gwaihir_dataset.interp_fwhm = f.root.output.interp_fwhm[...]
-                gwaihir_dataset.tilt_angle = tilt_angle
-
-            except tb.NoSuchNodeError:
-                # No angle correction during preprocess
-                pass
-
-            # Extra metadata for SixS to save in df
-            if gwaihir_dataset.beamline is "SIXS_2019":
-                data = rd.DataSet(gwaihir_dataset.path_to_nxs_data)
-                try:
-                    temp_df["x"] = data.x[0]
-                    temp_df["y"] = data.y[0]
-                    temp_df["z"] = data.z[0]
-                    temp_df["mu"] = data.mu[0]
-                    temp_df["delta"] = data.delta[0]
-                    temp_df["omega"] = data.omega[0]
-                    temp_df["gamma"] = data.gamma[0]
-                    temp_df["gamma-mu"] = data.gamma[0] - data.mu[0]
-                    temp_df["step_size"] = (
-                        data.mu[-1] - data.mu[-0]) / len(data.mu)
-                    temp_df["integration_time"] = data.integration_time[0]
-                    temp_df["steps"] = len(data.integration_time)
-                except AttributeError:
-                    print("Could not extract metadata from SixS file")
-
-    # Save in a csv file
-    try:
-        # Load old file
-        df = pd.read_csv(metadata_csv_file)
-
-        # Replace old data linked to this scan
-        indices = df[df['scan'] == scan_nb].index
-        df.drop(indices, inplace=True)
-        result = pd.concat([df, temp_df])
-
-        # Save
-        display(result.head())
-        result.to_csv(metadata_csv_file, index=False)
-        hash_print(f"Saved logs in {metadata_csv_file}")
-
-    except (FileNotFoundError, ValueError):
-        # Create file
-        metadata_csv_file = os.getcwd() + "/metadata.csv"
-
-        # Save
-        display(temp_df.head())
-        temp_df.to_csv(metadata_csv_file, index=False)
-        hash_print(f"Saved logs in {metadata_csv_file}")
-
-
-def initialize_preprocessing(
+def init_preprocess_tab(
     interface,
     unused_label_beamline,
     beamline,
@@ -240,8 +59,8 @@ def initialize_preprocessing(
     # normalize_flux
     photon_threshold,
     photon_filter,
-    # bin_during_loading todo
-    # frames_pattern todo
+    # bin_during_loading TODO
+    # frames_pattern TODO
     background_file,
     hotpixels_file,
     flatfield_file,
@@ -855,3 +674,186 @@ def initialize_preprocessing(
         plt.close()
         clear_output(True)
         gutil.hash_print("Cleared window.")
+
+
+def create_yaml_file(
+    fname,
+    **kwargs
+):
+    """
+    Create yaml file storing all keywords arguments given in input.
+    Used for bcdi scripts.
+
+    :param fname: path to created yaml file
+    :param kwargs: kwargs to store in file
+    """
+    config_file = []
+
+    for k, v in kwargs.items():
+        if isinstance(v, str):
+            config_file.append(f"{k}: \"{v}\"")
+        elif isinstance(v, tuple):
+            if v:
+                config_file.append(f"{k}: {list(v)}")
+            else:
+                config_file.append(f"{k}: None")
+        elif isinstance(v, np.ndarray):
+            config_file.append(f"{k}: {list(v)}")
+        elif isinstance(v, list):
+            if v:
+                config_file.append(f"{k}: {v}")
+            else:
+                config_file.append(f"{k}: None")
+        else:
+            config_file.append(f"{k}: {v}")
+
+    file = os.path.basename(fname)
+    directory = fname.strip(file)
+
+    # Create directory
+    if not os.path.isdir(directory):
+        full_path = ""
+        for d in directory.split("/"):
+            full_path += d + "/"
+            try:
+                os.mkdir(full_path)
+            except (FileExistsError, PermissionError):
+                pass
+
+    # Save in file
+    if fname.endswith('.yaml') or fname.endswith('.yml'):
+        with open(fname, "w") as v:
+            for line in config_file:
+                v.write(line + "\n")
+    else:
+        raise FileError("Parameter fname must end with .yaml or .yml")
+
+
+def extract_metadata(
+    scan_nb,
+    metadata_file,
+    gwaihir_dataset=None,
+    metadata_csv_file=None,
+):
+    """
+    Extract meaningful data from bcdi script output files and saves them
+    in a csv file as well as in the Dataset object to allow comparison.
+
+    :param scan_nb: int, nb of scan, used for indexing in csv file.
+    :param metadata_file: absolute path to metadata file (.h5) created by
+     bcdi.preprocessing_BCDI.py script
+    :param gwaihir_dataset: Dataset object in which the metadata is saved,
+     optionnal
+    :param metadata_csv_file: csv file in which the metadata is saved.
+     If None, defaulted to os.getcwd() + "/metadata.csv"
+    """
+    # Open file
+    with tb.open_file(metadata_file, "r") as f:
+
+        # Save metadata in a pd.DataFrame
+        temp_df = pd.DataFrame([[
+            scan_nb,
+            f.root.output.q[...][0],
+            f.root.output.q[...][1],
+            f.root.output.q[...][2],
+            f.root.output.qnorm[...],
+            f.root.output.dist_plane[...],
+            f.root.output.bragg_inplane[...],
+            f.root.output.bragg_outofplane[...],
+            f.root.output.bragg_peak[...],
+        ]],
+            columns=[
+                "scan",
+                "qx",
+                "qy",
+                "qz",
+                "q_norm",
+                "d_hkl",
+                "inplane_angle",
+                "out_of_plane_angle",
+                "bragg_peak",
+        ])
+
+        # Extra metadata that is not always computed
+        try:
+            temp_df["COM_rocking_curve"] = f.root.output.COM_rocking_curve[...]
+            temp_df["interp_fwhm"] = f.root.output.interp_fwhm[...]
+
+            tilt_angle = np.round(
+                np.mean(f.root.output.tilt_values[...][1:]
+                        - f.root.output.tilt_values[...][:-1]),
+                4)
+            temp_df["tilt_angle"] = tilt_angle
+
+        except tb.NoSuchNodeError:
+            # No angle correction during preprocess
+            pass
+
+        # Save metadata in the Dataset object
+        if isinstance(gwaihir_dataset, gwaihir.dataset.Dataset):
+
+            gwaihir_dataset.bragg_peak = f.root.output.bragg_peak[...]
+            gwaihir_dataset.q = f.root.output.q[...]
+            gwaihir_dataset.qnorm = f.root.output.qnorm[...]
+            gwaihir_dataset.dist_plane = f.root.output.dist_plane[...]
+            gwaihir_dataset.bragg_inplane = f.root.output.bragg_inplane[...]
+            gwaihir_dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
+
+            # Extra metadata that is not always computed
+            try:
+                gwaihir_dataset.tilt_values = f.root.output.tilt_values[...]
+                gwaihir_dataset.rocking_curve = f.root.output.rocking_curve[...]
+                gwaihir_dataset.interp_tilt = f.root.output.interp_tilt[...]
+                gwaihir_dataset.interp_curve = f.root.output.interp_curve[...]
+                gwaihir_dataset.detector_data_COM = f.root.output.detector_data_COM[...]
+                gwaihir_dataset.COM_rocking_curve = f.root.output.COM_rocking_curve[...]
+                gwaihir_dataset.interp_fwhm = f.root.output.interp_fwhm[...]
+                gwaihir_dataset.tilt_angle = tilt_angle
+
+            except tb.NoSuchNodeError:
+                # No angle correction during preprocess
+                pass
+
+            # Extra metadata for SixS to save in df
+            if gwaihir_dataset.beamline is "SIXS_2019":
+                data = rd.DataSet(gwaihir_dataset.path_to_nxs_data)
+                try:
+                    temp_df["x"] = data.x[0]
+                    temp_df["y"] = data.y[0]
+                    temp_df["z"] = data.z[0]
+                    temp_df["mu"] = data.mu[0]
+                    temp_df["delta"] = data.delta[0]
+                    temp_df["omega"] = data.omega[0]
+                    temp_df["gamma"] = data.gamma[0]
+                    temp_df["gamma-mu"] = data.gamma[0] - data.mu[0]
+                    temp_df["step_size"] = (
+                        data.mu[-1] - data.mu[-0]) / len(data.mu)
+                    temp_df["integration_time"] = data.integration_time[0]
+                    temp_df["steps"] = len(data.integration_time)
+                except AttributeError:
+                    print("Could not extract metadata from SixS file")
+
+    # Save in a csv file
+    try:
+        # Load old file
+        df = pd.read_csv(metadata_csv_file)
+
+        # Replace old data linked to this scan
+        indices = df[df['scan'] == scan_nb].index
+        df.drop(indices, inplace=True)
+        result = pd.concat([df, temp_df])
+
+        # Save
+        display(result.head())
+        result.to_csv(metadata_csv_file, index=False)
+        hash_print(f"Saved logs in {metadata_csv_file}")
+
+    except (FileNotFoundError, ValueError):
+        # Create file
+        metadata_csv_file = os.getcwd() + "/metadata.csv"
+
+        # Save
+        display(temp_df.head())
+        temp_df.to_csv(metadata_csv_file, index=False)
+        hash_print(f"Saved logs in {metadata_csv_file}")
+

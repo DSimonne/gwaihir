@@ -1,8 +1,9 @@
 import pandas as pd
 from IPython.display import display
+import ipywidgets as widgets
 
 
-def display_data_frame(
+def init_data_frame_tab(
     interface,
     unused_label_logs,
     parent_folder,
@@ -19,7 +20,7 @@ def display_data_frame(
     """
     # Load data
     if show_logs in ("load_csv", "load_field_data"):
-        interface.TabDataFrame._list_widgets.children[1].disabled = True
+        interface.TabDataFrame.children[1].disabled = True
         try:
             # csv data
             if show_logs == "load_csv":
@@ -55,6 +56,6 @@ def display_data_frame(
             )
 
     else:
-        interface.TabDataFrame._list_widgets.children[1].disabled = False
+        interface.TabDataFrame.children[1].disabled = False
         interface.csv_file_handler(parent_folder)
         clear_output(True)
