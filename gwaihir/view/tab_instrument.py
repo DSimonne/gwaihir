@@ -332,9 +332,12 @@ class TabInstrument(widgets.VBox):
             self.unused_label_xru,
             widgets.HBox([self.align_q, self.ref_axis_q]),
             widgets.HBox([self.direct_beam, self.dirbeam_detector_angles]),
-            widgets.HBox([self.outofplane_angle, self.inplane_angle, self.tilt_angle]),
-            widgets.HBox([self.sample_inplane, self.sample_outofplane, self.offset_inplane]),
-            widgets.HBox([self.cch1, self.cch2, self.detrot, self.tiltazimuth, self.tilt_detector]),
+            widgets.HBox(
+                [self.outofplane_angle, self.inplane_angle, self.tilt_angle]),
+            widgets.HBox(
+                [self.sample_inplane, self.sample_outofplane, self.offset_inplane]),
+            widgets.HBox([self.cch1, self.cch2, self.detrot,
+                         self.tiltazimuth, self.tilt_detector]),
         )
 
         # Assign handlers
@@ -344,14 +347,11 @@ class TabInstrument(widgets.VBox):
     # Define handlers
     def orthogonalisation_handler(self, change):
         """Handles changes related to data orthogonalisation."""
-
         if hasattr(change, "new"):
             change = change.new
 
-        if change:
-            for w in self.children[2:]:
+        for w in self.children[2:]:
+            if change:
                 w.disabled = False
-
-        if not change:
-            for w in self.children[2:]:
+            else:
                 w.disabled = True

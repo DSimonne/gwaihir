@@ -19,7 +19,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.box_style = box_style
 
         # Define widgets
-        self.unused_label_data=widgets.HTML(
+        self.unused_label_data = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Data files",
             style={
@@ -27,7 +27,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.parent_folder=widgets.Dropdown(
+        self.parent_folder = widgets.Dropdown(
             options=[x[0] + "/" for x in os.walk(os.getcwd())],
             value=os.getcwd() + "/",
             placeholder=os.getcwd() + "/",
@@ -37,7 +37,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.iobs=widgets.Dropdown(
+        self.iobs = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
                       glob.glob(os.getcwd() + "*.npz")],
@@ -47,7 +47,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.mask=widgets.Dropdown(
+        self.mask = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
                       glob.glob(os.getcwd() + "*.npz")],
@@ -57,7 +57,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.support=widgets.Dropdown(
+        self.support = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
                       glob.glob(os.getcwd() + "*.npz")],
@@ -68,7 +68,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.obj=widgets.Dropdown(
+        self.obj = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
                       glob.glob(os.getcwd() + "*.npz")],
@@ -79,7 +79,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.auto_center_resize=widgets.Checkbox(
+        self.auto_center_resize = widgets.Checkbox(
             value=False,
             description='Auto center and resize',
             continuous_update=False,
@@ -88,7 +88,7 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='check'
         )
 
-        self.max_size=widgets.BoundedIntText(
+        self.max_size = widgets.BoundedIntText(
             value=256,
             step=1,
             min=0,
@@ -102,7 +102,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_support=widgets.HTML(
+        self.unused_label_support = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Support parameters",
             style={
@@ -110,7 +110,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.support_threshold=widgets.Text(
+        self.support_threshold = widgets.Text(
             value="(0.23, 0.30)",
             placeholder="(0.23, 0.30)",
             description='Support threshold',
@@ -120,7 +120,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.support_only_shrink=widgets.Checkbox(
+        self.support_only_shrink = widgets.Checkbox(
             value=False,
             description='Support only shrink',
             continuous_update=False,
@@ -130,7 +130,7 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='check'
         )
 
-        self.support_update_period=widgets.BoundedIntText(
+        self.support_update_period = widgets.BoundedIntText(
             value=20,
             step=5,
             layout=widgets.Layout(
@@ -142,7 +142,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.support_smooth_width=widgets.Text(
+        self.support_smooth_width = widgets.Text(
             value="(2, 1, 600)",
             placeholder="(2, 1, 600)",
             description='Support smooth width',
@@ -152,7 +152,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.support_post_expand=widgets.Text(
+        self.support_post_expand = widgets.Text(
             value="(1, -2, 1)",
             placeholder="(1, -2, 1)",
             description='Support post expand',
@@ -162,7 +162,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.unused_label_psf=widgets.HTML(
+        self.unused_label_psf = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Point spread function parameters",
             style={
@@ -170,7 +170,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.psf=widgets.Checkbox(
+        self.psf = widgets.Checkbox(
             value=True,
             description='Use point spread function:',
             continuous_update=False,
@@ -179,7 +179,7 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='check'
         )
 
-        self.psf_model=widgets.Dropdown(
+        self.psf_model = widgets.Dropdown(
             options=[
                 "gaussian", "lorentzian", "pseudo-voigt"],
             value="pseudo-voigt",
@@ -188,7 +188,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.fwhm=widgets.FloatText(
+        self.fwhm = widgets.FloatText(
             value=0.5,
             step=0.01,
             min=0,
@@ -200,7 +200,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.eta=widgets.FloatText(
+        self.eta = widgets.FloatText(
             value=0.05,
             step=0.01,
             max=1,
@@ -214,7 +214,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.update_psf=widgets.BoundedIntText(
+        self.update_psf = widgets.BoundedIntText(
             value=20,
             step=5,
             continuous_update=False,
@@ -224,7 +224,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'}
         )
 
-        self.unused_label_algo=widgets.HTML(
+        self.unused_label_algo = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Iterative algorithms parameters",
             style={
@@ -232,7 +232,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.nb_raar=widgets.BoundedIntText(
+        self.nb_raar = widgets.BoundedIntText(
             value=1000,
             min=0,
             step=10,
@@ -245,7 +245,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.nb_hio=widgets.BoundedIntText(
+        self.nb_hio = widgets.BoundedIntText(
             value=400,
             min=0,
             step=10,
@@ -258,7 +258,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.nb_er=widgets.BoundedIntText(
+        self.nb_er = widgets.BoundedIntText(
             value=300,
             min=0,
             step=10,
@@ -271,7 +271,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.nb_ml=widgets.BoundedIntText(
+        self.nb_ml = widgets.BoundedIntText(
             value=0,
             min=0,
             step=10,
@@ -284,7 +284,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.nb_run=widgets.BoundedIntText(
+        self.nb_run = widgets.BoundedIntText(
             value=30,
             continuous_update=False,
             description='Number of run:',
@@ -294,7 +294,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_filtering=widgets.HTML(
+        self.unused_label_filtering = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Filtering criteria for reconstructions",
             style={
@@ -302,7 +302,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.filter_criteria=widgets.Dropdown(
+        self.filter_criteria = widgets.Dropdown(
             options=[
                 ("No filtering",
                  "no_filtering"),
@@ -319,7 +319,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.nb_run_keep=widgets.BoundedIntText(
+        self.nb_run_keep = widgets.BoundedIntText(
             value=10,
             continuous_update=False,
             description='Number of run to keep:',
@@ -329,7 +329,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_options=widgets.HTML(
+        self.unused_label_options = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Options",
             style={
@@ -337,7 +337,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.live_plot=widgets.BoundedIntText(
+        self.live_plot = widgets.BoundedIntText(
             value=200,
             step=10,
             max=500,
@@ -351,7 +351,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.positivity=widgets.Checkbox(
+        self.positivity = widgets.Checkbox(
             value=False,
             description='Force positivity',
             continuous_update=False,
@@ -363,7 +363,7 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='check'
         )
 
-        self.beta=widgets.FloatText(
+        self.beta = widgets.FloatText(
             value=0.9,
             step=0.01,
             max=1,
@@ -377,7 +377,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.detwin=widgets.Checkbox(
+        self.detwin = widgets.Checkbox(
             value=False,
             description='Detwinning',
             continuous_update=False,
@@ -389,7 +389,7 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='check'
         )
 
-        self.rebin=widgets.Text(
+        self.rebin = widgets.Text(
             value="(1, 1, 1)",
             placeholder="(1, 1, 1)",
             description='Rebin',
@@ -398,7 +398,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.verbose=widgets.BoundedIntText(
+        self.verbose = widgets.BoundedIntText(
             value=100,
             min=10,
             max=300,
@@ -410,7 +410,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.pixel_size_detector=widgets.BoundedIntText(
+        self.pixel_size_detector = widgets.BoundedIntText(
             value=55,
             continuous_update=False,
             description='Pixel size of detector (um):',
@@ -420,7 +420,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
-        self.unused_label_phase_retrieval=widgets.HTML(
+        self.unused_label_phase_retrieval = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Click below to run the phase retrieval</p>",
             style={
@@ -428,7 +428,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.run_phase_retrieval=widgets.ToggleButtons(
+        self.run_phase_retrieval = widgets.ToggleButtons(
             options=[
                 ('No phase retrieval', False),
                 ('Run batch job (slurm)', "batch"),
@@ -459,7 +459,7 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='fast-forward'
         )
 
-        self.unused_label_run_pynx_tools=widgets.HTML(
+        self.unused_label_run_pynx_tools = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Click below to use a phase retrieval tool</p>",
             style={
@@ -467,7 +467,7 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.run_pynx_tools=widgets.ToggleButtons(
+        self.run_pynx_tools = widgets.ToggleButtons(
             options=[
                 ('No tool running', False),
                 ("Modes decomposition",
@@ -621,22 +621,15 @@ class TabPhaseRetrieval(widgets.VBox):
         if hasattr(change, "new"):
             change = change.new
 
-        if change:
-            for w in [
-                self.psf_model,
-                self.fwhm,
-                self.eta,
-                self.update_psf,
-            ]:
+        for w in [
+            self.psf_model,
+            self.fwhm,
+            self.eta,
+            self.update_psf,
+        ]:
+            if change:
                 w.disabled = False
-
-        if not change:
-            for w in [
-                self.psf_model,
-                self.fwhm,
-                self.eta,
-                self.update_psf,
-            ]:
+            else:
                 w.disabled = True
 
         self.pynx_peak_shape_handler(
