@@ -597,7 +597,7 @@ class Interface:
 
             detector=widgets.Dropdown(
                 options=[
-                    "Eiger2M", "Maxipix", "Eiger4M", "Merlin", "Timepix"],
+                    "Eiger2M", "Maxipix", "Eiger4M", "Merlin", "MerlinSixS", "Timepix"],
                 value="Merlin",
                 description='Detector',
                 continuous_update=False,
