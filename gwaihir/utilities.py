@@ -141,18 +141,23 @@ def rotate_sixs_data(
                 data_og = f.root.com.scan_data.data_02[:]
                 index = 2
                 if np.ndim(data_og) is 1:
+                    # Mu scan
                     data_og = f.root.com.scan_data.data_10[:]
                     index = 10
-                # Mu scan
-                print("Calling merlin the enchanter in SBS...")
+                print("Calling Merlin the enchanter in SBS...")
                 scan_type = "SBS"
             except tb.NoSuchNodeError:
                 try:
                     data_og = f.root.com.scan_data.self_image[:]
-                    print("Calling merlin the enchanter in FLY...")
-                    scan_type = "FLY"
+                    print("Calling Merlin the enchanter in FLY...")
+                    scan_type = "FLY1"
                 except tb.NoSuchNodeError:
-                    print("This data does not result from Merlin :/")
+                    try:
+                        data_og = f.root.com.scan_data.test_image[:]
+                        print("Calling Merlin the enchanter in FLY...")
+                        scan_type = "FLY2"
+                    except:
+                        raise TypeError("Unsupported data")
 
             # Just an index for plotting schemes
             half = int(data_og.shape[0] / 2)
@@ -187,7 +192,9 @@ def rotate_sixs_data(
                     f.root.com.scan_data.data_02[:] = data
                 elif scan_type is "SBS" and index is 10:
                     f.root.com.scan_data.data_10[:] = data
-                elif scan_type is "FLY":
+                elif scan_type is "FLY1":
+                    f.root.com.scan_data.self_image[:] = data
+                elif scan_type is "FLY2":
                     f.root.com.scan_data.test_image[:] = data
             except tb.NoSuchNodeError:
                 print("Could not overwrite data ><")
