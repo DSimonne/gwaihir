@@ -132,32 +132,37 @@ def rotate_sixs_data(
         except (ValueError, RuntimeError):
             data_already_rotated = f['rotation'][...]
 
-    if not data_already_rotated:
-        hash_print("Rotating SIXS data ...")
-        with tb.open_file(path_to_nxs_data, "a") as f:
+    # Find 3D array key
+    three_d_data_keys = []
+    with h5py.File(path_to_nxs_data, "a") as f:
+        for key in f['com']['scan_data'].keys():
+            shape = f['com']['scan_data'][key].shape
+            if len(shape) == 3:
+                three_d_data_keys.append(key)
+
+        if not data_already_rotated:
+            hash_print("Rotating SIXS data ...")
             # Get data
-            try:
-                # Omega scan
-                data_og = f.root.com.scan_data.data_02[:]
-                index = 2
-                if np.ndim(data_og) is 1:
-                    # Mu scan
-                    data_og = f.root.com.scan_data.data_10[:]
-                    index = 10
-                print("Calling Merlin the enchanter in SBS...")
-                scan_type = "SBS"
-            except tb.NoSuchNodeError:
-                try:
-                    data_og = f.root.com.scan_data.self_image[:]
-                    print("Calling Merlin the enchanter in FLY...")
-                    scan_type = "FLY1"
-                except tb.NoSuchNodeError:
-                    try:
-                        data_og = f.root.com.scan_data.test_image[:]
-                        print("Calling Merlin the enchanter in FLY...")
-                        scan_type = "FLY2"
-                    except:
-                        raise TypeError("Unsupported data")
+            if len(three_d_data_keys) == 1:
+                good_data_key = three_d_data_keys[0]
+                print(f"Found 3D array for key: {good_data_key}")
+                data_og = f['com']['scan_data'][good_data_key][...]
+
+            else:  # There are multiple 3D arrays :O
+                for key in three_d_data_keys:
+                    data = f['com']['scan_data'][key][...]
+
+                    # We know that the Merlin detector array shape
+                    # should be either 512 or 515
+                    if not data_og.shape[1] in (512, 515) and data_og.shape[2] in (512, 515):
+                        three_d_data_keys.remove(key)
+
+                if len(three_d_data_keys) == 1:  # we removed 3D arrays from other detectors
+                    good_data_key = three_d_data_keys[0]
+                    print(f"Found 3D array for key: {good_data_key}")
+                    data_og = f['com']['scan_data'][good_data_key][...]
+                else:
+                    raise IndexError("Could not find 3D array")
 
             # Just an index for plotting schemes
             half = int(data_og.shape[0] / 2)
@@ -169,6 +174,10 @@ def rotate_sixs_data(
                 data[idx, :, :] = np.fliplr(tmp)
             print("Data well rotated by 90°.")
 
+            # Overwrite data in copied file
+            f['com']['scan_data'][good_data_key][...] = data
+
+            # Plot data
             print("Saving example figures...", end="\n\n")
             plt.figure(figsize=(16, 9))
             plt.imshow(data_og[half, :, :], vmax=10)
@@ -186,21 +195,8 @@ def rotate_sixs_data(
             plt.savefig(save_folder + "/data_after_rotation.png")
             plt.close()
 
-            # Overwrite data in copied file
-            try:
-                if scan_type is "SBS" and index is 2:
-                    f.root.com.scan_data.data_02[:] = data
-                elif scan_type is "SBS" and index is 10:
-                    f.root.com.scan_data.data_10[:] = data
-                elif scan_type is "FLY1":
-                    f.root.com.scan_data.self_image[:] = data
-                elif scan_type is "FLY2":
-                    f.root.com.scan_data.test_image[:] = data
-            except tb.NoSuchNodeError:
-                print("Could not overwrite data ><")
-
-    else:
-        hash_print("Data already rotated ...")
+        else:
+            hash_print("Data already rotated ...")
 
 
 def find_and_copy_raw_data(
