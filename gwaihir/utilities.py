@@ -174,7 +174,10 @@ def rotate_sixs_data(
                 data[idx, :, :] = np.fliplr(tmp)
             print("Data well rotated by 90°.")
 
+            # Check if there are duplicates in rocking curve for FLY scan
+
             # Overwrite data in copied file
+            del f['com']['scan_data'][good_data_key] 
             f['com']['scan_data'][good_data_key][...] = data
 
             # Plot data
