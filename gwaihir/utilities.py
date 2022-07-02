@@ -234,11 +234,11 @@ def find_and_copy_raw_data(
     # Get path_to_nxs_data from data in data_dir
     try:
         # Try and find a mu scan
-        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
+        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*.nxs")[0]
     except IndexError:
         try:
             # Try and find an omega scan
-            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
+            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*.nxs")[0]
         except IndexError:
             print("Could not find data, please specify template.")
 
