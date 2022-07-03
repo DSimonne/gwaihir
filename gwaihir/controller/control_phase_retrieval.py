@@ -9,6 +9,7 @@ from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
 import ipywidgets as widgets
+from IPython.display import clear_output
 
 # PyNX
 try:

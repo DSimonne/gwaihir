@@ -2,10 +2,12 @@ import numpy as np
 import pandas as pd
 import os
 
-from IPython.display import display
+from IPython.display import display, clear_output
 import ipywidgets as widgets
+from ipywidgets import interact
 
 from bcdi.preprocessing import ReadNxs3 as rd
+from bcdi.postprocessing import facet_analysis
 
 
 def init_facet_tab(
@@ -30,7 +32,7 @@ def init_facet_tab(
     """
     if load_data:
         # Disable text widget to avoid bugs
-        interface.TabFacet.children[1].disabled = True
+        interface.TabFacet.parent_folder.disabled = True
         try:
             interface.Dataset.facet_filename = vtk_file
         except AttributeError:
@@ -45,20 +47,20 @@ def init_facet_tab(
                 for more details.")
 
             # Button to rotate data
-            button_rotate = Button(
+            button_rotate = widgets.Button(
                 description="Work on facet data",
                 continuous_update=False,
                 button_style='',
-                layout=Layout(width='40%'),
+                layout=widgets.Layout(width='40%'),
                 style={'description_width': 'initial'},
                 icon='fast-forward')
 
             # Button to view data
-            button_view_particle = Button(
+            button_view_particle = widgets.Button(
                 description="View particle",
                 continuous_update=False,
                 button_style='',
-                layout=Layout(width='40%'),
+                layout=widgets.Layout(width='40%'),
                 style={'description_width': 'initial'},
                 icon='fast-forward')
 
@@ -79,7 +81,7 @@ def init_facet_tab(
                         value=1,
                         description='Facet a id:',
                         continuous_update=True,
-                        layout=Layout(width='45%'),
+                        layout=widgets.Layout(width='45%'),
                         style={'description_width': 'initial'}),
                     facet_b_id=widgets.Dropdown(
                         options=[
@@ -87,7 +89,7 @@ def init_facet_tab(
                         value=2,
                         description='Facet b id:',
                         continuous_update=True,
-                        layout=Layout(width='45%'),
+                        layout=widgets.Layout(width='45%'),
                         style={'description_width': 'initial'}),
                     u0=widgets.Text(
                         value="[1, 1, 1]",
@@ -120,7 +122,7 @@ def init_facet_tab(
                         max=360,
                         description='Elevation of the axes in degrees:',
                         continuous_update=False,
-                        layout=Layout(width='70%'),
+                        layout=widgets.Layout(width='70%'),
                         style={'description_width': 'initial'},),
                     azim=widgets.BoundedIntText(
                         value=0,
@@ -129,7 +131,7 @@ def init_facet_tab(
                         max=360,
                         description='Azimuth of the axes in degrees:',
                         continuous_update=False,
-                        layout=Layout(width='70%'),
+                        layout=widgets.Layout(width='70%'),
                         style={'description_width': 'initial'},),
                 )
                 def fix_facets(
@@ -167,7 +169,7 @@ def init_facet_tab(
                                 setattr(interface.Facets, p, literal_eval(
                                     getattr(interface.Facets, p)))
                     except ValueError:
-                        gutil.hash_print(f"Wrong list syntax for {p}")
+                        print(f"Wrong list syntax for {p}")
 
                     # Plot the chosen facet to help the user to pick the facets
                     # he wants to use to orient the particule
@@ -183,9 +185,9 @@ def init_facet_tab(
                     display(Markdown("""# Field data"""))
                     display(interface.Facets.field_data)
 
-                    button_fix_facets = Button(
+                    button_fix_facets = widgets.Button(
                         description="Fix parameters and extract data.",
-                        layout=Layout(width='50%', height='35px'))
+                        layout=widgets.Layout(width='50%', height='35px'))
                     display(button_fix_facets)
 
                     @ button_fix_facets.on_click
@@ -253,9 +255,9 @@ def init_facet_tab(
                         display(Markdown("""# Field data"""))
                         display(interface.Facets.field_data)
 
-                        button_save_facet_data = Button(
+                        button_save_facet_data = widgets.Button(
                             description="Save data",
-                            layout=Layout(width='50%', height='35px'))
+                            layout=widgets.Layout(width='50%', height='35px'))
                         display(button_save_facet_data)
 
                         @ button_save_facet_data.on_click
@@ -313,10 +315,10 @@ def init_facet_tab(
             display(buttons_facets)
 
         except TypeError:
-            gutil.hash_print("Data type not supported.")
+            print("Data type not supported.")
 
     if not load_data:
-        interface.TabFacet.children[1].disabled = False
+        interface.TabFacet.parent_folder.disabled = False
         interface.TabFacet.vtk_file_handler(parent_folder)
-        gutil.hash_print("Cleared window.")
+        print("Cleared window.")
         clear_output(True)

@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 import glob
 import os
 import tables as tb
-from IPython.display import display, clear_output
+from IPython.display import display, clear_output, Image
 import ipywidgets as widgets
+from ipywidgets import interactive
+from h5glance import H5Glance
 
 from scipy.ndimage import gaussian_filter
 
-from gwaihir.plot import plot_3d_slices
+from gwaihir.plot import Plotter, plot_3d_slices
 
 
 def init_plot_data_tab(
@@ -99,7 +101,7 @@ def init_plot_data_tab(
                 continuous_update=False,
                 description='Threshold:',
                 readout=True,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 style={
                     'description_width': 'initial'},
                 disabled=False),
@@ -108,7 +110,7 @@ def init_plot_data_tab(
                 description='Compute support ...',
                 button_style='',
                 icon='step-forward',
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 style={'description_width': 'initial'})
         )
 
@@ -166,7 +168,7 @@ def init_plot_data_tab(
                 continuous_update=False,
                 description='Sigma:',
                 readout=True,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 style={'description_width': 'initial'}),
             threshold=widgets.FloatText(
                 value=0.05,
@@ -176,14 +178,14 @@ def init_plot_data_tab(
                 continuous_update=False,
                 description='Threshold:',
                 readout=True,
-                layout=Layout(width='20%'),
+                layout=widgets.Layout(width='20%'),
                 style={'description_width': 'initial'}),
             compute=widgets.ToggleButton(
                 value=False,
                 description='Compute support ...',
                 button_style='',
                 icon='step-forward',
-                layout=Layout(width='45%'),
+                layout=widgets.Layout(width='45%'),
                 style={'description_width': 'initial'})
         )
 
@@ -244,10 +246,10 @@ def init_plot_data_tab(
             if not isinstance(w, widgets.HTML):
                 w.disabled = True
 
-        button_delete_data = Button(
+        button_delete_data = widgets.Button(
             description="Delete files ?",
             button_style='',
-            layout=Layout(width='70%'),
+            layout=widgets.Layout(width='70%'),
             style={'description_width': 'initial'},
             icon='step-forward')
 
@@ -372,8 +374,12 @@ class SupportTools:
                 try:
                     old_support = np.load(self.path_to_support)["data"]
                 except KeyError:
-                    print("Could not load 'data' or 'support' array from \
-                        file.")
+                    try:
+                        old_support = np.load(self.path_to_support)
+                    except Exception as E:
+                        print("Could not load 'data' or 'support' array from \
+                            file.")
+                        raise E
             except ValueError:
                 print("Data type not supported")
 

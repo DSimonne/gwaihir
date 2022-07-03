@@ -101,7 +101,7 @@ class Plotter:
                     f"\tNb of dimensions: {self.data_array.ndim}\n"
                     f"\tShape: {self.data_array.shape}\n"
                     "\t'plot' keyword accepted values: ('2D', 'slices', 3D')"
-                    "#########################################################"
+                    "\n#########################################################"
                     "########################################################"
                 )
 
@@ -183,7 +183,7 @@ class Plotter:
                     f"\tNb of dimensions: {self.data_array.ndim}\n"
                     f"\tShape: {self.data_array.shape}\n"
                     "\t'plot' keyword accepted values: ('2D', 'slices', 3D')"
-                    "#########################################################"
+                    "\n#########################################################"
                     "########################################################"
                 )
 

@@ -5,7 +5,7 @@ import os
 import tables as tb
 import h5py
 import shutil
-from IPython.display import display
+from IPython.display import display, clear_output
 import ipywidgets as widgets
 
 import gwaihir.dataset as gd
@@ -107,11 +107,12 @@ def init_startup_tab(
 
         # Strain folder, refresh values
         interface.TabPostprocess._list_widgets.children[-4].value = preprocessing_folder
-        interface.strain_folder_handler(change=preprocessing_folder)
+        interface.TabPostprocess.strain_folder_handler(
+            change=preprocessing_folder)
 
         # Facet folder, refresh values
         interface.TabFacet._list_widgets.children[1].value = postprocessing_folder
-        interface.vtk_file_handler(change=postprocessing_folder)
+        interface.TabFacet.vtk_file_handler(change=postprocessing_folder)
 
         return Dataset, matplotlib_backend, preprocessing_folder, postprocessing_folder
 
@@ -128,11 +129,11 @@ def save_dataset():
     # Only allow to save data if PyNX is imported to avoid errors
     if pynx_import:
         # Button to save data
-        button_save_as_cxi = Button(
+        button_save_as_cxi = widgets.Button(
             description="Save work as .cxi file",
             continuous_update=False,
             button_style='',
-            layout=Layout(width='40%'),
+            layout=widgets.Layout(width='40%'),
             style={'description_width': 'initial'},
             icon='step-forward')
 

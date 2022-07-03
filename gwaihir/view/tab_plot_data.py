@@ -117,12 +117,12 @@ class TabPlotData(widgets.VBox):
             change = change.new
 
         options = [""] + [os.path.basename(f) for f in sorted(
-            glob.glob(change.new + "/*.npy")
-            + glob.glob(change.new + "/*.npz")
-            + glob.glob(change.new + "/*.cxi")
-            + glob.glob(change.new + "/*.h5")
-            + glob.glob(change.new + "/*.nxs")
-            + glob.glob(change.new + "/*.png"),
+            glob.glob(change + "/*.npy")
+            + glob.glob(change + "/*.npz")
+            + glob.glob(change + "/*.cxi")
+            + glob.glob(change + "/*.h5")
+            + glob.glob(change + "/*.nxs")
+            + glob.glob(change + "/*.png"),
             key=os.path.getmtime)
         ]
 

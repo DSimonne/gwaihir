@@ -5,7 +5,7 @@ import glob
 import os
 from datetime import datetime
 import tables as tb
-from IPython.display import display
+from IPython.display import display, clear_output
 import ipywidgets as widgets
 
 import gwaihir
@@ -350,11 +350,13 @@ def init_preprocess_tab(
     if init_para:
         # Disable all widgets until the end of the program, will update
         # automatically after
-        for w in interface.TabStartup._list_widgets.children[:-1]:
-            w.disabled = True
+        for w in interface.TabStartup.children[:-1]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
-        for w in interface.TabPreprocess._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPreprocess.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Save parameter values as attributes
         interface.Dataset.beamline = beamline
@@ -443,7 +445,7 @@ def init_preprocess_tab(
                     setattr(interface.Dataset, p, literal_eval(
                         getattr(interface.Dataset, p)))
         except ValueError:
-            gutil.hash_print(f"Wrong list syntax for {p}")
+            print(f"Wrong list syntax for {p}")
 
         try:
             for p in tuple_parameters:
@@ -453,7 +455,7 @@ def init_preprocess_tab(
                     setattr(interface.Dataset, p, literal_eval(
                         getattr(interface.Dataset, p)))
         except ValueError:
-            gutil.hash_print(f"Wrong tuple syntax for {p}")
+            print(f"Wrong tuple syntax for {p}")
 
         try:
             for p in dict_parameters:
@@ -466,7 +468,7 @@ def init_preprocess_tab(
                         setattr(interface.Dataset, p, literal_eval(
                             getattr(interface.Dataset, p)))
         except ValueError:
-            gutil.hash_print(f"Wrong dict syntax for {p}")
+            print(f"Wrong dict syntax for {p}")
 
         # Set None if we are not using custom scans
         if not interface.Dataset.custom_scan:
@@ -486,15 +488,15 @@ def init_preprocess_tab(
         if interface.Dataset.specfile_name == "":
             interface.Dataset.specfile_name = None
 
-        button_run_preprocess = Button(
+        button_run_preprocess = widgets.Button(
             description="Run data preprocessing...",
             continuous_update=False,
             button_style='',
-            layout=Layout(width='40%'),
+            layout=widgets.Layout(width='40%'),
             style={'description_width': 'initial'},
             icon='fast-forward')
         display(button_run_preprocess)
-        gutil.hash_print("Parameters initialized...")
+        print("Parameters initialized...")
 
         @ button_run_preprocess.on_click
         def action_button_run_preprocess(selfbutton):
@@ -517,7 +519,7 @@ def init_preprocess_tab(
                 data_dir = interface.Dataset.data_dir
 
             # Create config file
-            gutil.create_yaml_file(
+            create_yaml_file(
                 fname=f"{interface.preprocessing_folder}config_preprocessing.yml",
                 scans=interface.Dataset.scan,
                 root_folder=root_folder,
@@ -625,14 +627,14 @@ def init_preprocess_tab(
 
             # Run function
             run_preprocessing(prm=args)
-            gutil.hash_print("End of script")
+            print("End of script")
 
             # Button to save metadata
-            button_save_metadata = Button(
+            button_save_metadata = widgets.Button(
                 description="Save metadata",
                 continuous_update=False,
                 button_style='',
-                layout=Layout(width='40%'),
+                layout=widgets.Layout(width='40%'),
                 style={'description_width': 'initial'},
                 icon='fast-forward')
 
@@ -645,14 +647,14 @@ def init_preprocess_tab(
                             f"{interface.preprocessing_folder}*preprocessing*.h5"),
                         key=os.path.getmtime)[-1]
 
-                    gutil.extract_metadata(
+                    extract_metadata(
                         scan_nb=interface.Dataset.scan,
                         metadata_file=metadata_file,
                         gwaihir_dataset=interface.Dataset,
                         metadata_csv_file=os.getcwd() + "metadata.csv"
                     )
                 except (IndexError, TypeError):
-                    gutil.hash_print(
+                    print(
                         f"Could not find any .h5 file in {interface.preprocessing_folder}")
 
                 # PyNX folder
@@ -673,7 +675,7 @@ def init_preprocess_tab(
     if not init_para:
         plt.close()
         clear_output(True)
-        gutil.hash_print("Cleared window.")
+        print("Cleared window.")
 
 
 def create_yaml_file(
@@ -856,4 +858,3 @@ def extract_metadata(
         display(temp_df.head())
         temp_df.to_csv(metadata_csv_file, index=False)
         hash_print(f"Saved logs in {metadata_csv_file}")
-

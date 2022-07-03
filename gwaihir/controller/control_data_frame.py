@@ -1,6 +1,7 @@
 import pandas as pd
-from IPython.display import display
+from IPython.display import display, clear_output
 import ipywidgets as widgets
+from ipywidgets import interact
 
 
 def init_data_frame_tab(
@@ -20,7 +21,7 @@ def init_data_frame_tab(
     """
     # Load data
     if show_logs in ("load_csv", "load_field_data"):
-        interface.TabDataFrame.children[1].disabled = True
+        interface.TabDataFrame.parent_folder.disabled = True
         try:
             # csv data
             if show_logs == "load_csv":
@@ -39,7 +40,7 @@ def init_data_frame_tab(
                     value=list(logs.columns)[:],
                     rows=10,
                     style={'description_width': 'initial'},
-                    layout=Layout(width='90%'),
+                    layout=widgets.Layout(width='90%'),
                     description='Select multiple columns with \
                     Ctrl + click:',
                 )
@@ -56,6 +57,6 @@ def init_data_frame_tab(
             )
 
     else:
-        interface.TabDataFrame.children[1].disabled = False
-        interface.csv_file_handler(parent_folder)
+        interface.TabDataFrame.parent_folder.disabled = False
+        interface.TabDataFrame.csv_file_handler(parent_folder)
         clear_output(True)

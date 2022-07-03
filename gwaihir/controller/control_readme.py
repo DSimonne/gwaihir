@@ -5,6 +5,7 @@ from gwaihir.controller import control_phase_retrieval
 from gwaihir.controller import control_postprocess
 import ipywidgets as widgets
 
+
 def init_readme_tab(contents):
     """
     Help text about different steps in data analysis workflow.

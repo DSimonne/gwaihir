@@ -2,6 +2,8 @@ import glob
 import os
 from datetime import datetime
 import ipywidgets as widgets
+from control_preprocess import create_yaml_file
+from IPython.display import clear_output
 
 
 def init_postprocess_tab(
@@ -349,11 +351,13 @@ def init_postprocess_tab(
         save_dir = f"{interface.postprocessing_folder}/result_{interface.Dataset.save_frame}/"
 
         # Disable all widgets until the end of the program
-        for w in interface.TabPostprocess._list_widgets.children[:-1]:
-            w.disabled = True
+        for w in interface.TabPostprocess.children[:-1]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
-        for w in interface.TabPreprocess._list_widgets.children[:-2]:
-            w.disabled = True
+        for w in interface.TabPreprocess.children[:-2]:
+            if not isinstance(w, widgets.HTML):
+                w.disabled = True
 
         # Extract dict, list and tuple from strings
         list_parameters = [
@@ -372,7 +376,7 @@ def init_postprocess_tab(
                     setattr(interface.Dataset, p, literal_eval(
                         getattr(interface.Dataset, p)))
         except ValueError:
-            gutil.hash_print(f"Wrong list syntax for {p}")
+            print(f"Wrong list syntax for {p}")
 
         try:
             for p in tuple_parameters:
@@ -382,7 +386,7 @@ def init_postprocess_tab(
                     setattr(interface.Dataset, p, literal_eval(
                         getattr(interface.Dataset, p)))
         except ValueError:
-            gutil.hash_print(f"Wrong tuple syntax for {p}")
+            print(f"Wrong tuple syntax for {p}")
 
         # Empty parameters are set to None (bcdi syntax)
         if interface.Dataset.output_size == []:
@@ -410,11 +414,13 @@ def init_postprocess_tab(
                 data_dir = interface.Dataset.data_dir
 
         except AttributeError:
-            for w in interface.TabPostprocess._list_widgets.children[:-1]:
-                w.disabled = False
+            for w in interface.TabPostprocess.children[:-1]:
+                if not isinstance(w, widgets.HTML):
+                    w.disabled = False
 
-            for w in interface.TabPreprocess._list_widgets.children[:-2]:
-                w.disabled = False
+            for w in interface.TabPreprocess.children[:-2]:
+                if not isinstance(w, widgets.HTML):
+                    w.disabled = False
 
             print("You need to initialize all the parameters with the \
                 preprocess tab first, some parameters are used here such \
@@ -422,7 +428,7 @@ def init_postprocess_tab(
             return
 
         try:
-            gutil.create_yaml_file(
+            create_yaml_file(
                 fname=f"{interface.postprocessing_folder}/config_postprocessing.yml",
                 scans=interface.Dataset.scan,
                 root_folder=root_folder,
@@ -542,7 +548,7 @@ def init_postprocess_tab(
 
             # Run function
             run_postprocessing(prm=args)
-            gutil.hash_print("End of script")
+            print("End of script")
 
             # Get data from saved file
             phase_fieldname = "disp" if interface.Dataset.invert_phase else "phase"
@@ -580,11 +586,11 @@ def init_postprocess_tab(
             )
 
         except KeyboardInterrupt:
-            gutil.hash_print("Strain analysis stopped by user ...")
+            print("Strain analysis stopped by user ...")
 
         finally:
             # At the end of the function
-            interface.TabPostprocess._list_widgets.children[-2].disabled = False
+            interface.TabPostprocess.run_strain.disabled = False
 
             # Refresh folders
             interface.TabStartup.sub_directories_handler(
@@ -606,10 +612,12 @@ def init_postprocess_tab(
 
     if not run_strain:
         for w in interface.TabPostprocess._list_widgets.children[:-1]:
-            w.disabled = False
+            if not isinstance(w, widgets.HTML):
+                w.disabled = False
 
         for w in interface.TabPreprocess._list_widgets.children[:-2]:
-            w.disabled = False
+            if not isinstance(w, widgets.HTML):
+                w.disabled = False
 
         # Refresh folders
         interface.TabStartup.sub_directories_handler(
@@ -629,5 +637,5 @@ def init_postprocess_tab(
             change=interface.preprocessing_folder
         )
 
-        gutil.hash_print("Cleared window.")
+        print("Cleared window.")
         clear_output(True)
