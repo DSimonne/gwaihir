@@ -2,7 +2,7 @@ import h5py
 import shutil
 import os
 
-from version import get_git_version
+from gwaihir.version import get_git_version
 from importlib.metadata import version, PackageNotFoundError
 
 
@@ -20,7 +20,10 @@ class Dataset:
         self.scan = scan
         self.sample_name = sample_name
         self.data_dir = data_dir
-        self.root_folder = root_folder
+        if root_folder.endswith("/"):
+            self.root_folder = root_folder
+        else:
+            self.root_folder = root_folder + "/"
         self._gwaihir_version = get_git_version()
 
         try:

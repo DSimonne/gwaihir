@@ -7,10 +7,12 @@ from datetime import datetime
 import tables as tb
 from IPython.display import display, clear_output
 import ipywidgets as widgets
-
+from ast import literal_eval
 import gwaihir
 
 from bcdi.preprocessing import ReadNxs3 as rd
+from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
+from bcdi.utils.parser import ConfigParser
 
 
 def init_preprocess_tab(
@@ -92,7 +94,7 @@ def init_preprocess_tab(
     tiltazimuth,
     tilt_detector,
     unused_label_preprocess,
-    init_para
+    init_para,
 ):
     """
     Initialize the parameters used in bcdi_preprocess_BCDI.py.
@@ -658,14 +660,14 @@ def init_preprocess_tab(
                         f"Could not find any .h5 file in {interface.preprocessing_folder}")
 
                 # PyNX folder
-                interface.TabPhaseRetrieval._list_widgets.children[1].value\
+                interface.TabPhaseRetrieval.parent_folder.value\
                     = interface.preprocessing_folder
                 interface.TabPhaseRetrieval.pynx_folder_handler(
                     change=interface.preprocessing_folder
                 )
 
                 # Plot folder
-                interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+                interface.TabPlotData.parent_folder.value = interface.preprocessing_folder
                 interface.TabPlotData.plot_folder_handler(
                     change=interface.preprocessing_folder
                 )

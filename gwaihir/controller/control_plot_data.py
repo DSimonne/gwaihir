@@ -17,7 +17,7 @@ from gwaihir.plot import Plotter, plot_3d_slices
 def init_plot_data_tab(
     interface,
     unused_label_plot,
-    folder,
+    parent_folder,
     filename,
     cmap,
     data_use,
@@ -27,7 +27,7 @@ def init_plot_data_tab(
     files.
 
     :param interface: GUI Interface Class
-    :param folder: folder in which the files are located
+    :param parent_folder: parent_folder in which the files are located
     :param cmap: cmap used for plots
     :param filename: file name, can be multiple
     :param data_use: e.g. "2D"
@@ -44,7 +44,7 @@ def init_plot_data_tab(
         for p in filename:
             print(f"Showing {p}")
             Plotter(
-                folder + "/" + p,
+                parent_folder + "/" + p,
                 plot=data_use,
                 log="interact",
                 cmap=cmap
@@ -58,7 +58,7 @@ def init_plot_data_tab(
 
         # Plot data
         Plotter(
-            folder + "/" + filename[0],
+            parent_folder + "/" + filename[0],
             plot=data_use,
             log="interact",
             cmap=cmap
@@ -74,7 +74,7 @@ def init_plot_data_tab(
         for p in filename:
             print(f"Showing {p}")
             Plotter(
-                folder + "/" + p,
+                parent_folder + "/" + p,
                 plot=data_use,
                 log="interact",
                 cmap=cmap
@@ -88,7 +88,7 @@ def init_plot_data_tab(
 
         # Initialize class
         sup = SupportTools(
-            path_to_data=folder + "/" + filename[0])
+            path_to_data=parent_folder + "/" + filename[0])
 
         # Interactive function to loadt threshold value
         window_support = interactive(
@@ -138,7 +138,7 @@ def init_plot_data_tab(
 
         # Initialize class
         sup = SupportTools(
-            path_to_data=folder + "/" + filename[0])
+            path_to_data=parent_folder + "/" + filename[0])
 
         # Extract the support from the data file and save it as npz
         sup.extract_support()
@@ -155,7 +155,7 @@ def init_plot_data_tab(
 
         # Initialize class
         sup = SupportTools(
-            path_to_support=folder + "/" + filename[0])
+            path_to_support=parent_folder + "/" + filename[0])
 
         # Interactive function to loadt threshold value
         window_support = interactive(
@@ -214,7 +214,7 @@ def init_plot_data_tab(
         try:
             for p in filename:
                 print(f"Showing {p}")
-                display(Image(filename=folder + "/" + p))
+                display(Image(filename=parent_folder + "/" + p))
 
         except (FileNotFoundError, ValueError):
             print("Could not load image from file.")
@@ -229,7 +229,7 @@ def init_plot_data_tab(
         for p in filename:
             try:
                 print(f"Showing {p}")
-                display(H5Glance(folder + "/" + filename[0]))
+                display(H5Glance(parent_folder + "/" + filename[0]))
             except TypeError:
                 print(
                     "This tool supports .nxs, .cxi or .hdf5 files only.")
@@ -258,7 +258,7 @@ def init_plot_data_tab(
             """Delete files."""
             for p in filename:
                 try:
-                    os.remove(folder + "/" + p)
+                    os.remove(parent_folder + "/" + p)
                     print(f"Removed {p}")
 
                 except FileNotFoundError:
@@ -271,7 +271,7 @@ def init_plot_data_tab(
         for w in interface.TabPlotData.children[:-2]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = False
-        interface.TabPlotData.plot_folder_handler(change=folder)
+        interface.TabPlotData.plot_folder_handler(change=parent_folder)
         print("Cleared window.")
         clear_output(True)
 

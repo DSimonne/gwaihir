@@ -105,7 +105,8 @@ class TabStartup(widgets.VBox):
             icon='step-forward',
             layout=widgets.Layout(
                 width='45%'),
-            style={'description_width': 'initial'}),
+            style={'description_width': 'initial'}
+        )
 
         # Define children
         self.children = (
@@ -118,45 +119,3 @@ class TabStartup(widgets.VBox):
             self.matplotlib_backend,
             self.run_dir_init,
         )
-
-        # Assign handlers
-        self.root_folder.observe(
-            self.sub_directories_handler, names="value")
-        self.run_dir_init.observe(
-            self.init_handler, names="value")
-
-    # Define handlers
-    def init_handler(self, change):
-        """Handles changes on the widget used for the initialization."""
-        if not change.new:
-            for w in self._list_widgets.children[:8]:
-                w.disabled = False
-
-            for w in self._list_widgets_preprocessing.children[:-1]:
-                w.disabled = True
-
-        if change.new:
-            for w in self._list_widgets.children[:8]:
-                w.disabled = True
-
-            for w in self._list_widgets_preprocessing.children[:-1]:
-                w.disabled = False
-
-            self.beamline_handler(  # TODO
-                change=self._list_widgets_preprocessing.children[1].value)
-            self.bragg_peak_centering_handler(  # TODO
-                change=self._list_widgets_preprocessing.children[13].value)
-            self.reload_data_handler(  # TODO
-                change=self._list_widgets_preprocessing.children[25].value)
-
-    def sub_directories_handler(self, change):
-        """Handles changes linked to root_folder subdirectories"""
-        if hasattr(change, "new"):
-            change = change.new
-        sub_dirs = [x[0] + "/" for x in os.walk(change)]
-
-        if self.run_dir_init.value:  # TODO
-            self._list_widgets_strain.children[-4].options = sub_dirs
-            self.tab_data.children[1].options = sub_dirs
-            self.tab_facet.children[1].options = sub_dirs
-            self._list_widgets_phase_retrieval.children[1].options = sub_dirs

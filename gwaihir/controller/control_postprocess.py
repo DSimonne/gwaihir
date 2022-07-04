@@ -4,6 +4,10 @@ from datetime import datetime
 import ipywidgets as widgets
 from control_preprocess import create_yaml_file
 from IPython.display import clear_output
+from ast import literal_eval
+
+from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
+from bcdi.utils.parser import ConfigParser
 
 
 def init_postprocess_tab(
@@ -422,10 +426,11 @@ def init_postprocess_tab(
                 if not isinstance(w, widgets.HTML):
                     w.disabled = False
 
-            print("You need to initialize all the parameters with the \
-                preprocess tab first, some parameters are used here such \
-                as the energy, detector distance, ...""")
-            return
+            return(
+                "You need to initialize all the parameters with the"
+                "preprocess tab first, some parameters are used here such"
+                "as the energy, detector distance, ..."
+            )
 
         try:
             create_yaml_file(
@@ -593,45 +598,45 @@ def init_postprocess_tab(
             interface.TabPostprocess.run_strain.disabled = False
 
             # Refresh folders
-            interface.TabStartup.sub_directories_handler(
+            interface.root_folder_handler(
                 change=interface.Dataset.scan_folder
             )
 
             # PyNX folder
-            interface.TabPhaseRetrieval._list_widgets.children[1].value\
+            interface.TabPhaseRetrieval.parent_folder.value\
                 = interface.preprocessing_folder
             interface.TabPhaseRetrieval.pynx_folder_handler(
                 change=interface.preprocessing_folder
             )
 
             # Plot folder
-            interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+            interface.TabPlotData.parent_folder.value = interface.preprocessing_folder
             interface.TabPlotData.plot_folder_handler(
                 change=interface.preprocessing_folder
             )
 
     if not run_strain:
-        for w in interface.TabPostprocess._list_widgets.children[:-1]:
+        for w in interface.TabPostprocess.children[:-1]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = False
 
-        for w in interface.TabPreprocess._list_widgets.children[:-2]:
+        for w in interface.TabPreprocess.children[:-2]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = False
 
         # Refresh folders
-        interface.TabStartup.sub_directories_handler(
+        interface.root_folder_handler(
             change=interface.Dataset.scan_folder
         )
 
         # Plot folder
-        interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData.parent_folder.value = interface.preprocessing_folder
         interface.TabPlotData.plot_folder_handler(
             change=interface.preprocessing_folder
         )
 
         # PyNX folder
-        interface.TabPhaseRetrieval._list_widgets.children[1].value\
+        interface.TabPhaseRetrieval.parent_folder.value\
             = interface.preprocessing_folder
         interface.TabPhaseRetrieval.pynx_folder_handler(
             change=interface.preprocessing_folder

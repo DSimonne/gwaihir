@@ -10,6 +10,7 @@ from scipy.ndimage import center_of_mass
 from shlex import quote
 import ipywidgets as widgets
 from IPython.display import clear_output
+from ast import literal_eval
 
 # PyNX
 try:
@@ -231,10 +232,9 @@ def init_phase_retrieval_tab(
 
     print("Scan n°", interface.Dataset.scan)
 
-    interface.Dataset.energy = interface.TabPreprocess._list_widgets.children[50].value
+    interface.Dataset.energy = interface.TabInstrument.energy.value
     interface.Dataset.wavelength = 1.2399 * 1e-6 / interface.Dataset.energy
-    interface.Dataset.detector_distance = interface.TabPreprocess._list_widgets.children[
-        49].value
+    interface.Dataset.detector_distance = interface.TabInstrument.detector_distance.value
 
     print("\tCXI input: Energy = %8.2f eV" % interface.Dataset.energy)
     print(f"\tCXI input: Wavelength = {interface.Dataset.wavelength*1e10} A")
@@ -721,7 +721,7 @@ def init_phase_retrieval_tab(
         )
 
         # Refresh folders
-        interface.TabStartup.sub_directories_handler(
+        interface.root_folder_handler(
             change=interface.Dataset.scan_folder
         )
 
@@ -732,7 +732,7 @@ def init_phase_retrieval_tab(
         )
 
         # Strain folder
-        interface.TabPostprocess._list_widgets.children[-4].value\
+        interface.TabPostprocess.strain_folder.value\
             = interface.preprocessing_folder
         interface.TabPostprocess.strain_folder_handler(
             change=interface.preprocessing_folder

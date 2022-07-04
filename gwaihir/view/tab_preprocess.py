@@ -470,8 +470,6 @@ class TabPreprocess(widgets.VBox):
             self.bragg_peak_centering_handler, names="value")
         self.reload_previous.observe(
             self.reload_data_handler, names="value")
-        self.init_para.observe(
-            self.preprocess_handler, names="value")
 
     # Define handlers
     def beamline_handler(self, change):
@@ -514,28 +512,4 @@ class TabPreprocess(widgets.VBox):
             if change:
                 w.disabled = False
             else:
-                w.disabled = True
-
-    def preprocess_handler(self, change):
-        """Handles changes on the widget used for the preprocessing."""
-        if hasattr(change, "new"):
-            change = change.new
-
-        if not change:
-            self._list_widgets_init_dir.children[8].disabled = False  # TODO
-
-            for w in self.children[:-2]:
-                w.disabled = False
-
-            self.beamline_handler(
-                change=self.beamline.value)
-            self.bragg_peak_centering_handler(
-                change=self.centering_method.value)
-            self.reload_data_handler(
-                change=self.reload_previous.value)
-
-        if change:
-            self._list_widgets_init_dir.children[8].disabled = True  # TODO
-
-            for w in self.children[:-2]:
                 w.disabled = True

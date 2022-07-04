@@ -28,7 +28,7 @@ class TabPlotData(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.folder = widgets.Dropdown(
+        self.parent_folder = widgets.Dropdown(
             options=[x[0] + "/" for x in os.walk(os.getcwd())],
             value=os.getcwd() + "/",
             placeholder=os.getcwd() + "/",
@@ -100,14 +100,14 @@ class TabPlotData(widgets.VBox):
         # Define children
         self.children = (
             self.unused_label_plot,
-            self.folder,
+            self.parent_folder,
             self.filename,
             self.cmap,
             self.data_use,
         )
 
         # Assign handlers
-        self.folder.observe(
+        self.parent_folder.observe(
             self.plot_folder_handler, names="value")
 
     # Define handlers
@@ -130,6 +130,6 @@ class TabPlotData(widgets.VBox):
                                  for f in options]
 
         if self.plot_tab_only:
-            self.folder.options = [
+            self.parent_folder.options = [
                 x[0] + "/" for x in os.walk(os.getcwd())
             ]

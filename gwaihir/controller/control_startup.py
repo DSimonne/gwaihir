@@ -41,9 +41,6 @@ def init_startup_tab(
      saved, not compatible with interactive masking. Other possibilities
      are 'module://matplotlib_inline.backend_inline' default value is
      "Qt5Agg"
-
-    return:
-        Dataset instance
     """
     if run_dir_init:
         # Create Dataset Class
@@ -54,22 +51,20 @@ def init_startup_tab(
             root_folder=root_folder,
         )
 
+        # Save Dataset as interface attribute
+        interface.Dataset = Dataset
+
         # Start to assign attributes
         Dataset.comment = comment
         Dataset.debug = debug
         Dataset.scan_name = Dataset.sample_name + str(Dataset.scan)
 
-        # Backend used for plotting
-        matplotlib_backend = matplotlib_backend
-
-        # Assign folders
-        Dataset.scan_folder = Dataset.root_folder + Dataset.scan_name + "/"
-        preprocessing_folder = Dataset.scan_folder + "preprocessing/"
-        postprocessing_folder = Dataset.scan_folder + "postprocessing/"
+        # Save backend used for plotting
+        interface.matplotlib_backend = matplotlib_backend
 
         # Update the directory structure
         print("Updating directories ...")
-        init_directories(
+        Dataset.scan_folder, interface.preprocessing_folder, interface.postprocessing_folder = init_directories(
             scan_name=Dataset.scan_name,
             root_folder=Dataset.root_folder,
         )
@@ -77,44 +72,43 @@ def init_startup_tab(
         # Try and find SixS data, will also rotate the data if needed
         template_imagefile, Dataset.data_dir, Dataset.path_to_nxs_data = find_and_copy_raw_data(
             scan=Dataset.scan,
-            sample_name=Dataset.sample_name,
-            root_folder=Dataset.root_folder,
+            scan_folder=Dataset.scan_folder,
             data_dir=Dataset.data_dir,
         )
 
         # Save template_imagefile in GUI
         if template_imagefile != "":
-            interface.TabPreprocess._list_widgets[42].value\
+            interface.TabDetector.template_imagefile.value\
                 = template_imagefile
 
         # Refresh folders
-        interface.TabStartup.sub_directories_handler(
-            change=interface.Dataset.scan_folder
+        interface.root_folder_handler(
+            change=Dataset.scan_folder
         )
 
         # PyNX folder
-        interface.TabPhaseRetrieval._list_widgets.children[1].value\
+        interface.TabPhaseRetrieval.parent_folder.value\
             = interface.preprocessing_folder
         interface.TabPhaseRetrieval.pynx_folder_handler(
             change=interface.preprocessing_folder
         )
 
         # Plot folder
-        interface.TabPlotData._list_widgets.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData.parent_folder.value = interface.preprocessing_folder
         interface.TabPlotData.plot_folder_handler(
             change=interface.preprocessing_folder
         )
 
         # Strain folder, refresh values
-        interface.TabPostprocess._list_widgets.children[-4].value = preprocessing_folder
+        interface.TabPostprocess.strain_folder.value = interface.preprocessing_folder
         interface.TabPostprocess.strain_folder_handler(
-            change=preprocessing_folder)
+            change=interface.preprocessing_folder
+        )
 
         # Facet folder, refresh values
-        interface.TabFacet._list_widgets.children[1].value = postprocessing_folder
-        interface.TabFacet.vtk_file_handler(change=postprocessing_folder)
-
-        return Dataset, matplotlib_backend, preprocessing_folder, postprocessing_folder
+        interface.TabFacet.parent_folder.value = interface.postprocessing_folder
+        interface.TabFacet.vtk_file_handler(
+            change=interface.postprocessing_folder)
 
     elif not run_dir_init:
         print("Cleared window.")
@@ -232,9 +226,11 @@ def init_directories(
 
     :param scan_name: str, scan name, e.g. 'S1322'
     :param root_folder: root folder of the experiment
+
+    return: scan_folder, preprocessing_folder, postprocessing_folder
     """
     # Assign scan folder
-    scan_folder = root_folder + "/" + scan_name + "/"
+    scan_folder = root_folder + scan_name + "/"
     print("Scan folder:", scan_folder)
 
     # Assign preprocessing folder
@@ -296,6 +292,91 @@ def init_directories(
             print(f"\tCreated {preprocessing_folder}{d}")
         except (FileExistsError, PermissionError):
             pass
+
+    return scan_folder, preprocessing_folder, postprocessing_folder
+
+
+def find_and_copy_raw_data(
+    scan,
+    scan_folder,
+    data_dir,
+):
+    """
+    If a file is found:
+        - template_imagefile parameter updated to match it for bcdi scripts
+        - a copy of the raw data file is saved in scan_folder + "data/"
+        - data_dir parameter is changed to scan_folder + "data/" to work with
+          the copy of the raw data file
+    This method allows us not to work with the original data of SixS, since we
+    need to rotate the data when working with the vertical configuration.
+
+    :param scan: int, scan number
+    :param scan_folder: folder in which the data is stored
+    :param data_dir: directory with all the raw data
+
+    returns:
+    :template_imagefile: empty string if no file or string updated to match the
+     file found
+    :data_dir: updated
+    :param path_to_sixs_data: absolute path to nexus file to have metadata
+     access
+    """
+    path_to_nxs_data = ""
+    template_imagefile = ""
+
+    # Get path_to_nxs_data from data in data_dir
+    try:
+        # Try and find a mu scan
+        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
+    except IndexError:
+        try:
+            # Try and find an omega scan
+            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
+        except IndexError:
+            print("Could not find data, please specify template.")
+
+    # Get template_imagefile from path_to_nxs_data
+    if path_to_nxs_data != "":
+        try:
+            print("File path:", path_to_nxs_data)
+            template_imagefile = os.path.basename(path_to_nxs_data).split(
+                "%05d" % scan)[0] + "%05d.nxs"
+            print(f"File template: {template_imagefile}\n\n")
+
+        except (IndexError, AttributeError):
+            pass
+
+        # Move data file to scan_folder + "data/"
+        try:
+            shutil.copy2(path_to_nxs_data, scan_folder + "data/")
+            print(f"Copied {path_to_nxs_data} to {data_dir}")
+
+            # Change data_dir, only if copy successful
+            data_dir = scan_folder + "data/"
+
+            # Change path_to_nxs_data, only if copy successful
+            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
+
+            # Rotate the data
+            rotate_sixs_data(path_to_nxs_data)
+
+        except (FileExistsError, PermissionError, shutil.SameFileError):
+            print(f"File exists in {scan_folder}data/")
+
+            # Change data_dir, since data already copied
+            data_dir = scan_folder + "data/"
+
+            # Change path_to_nxs_data, since data already copied
+            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
+
+            # Rotate the data
+            rotate_sixs_data(path_to_nxs_data)
+
+        except (AttributeError, FileNotFoundError):
+            print("Could not move the data file.")
+            pass
+
+    return template_imagefile, data_dir, path_to_nxs_data
 
 
 def rotate_sixs_data(
@@ -380,90 +461,3 @@ def rotate_sixs_data(
 
     else:
         hash_print("Data already rotated ...")
-
-
-def find_and_copy_raw_data(
-    scan,
-    sample_name,
-    root_folder,
-    data_dir,
-):
-    """
-    If a file is found:
-        - template_imagefile parameter updated to match it for bcdi scripts
-        - a copy of the raw data file is saved in scan_folder + "data/"
-        - data_dir parameter is changed to scan_folder + "data/" to work with
-          the copy of the raw data file
-    This method allows us not to work with the original data of SixS, since we
-    need to rotate the data when working with the vertical configuration.
-
-    :param scan: int, scan number
-    :param sample_name: str, sample name, e.g. 'S'
-    :param root_folder: root folder of the experiment
-    :param data_dir: directory with all the raw data
-
-    returns:
-    :template_imagefile: empty string if no file or string updated to match the
-     file found
-    :data_dir: updated
-    :param path_to_sixs_data: absolute path to nexus file to have metadata
-     access
-    """
-    # Assign scan folder
-    scan_folder = root_folder + "/" + sample_name + str(scan) + "/"
-    path_to_nxs_data = ""
-    template_imagefile = ""
-
-    # Get path_to_nxs_data from data in data_dir
-    try:
-        # Try and find a mu scan
-        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
-    except IndexError:
-        try:
-            # Try and find an omega scan
-            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
-        except IndexError:
-            print("Could not find data, please specify template.")
-
-    # Get template_imagefile from path_to_nxs_data
-    if path_to_nxs_data != "":
-        try:
-            print("File path:", path_to_nxs_data)
-            template_imagefile = os.path.basename(path_to_nxs_data).split(
-                "%05d" % scan)[0] + "%05d.nxs"
-            print(f"File template: {template_imagefile}\n\n")
-
-        except (IndexError, AttributeError):
-            pass
-
-        # Move data file to scan_folder + "data/"
-        try:
-            shutil.copy2(path_to_nxs_data, scan_folder + "data/")
-            print(f"Copied {path_to_nxs_data} to {data_dir}")
-
-            # Change data_dir, only if copy successful
-            data_dir = scan_folder + "data/"
-
-            # Change path_to_nxs_data, only if copy successful
-            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
-
-            # Rotate the data
-            rotate_sixs_data(path_to_nxs_data)
-
-        except (FileExistsError, PermissionError, shutil.SameFileError):
-            print(f"File exists in {scan_folder}data/")
-
-            # Change data_dir, since data already copied
-            data_dir = scan_folder + "data/"
-
-            # Change path_to_nxs_data, since data already copied
-            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
-
-            # Rotate the data
-            rotate_sixs_data(path_to_nxs_data)
-
-        except (AttributeError, FileNotFoundError):
-            print("Could not move the data file.")
-            pass
-
-    return template_imagefile, data_dir, path_to_nxs_data
