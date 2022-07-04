@@ -964,7 +964,7 @@ def initialize_cdi_operator(
 
     return: cdi operator
     """
-    if iobs in ("", None) or not os.path.isfile(iobs):
+    if iobs in ("", None) and os.path.isfile(iobs):
         # Dataset.iobs = None
         iobs = None
         print("At least iobs must exist.")
@@ -983,11 +983,12 @@ def initialize_cdi_operator(
 
     if rebin != (1, 1, 1):
         iobs = bin_data(iobs, rebin)
+        print("\tBinned data.")
 
     # fft shift
     iobs = fftshift(iobs)
 
-    if mask not in ("", None) or not os.path.isfile(mask):
+    if mask not in ("", None) and os.path.isfile(mask):
         if mask.endswith(".npy"):
             mask = np.load(mask).astype(np.int8)
             nb = mask.sum()
@@ -1005,6 +1006,7 @@ def initialize_cdi_operator(
 
         if rebin != (1, 1, 1):
             mask = bin_data(mask, rebin)
+            print("\tBinned mask.")
 
         # fft shift
         mask = fftshift(mask)
@@ -1012,8 +1014,7 @@ def initialize_cdi_operator(
     else:
         mask = None
 
-    print(support)
-    if support not in ("", None) or not os.path.isfile(support):
+    if support not in ("", None) and os.path.isfile(support):
         if support.endswith(".npy"):
             support = np.load(support)
             print("\tCXI input: loading support")
@@ -1041,17 +1042,14 @@ def initialize_cdi_operator(
 
         if rebin != (1, 1, 1):
             support = bin_data(support, rebin)
+            print("\tBinned support.")
 
         # fft shift
-        try:
-            support = fftshift(support)
-        except ValueError:
-            support = None
+        support = fftshift(support)
 
     else:
         support = None
 
-    print(obj)
     if obj not in ("", None) or not os.path.isfile(obj):
         if obj.endswith(".npy"):
             obj = np.load(obj)
@@ -1065,12 +1063,10 @@ def initialize_cdi_operator(
 
         if rebin != (1, 1, 1):
             obj = bin_data(obj, rebin)
+            print("\tBinned obj.")
 
         # fft shift
-        try:
-            obj = fftshift(obj)
-        except ValueError:
-            obj = None
+        obj = fftshift(obj)
 
     else:
         obj = None

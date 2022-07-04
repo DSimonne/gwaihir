@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import random
 import matplotlib.pyplot as plt
 import glob
 import os
@@ -327,11 +328,11 @@ def find_and_copy_raw_data(
     # Get path_to_nxs_data from data in data_dir
     try:
         # Try and find a mu scan
-        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*")[0]
+        path_to_nxs_data = glob.glob(f"{data_dir}*mu*{scan}*.nxs")[0]
     except IndexError:
         try:
             # Try and find an omega scan
-            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*")[0]
+            path_to_nxs_data = glob.glob(f"{data_dir}*omega*{scan}*.nxs")[0]
         except IndexError:
             print("Could not find data, please specify template.")
 
@@ -399,27 +400,37 @@ def rotate_sixs_data(
         except (ValueError, RuntimeError):
             data_already_rotated = f['rotation'][...]
 
-    if not data_already_rotated:
-        hash_print("Rotating SIXS data ...")
-        with tb.open_file(path_to_nxs_data, "a") as f:
+    # Find 3D array key
+    three_d_data_keys = []
+    with h5py.File(path_to_nxs_data, "a") as f:
+        for key in f['com']['scan_data'].keys():
+            shape = f['com']['scan_data'][key].shape
+            if len(shape) == 3:
+                three_d_data_keys.append(key)
+
+        if not data_already_rotated:
+            print("Rotating SIXS data ...")
             # Get data
-            try:
-                # Omega scan
-                data_og = f.root.com.scan_data.data_02[:]
-                index = 2
-                if np.ndim(data_og) is 1:
-                    data_og = f.root.com.scan_data.data_10[:]
-                    index = 10
-                # Mu scan
-                print("Calling merlin the enchanter in SBS...")
-                scan_type = "SBS"
-            except tb.NoSuchNodeError:
-                try:
-                    data_og = f.root.com.scan_data.self_image[:]
-                    print("Calling merlin the enchanter in FLY...")
-                    scan_type = "FLY"
-                except tb.NoSuchNodeError:
-                    print("This data does not result from Merlin :/")
+            if len(three_d_data_keys) == 1:
+                good_data_key = three_d_data_keys[0]
+                print(f"Found 3D array for key: {good_data_key}")
+                data_og = f['com']['scan_data'][good_data_key][...]
+
+            else:  # There are multiple 3D arrays :O
+                for key in three_d_data_keys:
+                    data = f['com']['scan_data'][key][...]
+
+                    # We know that the Merlin detector array shape
+                    # should be either 512 or 515
+                    if not data_og.shape[1] in (512, 515) and data_og.shape[2] in (512, 515):
+                        three_d_data_keys.remove(key)
+
+                if len(three_d_data_keys) == 1:  # we removed 3D arrays from other detectors
+                    good_data_key = three_d_data_keys[0]
+                    print(f"Found 3D array for key: {good_data_key}")
+                    data_og = f['com']['scan_data'][good_data_key][...]
+                else:
+                    raise IndexError("Could not find 3D array")
 
             # Just an index for plotting schemes
             half = int(data_og.shape[0] / 2)
@@ -431,6 +442,35 @@ def rotate_sixs_data(
                 data[idx, :, :] = np.fliplr(tmp)
             print("Data well rotated by 90°.")
 
+            # Find bad frames
+            sum_along_rc = data.sum(axis=(1, 2))
+
+            bad_frames = []
+            for j, summed_frame in enumerate(sum_along_rc):
+                if j == 0:
+                    if 100 * sum_along_rc[1] < summed_frame:
+                        bad_frames.append(j)
+                elif j == len(sum_along_rc)-1:
+                    if 100 * sum_along_rc[-2] < summed_frame:
+                        bad_frames.append(j)
+                else:
+                    if 100 * sum_along_rc[j-1] < summed_frame and 100 * sum_along_rc[j+1] < summed_frame:
+                        bad_frames.append(j)
+
+            # Mask bad frames
+            for j in bad_frames:
+                print("Masked frame", j)
+                data[j] = np.zeros((data.shape[1], data.shape[2]))
+
+                # Put one random pixel to 1, so that bcdi does not skip the frame
+                # since it is boggy for now
+                data[j, random.randint(0, data.shape[1]),
+                     random.randint(0, data.shape[1])] = 1
+
+            # Overwrite data in copied file
+            f['com']['scan_data'][good_data_key][...] = data
+
+            # Plot data
             print("Saving example figures...", end="\n\n")
             plt.figure(figsize=(16, 9))
             plt.imshow(data_og[half, :, :], vmax=10)
@@ -448,16 +488,5 @@ def rotate_sixs_data(
             plt.savefig(save_folder + "/data_after_rotation.png")
             plt.close()
 
-            # Overwrite data in copied file
-            try:
-                if scan_type is "SBS" and index is 2:
-                    f.root.com.scan_data.data_02[:] = data
-                elif scan_type is "SBS" and index is 10:
-                    f.root.com.scan_data.data_10[:] = data
-                elif scan_type is "FLY":
-                    f.root.com.scan_data.test_image[:] = data
-            except tb.NoSuchNodeError:
-                print("Could not overwrite data ><")
-
-    else:
-        hash_print("Data already rotated ...")
+        else:
+            print("Data already rotated ...")
