@@ -1032,7 +1032,7 @@ def plot_data(
             value=0,
             step=1,
             title="Position",
-            orientation="vertical",
+            orientation="horizontal",
         )
         slider_index.on_change('value', callback_change_index)
 
