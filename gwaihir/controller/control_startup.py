@@ -380,9 +380,7 @@ def find_and_copy_raw_data(
     return template_imagefile, data_dir, path_to_nxs_data
 
 
-def rotate_sixs_data(
-    path_to_nxs_data
-):
+def rotate_sixs_data(path_to_nxs_data):
     """
     Python script to rotate the data when using the vertical configuration.
     Should work on a copy of the data !! Never use the OG data !!

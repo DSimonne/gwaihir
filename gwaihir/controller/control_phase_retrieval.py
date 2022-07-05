@@ -12,15 +12,11 @@ import ipywidgets as widgets
 from IPython.display import clear_output
 from ast import literal_eval
 
-# PyNX
-try:
-    from pynx.cdi import CDI
-    from pynx.cdi.runner.id01 import params
-    from pynx.utils.math import smaller_primes
-    pynx_import = True
-except ModuleNotFoundError:
-    pynx_import = False
-
+# GPU will be auto-selected
+from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport,\
+    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI
+from pynx.cdi.runner.id01 import params
+from pynx.utils.math import smaller_primes
 
 from bcdi.utils.utilities import bin_data
 
@@ -417,7 +413,7 @@ def init_phase_retrieval_tab(
         elif run_phase_retrieval == "operators":
             # Extract data
             print(
-                "Log likelihood is updated every 50 iterations.")
+                "\tLog likelihood is updated every 50 iterations.")
             interface.Dataset.calc_llk = 50  # TODO
 
             # Keep a list of the resulting scans
@@ -726,7 +722,7 @@ def init_phase_retrieval_tab(
         )
 
         # Plot folder
-        interface.TabData.children[1].value = interface.preprocessing_folder
+        interface.TabPlotData.children[1].value = interface.preprocessing_folder
         interface.TabPlotData.plot_folder_handler(
             change=interface.preprocessing_folder
         )
@@ -893,7 +889,7 @@ def filter_reconstructions(
                 filter_by_std(cxi_files, nb_run_keep +
                               (nb_run - nb_run_keep) // 2)
 
-                hash_print("Iterating on remaining files.")
+                print("Iterating on remaining files.")
 
                 cxi_files = sorted(
                     glob.glob(f"{folder}/result_scan*LLK*.cxi"))
@@ -913,7 +909,7 @@ def filter_reconstructions(
                 filter_by_LLK(cxi_files, nb_run_keep +
                               (nb_run - nb_run_keep) // 2)
 
-                hash_print("Iterating on remaining files.")
+                print("Iterating on remaining files.")
 
                 cxi_files = sorted(
                     glob.glob(f"{folder}/result_scan*LLK*.cxi"))
@@ -926,9 +922,9 @@ def filter_reconstructions(
                     filter_by_std(cxi_files, nb_run_keep)
 
             else:
-                hash_print("No filtering")
+                print("No filtering")
     except KeyboardInterrupt:
-        hash_print("File filtering stopped by user ...")
+        print("File filtering stopped by user ...")
 
 
 def initialize_cdi_operator(
@@ -1050,7 +1046,7 @@ def initialize_cdi_operator(
     else:
         support = None
 
-    if obj not in ("", None) or not os.path.isfile(obj):
+    if obj not in ("", None) and os.path.isfile(obj):
         if obj.endswith(".npy"):
             obj = np.load(obj)
             print("\tCXI input: loading object")
@@ -1347,4 +1343,4 @@ def run_modes_decomposition(
             )
         )
     except KeyboardInterrupt:
-        hash_print("Decomposition into modes stopped by user...")
+        print("Decomposition into modes stopped by user...")

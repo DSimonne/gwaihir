@@ -372,10 +372,7 @@ def init_preprocess_tab(
         interface.Dataset.rocking_angle = rocking_angle
         interface.Dataset.flag_interact = flag_interact
         interface.Dataset.background_plot = str(background_plot)
-        if centering_method == "manual":  # will be overridden
-            interface.Dataset.centering_method = "max"
-        else:
-            interface.Dataset.centering_method = centering_method
+        interface.Dataset.centering_method = centering_method
         interface.Dataset.bragg_peak = bragg_peak
         interface.Dataset.fix_size = fix_size
         interface.Dataset.center_fft = center_fft
@@ -416,7 +413,6 @@ def init_preprocess_tab(
         interface.Dataset.ref_axis_q = ref_axis_q
         interface.Dataset.direct_beam = direct_beam
         interface.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
-        # bragg_peak
         interface.Dataset.outofplane_angle = outofplane_angle
         interface.Dataset.inplane_angle = inplane_angle
         interface.Dataset.tilt_angle = tilt_angle
@@ -491,16 +487,6 @@ def init_preprocess_tab(
         if interface.Dataset.specfile_name == "":
             interface.Dataset.specfile_name = None
 
-        button_run_preprocess = widgets.Button(
-            description="Run data preprocessing...",
-            continuous_update=False,
-            button_style='',
-            layout=widgets.Layout(width='40%'),
-            style={'description_width': 'initial'},
-            icon='fast-forward')
-        display(button_run_preprocess)
-        print("Parameters initialized...")
-
         @ interact(
             run_preprocess=widgets.ToggleButtons(
                 options=[
@@ -512,7 +498,7 @@ def init_preprocess_tab(
                 description="Run preprocess:",
                 continuous_update=False,
                 button_style='',
-                layout=Layout(
+                layout=widgets.Layout(
                     width='100%', height="50px"),
                 style={
                     'description_width': 'initial'},
@@ -537,93 +523,93 @@ def init_preprocess_tab(
 
                 # Create config file
                 create_yaml_file(
-                    fname=f"{self.preprocessing_folder}config_preprocessing.yml",
-                    scans=self.Dataset.scan,
+                    fname=f"{interface.preprocessing_folder}config_preprocessing.yml",
+                    scans=interface.Dataset.scan,
                     root_folder=root_folder,
-                    save_dir=self.preprocessing_folder,
+                    save_dir=interface.preprocessing_folder,
                     data_dir=data_dir,
-                    sample_name=self.Dataset.sample_name,
-                    comment=self.Dataset.comment,
-                    debug=self.Dataset.debug,
+                    sample_name=interface.Dataset.sample_name,
+                    comment=interface.Dataset.comment,
+                    debug=interface.Dataset.debug,
                     # parameters used in masking
-                    flag_interact=self.Dataset.flag_interact,
-                    background_plot=self.Dataset.background_plot,
+                    flag_interact=interface.Dataset.flag_interact,
+                    background_plot=interface.Dataset.background_plot,
                     backend=backend,
                     # parameters related to data cropping/padding/centering
-                    centering_method=self.Dataset.centering_method,
-                    fix_size=self.Dataset.fix_size,
-                    center_fft=self.Dataset.center_fft,
-                    pad_size=self.Dataset.pad_size,
+                    centering_method=interface.Dataset.centering_method,
+                    fix_size=interface.Dataset.fix_size,
+                    center_fft=interface.Dataset.center_fft,
+                    pad_size=interface.Dataset.pad_size,
                     # parameters for data filtering
-                    mask_zero_event=self.Dataset.mask_zero_event,
-                    median_filter=self.Dataset.median_filter,
-                    median_filter_order=self.Dataset.median_filter_order,
+                    mask_zero_event=interface.Dataset.mask_zero_event,
+                    median_filter=interface.Dataset.median_filter,
+                    median_filter_order=interface.Dataset.median_filter_order,
                     # parameters used when reloading processed data
-                    reload_previous=self.Dataset.reload_previous,
-                    reload_orthogonal=self.Dataset.reload_orthogonal,
-                    preprocessing_binning=self.Dataset.preprocessing_binning,
+                    reload_previous=interface.Dataset.reload_previous,
+                    reload_orthogonal=interface.Dataset.reload_orthogonal,
+                    preprocessing_binning=interface.Dataset.preprocessing_binning,
                     # saving options
-                    save_rawdata=self.Dataset.save_rawdata,
-                    save_to_npz=self.Dataset.save_to_npz,
-                    save_to_mat=self.Dataset.save_to_mat,
-                    save_to_vti=self.Dataset.save_to_vti,
-                    save_as_int=self.Dataset.save_as_int,
+                    save_rawdata=interface.Dataset.save_rawdata,
+                    save_to_npz=interface.Dataset.save_to_npz,
+                    save_to_mat=interface.Dataset.save_to_mat,
+                    save_to_vti=interface.Dataset.save_to_vti,
+                    save_as_int=interface.Dataset.save_as_int,
                     # define beamline related parameters
-                    beamline=self.Dataset.beamline,
-                    actuators=self.Dataset.actuators,
-                    is_series=self.Dataset.is_series,
-                    rocking_angle=self.Dataset.rocking_angle,
-                    specfile_name=self.Dataset.specfile_name,
+                    beamline=interface.Dataset.beamline,
+                    actuators=interface.Dataset.actuators,
+                    is_series=interface.Dataset.is_series,
+                    rocking_angle=interface.Dataset.rocking_angle,
+                    specfile_name=interface.Dataset.specfile_name,
                     # parameters for custom scans
-                    custom_scan=self.Dataset.custom_scan,
-                    custom_images=self.Dataset.custom_images,
-                    custom_monitor=self.Dataset.custom_monitor,
+                    custom_scan=interface.Dataset.custom_scan,
+                    custom_images=interface.Dataset.custom_images,
+                    custom_monitor=interface.Dataset.custom_monitor,
                     # detector related parameters
-                    detector=self.Dataset.detector,
-                    phasing_binning=self.Dataset.phasing_binning,
-                    linearity_func=self.Dataset.linearity_func,
+                    detector=interface.Dataset.detector,
+                    phasing_binning=interface.Dataset.phasing_binning,
+                    linearity_func=interface.Dataset.linearity_func,
                     # center_roi_x
                     # center_roi_y
-                    roi_detector=self.Dataset.roi_detector,
-                    normalize_flux=self.Dataset.normalize_flux,
-                    photon_threshold=self.Dataset.photon_threshold,
-                    photon_filter=self.Dataset.photon_filter,
-                    bin_during_loading=self.Dataset.bin_during_loading,
-                    frames_pattern=self.Dataset.frames_pattern,
-                    background_file=self.Dataset.background_file,
-                    hotpixels_file=self.Dataset.hotpixels_file,
-                    flatfield_file=self.Dataset.flatfield_file,
-                    template_imagefile=self.Dataset.template_imagefile,
+                    roi_detector=interface.Dataset.roi_detector,
+                    normalize_flux=interface.Dataset.normalize_flux,
+                    photon_threshold=interface.Dataset.photon_threshold,
+                    photon_filter=interface.Dataset.photon_filter,
+                    bin_during_loading=interface.Dataset.bin_during_loading,
+                    frames_pattern=interface.Dataset.frames_pattern,
+                    background_file=interface.Dataset.background_file,
+                    hotpixels_file=interface.Dataset.hotpixels_file,
+                    flatfield_file=interface.Dataset.flatfield_file,
+                    template_imagefile=interface.Dataset.template_imagefile,
                     # define parameters below if you want to orthogonalize the
                     # data before phasing
-                    use_rawdata=self.Dataset.use_rawdata,
-                    interpolation_method=self.Dataset.interpolation_method,
-                    fill_value_mask=self.Dataset.fill_value_mask,
-                    beam_direction=self.Dataset.beam_direction,
-                    sample_offsets=self.Dataset.sample_offsets,
-                    detector_distance=self.Dataset.detector_distance,
-                    energy=self.Dataset.energy,
-                    custom_motors=self.Dataset.custom_motors,
+                    use_rawdata=interface.Dataset.use_rawdata,
+                    interpolation_method=interface.Dataset.interpolation_method,
+                    fill_value_mask=interface.Dataset.fill_value_mask,
+                    beam_direction=interface.Dataset.beam_direction,
+                    sample_offsets=interface.Dataset.sample_offsets,
+                    detector_distance=interface.Dataset.detector_distance,
+                    energy=interface.Dataset.energy,
+                    custom_motors=interface.Dataset.custom_motors,
                     # parameters when orthogonalizing the data before
                     # phasing  using the linearized transformation matrix
-                    align_q=self.Dataset.align_q,
-                    ref_axis_q=self.Dataset.ref_axis_q,
-                    direct_beam=self.Dataset.direct_beam,
-                    dirbeam_detector_angles=self.Dataset.dirbeam_detector_angles,
-                    bragg_peak=self.Dataset.bragg_peak,
-                    outofplane_angle=self.Dataset.outofplane_angle,
-                    inplane_angle=self.Dataset.inplane_angle,
-                    tilt_angle=self.Dataset.tilt_angle,
+                    align_q=interface.Dataset.align_q,
+                    ref_axis_q=interface.Dataset.ref_axis_q,
+                    direct_beam=interface.Dataset.direct_beam,
+                    dirbeam_detector_angles=interface.Dataset.dirbeam_detector_angles,
+                    bragg_peak=interface.Dataset.bragg_peak,
+                    outofplane_angle=interface.Dataset.outofplane_angle,
+                    inplane_angle=interface.Dataset.inplane_angle,
+                    tilt_angle=interface.Dataset.tilt_angle,
                     # parameters when orthogonalizing the data before phasing
                     # using xrayutilities
-                    sample_inplane=self.Dataset.sample_inplane,
-                    sample_outofplane=self.Dataset.sample_outofplane,
-                    offset_inplane=self.Dataset.offset_inplane,
-                    cch1=self.Dataset.cch1,
-                    cch2=self.Dataset.cch2,
-                    detrot=self.Dataset.detrot,
-                    tiltazimuth=self.Dataset.tiltazimuth,
-                    tilt_detector=self.Dataset.tilt_detector,
+                    sample_inplane=interface.Dataset.sample_inplane,
+                    sample_outofplane=interface.Dataset.sample_outofplane,
+                    offset_inplane=interface.Dataset.offset_inplane,
+                    cch1=interface.Dataset.cch1,
+                    cch2=interface.Dataset.cch2,
+                    detrot=interface.Dataset.detrot,
+                    tiltazimuth=interface.Dataset.tiltazimuth,
+                    tilt_detector=interface.Dataset.tilt_detector,
                 )
 
                 if run_preprocess == "GUI":
@@ -652,30 +638,30 @@ def init_preprocess_tab(
                     print(
                         "\n###########################################"
                         "#############################################"
-                        f"\nRunning: $ {self.path_scripts}/bcdi_preprocess_BCDI.py"
-                        f"\nConfig file: {self.preprocessing_folder}config_preprocessing.yml"
+                        f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
+                        f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
                         "\n###########################################"
                         "#############################################"
                     )
 
                     # Run function
                     print(
-                        f"cd {self.preprocessing_folder}; "
-                        f"{self.path_scripts}/bcdi_preprocess_BCDI.py "
+                        f"cd {interface.preprocessing_folder}; "
+                        f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
                         "-c config_preprocessing.yml"
                     )
                     os.system(
-                        f"cd {self.preprocessing_folder}; "
-                        f"{self.path_scripts}/bcdi_preprocess_BCDI.py "
+                        f"cd {interface.preprocessing_folder}; "
+                        f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
                         "-c config_preprocessing.yml"
                     )
 
                 # Button to save metadata
-                button_save_metadata = Button(
+                button_save_metadata = widgets.Button(
                     description="Save metadata",
                     continuous_update=False,
                     button_style='',
-                    layout=Layout(width='40%'),
+                    layout=widgets.Layout(width='40%'),
                     style={'description_width': 'initial'},
                     icon='fast-forward')
 
@@ -889,7 +875,7 @@ def extract_metadata(
         # Save
         display(result.head())
         result.to_csv(metadata_csv_file, index=False)
-        hash_print(f"Saved logs in {metadata_csv_file}")
+        print(f"Saved logs in {metadata_csv_file}")
 
     except (FileNotFoundError, ValueError):
         # Create file
@@ -898,4 +884,4 @@ def extract_metadata(
         # Save
         display(temp_df.head())
         temp_df.to_csv(metadata_csv_file, index=False)
-        hash_print(f"Saved logs in {metadata_csv_file}")
+        print(f"Saved logs in {metadata_csv_file}")

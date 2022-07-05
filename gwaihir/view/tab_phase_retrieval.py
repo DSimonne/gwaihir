@@ -235,6 +235,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.nb_raar = widgets.BoundedIntText(
             value=1000,
             min=0,
+            max=9999,
             step=10,
             continuous_update=False,
             description='Nb of RAAR:',
@@ -248,6 +249,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.nb_hio = widgets.BoundedIntText(
             value=400,
             min=0,
+            max=9999,
             step=10,
             continuous_update=False,
             description='Nb of HIO:',
@@ -261,6 +263,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.nb_er = widgets.BoundedIntText(
             value=300,
             min=0,
+            max=9999,
             step=10,
             continuous_update=False,
             description='Nb of ER:',
@@ -274,6 +277,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.nb_ml = widgets.BoundedIntText(
             value=0,
             min=0,
+            max=9999,
             step=10,
             continuous_update=False,
             description='Nb of ML:',
@@ -286,6 +290,8 @@ class TabPhaseRetrieval(widgets.VBox):
 
         self.nb_run = widgets.BoundedIntText(
             value=30,
+            min=0,
+            max=100,
             continuous_update=False,
             description='Number of run:',
             layout=widgets.Layout(height="50px"),

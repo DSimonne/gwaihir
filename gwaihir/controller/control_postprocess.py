@@ -2,7 +2,7 @@ import glob
 import os
 from datetime import datetime
 import ipywidgets as widgets
-from control_preprocess import create_yaml_file
+from gwaihir.controller.control_preprocess import create_yaml_file
 from IPython.display import clear_output
 from ast import literal_eval
 

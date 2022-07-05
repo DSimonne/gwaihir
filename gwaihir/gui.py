@@ -7,30 +7,28 @@ import ipywidgets as widgets
 from ipywidgets import interactive, fixed, Tab
 from IPython.display import display
 
-from tab_data_frame import TabDataFrame
-from tab_detector import TabDetector
-from tab_facet import TabFacet
-from tab_instrument import TabInstrument
-from tab_phase_retrieval import TabPhaseRetrieval
-from tab_plot_data import TabPlotData
-from tab_postprocess import TabPostprocess
-from tab_preprocess import TabPreprocess
-from tab_readme import TabReadme
-from tab_startup import TabStartup
+from gwaihir.view.tab_data_frame import TabDataFrame
+from gwaihir.view.tab_detector import TabDetector
+from gwaihir.view.tab_facet import TabFacet
+from gwaihir.view.tab_instrument import TabInstrument
+from gwaihir.view.tab_phase_retrieval import TabPhaseRetrieval
+from gwaihir.view.tab_plot_data import TabPlotData
+from gwaihir.view.tab_postprocess import TabPostprocess
+from gwaihir.view.tab_preprocess import TabPreprocess
+from gwaihir.view.tab_readme import TabReadme
+from gwaihir.view.tab_startup import TabStartup
 
-from control_data_frame import init_data_frame_tab
-from control_facet import init_facet_tab
-from control_phase_retrieval import init_phase_retrieval_tab
-from control_plot_data import init_plot_data_tab
-from control_postprocess import init_postprocess_tab
-from control_preprocess import init_preprocess_tab
-from control_readme import init_readme_tab
-from control_startup import init_startup_tab
+from gwaihir.controller.control_data_frame import init_data_frame_tab
+from gwaihir.controller.control_facet import init_facet_tab
+from gwaihir.controller.control_phase_retrieval import init_phase_retrieval_tab
+from gwaihir.controller.control_plot_data import init_plot_data_tab
+from gwaihir.controller.control_postprocess import init_postprocess_tab
+from gwaihir.controller.control_preprocess import init_preprocess_tab
+from gwaihir.controller.control_readme import init_readme_tab
+from gwaihir.controller.control_startup import init_startup_tab
 
-# GPU will be auto-selected
 try:
-    from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport
-    from pynx.cdi import InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge
+    import pynx
     pynx_import_success = True
 except ModuleNotFoundError:
     pynx_import_success = False
@@ -457,7 +455,7 @@ class Interface:
 
         if self.TabStartup.run_dir_init.value:
             self.TabPostprocess.strain_folder.options = sub_dirs
-            self.TabDataFrame.parent_folder.options = sub_dirs
+            self.TabPlotData.parent_folder.options = sub_dirs
             self.TabFacet.parent_folder.options = sub_dirs
             self.TabPhaseRetrieval.parent_folder.options = sub_dirs
 
