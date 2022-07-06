@@ -122,15 +122,17 @@ class Interface:
 
         # Display only the plot tab
         if plot_tab_only:
-            self.window = interactive(
-                init_plot_data_tab,
-                interface=fixed(self),
-                unused_label_plot=self.TabPlotData.unused_label_plot,
-                parent_folder=self.TabPlotData.parent_folder,
-                filename=self.TabPlotData.filename,
-                cmap=self.TabPlotData.cmap,
-                data_use=self.TabPlotData.data_use,
-            )
+            self.window = Tab(children=(
+                interactive(
+                    init_plot_data_tab,
+                    interface=fixed(self),
+                    unused_label_plot=self.TabPlotData.unused_label_plot,
+                    parent_folder=self.TabPlotData.parent_folder,
+                    filename=self.TabPlotData.filename,
+                    cmap=self.TabPlotData.cmap,
+                    data_use=self.TabPlotData.data_use,
+                ),
+            ))
 
             self.window.set_title(0, "Plot data")
 
@@ -353,7 +355,7 @@ class Interface:
                 unused_label_strain=self.TabPostprocess.unused_label_strain,
                 strain_folder=self.TabPostprocess.strain_folder,
                 reconstruction_files=self.TabPostprocess.reconstruction_files,
-                run_strain=self.TabPostprocess.run_strain,
+                init_postprocess_parameters=self.TabPostprocess.init_postprocess_parameters,
             )
 
             self.init_plot_data_tab_gui = interactive(

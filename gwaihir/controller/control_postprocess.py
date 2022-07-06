@@ -1,13 +1,23 @@
 import glob
 import os
+import tables as tb
+import numpy as np
+import matplotlib.pyplot as plt
 from datetime import datetime
 import ipywidgets as widgets
-from gwaihir.controller.control_preprocess import create_yaml_file
 from IPython.display import clear_output
 from ast import literal_eval
 
+from scipy.fftpack import fftn, ifftn, fftshift, fftfreq
+from scipy.ndimage import center_of_mass
+
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
 from bcdi.utils.parser import ConfigParser
+
+from pynx.utils import phase_retrieval_transfer_function
+
+from gwaihir import plot
+from gwaihir.controller.control_preprocess import create_yaml_file
 
 
 def init_postprocess_tab(
@@ -74,7 +84,7 @@ def init_postprocess_tab(
     unused_label_strain,
     strain_folder,
     reconstruction_files,
-    run_strain,
+    init_postprocess_parameters,
 ):
     """
     Interpolate the output of the phase retrieval into an orthonormal frame,
@@ -350,7 +360,7 @@ def init_postprocess_tab(
     interface.Dataset.apodization_alpha = apodization_alpha
     interface.reconstruction_files = strain_folder + reconstruction_files
 
-    if run_strain:
+    if init_postprocess_parameters == "run_strain":
         # Save directory
         save_dir = f"{interface.postprocessing_folder}/result_{interface.Dataset.save_frame}/"
 
@@ -595,7 +605,7 @@ def init_postprocess_tab(
 
         finally:
             # At the end of the function
-            interface.TabPostprocess.run_strain.disabled = False
+            interface.TabPostprocess.init_postprocess_parameters.disabled = False
 
             # Refresh folders
             interface.root_folder_handler(
@@ -615,7 +625,14 @@ def init_postprocess_tab(
                 change=interface.preprocessing_folder
             )
 
-    if not run_strain:
+    elif init_postprocess_parameters == "run_prtf":
+        compute_prtf(
+            iobs=interface.Dataset.iobs,
+            mask=interface.Dataset.mask,
+            obj=interface.reconstruction_files,
+        )
+
+    elif not init_postprocess_parameters:
         for w in interface.TabPostprocess.children[:-1]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = False
@@ -644,3 +661,102 @@ def init_postprocess_tab(
 
         print("Cleared window.")
         clear_output(True)
+    else:
+        print("Not yet supported.")
+        clear_output(True)
+
+
+def center(data, mask=None, center=None, method="com"):
+    """
+    Center 3D volume data such that the center of mass of data is at
+    the very center of the 3D matrix.
+    :param data: volume data (np.array). 3D numpy array which will be
+    centered.
+    :param mask: volume mask (np.array). 3D numpy array of same size 
+    as data which will be centered based on data
+    :param com: center of mass coordinates(list, np.array). If no com is
+    provided, com of the given data is computed (default: None).
+    :param method: what region to place at the center (str), either
+    com or max.
+
+    Written by @Clatlan 
+    :returns: centered 3D numpy array.
+    """
+    shape = data.shape
+
+    if method == "com":
+        if center is None:
+            xcenter, ycenter, zcenter = (
+                int(round(c)) for c in center_of_mass(data)
+            )
+    elif method == "max":
+        if center is None:
+            xcenter, ycenter, zcenter = np.where(data == np.max(data))
+    else:
+        print("method unknown, please choose between ['com', 'max']")
+        return data, None
+
+    centered_data = np.roll(data, shape[0] // 2 - xcenter, axis=0)
+    centered_data = np.roll(centered_data, shape[1] // 2 - ycenter, axis=1)
+    centered_data = np.roll(centered_data, shape[2] // 2 - zcenter, axis=2)
+
+    if isinstance(mask, np.ndarray):
+        centered_mask = np.roll(mask, shape[0] // 2 - xcenter, axis=0)
+        centered_mask = np.roll(centered_mask, shape[1] // 2 - ycenter, axis=1)
+        centered_mask = np.roll(centered_mask, shape[2] // 2 - zcenter, axis=2)
+
+        return centered_data, centered_mask
+
+    else:
+        return centered_data, None
+
+
+def compute_prtf(
+    iobs,
+    obj,
+    mask=None,
+    log_in_plots=True,
+):
+    """
+    """
+    # Get arrays
+    iobs = plot.Plotter(iobs, plot=False).data_array
+    mask = plot.Plotter(mask, plot=False).data_array
+
+    # Center and plot the observed data and mask
+    iobs, mask = center(data=iobs, mask=mask)
+
+    plot.plot_3d_slices(iobs, log=log_in_plots)
+    plt.show()
+    if isinstance(mask, np.ndarray):
+        plot.plot_3d_slices(mask, log=log_in_plots)
+        plt.show()
+
+    # Get data array from cxi or h5 file:
+    obj = plot.Plotter(obj, plot=False).data_array
+
+    # IFFT and FFT shift
+    fft_obj = fftshift(ifftn(obj))
+    plt.show()
+
+    # square of the modulus, center
+    icalc = np.abs(fft_obj)**2
+    icalc, _ = center(icalc)
+
+    # flip data (not all the time ?)
+    icalc = np.flip(icalc)
+
+    plot.plot_3d_slices(icalc, log=True)
+    plt.show()
+
+    frequency, frequency_nyquist, prtf, iobs = phase_retrieval_transfer_function.prtf(
+        icalc=icalc,
+        iobs=iobs,
+        mask=mask,
+    )
+
+    phase_retrieval_transfer_function.plot_prtf(
+        frequency, frequency_nyquist, prtf, iobs)
+    plt.show()
+
+    return frequency, frequency_nyquist, prtf, iobs

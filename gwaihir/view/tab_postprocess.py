@@ -599,10 +599,13 @@ class TabPostprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.run_strain = widgets.ToggleButtons(
+        self.init_postprocess_parameters = widgets.ToggleButtons(
             options=[
                 ("Clear/ Reload folder", False),
-                ("Run postprocessing", "run"),
+                ("Determine disp and strain arrays", "run_strain"),
+                ("Determine PRTF", "run_prtf"),
+                ("Determine FSC", "run_fsc"),
+                ("Determine SSC", "run_ssc"),
             ],
             value=False,
             description='Run strain analysis',
@@ -656,7 +659,7 @@ class TabPostprocess(widgets.VBox):
             self.unused_label_strain,
             self.strain_folder,
             self.reconstruction_files,
-            self.run_strain,
+            self.init_postprocess_parameters,
         )
 
         # Assign handler
