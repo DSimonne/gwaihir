@@ -241,8 +241,6 @@ def init_phase_retrieval_tab(
 
     # PyNX arguments text files
     interface.Dataset.pynx_parameter_gui_file = interface.preprocessing_folder\
-        + "/pynx_run_gui.txt"
-    interface.Dataset.pynx_parameter_cli_file = interface.preprocessing_folder\
         + "/pynx_run.txt"
 
     # Phase retrieval
@@ -1275,14 +1273,15 @@ def save_cdi_operator_as_cxi(
 
 def list_reconstructions(
     folder,
-    scan_name
+    scan_name,
 ):
     """List all cxi files in the folder and sort by creation time"""
     cxi_file_list = [f for f in sorted(
         glob.glob(folder + "*.cxi"),
         key=os.path.getmtime,
         reverse=True,
-    ) if not os.path.basename(f).startswith(scan_name)]
+    ) # if not os.path.basename(f).startswith(scan_name)
+    ]
 
     print(
         "################################################"
