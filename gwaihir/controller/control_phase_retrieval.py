@@ -677,7 +677,7 @@ def init_phase_retrieval_tab(
                     "Phase retrieval stopped by user, cxi file list below."
                 )
 
-            list_reconstructions(
+            interface.cxi_file_list = list_reconstructions(
                 folder=interface.preprocessing_folder,
                 scan_name=interface.Dataset.scan_name
             )
@@ -703,7 +703,7 @@ def init_phase_retrieval_tab(
         print("Cleared output.")
         clear_output(True)
 
-        list_reconstructions(
+        interface.cxi_file_list = list_reconstructions(
             folder=interface.preprocessing_folder,
             scan_name=interface.Dataset.scan_name
         )
@@ -853,7 +853,7 @@ def filter_reconstructions(
         )
         print("Iterating on files matching:")
         print(f"\t{folder}/*LLK*.cxi")
-        cxi_files = sorted(glob.glob(f"{folder}/result_scan*LLK*.cxi"))
+        cxi_files = sorted(glob.glob(f"{folder}/*LLK*.cxi"))
         print(
             "#####################"
             "#####################"
@@ -862,7 +862,7 @@ def filter_reconstructions(
         )
 
         if cxi_files == []:
-            print(f"No *LLK*.cxi files in {folder}/result_scan*LLK*.cxi")
+            print(f"No *LLK*.cxi files in {folder}/*LLK*.cxi")
 
         else:
             # only standard_deviation
@@ -884,12 +884,12 @@ def filter_reconstructions(
                 print("Iterating on remaining files.")
 
                 cxi_files = sorted(
-                    glob.glob(f"{folder}/result_scan*LLK*.cxi"))
+                    glob.glob(f"{folder}/*LLK*.cxi"))
 
                 if cxi_files == []:
                     print(
                         f"No *LLK*.cxi files remaining in \
-                        {folder}/result_scan*LLK*.cxi")
+                        {folder}/*LLK*.cxi")
                 else:
                     filter_by_LLK(cxi_files, nb_run_keep)
 
@@ -904,12 +904,12 @@ def filter_reconstructions(
                 print("Iterating on remaining files.")
 
                 cxi_files = sorted(
-                    glob.glob(f"{folder}/result_scan*LLK*.cxi"))
+                    glob.glob(f"{folder}/*LLK*.cxi"))
 
                 if cxi_files == []:
                     print(
                         f"No *LLK*.cxi files remaining in \
-                        {folder}/result_scan*LLK*.cxi")
+                        {folder}/*LLK*.cxi")
                 else:
                     filter_by_std(cxi_files, nb_run_keep)
 
@@ -1280,7 +1280,7 @@ def list_reconstructions(
         glob.glob(folder + "*.cxi"),
         key=os.path.getmtime,
         reverse=True,
-    ) # if not os.path.basename(f).startswith(scan_name)
+    )  # if not os.path.basename(f).startswith(scan_name)
     ]
 
     print(
@@ -1301,6 +1301,8 @@ def list_reconstructions(
                 "################################################"
                 "################################################"
             )
+
+    return cxi_file_list
 
 
 def run_modes_decomposition(
