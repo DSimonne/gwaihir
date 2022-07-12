@@ -490,16 +490,10 @@ def init_phase_retrieval_tab(
                     if not interface.Dataset.support:
                         sup_init = "autocorrelation"
                         if isinstance(interface.Dataset.live_plot, int):
-                            if i > 4:
-                                cdi = ScaleObj() * AutoCorrelationSupport(
-                                    threshold=0.1,  # extra argument
-                                    verbose=True) * cdi
-
-                            else:
-                                cdi = ShowCDI() * ScaleObj() \
-                                    * AutoCorrelationSupport(
-                                    threshold=0.1,  # extra argument
-                                    verbose=True) * cdi
+                            cdi = ShowCDI() * ScaleObj() \
+                                * AutoCorrelationSupport(
+                                threshold=0.1,  # extra argument
+                                verbose=True) * cdi
 
                         else:
                             cdi = ScaleObj() * AutoCorrelationSupport(
