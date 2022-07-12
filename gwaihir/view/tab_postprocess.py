@@ -480,7 +480,7 @@ class TabPostprocess(widgets.VBox):
             min=0,
             max=10,
             continuous_update=False,
-            layout=widgets.Layout(width='45%'),
+            layout=widgets.Layout(width='20%'),
             style={'description_width': 'initial'}
         )
 
