@@ -391,16 +391,16 @@ def init_phase_retrieval_tab(
 
                 # Copy Pynx parameter file in folder
                 shutil.copyfile(interface.Dataset.pynx_parameter_gui_file,
-                                f"{interface.preprocessing_folder}/gui_run/pynx_run_gui.txt")
+                                f"{interface.preprocessing_folder}/gui_run/pynx_run.txt")
 
             elif run_phase_retrieval == "local_script":
                 try:
                     print(
                         f"\nRunning: $ {interface.path_scripts}/pynx-id01cdi.py "
-                        "pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &",
+                        "pynx_run.txt 2>&1 | tee README_pynx_local_script.md &",
                         end="\n\n")
                     os.system(
-                        "cd {}; {}/pynx-id01cdi.py pynx_run_gui.txt 2>&1 | tee README_pynx_local_script.md &".format(
+                        "cd {}; {}/pynx-id01cdi.py pynx_run.txt 2>&1 | tee README_pynx_local_script.md &".format(
                             quote(interface.preprocessing_folder),
                             quote(interface.path_scripts),
                         )
