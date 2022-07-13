@@ -490,12 +490,12 @@ def init_phase_retrieval_tab(
                         if isinstance(interface.Dataset.live_plot, int):
                             cdi = ShowCDI() * ScaleObj() \
                                 * AutoCorrelationSupport(
-                                threshold=0.1,  # extra argument
+                                threshold=0.1,
                                 verbose=True) * cdi
 
                         else:
                             cdi = ScaleObj() * AutoCorrelationSupport(
-                                threshold=0.1,  # extra argument
+                                threshold=0.1,
                                 verbose=True) * cdi
                     else:
                         sup_init = "support"
@@ -1323,15 +1323,15 @@ def run_modes_decomposition(
         print(
             "\n###########################################"
             "#############################################"
-            f"\nUsing {path_scripts}/pynx-cdi-analysis"
+            f"\nUsing {path_scripts}/pynx-cdi-analysis.py"
             f"\nUsing {folder}/*LLK* files."
-            f"\nRunning: $ pynx-cdi-analysis *LLK* modes=1"
+            f"\nRunning: $ pynx-cdi-analysis.py *LLK* modes=1"
             f"\nOutput in {folder}/modes_gui.h5"
             "\n###########################################"
             "#############################################"
         )
         os.system(
-            "{}/pynx-cdi-analysis {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+            "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
                 quote(path_scripts),
                 quote(folder),
                 quote(folder),
