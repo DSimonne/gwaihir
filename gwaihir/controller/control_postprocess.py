@@ -436,10 +436,9 @@ def init_postprocess_tab(
                 if not isinstance(w, widgets.HTML):
                     w.disabled = False
 
-            return(
-                "You need to initialize all the parameters with the"
-                "preprocess tab first, some parameters are used here such"
-                "as the energy, detector distance, ..."
+            print(
+                "You need to initialize all the parameters in the"
+                "preprocess tab first.\nSome parameters are redundant."
             )
 
         try:

@@ -41,7 +41,7 @@ class Plotter:
         data,
         plot="slices",
         log=False,
-        cmap="YlGnBu_r",
+        cmap="turbo",
         figsize=(10, 10),
         fontsize=15,
         title=None,
@@ -358,70 +358,6 @@ class ThreeDViewer(widgets.Box):
             readout=True
         )
 
-        # Plane widgets
-        self.toggle_plane = widgets.ToggleButton(
-            value=False,
-            description='Cut planes',
-            tooltips='Cut plane'
-        )
-        self.plane_text = widgets.Text(
-            value="",
-            description="",
-            tooltips='Plane equation')
-        # hbox_plane = widgets.HBox([self.toggle_plane, self.plane_text])
-
-        # Clip widgets
-        self.clipx = widgets.FloatSlider(
-            value=1,
-            min=-1,
-            max=1,
-            step=0.1,
-            description='Plane Ux',
-            disabled=False,
-            continuous_update=False,
-            orientation='horizontal',
-            readout=True,
-            readout_format='.01f',
-        )
-        self.clipy = widgets.FloatSlider(
-            value=1,
-            min=-1,
-            max=1,
-            step=0.1,
-            description='Plane Uy',
-            disabled=False,
-            continuous_update=False,
-            orientation='horizontal',
-            readout=True,
-            readout_format='.01f',
-        )
-        self.clipz = widgets.FloatSlider(
-            value=1,
-            min=-1,
-            max=1,
-            step=0.1,
-            description='Plane Uz',
-            disabled=False,
-            continuous_update=False,
-            orientation='horizontal',
-            readout=True,
-            readout_format='.01f',
-        )
-        self.clipdist = widgets.FloatRangeSlider(
-            value=[0, 100],
-            min=0,
-            max=100,
-            step=0.5,
-            description='Planes dist',
-            disabled=False,
-            continuous_update=False,
-            orientation='horizontal',
-            readout=True,
-            readout_format='.1f',
-        )
-
-        # self.toggle_mode = widgets.ToggleButtons(options=['Volume','X','Y','Z'])
-
         # Progress bar
         self.progress = widgets.IntProgress(
             value=10,
@@ -438,11 +374,6 @@ class ThreeDViewer(widgets.Box):
         self.toggle_phase.observe(self.on_change_scale)
         self.colormap.observe(self.on_update_plot)
         self.colormap_range.observe(self.on_update_plot)
-        self.clipx.observe(self.on_update_plot)
-        self.clipy.observe(self.on_update_plot)
-        self.clipz.observe(self.on_update_plot)
-        self.clipdist.observe(self.on_update_plot)
-        self.toggle_plane.observe(self.on_update_plot)
 
         self.toggle_dark.observe(self.on_update_style)
         self.toggle_box.observe(self.on_update_style)
@@ -460,32 +391,17 @@ class ThreeDViewer(widgets.Box):
         self.vbox = widgets.VBox([self.threshold,
                                   hbox1, hbox_toggle,
                                   self.colormap,
-                                  # self.colormap_range,
-                                  # hbox_plane,
-                                  # self.clipx, self.clipy, self.clipz,
-                                  # self.clipdist,
+                                  # self.colormap_range, # useless for one contour
                                   self.progress,
-                                  # self.fc
                                   ])
 
         # Load data
         if isinstance(input_file, np.ndarray):
-            data_array = input_file
-
             # We create an output for ipyvolume
             self.output_view = widgets.Output()
             with self.output_view:
-                self.fig = ipv.figure(
-                    # width=900,
-                    # height=600,
-                    # controls_light=True,
-                )
-                # if input_file is not None:
-                #     if isinstance(input_file, str):
-                #         if os.path.isfile(input_file):
-                #             self.change_file(input_file)
-                #     elif isinstance(input_file, np.ndarray):
-                self.set_data(d=data_array)
+                self.fig = ipv.figure()
+                self.set_data(input_file)
                 display(self.fig)
 
             self.window = widgets.HBox([self.output_view, self.vbox])
@@ -505,63 +421,9 @@ class ThreeDViewer(widgets.Box):
             return
         self.progress.value = 7
 
-        # See https://github.com/maartenbreddels/ipyvolume/issues/174
-        # to support using normals
-
-        # Unobserve as we disable/enable buttons and that triggers events
-        # try:
-        #     self.clipx.unobserve(self.on_update_plot)
-        #     self.clipy.unobserve(self.on_update_plot)
-        #     self.clipz.unobserve(self.on_update_plot)
-        #     self.clipdist.unobserve(self.on_update_plot)
-        # except:
-        #     pass
-
-        # if self.toggle_plane.value:
-        #     self.clipx.disabled = False
-        #     self.clipy.disabled = False
-        #     self.clipz.disabled = False
-        #     self.clipdist.disabled = False
-        #     # Cut volume with clipping plane
-        #     uz, uy, ux = self.clipz.value, self.clipy.value, self.clipx.value
-        #     u = np.sqrt(ux ** 2 + uy ** 2 + uz ** 2)
-        #     if np.isclose(u, 0):
-        #         ux = 1
-        #         u = 1
-
-        #     nz, ny, nx = self.d.shape
-        #     z, y, x = np.meshgrid(np.arange(nz), np.arange(
-        #         ny), np.arange(nx), indexing='ij')
-
-        #     # Compute maximum range of clip planes & fix dist range
-        #     tmpz, tmpy, tmpx = np.where(abs(self.d) >= self.threshold.value)
-        #     tmp = (tmpx * ux + tmpy * uy + tmpz * uz) / u
-        #     tmpmin, tmpmax = tmp.min() - 1, tmp.max() + 1
-        #     if tmpmax > self.clipdist.min:  # will throw an exception if min>max
-        #         self.clipdist.max = tmpmax
-        #         self.clipdist.min = tmpmin
-        #     else:
-        #         self.clipdist.min = tmpmin
-        #         self.clipdist.max = tmpmax
-
-        #     # Compute clipping mask
-        #     c = ((x * ux + y * uy + z * uz) / u > self.clipdist.value[0]) * (
-        #         ((x * ux + y * uy + z * uz) / u < self.clipdist.value[1]))
-        #     self.plane_text.value = "%6.1f < (%4.2f*x %+4.2f*y %+4.2f*z) < %6.1f" % (
-        #         self.clipdist.value[0], ux / u, uy / u,
-        #         uz / u, self.clipdist.value[1])
-        # else:
-        #     self.clipx.disabled = True
-        #     self.clipy.disabled = True
-        #     self.clipz.disabled = True
-        #     self.clipdist.disabled = True
-        #     self.plane_text.value = ""
-        #     c = 1
-
-        c = 1
         try:
             verts, faces, _, _ = marching_cubes(
-                abs(self.d) * c,
+                abs(self.d),
                 level=self.threshold.value,
                 step_size=1,
             )
@@ -600,15 +462,6 @@ class ThreeDViewer(widgets.Box):
         except Exception as E:
             print(E)
 
-        # Observe again
-        # try:
-        #     self.clipx.observe(self.on_update_plot)
-        #     self.clipy.observe(self.on_update_plot)
-        #     self.clipz.observe(self.on_update_plot)
-        #     self.clipdist.observe(self.on_update_plot)
-        # except:
-        #     pass
-
         # Update progress bar
         self.progress.value = 10
 
@@ -637,40 +490,6 @@ class ThreeDViewer(widgets.Box):
                 ipv.pylab.style.axes_on()
             else:
                 ipv.pylab.style.axes_off()
-
-    # def on_select_file(self, change):
-    #     """
-    #     Called when a file selection has been done
-    #     :param change:
-    #     :return:
-    #     """
-    #     self.change_file(self.fc.selected)
-
-    # def change_file(self, file_name):
-    #     """
-    #     Function used to load data from a new file
-    #     :param file_name: the file where the object data is loaded,
-    #      either a CXI or modes h5 file
-    #     :return:
-    #     """
-    #     self.progress.value = 3
-    #     print('Loading:', file_name)
-
-    #     try:
-    #         self.toggle_plane.unobserve(self.on_update_plot)
-    #         self.toggle_plane.value = False
-    #         self.toggle_plane.observe(self.on_update_plot)
-    #         d = h5.File(file_name, mode='r')['entry_1/data_1/data'][()]
-    #         if d.ndim == 4:
-    #             d = d[0]
-    #         d = np.swapaxes(d, 0, 2)  # Due to labelling of axes x,y,z and not z,y,x
-    #         if 'log' in self.toggle_phase.value:
-    #             self.d0 = d
-    #             d = np.log10(np.maximum(0.1, abs(d)))
-    #         self.set_data(d)
-    #     except:
-    #         print("Failed to load file - is this a \
-    #               result CXI result or a modes file from a 3D CDI analysis ?")
 
     def on_change_scale(self, change):
         """Change scale between logarithmic and linear"""
@@ -767,7 +586,7 @@ class ThreeDViewer(widgets.Box):
         ipv.squarelim()
         self.on_update_plot()
 
-    def on_animate(self):
+    def on_animate(self, v):
         """Trigger the animation (rotation around vertical axis)
         """
         if self.pcb_rotate is None:
@@ -799,7 +618,7 @@ def plot_data(
     figsize=(10, 10),
     fontsize=15,
     log="interact",
-    cmap="YlGnBu_r",
+    cmap="turbo",
     title=None,
 ):
     """
@@ -1187,7 +1006,7 @@ def plot_2d_image(
     fig=None,
     ax=None,
     log=False,
-    cmap="YlGnBu_r",
+    cmap="turbo",
     title=None,
     x_label="x",
     y_label="y"
@@ -1254,7 +1073,7 @@ def plot_3d_slices(
     fontsize=15,
     figsize=None,
     log=False,
-    cmap="YlGnBu_r",
+    cmap="turbo",
     title=None
 ):
     """

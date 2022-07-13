@@ -56,7 +56,7 @@ class TabPlotData(widgets.VBox):
 
         self.cmap = widgets.Dropdown(
             options=plt.colormaps(),
-            value="jet",
+            value="turbo",
             description="Color map:",
             continuous_update=False,
             layout=widgets.Layout(width='90%'),
