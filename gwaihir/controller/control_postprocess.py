@@ -14,7 +14,7 @@ from scipy.ndimage import center_of_mass
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
 from bcdi.utils.parser import ConfigParser
 
-from pynx.utils import phase_retrieval_transfer_function
+# from pynx.utils import phase_retrieval_transfer_function
 
 from gwaihir import plot
 from gwaihir.controller.control_preprocess import create_yaml_file
@@ -624,12 +624,12 @@ def init_postprocess_tab(
                 change=interface.preprocessing_folder
             )
 
-    elif init_postprocess_parameters == "run_prtf":
-        compute_prtf(
-            iobs=interface.Dataset.iobs,
-            mask=interface.Dataset.mask,
-            obj=interface.reconstruction_files,
-        )
+    # elif init_postprocess_parameters == "run_prtf":
+    #     compute_prtf(
+    #         iobs=interface.Dataset.iobs,
+    #         mask=interface.Dataset.mask,
+    #         obj=interface.reconstruction_files,
+    #     )
 
     elif not init_postprocess_parameters:
         for w in interface.TabPostprocess.children[:-1]:
@@ -679,7 +679,7 @@ def center(data, mask=None, center=None, method="com"):
     com or max.
 
     Written by @Clatlan 
-    :returns: centered 3D numpy array.
+    :returns: centered data, centered mask
     """
     shape = data.shape
 

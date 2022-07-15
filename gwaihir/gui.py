@@ -11,7 +11,6 @@ from gwaihir.view.tab_data_frame import TabDataFrame
 from gwaihir.view.tab_detector import TabDetector
 from gwaihir.view.tab_facet import TabFacet
 from gwaihir.view.tab_instrument import TabInstrument
-from gwaihir.view.tab_phase_retrieval import TabPhaseRetrieval
 from gwaihir.view.tab_plot_data import TabPlotData
 from gwaihir.view.tab_postprocess import TabPostprocess
 from gwaihir.view.tab_preprocess import TabPreprocess
@@ -20,7 +19,6 @@ from gwaihir.view.tab_startup import TabStartup
 
 from gwaihir.controller.control_data_frame import init_data_frame_tab
 from gwaihir.controller.control_facet import init_facet_tab
-from gwaihir.controller.control_phase_retrieval import init_phase_retrieval_tab
 from gwaihir.controller.control_plot_data import init_plot_data_tab
 from gwaihir.controller.control_postprocess import init_postprocess_tab
 from gwaihir.controller.control_preprocess import init_preprocess_tab
@@ -28,7 +26,8 @@ from gwaihir.controller.control_readme import init_readme_tab
 from gwaihir.controller.control_startup import init_startup_tab
 
 try:
-    import pynx
+    from gwaihir.view.tab_phase_retrieval import TabPhaseRetrieval
+    from gwaihir.controller.control_phase_retrieval import init_phase_retrieval_tab
     pynx_import_success = True
 except ModuleNotFoundError:
     pynx_import_success = False
@@ -136,7 +135,6 @@ class Interface:
 
             self.window.set_title(0, "Plot data")
 
-        # Display all the tabs
         else:
             # Initialize functions
             self.init_startup_tab_gui = interactive(
@@ -242,53 +240,54 @@ class Interface:
                 show_logs=self.TabDataFrame.show_logs,
             )
 
-            self.init_phase_retrieval_tab_gui = interactive(
-                init_phase_retrieval_tab,
-                interface=fixed(self),
-                unused_label_data=self.TabPhaseRetrieval.unused_label_data,
-                parent_folder=self.TabPhaseRetrieval.parent_folder,
-                iobs=self.TabPhaseRetrieval.iobs,
-                mask=self.TabPhaseRetrieval.mask,
-                support=self.TabPhaseRetrieval.support,
-                obj=self.TabPhaseRetrieval.obj,
-                auto_center_resize=self.TabPhaseRetrieval.auto_center_resize,
-                max_size=self.TabPhaseRetrieval.max_size,
-                unused_label_support=self.TabPhaseRetrieval.unused_label_support,
-                support_threshold=self.TabPhaseRetrieval.support_threshold,
-                support_only_shrink=self.TabPhaseRetrieval.support_only_shrink,
-                support_update_period=self.TabPhaseRetrieval.support_update_period,
-                support_smooth_width=self.TabPhaseRetrieval.support_smooth_width,
-                support_post_expand=self.TabPhaseRetrieval.support_post_expand,
-                unused_label_psf=self.TabPhaseRetrieval.unused_label_psf,
-                psf=self.TabPhaseRetrieval.psf,
-                psf_model=self.TabPhaseRetrieval.psf_model,
-                fwhm=self.TabPhaseRetrieval.fwhm,
-                eta=self.TabPhaseRetrieval.eta,
-                update_psf=self.TabPhaseRetrieval.update_psf,
-                unused_label_algo=self.TabPhaseRetrieval.unused_label_algo,
-                nb_hio=self.TabPhaseRetrieval.nb_hio,
-                nb_raar=self.TabPhaseRetrieval.nb_raar,
-                nb_er=self.TabPhaseRetrieval.nb_er,
-                nb_ml=self.TabPhaseRetrieval.nb_ml,
-                nb_run=self.TabPhaseRetrieval.nb_run,
-                unused_label_filtering=self.TabPhaseRetrieval.unused_label_filtering,
-                filter_criteria=self.TabPhaseRetrieval.filter_criteria,
-                nb_run_keep=self.TabPhaseRetrieval.nb_run_keep,
-                unused_label_options=self.TabPhaseRetrieval.unused_label_options,
-                live_plot=self.TabPhaseRetrieval.live_plot,
-                # zero_mask TODO = self.TabPhaseRetrieval.    # TODO,
-                # crop_output TODO = self.TabPhaseRetrieval.    # TODO,
-                positivity=self.TabPhaseRetrieval.positivity,
-                beta=self.TabPhaseRetrieval.beta,
-                detwin=self.TabPhaseRetrieval.detwin,
-                rebin=self.TabPhaseRetrieval.rebin,
-                verbose=self.TabPhaseRetrieval.verbose,
-                pixel_size_detector=self.TabPhaseRetrieval.pixel_size_detector,
-                unused_label_phase_retrieval=self.TabPhaseRetrieval.unused_label_phase_retrieval,
-                run_phase_retrieval=self.TabPhaseRetrieval.run_phase_retrieval,
-                unused_label_run_pynx_tools=self.TabPhaseRetrieval.unused_label_run_pynx_tools,
-                run_pynx_tools=self.TabPhaseRetrieval.run_pynx_tools,
-            )
+            if pynx_import_success:
+                self.init_phase_retrieval_tab_gui = interactive(
+                    init_phase_retrieval_tab,
+                    interface=fixed(self),
+                    unused_label_data=self.TabPhaseRetrieval.unused_label_data,
+                    parent_folder=self.TabPhaseRetrieval.parent_folder,
+                    iobs=self.TabPhaseRetrieval.iobs,
+                    mask=self.TabPhaseRetrieval.mask,
+                    support=self.TabPhaseRetrieval.support,
+                    obj=self.TabPhaseRetrieval.obj,
+                    auto_center_resize=self.TabPhaseRetrieval.auto_center_resize,
+                    max_size=self.TabPhaseRetrieval.max_size,
+                    unused_label_support=self.TabPhaseRetrieval.unused_label_support,
+                    support_threshold=self.TabPhaseRetrieval.support_threshold,
+                    support_only_shrink=self.TabPhaseRetrieval.support_only_shrink,
+                    support_update_period=self.TabPhaseRetrieval.support_update_period,
+                    support_smooth_width=self.TabPhaseRetrieval.support_smooth_width,
+                    support_post_expand=self.TabPhaseRetrieval.support_post_expand,
+                    unused_label_psf=self.TabPhaseRetrieval.unused_label_psf,
+                    psf=self.TabPhaseRetrieval.psf,
+                    psf_model=self.TabPhaseRetrieval.psf_model,
+                    fwhm=self.TabPhaseRetrieval.fwhm,
+                    eta=self.TabPhaseRetrieval.eta,
+                    update_psf=self.TabPhaseRetrieval.update_psf,
+                    unused_label_algo=self.TabPhaseRetrieval.unused_label_algo,
+                    nb_hio=self.TabPhaseRetrieval.nb_hio,
+                    nb_raar=self.TabPhaseRetrieval.nb_raar,
+                    nb_er=self.TabPhaseRetrieval.nb_er,
+                    nb_ml=self.TabPhaseRetrieval.nb_ml,
+                    nb_run=self.TabPhaseRetrieval.nb_run,
+                    unused_label_filtering=self.TabPhaseRetrieval.unused_label_filtering,
+                    filter_criteria=self.TabPhaseRetrieval.filter_criteria,
+                    nb_run_keep=self.TabPhaseRetrieval.nb_run_keep,
+                    unused_label_options=self.TabPhaseRetrieval.unused_label_options,
+                    live_plot=self.TabPhaseRetrieval.live_plot,
+                    # zero_mask TODO = self.TabPhaseRetrieval.    # TODO,
+                    # crop_output TODO = self.TabPhaseRetrieval.    # TODO,
+                    positivity=self.TabPhaseRetrieval.positivity,
+                    beta=self.TabPhaseRetrieval.beta,
+                    detwin=self.TabPhaseRetrieval.detwin,
+                    rebin=self.TabPhaseRetrieval.rebin,
+                    verbose=self.TabPhaseRetrieval.verbose,
+                    pixel_size_detector=self.TabPhaseRetrieval.pixel_size_detector,
+                    unused_label_phase_retrieval=self.TabPhaseRetrieval.unused_label_phase_retrieval,
+                    run_phase_retrieval=self.TabPhaseRetrieval.run_phase_retrieval,
+                    unused_label_run_pynx_tools=self.TabPhaseRetrieval.unused_label_run_pynx_tools,
+                    run_pynx_tools=self.TabPhaseRetrieval.run_pynx_tools,
+                )
 
             self.init_postprocess_tab_gui = interactive(
                 init_postprocess_tab,
@@ -383,58 +382,100 @@ class Interface:
             )
 
             # Create window
-            self.window = Tab(children=(
-                widgets.VBox([
-                    self.TabStartup,
-                    self.init_startup_tab_gui.children[-1]
-                ]),
-                self.TabDetector,
-                self.TabInstrument,
-                widgets.VBox([
-                    self.TabPreprocess,
-                    self.init_preprocess_tab_gui.children[-1]
-                ]),
-                widgets.VBox([
-                    self.TabDataFrame,
-                    self.init_data_frame_tab_gui.children[-1]
-                ]),
-                widgets.VBox([
-                    self.TabPhaseRetrieval,
-                    self.init_phase_retrieval_tab_gui.children[-1]
-                ]),
-                widgets.VBox([
-                    self.TabPostprocess,
-                    self.init_postprocess_tab_gui.children[-1]
-                ]),
-                widgets.VBox([
-                    self.TabPlotData,
-                    self.init_plot_data_tab_gui.children[-1]
-                ]),
-                widgets.VBox([
-                    self.TabFacet,
-                    self.init_facet_tab_gui.children[-1]
-                ]),
-                widgets.VBox([
-                    self.TabReadme,
-                    self.init_readme_tab_gui.children[-1]
-                ]),
-            ))
+            if pynx_import_success:
+                self.window = Tab(children=(
+                    widgets.VBox([
+                        self.TabStartup,
+                        self.init_startup_tab_gui.children[-1]
+                    ]),
+                    self.TabDetector,
+                    self.TabInstrument,
+                    widgets.VBox([
+                        self.TabPreprocess,
+                        self.init_preprocess_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabDataFrame,
+                        self.init_data_frame_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabPhaseRetrieval,
+                        self.init_phase_retrieval_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabPostprocess,
+                        self.init_postprocess_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabPlotData,
+                        self.init_plot_data_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabFacet,
+                        self.init_facet_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabReadme,
+                        self.init_readme_tab_gui.children[-1]
+                    ]),
+                ))
 
-            if not pynx_import_success:
-                self.window.children = self.window.children[:5] + \
-                    self.window.children[6:]
+                # Set tab names
+                self.window.set_title(0, "Startup")
+                self.window.set_title(1, "Detector")
+                self.window.set_title(2, "Setup")
+                self.window.set_title(3, "Preprocess")
+                self.window.set_title(4, "Metadata")
+                self.window.set_title(5, "Phase retrieval")
+                self.window.set_title(6, "Postprocess")
+                self.window.set_title(7, "Plot data")
+                self.window.set_title(8, "Facet")
+                self.window.set_title(9, "Readme")
 
-            # Set tab names
-            self.window.set_title(0, "Startup")
-            self.window.set_title(1, "Detector")
-            self.window.set_title(2, "Setup")
-            self.window.set_title(3, "Preprocess")
-            self.window.set_title(4, "Metadata")
-            self.window.set_title(5, "Phase retrieval")
-            self.window.set_title(6, "Postprocess")
-            self.window.set_title(7, "Plot data")
-            self.window.set_title(8, "Facet")
-            self.window.set_title(9, "Readme")
+            else:
+                self.window = Tab(children=(
+                    widgets.VBox([
+                        self.TabStartup,
+                        self.init_startup_tab_gui.children[-1]
+                    ]),
+                    self.TabDetector,
+                    self.TabInstrument,
+                    widgets.VBox([
+                        self.TabPreprocess,
+                        self.init_preprocess_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabDataFrame,
+                        self.init_data_frame_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabPostprocess,
+                        self.init_postprocess_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabPlotData,
+                        self.init_plot_data_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabFacet,
+                        self.init_facet_tab_gui.children[-1]
+                    ]),
+                    widgets.VBox([
+                        self.TabReadme,
+                        self.init_readme_tab_gui.children[-1]
+                    ]),
+                ))
+
+                # Set tab names
+                self.window.set_title(0, "Startup")
+                self.window.set_title(1, "Detector")
+                self.window.set_title(2, "Setup")
+                self.window.set_title(3, "Preprocess")
+                self.window.set_title(4, "Metadata")
+                self.window.set_title(5, "Postprocess")
+                self.window.set_title(6, "Plot data")
+                self.window.set_title(7, "Facet")
+                self.window.set_title(8, "Readme")
 
             # Handlers specific to GUI because they
             # interact with multiple tabs
