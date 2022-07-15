@@ -423,7 +423,7 @@ class ThreeDViewer(widgets.Box):
 
         try:
             verts, faces, _, _ = marching_cubes(
-                abs(self.d),
+                abs(self.data),
                 level=self.threshold.value,
                 step_size=1,
             )
@@ -500,21 +500,21 @@ class ThreeDViewer(widgets.Box):
 
                 # linear scale
                 if 'log' in oldv and 'log' not in newv:
-                    d = self.d0
-                    self.set_data(d, threshold=10 ** self.threshold.value)
+                    data = self.d0
+                    self.set_data(data, threshold=10 ** self.threshold.value)
 
                 # log scale
                 elif 'log' in newv and 'log' not in oldv:
-                    self.d0 = self.d
-                    d = np.log10(np.maximum(0.1, abs(self.d0)))
-                    self.set_data(d, threshold=np.log10(self.threshold.value))
+                    self.d0 = self.data
+                    data = np.log10(np.maximum(0.1, abs(self.d0)))
+                    self.set_data(data, threshold=np.log10(self.threshold.value))
                     return
             self.on_update_plot()
 
-    def set_data(self, d, threshold=None):
+    def set_data(self, data, threshold=None):
         """Check if data is complex or not
 
-        :param d: data 3d array, complex ot not, to be plotted
+        :param data: data 3d array, complex ot not, to be plotted
         :param threshold: threshold for contour, if None set to max/2
         """
 
@@ -522,12 +522,12 @@ class ThreeDViewer(widgets.Box):
         self.progress.value = 5
 
         # Save data
-        self.d = d
+        self.data = data
 
         # Change scale options depending on data
         self.toggle_phase.unobserve(self.on_change_scale)
 
-        if np.iscomplexobj(d):
+        if np.iscomplexobj(data):
             if self.toggle_phase.value == 'log10(Abs)':
                 self.toggle_phase.value = 'Abs'
             self.toggle_phase.options = ('Abs', 'Phase')
@@ -540,34 +540,34 @@ class ThreeDViewer(widgets.Box):
         # Set threshold
         self.threshold.unobserve(self.on_update_plot)
         self.colormap_range.unobserve(self.on_update_plot)
-        self.threshold.max = abs(self.d).max()
+        self.threshold.max = abs(self.data).max()
         if threshold is None:
             self.threshold.value = self.threshold.max / 2
         else:
             self.threshold.value = threshold
 
         # Set colormap
-        self.colormap_range.max = abs(self.d).max()
-        self.colormap_range.value = [0, abs(self.d).max()]
+        self.colormap_range.max = abs(self.data).max()
+        self.colormap_range.value = [0, abs(self.data).max()]
         self.threshold.observe(self.on_update_plot)
         self.colormap_range.observe(self.on_update_plot)
 
-        nz, ny, nx = self.d.shape
+        nz, ny, nx = self.data.shape
         z, y, x = np.arange(nz), np.arange(ny), np.arange(nx)
 
         # Interpolate probe to object grid
         self.rgi = RegularGridInterpolator(
             (z, y, x),
-            self.d,
+            self.data,
             method='linear',
             bounds_error=False,
             fill_value=0,
         )
 
         # Also prepare the phase gradient
-        gz, gy, gx = np.gradient(self.d)
-        a = np.maximum(abs(self.d), 1e-6)
-        ph = self.d / a
+        gz, gy, gx = np.gradient(self.data)
+        a = np.maximum(abs(self.data), 1e-6)
+        ph = self.data / a
         gaz, gay, gax = np.gradient(a)
         self.rgi_gx = RegularGridInterpolator(
             (z, y, x), ((gx - gax * ph) / (ph * a)).real,
@@ -580,10 +580,10 @@ class ThreeDViewer(widgets.Box):
             method='linear', bounds_error=False, fill_value=0)
 
         # Fix extent otherwise weird things happen
-        ipv.pylab.xlim(0, self.d.shape[0])
-        ipv.pylab.ylim(0, self.d.shape[1])
-        ipv.pylab.zlim(0, self.d.shape[2])
-        ipv.squarelim()
+        ipv.pylab.xlim(0, self.data.shape[0])
+        ipv.pylab.ylim(0, self.data.shape[1])
+        ipv.pylab.zlim(0, self.data.shape[2])
+        # ipv.squarelim()
         self.on_update_plot()
 
     def on_animate(self, v):
