@@ -666,7 +666,6 @@ def plot_data(
                 # Create figure
                 if not figsize:
                     figsize = (7, 7)
-                    print("Figure size defaulted to", figsize)
 
                 _, ax = plt.subplots(figsize=figsize)
 
@@ -713,7 +712,6 @@ def plot_data(
                 # Create figure
                 if not figsize:
                     figsize = (10, 10)
-                    print("Figure size defaulted to", figsize)
 
                 fig, ax = plt.subplots(figsize=figsize)
 
@@ -1074,7 +1072,7 @@ def plot_3d_slices(
     figsize=None,
     log=False,
     cmap="turbo",
-    title=None
+    title=None,
 ):
     """
     Plot 3 slices for 3d data.
@@ -1092,13 +1090,12 @@ def plot_3d_slices(
         # Create figure
         if not figsize:
             figsize = (15, 7)
-            print("Figure size defaulted to", figsize)
 
         fig, axs = plt.subplots(1, 3, figsize=figsize)
 
         # Add titles
         if isinstance(title, str):
-            fig.suptitle(title, fontsize=fontsize + 2)
+            fig.suptitle(title, fontsize=fontsize + 2, y=0.95)
             titles = [None, None, None]
         elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
             titles = title
@@ -1165,7 +1162,6 @@ def plot_3d_slices(
             # Create figure
             if not figsize:
                 figsize = (15, 7)
-                print("Figure size defaulted to", figsize)
 
             fig, axs = plt.subplots(1, 3, figsize=figsize)
 
