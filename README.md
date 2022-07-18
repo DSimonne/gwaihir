@@ -9,6 +9,9 @@ On the contrary, if you follow the github changes on the you will have the lates
 
 Here is a link to a poster that tries to present Gwaihir:
 [Poster_Gwaihir.pdf](https://www.dsimonne.eu/PhDAttachments/Poster_Gwaihir.pdf)
+
+And to the [paper](https://scripts.iucr.org/cgi-bin/paper?S1600576722005854)
+
 ![Gwahir](https://user-images.githubusercontent.com/51970962/168030371-7212abe3-f8be-4fef-9231-8b1be87abc2e.png)
 
 To increase the width of the cells in Jupyter Notebook:
