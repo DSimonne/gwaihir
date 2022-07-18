@@ -68,6 +68,7 @@ class TabPlotData(widgets.VBox):
                 ("Clear/ Reload folder", False),
                 ('2D plot', "2D"),
                 ("Plot slices", "slices"),
+                ("Plot contour slices", "contour_slices"),
                 ("3D plot", "3D"),
                 ("Create support", "create_support"),
                 ("Extract support", "extract_support"),

@@ -53,7 +53,7 @@ class Plotter:
         :param filename: path to data, supported files extensions are .cxi,
          .npy or .npz
         :param data_array: a np.ndarray
-        :param plot: either '2D', 'slices', '3D' or False
+        :param plot: either '2D', 'slices', 'contour_slices', '3D' or False
         :param log: True to have a logarithmic scale
          False to have a linear scale
         :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
@@ -88,7 +88,13 @@ class Plotter:
 
             elif self.plot == "slices" and self.data_array.ndim == 3:
                 self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap,
-                                    fontsize=self.fontsize, title=self.title)
+                                    fontsize=self.fontsize, title=self.title,
+                                    contour=False)
+
+            elif self.plot == "contour_slices" and self.data_array.ndim == 3:
+                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap,
+                                    fontsize=self.fontsize, title=self.title,
+                                    contour=True)
 
             elif self.plot == "3D" and self.data_array.ndim == 3:
                 ThreeDViewer(self.data_array)
@@ -170,7 +176,13 @@ class Plotter:
 
             elif self.plot == "slices" and self.data_array.ndim == 3:
                 self.plot_3d_slices(figsize=None, log=self.log, fontsize=self.fontsize,
-                                    cmap=self.cmap, title=self.title)
+                                    cmap=self.cmap, title=self.title,
+                                    contour=False)
+
+            elif self.plot == "contour_slices" and self.data_array.ndim == 3:
+                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap,
+                                    fontsize=self.fontsize, title=self.title,
+                                    contour=True)
 
             elif self.plot == "3D" and self.data_array.ndim == 3:
                 ThreeDViewer(self.data_array)
@@ -264,6 +276,7 @@ class Plotter:
             log=self.log,
             cmap=self.cmap,
             title=self.title,
+            contour=self.contour,
         )
 
 
@@ -1007,7 +1020,8 @@ def plot_2d_image(
     cmap="turbo",
     title=None,
     x_label="x",
-    y_label="y"
+    y_label="y",
+    contour=False,
 ):
     """
     Plot 2d image from 2d array.
@@ -1018,8 +1032,12 @@ def plot_2d_image(
      will create a figure, used to add 2d images to 3d figures
     :param ax: axes of figure, default is None and will create axes
     :param log: True to have a logarithmic scale, False to have a linear scale
-    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
+    :param cmap: matplotlib cmap used for plot, default 'turbo'
     :param title: str, title for this axe
+    :param x_label: label on x axis
+    :param y_label: label on y axis
+    :param contour: True to plot contour of data
+
     :return: image on ax (ax.imshow())
     """
     if not fig and not ax:
@@ -1028,12 +1046,20 @@ def plot_2d_image(
     scale = "logarithmic" if log else "linear"
 
     try:
-        img = ax.imshow(
-            two_d_array,
-            norm={"linear": None, "logarithmic": LogNorm()}[
-                scale],
-            cmap=cmap,
-        )
+        if contour:
+            img = ax.contourf(
+                two_d_array,
+                norm={"linear": None, "logarithmic": LogNorm()}[
+                    scale],
+                cmap=cmap,
+            )
+        else:
+            img = ax.imshow(
+                two_d_array,
+                norm={"linear": None, "logarithmic": LogNorm()}[
+                    scale],
+                cmap=cmap,
+            )
         ax.set_xlabel(x_label, fontsize=fontsize)
         ax.set_ylabel(y_label, fontsize=fontsize)
         if isinstance(title, str):
@@ -1043,13 +1069,20 @@ def plot_2d_image(
 
     except TypeError:
         print("Using complex data, automatically switching to array module")
-
-        img = ax.imshow(
-            np.abs(two_d_array),
-            norm={"linear": None, "logarithmic": LogNorm()}[
-                scale],
-            cmap=cmap,
-        )
+        if contour:
+            img = ax.contourf(
+                two_d_array,
+                norm={"linear": None, "logarithmic": LogNorm()}[
+                    scale],
+                cmap=cmap,
+            )
+        else:
+            img = ax.contourf(
+                np.abs(two_d_array),
+                norm={"linear": None, "logarithmic": LogNorm()}[
+                    scale],
+                cmap=cmap,
+            )
         ax.set_xlabel(x_label, fontsize=fontsize)
         ax.set_ylabel(y_label, fontsize=fontsize)
         if isinstance(title, str):
@@ -1073,6 +1106,7 @@ def plot_3d_slices(
     log=False,
     cmap="turbo",
     title=None,
+    contour=False,
 ):
     """
     Plot 3 slices for 3d data.
@@ -1085,6 +1119,7 @@ def plot_3d_slices(
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     :param title: string to set as title for main plot or list of
      strings of length 3 for sub axes
+    :param contour: True to plot contour of data
     """
     if isinstance(log, bool):
         # Create figure
@@ -1097,7 +1132,8 @@ def plot_3d_slices(
         if isinstance(title, str):
             fig.suptitle(title, fontsize=fontsize + 2, y=0.95)
             titles = [None, None, None]
-        elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
+        elif isinstance(title, tuple) and len(title) == 3\
+                or isinstance(title, list) and len(title) == 3:
             titles = title
         else:
             titles = [None, None, None]
@@ -1109,7 +1145,7 @@ def plot_3d_slices(
         two_d_array = data_array[shape[0]//2, :, :]
         img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
                               ax=axs[0], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="z", y_label="y")
+                              x_label="z", y_label="y", contour=contour)
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[0]).append_axes(
@@ -1122,7 +1158,7 @@ def plot_3d_slices(
         two_d_array = data_array[:, shape[1]//2, :]
         img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
                               ax=axs[1], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="z", y_label="x")
+                              x_label="z", y_label="x", contour=contour)
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[1]).append_axes(
@@ -1135,7 +1171,7 @@ def plot_3d_slices(
         two_d_array = data_array[:, :, shape[2]//2]
         img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
                               ax=axs[2], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="y", y_label="x")
+                              x_label="y", y_label="x", contour=contour)
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[2]).append_axes(
@@ -1168,7 +1204,8 @@ def plot_3d_slices(
             if isinstance(title, str):
                 fig.suptitle(title, fontsize=fontsize + 2)
                 titles = [None, None, None]
-            elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
+            elif isinstance(title, tuple) and len(title) == 3 \
+                    or isinstance(title, list) and len(title) == 3:
                 titles = title
             else:
                 titles = [None, None, None]
@@ -1184,7 +1221,8 @@ def plot_3d_slices(
                 two_d_array = data_array[shape[0]//2, :, :]
                 img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
                                       ax=axs[0], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="z", y_label="y")
+                                      fontsize=fontsize, x_label="z",
+                                      y_label="y", contour=contour)
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(axs[0]).append_axes(
@@ -1197,7 +1235,8 @@ def plot_3d_slices(
                 two_d_array = data_array[:, shape[1]//2, :]
                 img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
                                       ax=axs[1], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="z", y_label="x")
+                                      fontsize=fontsize, x_label="z",
+                                      y_label="x", contour=contour)
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(axs[1]).append_axes(
@@ -1210,7 +1249,8 @@ def plot_3d_slices(
                 two_d_array = data_array[:, :, shape[2]//2]
                 img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
                                       ax=axs[2], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="y", y_label="x")
+                                      fontsize=fontsize, x_label="y",
+                                      y_label="x", contour=contour)
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(axs[2]).append_axes(

@@ -35,11 +35,6 @@ def init_plot_data_tab(
      "smooth_support", "show_image", "hf_glance", "delete"
     """
     if data_use == "2D":
-        # Disable widgets
-        for w in interface.TabPlotData.children[:-3]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = True
-
         # Plot data
         for p in filename:
             print(f"Showing {p}")
@@ -50,12 +45,7 @@ def init_plot_data_tab(
                 cmap=cmap
             )
 
-    if data_use == "3D" and len(filename) == 1:
-        # Disable widgets
-        for w in interface.TabPlotData.children[:-2]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = True
-
+    elif data_use == "3D" and len(filename) == 1:
         # Plot data
         Plotter(
             parent_folder + "/" + filename[0],
@@ -64,12 +54,18 @@ def init_plot_data_tab(
             cmap=cmap
         )
 
-    if data_use == "slices":
-        # Disable widgets
-        for w in interface.TabPlotData.children[:-3]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = True
+    elif data_use == "slices":
+        # Plot data
+        for p in filename:
+            print(f"Showing {p}")
+            Plotter(
+                parent_folder + "/" + p,
+                plot=data_use,
+                log="interact",
+                cmap=cmap
+            )
 
+    elif data_use == "contour_slices":
         # Plot data
         for p in filename:
             print(f"Showing {p}")
@@ -82,7 +78,7 @@ def init_plot_data_tab(
 
     elif data_use == "create_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData.children[:-2]:
+        for w in interface.TabPlotData.children[:-1]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = True
 
@@ -132,7 +128,7 @@ def init_plot_data_tab(
 
     elif data_use == "extract_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData.children[:-2]:
+        for w in interface.TabPlotData.children[:-1]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = True
 
@@ -149,7 +145,7 @@ def init_plot_data_tab(
 
     elif data_use == "smooth_support" and len(filename) == 1:
         # Disable widgets
-        for w in interface.TabPlotData.children[:-2]:
+        for w in interface.TabPlotData.children[:-1]:
             if not isinstance(w, widgets.HTML):
                 w.disabled = True
 
@@ -206,11 +202,6 @@ def init_plot_data_tab(
             change=interface.preprocessing_folder)
 
     elif data_use == "show_image":
-        # Disable widgets
-        for w in interface.TabPlotData.children[:-2]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = True
-
         try:
             for p in filename:
                 print(f"Showing {p}")
@@ -220,11 +211,6 @@ def init_plot_data_tab(
             print("Could not load image from file.")
 
     elif data_use == "hf_glance":
-        # Disable widgets
-        for w in interface.TabPlotData.children[:-2]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = True
-
         # Show tree
         for p in filename:
             try:
