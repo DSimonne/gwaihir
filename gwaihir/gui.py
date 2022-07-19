@@ -275,6 +275,7 @@ class Interface:
                     nb_run_keep=self.TabPhaseRetrieval.nb_run_keep,
                     unused_label_options=self.TabPhaseRetrieval.unused_label_options,
                     live_plot=self.TabPhaseRetrieval.live_plot,
+                    plot_axis=self.TabPhaseRetrieval.plot_axis,
                     # zero_mask TODO = self.TabPhaseRetrieval.    # TODO,
                     # crop_output TODO = self.TabPhaseRetrieval.    # TODO,
                     positivity=self.TabPhaseRetrieval.positivity,
