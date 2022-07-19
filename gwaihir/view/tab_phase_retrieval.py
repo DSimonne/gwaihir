@@ -94,7 +94,7 @@ class TabPhaseRetrieval(widgets.VBox):
             min=0,
             max=1000,
             layout=widgets.Layout(
-                height="50px", width="40%"),
+                height="50px", width="30%"),
             continuous_update=False,
             description='Maximum array size for cropping:',
             readout=True,
@@ -115,7 +115,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(0.23, 0.30)",
             description='Support threshold',
             layout=widgets.Layout(
-                height="50px", width="40%"),
+                height="50px", width="30%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -147,7 +147,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(2, 1, 600)",
             description='Support smooth width',
             layout=widgets.Layout(
-                height="50px", width="35%"),
+                height="50px", width="25%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -157,7 +157,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(1, -2, 1)",
             description='Support post expand',
             layout=widgets.Layout(
-                height="50px", width="35%"),
+                height="50px", width="25%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -294,7 +294,7 @@ class TabPhaseRetrieval(widgets.VBox):
             max=100,
             continuous_update=False,
             description='Number of run:',
-            layout=widgets.Layout(height="50px"),
+            layout=widgets.Layout(width="20%", height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -321,7 +321,7 @@ class TabPhaseRetrieval(widgets.VBox):
             ],
             value="LLK_standard_deviation",
             description='Filtering criteria',
-            layout=widgets.Layout(width='90%'),
+            layout=widgets.Layout(width='30%'),
             style={'description_width': 'initial'}
         )
 
@@ -352,7 +352,46 @@ class TabPhaseRetrieval(widgets.VBox):
             description='Plot every:',
             readout=True,
             layout=widgets.Layout(
-                height="50px", width="20%"),
+                height="50px", width="15%"),
+            style={
+                'description_width': 'initial'},
+        )
+
+        self.plot_axis = widgets.Dropdown(
+            options=[0, 1, 2],
+            value=0,
+            description='Axis used for plots',
+            layout=widgets.Layout(width='15%'),
+            style={'description_width': 'initial'}
+        )
+
+        self.verbose = widgets.BoundedIntText(
+            value=100,
+            min=10,
+            max=300,
+            continuous_update=False,
+            description='Verbose:',
+            layout=widgets.Layout(width='15%', height="50px"),
+            readout=True,
+            style={
+                'description_width': 'initial'},
+        )
+
+        self.rebin = widgets.Text(
+            value="(1, 1, 1)",
+            placeholder="(1, 1, 1)",
+            description='Rebin',
+            layout=widgets.Layout(width='15%', height="50px"),
+            continuous_update=False,
+            style={'description_width': 'initial'}
+        )
+
+        self.pixel_size_detector = widgets.BoundedIntText(
+            value=55,
+            continuous_update=False,
+            description='Pixel size of detector (um):',
+            layout=widgets.Layout(height="50px"),
+            readout=True,
             style={
                 'description_width': 'initial'},
         )
@@ -365,7 +404,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={
                 'description_width': 'initial'},
             layout=widgets.Layout(
-                height="50px", width="20%"),
+                height="50px", width="15%"),
             icon='check'
         )
 
@@ -377,7 +416,7 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description='Beta parameter for RAAR and HIO:',
             layout=widgets.Layout(
-                width='35%', height="50px"),
+                width='25%', height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -393,37 +432,6 @@ class TabPhaseRetrieval(widgets.VBox):
             layout=widgets.Layout(
                 height="50px", width="15%"),
             icon='check'
-        )
-
-        self.rebin = widgets.Text(
-            value="(1, 1, 1)",
-            placeholder="(1, 1, 1)",
-            description='Rebin',
-            layout=widgets.Layout(height="50px"),
-            continuous_update=False,
-            style={'description_width': 'initial'}
-        )
-
-        self.verbose = widgets.BoundedIntText(
-            value=100,
-            min=10,
-            max=300,
-            continuous_update=False,
-            description='Verbose:',
-            layout=widgets.Layout(height="50px"),
-            readout=True,
-            style={
-                'description_width': 'initial'},
-        )
-
-        self.pixel_size_detector = widgets.BoundedIntText(
-            value=55,
-            continuous_update=False,
-            description='Pixel size of detector (um):',
-            layout=widgets.Layout(height="50px"),
-            readout=True,
-            style={
-                'description_width': 'initial'},
         )
 
         self.unused_label_phase_retrieval = widgets.HTML(
@@ -544,14 +552,17 @@ class TabPhaseRetrieval(widgets.VBox):
             self.unused_label_options,
             widgets.HBox([
                 self.live_plot,
-                self.positivity,
-                self.beta,
-                self.detwin,
+                self.plot_axis,
+                self.verbose,
             ]),
             widgets.HBox([
                 self.rebin,
-                self.verbose,
                 self.pixel_size_detector,
+            ]),
+            widgets.HBox([
+                self.positivity,
+                self.beta,
+                self.detwin,
             ]),
             self.unused_label_phase_retrieval,
             self.run_phase_retrieval,
