@@ -232,7 +232,12 @@ class Plotter:
                     elif self.plot == "slices" and self.data_array.ndim == 3:
                         self.plot_3d_slices(fontsize=self.fontsize, title=self.title,
                                             figsize=None, log=self.log,
-                                            cmap=self.cmap)
+                                            cmap=self.cmap, contour=False)
+
+                    elif self.plot == "contour_slices" and self.data_array.ndim == 3:
+                        self.plot_3d_slices(fontsize=self.fontsize, title=self.title,
+                                            figsize=None, log=self.log,
+                                            cmap=self.cmap, contour=True)
 
                     elif self.plot == "3D" and self.data_array.ndim == 3:
                         ThreeDViewer(self.data_array)
