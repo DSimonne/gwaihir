@@ -664,6 +664,7 @@ def init_postprocess_tab(
         print("Not yet supported.")
         clear_output(True)
 
+# Center the data
 
 def center(data, mask=None, center=None, method="com"):
     """
@@ -807,6 +808,8 @@ def center_and_crop(data, mask=None):
         Plotter(cropped_data, log=True)
         return cropped_data, None
 
+
+# Resolution
 
 def compute_prtf(
     iobs,

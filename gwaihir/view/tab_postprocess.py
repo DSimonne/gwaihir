@@ -215,7 +215,7 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.offset_method = widgets.Dropdown(
-            options=["COM", "mean"],
+            options=["com", "mean"],
             value="mean",
             description='Offset method:',
             continuous_update=False,
@@ -225,7 +225,7 @@ class TabPostprocess(widgets.VBox):
 
         self.centering_method = widgets.Dropdown(
             options=[
-                "COM", "max", "max_com"],
+                "com", "max", "max_com"],
             value="max_com",
             description='Centering method:',
             continuous_update=False,
