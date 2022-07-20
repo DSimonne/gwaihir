@@ -75,7 +75,7 @@ class Plotter:
         self.interact_scale = False
 
         # Get data array from any of the supported files
-        if isinstance(data, str):
+        if os.path.isfile(data):
             self.filename = data
             self.get_data_array()
 
