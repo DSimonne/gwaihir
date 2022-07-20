@@ -48,7 +48,7 @@ class TabPlotData(widgets.VBox):
                 + glob.glob(os.getcwd() + "/*.nxs")
                 + glob.glob(os.getcwd() + "/*.png"),
                 key=os.path.getmtime)],
-            rows=10,
+            rows=20,
             description='Compatible file list',
             layout=widgets.Layout(width='90%'),
             style={'description_width': 'initial'}
