@@ -781,8 +781,8 @@ def center_and_crop(data, mask=None):
 
     if isinstance(mask, np.ndarray):
         # Plot before
-        Plotter(data, log=True)
-        Plotter(mask, log=True)
+        plot.Plotter(data, log=True)
+        plot.Plotter(mask, log=True)
 
         # Crop and center
         centered_data, centered_mask = center(data=data, mask=mask)
@@ -790,14 +790,14 @@ def center_and_crop(data, mask=None):
             data=centered_data, mask=centered_mask, final_shape=final_shape)
 
         # Plot after
-        Plotter(cropped_data, log=True)
-        Plotter(cropped_mask, log=True)
+        plot.Plotter(cropped_data, log=True)
+        plot.Plotter(cropped_mask, log=True)
 
         return cropped_data, cropped_mask
 
     else:
         # Plot before
-        Plotter(data, log=True)
+        plot.Plotter(data, log=True)
 
         # Crop and center
         centered_data, __ = center(data=data)
@@ -805,7 +805,7 @@ def center_and_crop(data, mask=None):
             data=centered_data, final_shape=final_shape)
 
         # Plot after
-        Plotter(cropped_data, log=True)
+        plot.Plotter(cropped_data, log=True)
         return cropped_data, None
 
 
