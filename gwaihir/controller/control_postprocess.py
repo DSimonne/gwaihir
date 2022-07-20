@@ -669,31 +669,34 @@ def center(data, mask=None, center=None, method="com"):
     """
     Center 3D volume data such that the center of mass of data is at
     the very center of the 3D matrix.
-    :param data: volume data (np.array). 3D numpy array which will be
-    centered.
-    :param mask: volume mask (np.array). 3D numpy array of same size 
-    as data which will be centered based on data
-    :param com: center of mass coordinates(list, np.array). If no com is
-    provided, com of the given data is computed (default: None).
-    :param method: what region to place at the center (str), either
-    com or max.
 
-    Written by @Clatlan 
+    :param data: volume data (np.array). 3D numpy array which will be
+        centered.
+    :param mask: volume mask (np.array). 3D numpy array of same size
+        as data which will be centered based on data
+    :param center: center of mass coordinates(list, np.array). If no center
+        is provided, center of the given data is computed (default: None).
+    :param method: what region to place at the center (str), either
+        com or max.
+
+    Adapted from @Clatlan
+
     :returns: centered data, centered mask
     """
     shape = data.shape
 
-    if method == "com":
-        if center is None:
+    if center is None:
+        if method == "com":
             xcenter, ycenter, zcenter = (
                 int(round(c)) for c in center_of_mass(data)
             )
-    elif method == "max":
-        if center is None:
+        elif method == "max":
             xcenter, ycenter, zcenter = np.where(data == np.max(data))
+        else:
+            print("method unknown, please choose between ['com', 'max']")
+            return data, None
     else:
-        print("method unknown, please choose between ['com', 'max']")
-        return data, None
+        xcenter, ycenter, zcenter = center
 
     centered_data = np.roll(data, shape[0] // 2 - xcenter, axis=0)
     centered_data = np.roll(centered_data, shape[1] // 2 - ycenter, axis=1)
@@ -708,6 +711,101 @@ def center(data, mask=None, center=None, method="com"):
 
     else:
         return centered_data, None
+
+
+def crop_at_center(data, mask=None, final_shape=None):
+    """
+    Crop 3D array data to match the final_shape. Center of the input
+    data remains the center of cropped data.
+
+    :param data: volume data (np.array). 3D numpy array which will be
+        centered.
+    :param mask: volume mask (np.array). 3D numpy array of same size
+        as data which will be centered based on data
+    :param final_shape: the targetted shape (list). If None, nothing
+    happens.
+
+    Adapted from @Clatlan
+
+    :returns: cropped 3D array (np.array).
+    """
+    if final_shape is None:
+        print("No final shape specified, did not proceed to cropping")
+        return data
+
+    shape = data.shape
+    final_shape = np.array(final_shape)
+
+    if not (final_shape <= data.shape).all():
+        print(
+            "One of the axis of the final shape is larger than "
+            "the initial axis (initial shape: {}, final shape: {}).\n"
+            "Did not proceed to cropping.".format(shape, tuple(final_shape))
+        )
+        return data
+
+    # Crop data
+    c = np.array(shape) // 2  # coordinates of the center
+    to_crop = final_shape // 2  # indices to crop at both sides
+    plus_one = np.where((final_shape % 2 == 0), 0, 1)
+
+    cropped_data = data[c[0] - to_crop[0]: c[0] + to_crop[0] + plus_one[0],
+                        c[1] - to_crop[1]: c[1] + to_crop[1] + plus_one[1],
+                        c[2] - to_crop[2]: c[2] + to_crop[2] + plus_one[2]]
+
+    # Crop mask
+    if isinstance(mask, np.ndarray):
+        cropped_mask = mask[c[0] - to_crop[0]: c[0] + to_crop[0] + plus_one[0],
+                            c[1] - to_crop[1]: c[1] + to_crop[1] + plus_one[1],
+                            c[2] - to_crop[2]: c[2] + to_crop[2] + plus_one[2]]
+
+        return cropped_data, cropped_mask
+
+    else:
+        return cropped_data, None
+
+
+def center_and_crop(data, mask=None):
+    print("Original shape:", data.shape)
+    com = center_of_mass(data)
+    print("Original center of mass:", com)
+
+    final_shape = []
+    for s, c in zip(data.shape, com):
+        if c > s//2:
+            final_shape.append(int(np.rint(s-c)*2))
+        else:
+            final_shape.append(int(np.rint(c)*2))
+    print("Final shape after centering and cropping", final_shape)
+
+    if isinstance(mask, np.ndarray):
+        # Plot before
+        Plotter(data, log=True)
+        Plotter(mask, log=True)
+
+        # Crop and center
+        centered_data, centered_mask = center(data=data, mask=mask)
+        cropped_data, cropped_mask = crop_at_center(
+            data=centered_data, mask=centered_mask, final_shape=final_shape)
+
+        # Plot after
+        Plotter(cropped_data, log=True)
+        Plotter(cropped_mask, log=True)
+
+        return cropped_data, cropped_mask
+
+    else:
+        # Plot before
+        Plotter(data, log=True)
+
+        # Crop and center
+        centered_data, __ = center(data=data)
+        cropped_data, __ = crop_at_center(
+            data=centered_data, final_shape=final_shape)
+
+        # Plot after
+        Plotter(cropped_data, log=True)
+        return cropped_data, None
 
 
 def compute_prtf(
