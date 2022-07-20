@@ -1085,7 +1085,7 @@ def plot_2d_image(
                 cmap=cmap,
             )
         else:
-            img = ax.contourf(
+            img = ax.imshow(
                 np.abs(two_d_array),
                 norm={"linear": None, "logarithmic": LogNorm()}[
                     scale],
