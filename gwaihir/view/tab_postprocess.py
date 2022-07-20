@@ -216,7 +216,7 @@ class TabPostprocess(widgets.VBox):
 
         self.offset_method = widgets.Dropdown(
             options=["com", "mean"],
-            value="mean",
+            value="com",
             description='Offset method:',
             continuous_update=False,
             layout=widgets.Layout(width='20%'),
@@ -226,7 +226,7 @@ class TabPostprocess(widgets.VBox):
         self.centering_method = widgets.Dropdown(
             options=[
                 "com", "max", "max_com"],
-            value="max_com",
+            value="com",
             description='Centering method:',
             continuous_update=False,
             layout=widgets.Layout(width='25%'),
@@ -417,8 +417,8 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.strain_range = widgets.FloatText(
-            value=0.002,
-            step=0.00001,
+            value=0.0001,
+            step=0.000001,
             continuous_update=False,
             description='Strain range:',
             readout=True,
