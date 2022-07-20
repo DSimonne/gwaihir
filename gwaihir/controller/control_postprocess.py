@@ -767,17 +767,18 @@ def crop_at_center(data, mask=None, final_shape=None):
         return cropped_data, None
 
 
-def center_and_crop(data, mask=None):
+def center_and_crop(data, mask=None, final_shape=None):
     print("Original shape:", data.shape)
     com = center_of_mass(data)
     print("Original center of mass:", com)
 
-    final_shape = []
-    for s, c in zip(data.shape, com):
-        if c > s//2:
-            final_shape.append(int(np.rint(s-c)*2))
-        else:
-            final_shape.append(int(np.rint(c)*2))
+    if not final_shape:
+        final_shape = []
+        for s, c in zip(data.shape, com):
+            if c > s//2:
+                final_shape.append(int(np.rint(s-c)*2))
+            else:
+                final_shape.append(int(np.rint(c)*2))
     print("Final shape after centering and cropping", final_shape)
 
     if isinstance(mask, np.ndarray):

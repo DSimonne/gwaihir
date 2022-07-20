@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 import h5py as h5
+import os
 
 from tornado.ioloop import PeriodicCallback
 
@@ -113,7 +114,9 @@ class Plotter:
 
         else:
             print(
-                "Please provide either a filename (arg filename) or directly an np.ndarray (arg data_array).")
+                "Please provide either a valid filename (arg filename)"
+                " or directly an np.ndarray (arg data_array)."
+            )
 
     def get_data_array(self):
         """Get numpy array from file.
