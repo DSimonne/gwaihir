@@ -491,7 +491,7 @@ def init_phase_retrieval_tab(
                     if not interface.Dataset.support:
                         sup_init = "autocorrelation"
                         if isinstance(interface.Dataset.live_plot, int):
-                            cdi = ShowCDI(axis=plot_axis) * ScaleObj() \
+                            cdi = ShowCDI(plot_axis=plot_axis) * ScaleObj() \
                                 * AutoCorrelationSupport(
                                 threshold=0.1,  # extra argument
                                 verbose=True) * cdi
@@ -512,13 +512,13 @@ def init_phase_retrieval_tab(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
 
                                 # PSF is introduced at 66% of HIO and RAAR
@@ -540,13 +540,13 @@ def init_phase_retrieval_tab(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     update_psf=interface.Dataset.update_psf,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     update_psf=interface.Dataset.update_psf,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -562,14 +562,14 @@ def init_phase_retrieval_tab(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
 
@@ -593,14 +593,14 @@ def init_phase_retrieval_tab(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     update_psf=interface.Dataset.update_psf,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     update_psf=interface.Dataset.update_psf,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
@@ -611,18 +611,18 @@ def init_phase_retrieval_tab(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** interface.Dataset.nb_raar * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -637,20 +637,20 @@ def init_phase_retrieval_tab(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    axis=plot_axis,
+                                    plot_axis=plot_axis,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
