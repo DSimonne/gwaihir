@@ -69,6 +69,8 @@ class TabPlotData(widgets.VBox):
                 ('2D plot', "2D"),
                 ("Plot slices", "slices"),
                 ("Plot contour slices", "contour_slices"),
+                ("Plot sum over axes", "sum_slices"),
+                ("Plot contour of sum over axes", "sum_contour_slices"),
                 ("3D plot", "3D"),
                 ("Create support", "create_support"),
                 ("Extract support", "extract_support"),

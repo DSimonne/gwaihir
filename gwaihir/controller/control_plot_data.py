@@ -54,18 +54,9 @@ def init_plot_data_tab(
             cmap=cmap
         )
 
-    elif data_use == "slices":
-        # Plot data
-        for p in filename:
-            print(f"Showing {p}")
-            Plotter(
-                parent_folder + "/" + p,
-                plot=data_use,
-                log="interact",
-                cmap=cmap
-            )
-
-    elif data_use == "contour_slices":
+    elif data_use == in [
+        "slices", "contour_slices", "sum_slices", "sum_contour_slices"
+    ]:
         # Plot data
         for p in filename:
             print(f"Showing {p}")
