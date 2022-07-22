@@ -664,10 +664,8 @@ def init_postprocess_tab(
         print("Not yet supported.")
         clear_output(True)
 
-# Center the data
 
-
-def center(data, mask=None, center=None, method="com"):
+def center_array(data, mask=None, center=None, method="com"):
     """
     Center 3D volume data such that the center of mass of data is at
     the very center of the 3D matrix.
@@ -744,7 +742,7 @@ def crop_at_center(data, mask=None, final_shape=None):
             "the initial axis (initial shape: {}, final shape: {}).\n"
             "Did not proceed to cropping.".format(shape, tuple(final_shape))
         )
-        return data
+        return data, mask
 
     # Crop data
     c = np.array(shape) // 2  # coordinates of the center
@@ -764,22 +762,39 @@ def crop_at_center(data, mask=None, final_shape=None):
         return cropped_data, cropped_mask
 
     else:
-        return cropped_data, None
+        return cropped_data, mask
 
 
-def center_and_crop(data, mask=None, final_shape=None):
+def center_and_crop(
+    data,
+    mask=None,
+    center=None,
+    method="com",
+    final_shape=None,
+):
     print("Original shape:", data.shape)
-    com = center_of_mass(data)
-    print("Original center of mass:", com)
+    # Determine center if not given with `method`
+    if center is None:
+        if method == "com":
+            center = [
+                int(round(c)) for c in center_of_mass(data)
+            ]
+        elif method == "max":
+            center = np.where(data == np.max(data))
+        else:
+            print("method unknown, please choose between ['com', 'max']")
+            return data, None
+    print("Center of array:", center)
 
-    if not final_shape:
+    # Determine the final shape if not given
+    if final_shape is None:
         final_shape = []
-        for s, c in zip(data.shape, com):
-            if c > s//2:
+        for s, c in zip(data.shape, center):
+            if c > s/2:
                 final_shape.append(int(np.rint(s-c)*2))
             else:
                 final_shape.append(int(np.rint(c)*2))
-    print("Final shape after centering and cropping", final_shape)
+    print("Final shape after centering and cropping:", final_shape)
 
     if isinstance(mask, np.ndarray):
         # Plot before
@@ -787,7 +802,8 @@ def center_and_crop(data, mask=None, final_shape=None):
         plot.Plotter(mask, log=True)
 
         # Crop and center
-        centered_data, centered_mask = center(data=data, mask=mask)
+        centered_data, centered_mask = center_array(
+            data=data, mask=mask, center=center, method=method)
         cropped_data, cropped_mask = crop_at_center(
             data=centered_data, mask=centered_mask, final_shape=final_shape)
 
@@ -802,14 +818,14 @@ def center_and_crop(data, mask=None, final_shape=None):
         plot.Plotter(data, log=True)
 
         # Crop and center
-        centered_data, __ = center(data=data)
+        centered_data, __ = center_array(
+            data=data, center=center, method=method)
         cropped_data, __ = crop_at_center(
             data=centered_data, final_shape=final_shape)
 
         # Plot after
         plot.Plotter(cropped_data, log=True)
         return cropped_data, None
-
 
 # Resolution
 
@@ -826,7 +842,7 @@ def compute_prtf(
     mask = plot.Plotter(mask, plot=False).data_array
 
     # Center and plot the observed data and mask
-    iobs, mask = center(data=iobs, mask=mask)
+    iobs, mask = center_array(data=iobs, mask=mask)
 
     plot.plot_3d_slices(iobs, log=log_in_plots)
     plt.show()
