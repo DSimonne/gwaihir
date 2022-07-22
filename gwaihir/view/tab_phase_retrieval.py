@@ -439,8 +439,8 @@ class TabPhaseRetrieval(widgets.VBox):
             min=0,
             max=100,
             continuous_update=False,
-            description='FLLK update interval:',
-            layout=widgets.Layout(width="20%", height="50px"),
+            description='Log likelihood update interval:',
+            layout=widgets.Layout(width="25%", height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
