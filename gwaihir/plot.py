@@ -1160,7 +1160,7 @@ def plot_3d_slices(
                     data_array=data_array,
                     fontsize=fontsize,
                     figsize=figsize,
-                    log=log,
+                    log=scale,
                     cmap=cmap,
                     title=title,
                     contour=contour,
