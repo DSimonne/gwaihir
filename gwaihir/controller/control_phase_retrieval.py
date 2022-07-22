@@ -728,7 +728,7 @@ def init_phase_retrieval_tab(
         clear_output(True)
 
         interface.cxi_files_list = list_files(
-            folder=interface.preprocessing_folder,
+            folder=interface.Dataset.parent_folder,
             glob_pattern="*.cxi",
             verbose=True,
         )
