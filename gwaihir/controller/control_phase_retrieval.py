@@ -700,9 +700,10 @@ def init_phase_retrieval_tab(
                     "Phase retrieval stopped by user, cxi file list below."
                 )
 
-            interface.cxi_file_list = list_reconstructions(
+            interface.cxi_files_list = list_files(
                 folder=interface.preprocessing_folder,
-                scan_name=interface.Dataset.scan_name
+                glob_pattern="*.cxi",
+                verbose=True,
             )
 
     # Modes decomposition and solution filtering
@@ -726,9 +727,10 @@ def init_phase_retrieval_tab(
         print("Cleared output.")
         clear_output(True)
 
-        interface.cxi_file_list = list_reconstructions(
+        interface.cxi_files_list = list_files(
             folder=interface.preprocessing_folder,
-            scan_name=interface.Dataset.scan_name
+            glob_pattern="*.cxi",
+            verbose=True,
         )
 
         # Refresh folders
@@ -868,24 +870,32 @@ def filter_reconstructions(
 
     # Main function supporting different cases
     try:
+        glob_pattern = "*FLLK*.cxi"
         print(
-            "\n###################"
-            "#####################"
-            "#####################"
-            "#####################"
+            "\n########################################"
+            "##########################################"
         )
         print("Iterating on files matching:")
-        print(f"\t{folder}/*FLLK*.cxi")
-        cxi_files = sorted(glob.glob(f"{folder}/*FLLK*.cxi"))
+        print(f"\t{folder}/{glob_pattern}")
+        cxi_files = list_files(
+            folder=folder,
+            glob_pattern=glob_pattern,
+        )
         print(
-            "#####################"
-            "#####################"
-            "#####################"
-            "###################\n"
+            "##########################################"
+            "########################################\n"
         )
 
         if cxi_files == []:
-            print(f"No *FLLK*.cxi files in {folder}/*FLLK*.cxi")
+            print(
+                f"No match for {folder}/*FLLK*.cxi"
+                f"Trying with {folder}/*LLK*.cxi"
+            )
+            glob_pattern = "*LLK*.cxi"
+            cxi_files = list_files(
+                folder=folder,
+                glob_pattern=glob_pattern,
+            )
 
         else:
             # only standard_deviation
@@ -906,13 +916,14 @@ def filter_reconstructions(
 
                 print("Iterating on remaining files.")
 
-                cxi_files = sorted(
-                    glob.glob(f"{folder}/*FLLK*.cxi"))
+                cxi_files = list_files(
+                    folder=folder,
+                    glob_pattern=glob_pattern,
+                )
 
                 if cxi_files == []:
                     print(
-                        f"No *FLLK*.cxi files remaining in \
-                        {folder}/*FLLK*.cxi")
+                        f"No {glob_pattern} files remaining in {folder}")
                 else:
                     filter_by_FLLK(cxi_files, nb_run_keep)
 
@@ -926,13 +937,14 @@ def filter_reconstructions(
 
                 print("Iterating on remaining files.")
 
-                cxi_files = sorted(
-                    glob.glob(f"{folder}/*FLLK*.cxi"))
+                cxi_files = list_files(
+                    folder=folder,
+                    glob_pattern=glob_pattern,
+                )
 
                 if cxi_files == []:
                     print(
-                        f"No *FLLK*.cxi files remaining in \
-                        {folder}/*FLLK*.cxi")
+                        f"No {glob_pattern} files remaining in {folder}")
                 else:
                     filter_by_std(cxi_files, nb_run_keep)
 
@@ -1294,38 +1306,37 @@ def save_cdi_operator_as_cxi(
     )
 
 
-def list_reconstructions(
+def list_files(
     folder,
-    scan_name,
+    glob_pattern="*FLLK*.cxi",
+    verbose=False,
 ):
     """List all cxi files in the folder and sort by creation time"""
-    cxi_file_list = [f for f in sorted(
-        glob.glob(folder + "*.cxi"),
+    cxi_files_list = [f for f in sorted(
+        glob.glob(folder + "/" + glob_pattern),
         key=os.path.getmtime,
         reverse=True,
-    )  # if not os.path.basename(f).startswith(scan_name)
+    )
     ]
 
-    print(
-        "################################################"
-        "################################################"
-    )
-    for j, f in enumerate(cxi_file_list):
-        file_timestamp = datetime.fromtimestamp(
-            os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
+    if verbose:
         print(
-            f"File: {os.path.basename(f)}"
-            f"\n\tCreated: {file_timestamp}"
+            "################################################"
+            "################################################"
         )
-        if j != len(cxi_file_list)-1:
-            print("")
-        else:
+        for j, f in enumerate(cxi_files_list):
+            file_timestamp = datetime.fromtimestamp(
+                os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
             print(
-                "################################################"
-                "################################################"
+                f"\nFile: {os.path.basename(f)}"
+                f"\n\tCreated: {file_timestamp}"
             )
+        print(
+            "################################################"
+            "################################################"
+        )
 
-    return cxi_file_list
+    return file_list
 
 
 def run_modes_decomposition(
@@ -1336,25 +1347,48 @@ def run_modes_decomposition(
     Decomposes several phase retrieval solutions into modes, saves only
     the first mode to save space.
 
+    All files corresponding to *FLLK* pattern are loaded, if no files are
+    loaded, trying with *LLK* pattern.
+
     :param path_scripts: absolute path to script containing
      folder
-    :param folder: path to folder in which are stored
-     the .cxi files, all files corresponding to
-     *FLLK* pattern are loaded
+    :param folder: path to folder in which are stored the reconstructions
     """
-    try:
+
+    glob_pattern = "*FLLK*.cxi"
+    cxi_files_list = list_files(
+        folder=folder,
+        glob_pattern=glob_pattern,
+    )
+
+    if cxi_files_list == []:
+        glob_pattern = "*LLK*.cxi"
+        cxi_files_list = list_files(
+            folder=folder,
+            glob_pattern=glob_pattern,
+        )
+        if cxi_files_list == []:
+            print(
+                "Could not find any files matching the *LLK*.cxi* "
+                "or *FLLK*.cxi patterns."
+            )
+            glob_pattern = False
+
+    if isinstance(glob_pattern, str):
         print(
             "\n###########################################"
             "#############################################"
             f"\nUsing {path_scripts}/pynx-cdi-analysis"
-            f"\nUsing {folder}/*FLLK* files."
-            f"\nRunning: $ pynx-cdi-analysis *FLLK* modes=1"
+            f"\nUsing {folder}/{glob_pattern} files."
+            f"\nRunning: $ pynx-cdi-analysis {glob_pattern} modes=1"
             f"\nOutput in {folder}/modes_gui.h5"
             "\n###########################################"
             "#############################################"
         )
+    try:
         os.system(
-            "{}/pynx-cdi-analysis {}/*FLLK* modes=1 modes_output={}/modes_gui.h5".format(
+            "{}/pynx-cdi-analysis {}/{} modes=1 modes_output={}/modes_gui.h5".format(
+                quote(glob_pattern),
                 quote(path_scripts),
                 quote(folder),
                 quote(folder),
