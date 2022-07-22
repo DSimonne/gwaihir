@@ -281,6 +281,7 @@ class Interface:
                     positivity=self.TabPhaseRetrieval.positivity,
                     beta=self.TabPhaseRetrieval.beta,
                     detwin=self.TabPhaseRetrieval.detwin,
+                    calc_llk=self.TabPhaseRetrieval.calc_llk,
                     rebin=self.TabPhaseRetrieval.rebin,
                     verbose=self.TabPhaseRetrieval.verbose,
                     pixel_size_detector=self.TabPhaseRetrieval.pixel_size_detector,
