@@ -1312,7 +1312,7 @@ def list_files(
     verbose=False,
 ):
     """List all cxi files in the folder and sort by creation time"""
-    cxi_files_list = [f for f in sorted(
+    file_list = [f for f in sorted(
         glob.glob(folder + "/" + glob_pattern),
         key=os.path.getmtime,
         reverse=True,
@@ -1324,7 +1324,7 @@ def list_files(
             "################################################"
             "################################################"
         )
-        for j, f in enumerate(cxi_files_list):
+        for j, f in enumerate(file_list):
             file_timestamp = datetime.fromtimestamp(
                 os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
             print(
