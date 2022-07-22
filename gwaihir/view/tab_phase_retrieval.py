@@ -314,12 +314,12 @@ class TabPhaseRetrieval(widgets.VBox):
                  "no_filtering"),
                 ("Standard deviation",
                     "standard_deviation"),
-                ("Log-likelihood (LLK)", "LLK"),
-                ("LLK > Standard deviation",
-                    "LLK_standard_deviation"),
-                # ("Standard deviation > LLK", "standard_deviation_LLK"),
+                ("Log-likelihood (FLLK)", "FLLK"),
+                ("FLLK > Standard deviation",
+                    "FLLK_standard_deviation"),
+                # ("Standard deviation > FLLK", "standard_deviation_FLLK"),
             ],
-            value="LLK_standard_deviation",
+            value="FLLK_standard_deviation",
             description='Filtering criteria',
             layout=widgets.Layout(width='30%'),
             style={'description_width': 'initial'}
@@ -434,6 +434,18 @@ class TabPhaseRetrieval(widgets.VBox):
             icon='check'
         )
 
+        self.calc_llk = widgets.BoundedIntText(
+            value=50,
+            min=0,
+            max=100,
+            continuous_update=False,
+            description='FLLK update interval:',
+            layout=widgets.Layout(width="20%", height="50px"),
+            readout=True,
+            style={
+                'description_width': 'initial'},
+        )
+
         self.unused_label_phase_retrieval = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Click below to run the phase retrieval</p>",
@@ -492,7 +504,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=False,
             tooltips=[
                 "Click to be able to change parameters",
-                "Run modes decomposition in data folder, selects *LLK*.cxi\
+                "Run modes decomposition in data folder, selects *FLLK*.cxi\
                  files",
                 "Filter reconstructions"
             ],
@@ -563,6 +575,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 self.positivity,
                 self.beta,
                 self.detwin,
+                self.calc_llk,
             ]),
             self.unused_label_phase_retrieval,
             self.run_phase_retrieval,

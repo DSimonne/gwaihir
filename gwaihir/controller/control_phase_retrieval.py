@@ -60,6 +60,7 @@ def init_phase_retrieval_tab(
     positivity,
     beta,
     detwin,
+    calc_llk,
     rebin,
     verbose,
     pixel_size_detector,
@@ -154,7 +155,7 @@ def init_phase_retrieval_tab(
     :param nb_run: number of times to run the optimization
     :param nb_run_keep: number of best run results to keep, according to
      filter_criteria.
-    :param filter_criteria: e.g. "LLK"
+    :param filter_criteria: e.g. "FLLK"
         criteria onto which the best solutions will be chosen
     :param live_plot: a live plot will be displayed every N cycle
     :param plot_axis: for 3D data, the axis along which the cut plane will be
@@ -168,6 +169,8 @@ def init_phase_retrieval_tab(
      file), 10 cycles will be performed at 25% of the total number of
      RAAR or HIO cycles, with a support cut in half to bias towards one
      twin image
+    :param calc_llk: interval at which the different Log Likelihood are
+     computed
     :param pixel_size_detector: detector pixel size (meters)
     :param wavelength: experiment wavelength (meters)
     :param detector_distance: detector distance (meters)
@@ -212,6 +215,7 @@ def init_phase_retrieval_tab(
     interface.Dataset.positivity = positivity
     interface.Dataset.beta = beta
     interface.Dataset.detwin = detwin
+    interface.Dataset.calc_llk = calc_llk
     interface.Dataset.rebin = rebin
     interface.Dataset.verbose = verbose
     interface.Dataset.pixel_size_detector = np.round(
@@ -306,16 +310,16 @@ def init_phase_retrieval_tab(
             # no PSF, just don't write anything
 
             # Filtering the reconstructions
-            if interface.Dataset.filter_criteria == "LLK":
-                nb_run_keep_LLK = interface.Dataset.nb_run_keep
+            if interface.Dataset.filter_criteria == "FLLK":
+                nb_run_keep_FLLK = interface.Dataset.nb_run_keep
                 nb_run_keep_std = False
 
             elif interface.Dataset.filter_criteria == "std":
-                nb_run_keep_LLK = interface.Dataset.nb_run
+                nb_run_keep_FLLK = interface.Dataset.nb_run
                 nb_run_keep_std = interface.Dataset.nb_run_keep
 
-            elif interface.Dataset.filter_criteria == "LLK_standard_deviation":
-                nb_run_keep_LLK = interface.Dataset.nb_run_keep + \
+            elif interface.Dataset.filter_criteria == "FLLK_standard_deviation":
+                nb_run_keep_FLLK = interface.Dataset.nb_run_keep + \
                     (interface.Dataset.nb_run - interface.Dataset.nb_run_keep) // 2
                 nb_run_keep_std = interface.Dataset.nb_run_keep
 
@@ -335,7 +339,7 @@ def init_phase_retrieval_tab(
                 f'nb_ml = {interface.Dataset.nb_ml}\n',
                 '\n',
                 f'nb_run = {interface.Dataset.nb_run}\n',
-                f'nb_run_keep = {nb_run_keep_LLK}\n',
+                f'nb_run_keep = {nb_run_keep_FLLK}\n',
                 '\n',
                 f'# max_size = {interface.Dataset.max_size}\n',
                 'zero_mask = auto # masked pixels will start from imposed 0 and then let free\n',
@@ -367,7 +371,7 @@ def init_phase_retrieval_tab(
 
             if run_phase_retrieval == "batch":
                 # Runs modes directly and saves all data in a "gui_run"
-                # subdir, filter based on LLK
+                # subdir, filter based on FLLK
                 print(
                     f"\nRunning: $ {interface.path_scripts}/run_slurm_job.sh "
                     f"--reconstruct gui --username {interface.user_name} "
@@ -414,8 +418,9 @@ def init_phase_retrieval_tab(
         elif run_phase_retrieval == "operators":
             # Extract data
             print(
-                "\tLog likelihood is updated every 50 iterations.")
-            interface.Dataset.calc_llk = 50  # TODO
+                "\tLog likelihood is updated every "
+                f"{interface.Dataset.calc_llk} iterations."
+            )
 
             # Keep a list of the resulting scans
             interface.reconstruction_file_list = []
@@ -483,7 +488,7 @@ def init_phase_retrieval_tab(
                         post_expand=interface.Dataset.support_post_expand,
                     )
 
-                    # Initialize the free pixels for LLK
+                    # Initialize the free pixels for FLLK
                     cdi = InitFreePixels() * cdi
 
                     # Initialize the support with autocorrelation, if no
@@ -655,11 +660,12 @@ def init_phase_retrieval_tab(
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
-                        fn = "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
+                        fn = "{}/result_scan_{}_run_{}_FLLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                             interface.Dataset.parent_folder,
                             interface.Dataset.scan,
                             i,
-                            cdi.get_llk()[0],
+                            cdi.get_llk(normalized=True)[
+                                3],  # check pynx for this
                             interface.Dataset.threshold_relative,
                             cdi.iobs.shape[0],
                             cdi.iobs.shape[1],
@@ -748,14 +754,14 @@ def filter_reconstructions(
     folder,
     nb_run_keep,
     nb_run=None,
-    filter_criteria="LLK"
+    filter_criteria="FLLK"
 ):
     """
     Filter the phase retrieval output depending on a given parameter,
-    for now only LLK and standard deviation are available. This allows the
+    for now only FLLK and standard deviation are available. This allows the
     user to run a lot of reconstructions but to then automatically keep the
     "best" ones, according to this parameter. filter_criteria can take the
-    values "LLK" or "standard_deviation" If you filter based on both, the
+    values "FLLK" or "standard_deviation" If you filter based on both, the
     function will filter nb_run_keep/2 files by the first criteria, and the
     remaining files by the second criteria.
 
@@ -766,10 +772,10 @@ def filter_reconstructions(
      according to filter_criteria.
     :param nb_run: number of times to run the optimization, if None, equal
      to nb of files detected
-    :param filter_criteria: default "LLK"
+    :param filter_criteria: default "FLLK"
      criteria onto which the best solutions will be chosen
-     possible values are ("standard_deviation", "LLK",
-     "standard_deviation_LLK", "LLK_standard_deviation")
+     possible values are ("standard_deviation", "FLLK",
+     "standard_deviation_FLLK", "FLLK_standard_deviation")
     """
     # Sorting functions depending on filtering criteria
     def filter_by_std(cxi_files, nb_run_keep):
@@ -817,7 +823,7 @@ def filter_reconstructions(
             "###################\n"
         )
 
-    def filter_by_LLK(cxi_files, nb_run_keep):
+    def filter_by_FLLK(cxi_files, nb_run_keep):
         """
         Use the free log-likelihood values of the reconstructed object
         as filtering criteria.
@@ -834,13 +840,13 @@ def filter_reconstructions(
             "#####################"
             "#####################"
         )
-        print("Extracting LLK value (poisson statistics) for scans:")
+        print("Extracting FLLK value (poisson statistics) for scans:")
         for filename in cxi_files:
             print(f"\t{os.path.basename(filename)}")
             with tb.open_file(filename, "r") as f:
-                llk = f.root.entry_1.image_1.process_1.\
-                    results.llk_poisson[...]
-                filtering_criteria_value[filename] = llk
+                fllk = f.root.entry_1.image_1.process_1.\
+                    results.free_llk_poisson[...]
+                filtering_criteria_value[filename] = fllk
 
         # Sort files
         sorted_dict = sorted(
@@ -869,8 +875,8 @@ def filter_reconstructions(
             "#####################"
         )
         print("Iterating on files matching:")
-        print(f"\t{folder}/*LLK*.cxi")
-        cxi_files = sorted(glob.glob(f"{folder}/*LLK*.cxi"))
+        print(f"\t{folder}/*FLLK*.cxi")
+        cxi_files = sorted(glob.glob(f"{folder}/*FLLK*.cxi"))
         print(
             "#####################"
             "#####################"
@@ -879,19 +885,19 @@ def filter_reconstructions(
         )
 
         if cxi_files == []:
-            print(f"No *LLK*.cxi files in {folder}/*LLK*.cxi")
+            print(f"No *FLLK*.cxi files in {folder}/*FLLK*.cxi")
 
         else:
             # only standard_deviation
             if filter_criteria is "standard_deviation":
                 filter_by_std(cxi_files, nb_run_keep)
 
-            # only LLK
-            elif filter_criteria is "LLK":
-                filter_by_LLK(cxi_files, nb_run_keep)
+            # only FLLK
+            elif filter_criteria is "FLLK":
+                filter_by_FLLK(cxi_files, nb_run_keep)
 
-            # standard_deviation then LLK
-            elif filter_criteria is "standard_deviation_LLK":
+            # standard_deviation then FLLK
+            elif filter_criteria is "standard_deviation_FLLK":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
@@ -901,32 +907,32 @@ def filter_reconstructions(
                 print("Iterating on remaining files.")
 
                 cxi_files = sorted(
-                    glob.glob(f"{folder}/*LLK*.cxi"))
+                    glob.glob(f"{folder}/*FLLK*.cxi"))
 
                 if cxi_files == []:
                     print(
-                        f"No *LLK*.cxi files remaining in \
-                        {folder}/*LLK*.cxi")
+                        f"No *FLLK*.cxi files remaining in \
+                        {folder}/*FLLK*.cxi")
                 else:
-                    filter_by_LLK(cxi_files, nb_run_keep)
+                    filter_by_FLLK(cxi_files, nb_run_keep)
 
-            # LLK then standard_deviation
-            elif filter_criteria is "LLK_standard_deviation":
+            # FLLK then standard_deviation
+            elif filter_criteria is "FLLK_standard_deviation":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
-                filter_by_LLK(cxi_files, nb_run_keep +
-                              (nb_run - nb_run_keep) // 2)
+                filter_by_FLLK(cxi_files, nb_run_keep +
+                               (nb_run - nb_run_keep) // 2)
 
                 print("Iterating on remaining files.")
 
                 cxi_files = sorted(
-                    glob.glob(f"{folder}/*LLK*.cxi"))
+                    glob.glob(f"{folder}/*FLLK*.cxi"))
 
                 if cxi_files == []:
                     print(
-                        f"No *LLK*.cxi files remaining in \
-                        {folder}/*LLK*.cxi")
+                        f"No *FLLK*.cxi files remaining in \
+                        {folder}/*FLLK*.cxi")
                 else:
                     filter_by_std(cxi_files, nb_run_keep)
 
@@ -1334,21 +1340,21 @@ def run_modes_decomposition(
      folder
     :param folder: path to folder in which are stored
      the .cxi files, all files corresponding to
-     *LLK* pattern are loaded
+     *FLLK* pattern are loaded
     """
     try:
         print(
             "\n###########################################"
             "#############################################"
             f"\nUsing {path_scripts}/pynx-cdi-analysis"
-            f"\nUsing {folder}/*LLK* files."
-            f"\nRunning: $ pynx-cdi-analysis *LLK* modes=1"
+            f"\nUsing {folder}/*FLLK* files."
+            f"\nRunning: $ pynx-cdi-analysis *FLLK* modes=1"
             f"\nOutput in {folder}/modes_gui.h5"
             "\n###########################################"
             "#############################################"
         )
         os.system(
-            "{}/pynx-cdi-analysis {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+            "{}/pynx-cdi-analysis {}/*FLLK* modes=1 modes_output={}/modes_gui.h5".format(
                 quote(path_scripts),
                 quote(folder),
                 quote(folder),
