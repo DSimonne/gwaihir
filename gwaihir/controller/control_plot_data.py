@@ -54,7 +54,7 @@ def init_plot_data_tab(
             cmap=cmap
         )
 
-    elif data_use == in [
+    elif data_use in [
         "slices", "contour_slices", "sum_slices", "sum_contour_slices"
     ]:
         # Plot data
