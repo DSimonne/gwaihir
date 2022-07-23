@@ -175,7 +175,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(0.10)",
             description='Support autocorrelation threshold',
             layout=widgets.Layout(
-                height="50px", width="30%"),
+                height="50px", width="25%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -193,7 +193,7 @@ class TabPhaseRetrieval(widgets.VBox):
             description='Use point spread function',
             continuous_update=False,
             indent=False,
-            layout=widgets.Layout(width = "20%", height="50px"),
+            layout=widgets.Layout(width="20%", height="50px"),
             icon='check'
         )
 
@@ -419,7 +419,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=55,
             continuous_update=False,
             description='Pixel size of detector (um):',
-            layout=widgets.Layout(width="15%", height="50px"),
+            layout=widgets.Layout(width="20%", height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -749,7 +749,7 @@ class TabPhaseRetrieval(widgets.VBox):
         if change.new:
             for w in self.children[:-1]:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
-                    for wc in self.children[:-1]:
+                    for wc in w[:-1]:
                         wc.disabled = True
                 else:
                     w.disabled = True
@@ -759,7 +759,7 @@ class TabPhaseRetrieval(widgets.VBox):
         elif not change.new:
             for w in self.children[:-1]:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
-                    for wc in self.children[:-1]:
+                    for wc in w[:-1]:
                         wc.disabled = False
                 else:
                     w.disabled = False
