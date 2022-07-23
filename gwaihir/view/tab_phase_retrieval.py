@@ -195,7 +195,7 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description="FWHM:",
             layout=widgets.Layout(
-                width='15%', height="50px"),
+                width='10%', height="50px"),
             style={
                 'description_width': 'initial'}
         )
@@ -208,17 +208,30 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description='Eta:',
             layout=widgets.Layout(
-                width='15%', height="50px"),
+                width='10%', height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'}
         )
+
+        self.psf_filter = widgets.Dropdown(
+            options=["None", "hann", "tukey"],
+            value="None",
+            description='PSF filter',
+            layout=widgets.Layout(
+                width='10%', height="50px"),
+            continuous_update=False,
+            style={'description_width': 'initial'}
+        )
+
 
         self.update_psf = widgets.BoundedIntText(
             value=20,
             step=5,
             continuous_update=False,
             description='Update PSF every:',
+            layout=widgets.Layout(
+                width='15%', height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'}
@@ -546,6 +559,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 self.psf_model,
                 self.fwhm,
                 self.eta,
+                self.psf_filter,
             ]),
             self.update_psf,
             self.unused_label_algo,
@@ -655,6 +669,7 @@ class TabPhaseRetrieval(widgets.VBox):
             self.psf_model,
             self.fwhm,
             self.eta,
+            self.psf_filter,
             self.update_psf,
         ]:
             if change:

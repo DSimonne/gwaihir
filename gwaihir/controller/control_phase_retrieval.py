@@ -40,6 +40,7 @@ def init_phase_retrieval_tab(
     unused_label_psf,
     psf,
     psf_model,
+    psf_filter,
     fwhm,
     eta,
     update_psf,
@@ -139,6 +140,8 @@ def init_phase_retrieval_tab(
      estimated with 50 cycles of Richardson-Lucy
     :param psf_model: "lorentzian", "gaussian" or "pseudo-voigt", or None
      to deactivate
+    :param psf_filter: either None, "hann" or "tukey": window type to
+     filter the PSF update
     :param fwhm: the full-width at half maximum, in pixels
     :param eta: the eta parameter for the pseudo-voigt
     :param update_psf: how often the psf is updated
@@ -199,6 +202,7 @@ def init_phase_retrieval_tab(
     interface.Dataset.support_post_expand = support_post_expand
     interface.Dataset.psf = psf
     interface.Dataset.psf_model = psf_model
+    interface.Dataset.psf_filter = if psf_filter != "None" else None
     interface.Dataset.fwhm = fwhm
     interface.Dataset.eta = eta
     interface.Dataset.update_psf = update_psf
@@ -520,6 +524,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
@@ -527,6 +532,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
 
                                 # PSF is introduced at 66% of HIO and RAAR
@@ -534,6 +540,7 @@ def init_phase_retrieval_tab(
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
+                                        filter=psf_filter,
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
@@ -541,6 +548,7 @@ def init_phase_retrieval_tab(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
                                         eta=interface.Dataset.eta,
+                                        filter=psf_filter,
                                     ) * cdi
 
                                 cdi = RAAR(
@@ -550,6 +558,7 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
@@ -557,6 +566,7 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -574,6 +584,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
@@ -582,6 +593,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
 
@@ -591,6 +603,7 @@ def init_phase_retrieval_tab(
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
+                                        filter=psf_filter,
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
@@ -598,6 +611,7 @@ def init_phase_retrieval_tab(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
                                         eta=interface.Dataset.eta,
+                                        filter=psf_filter,
                                     ) * cdi
 
                                 cdi = (sup * RAAR(
@@ -607,6 +621,7 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
@@ -615,6 +630,7 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
@@ -627,6 +643,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
@@ -634,12 +651,14 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** interface.Dataset.nb_raar * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -656,6 +675,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
@@ -664,6 +684,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
@@ -671,6 +692,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
+                                    psf_filter=psf_filter,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
@@ -1296,7 +1318,7 @@ def save_cdi_operator_as_cxi(
     # cdi_parameters["nb_run_keep_max_obj2_out"] \
     # = gwaihir_dataset.nb_run_keep_max_obj2_out
     # cdi_parameters["flatfield"] = gwaihir_dataset.flatfield
-    # cdi_parameters["psf_filter"] = gwaihir_dataset.psf_filter
+    cdi_parameters["psf_filter"] = gwaihir_dataset.psf_filter
     cdi_parameters["detwin"] = gwaihir_dataset.detwin
     cdi_parameters["nb_raar"] = gwaihir_dataset.nb_raar
     cdi_parameters["nb_hio"] = gwaihir_dataset.nb_hio
