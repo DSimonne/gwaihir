@@ -500,7 +500,6 @@ class TabPhaseRetrieval(widgets.VBox):
 
         self.mask_interp = widgets.Text(
             value="(8, 2)",
-            value="(8, 2)",
             description='Mask interp.',
             layout=widgets.Layout(
                 height="50px", width="20%"),
