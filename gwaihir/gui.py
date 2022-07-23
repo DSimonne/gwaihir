@@ -285,7 +285,7 @@ class Interface:
                     detwin=self.TabPhaseRetrieval.detwin,
                     calc_llk=self.TabPhaseRetrieval.calc_llk,
                     pixel_size_detector=self.TabPhaseRetrieval.pixel_size_detector,
-                    unused_label_masking=self.TabPhaseRetrieval.unused_label_masking,
+                    unused_label_mask_options=self.TabPhaseRetrieval.unused_label_mask_options,
                     zero_mask=self.TabPhaseRetrieval.zero_mask,
                     unused_label_phase_retrieval=self.TabPhaseRetrieval.unused_label_phase_retrieval,
                     run_phase_retrieval=self.TabPhaseRetrieval.run_phase_retrieval,

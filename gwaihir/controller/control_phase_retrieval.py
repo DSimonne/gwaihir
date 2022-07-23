@@ -64,7 +64,7 @@ def init_phase_retrieval_tab(
     beta,
     detwin,
     calc_llk,
-    unused_label_masking,
+    unused_label_mask_options,
     zero_mask,
     unused_label_phase_retrieval,
     run_phase_retrieval,
