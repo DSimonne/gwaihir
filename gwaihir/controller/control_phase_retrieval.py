@@ -209,7 +209,7 @@ def init_phase_retrieval_tab(
     interface.Dataset.psf_model = psf_model
     interface.Dataset.fwhm = fwhm
     interface.Dataset.eta = eta
-    interface.Dataset.psf_filter = if psf_filter != "None" else None
+    interface.Dataset.psf_filter = None
     interface.Dataset.update_psf = update_psf
 
     interface.Dataset.nb_raar = nb_raar
@@ -323,7 +323,7 @@ def init_phase_retrieval_tab(
 
                 # Don't use bc experimental
                 interface.text_file.append(
-                    f"# psf_filter = \"{interface.Dataset.psf_filter}\"\n")
+                    f"# psf_filter = \"none\"\n")
 
             # else no PSF, just don't write anything
 
@@ -629,7 +629,7 @@ def init_phase_retrieval_tab(
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
-                                        filter=psf_filter,
+                                        filter=None,
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
@@ -637,7 +637,7 @@ def init_phase_retrieval_tab(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
                                         eta=interface.Dataset.eta,
-                                        filter=psf_filter,
+                                        filter=None,
                                     ) * cdi
 
                                 cdi = (sup * RAAR(
