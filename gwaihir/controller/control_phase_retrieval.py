@@ -66,6 +66,7 @@ def init_phase_retrieval_tab(
     calc_llk,
     unused_label_mask_options,
     zero_mask,
+    mask_interp,
     unused_label_phase_retrieval,
     run_phase_retrieval,
     unused_label_run_pynx_tools,
@@ -77,105 +78,111 @@ def init_phase_retrieval_tab(
     python using the operators.
 
     :param parent_folder: folder in which the raw data files are, and where the
-     output will be saved
+        output will be saved
     :param iobs: 2D/3D observed diffraction data (intensity).
-      Assumed to be corrected and following Poisson statistics, will be
-      converted to float32. Dimensions should be divisible by 4 and have a
-      prime factor decomposition up to 7. Internally, the following special
-      values are used:
-      * values<=-1e19 are masked. Among those, values in ]-1e38;-1e19] are
-         estimated values, stored as -(iobs_est+1)*1e19, which can be used
-         to make a loose amplitude projection.
-        Values <=-1e38 are masked (no amplitude projection applied), just
-        below the minimum float32 value
-      * -1e19 < values <= 1 are observed but used as free pixels
-        If the mask is not supplied, then it is assumed that the above
-        special values are used.
+        Assumed to be corrected and following Poisson statistics, will be
+        converted to float32. Dimensions should be divisible by 4 and have a
+        prime factor decomposition up to 7. Internally, the following special
+        values are used:
+        * values<=-1e19 are masked. Among those, values in ]-1e38;-1e19] are
+            estimated values, stored as -(iobs_est+1)*1e19, which can be used
+            to make a loose amplitude projection.
+            Values <=-1e38 are masked (no amplitude projection applied), just
+            below the minimum float32 value
+        * -1e19 < values <= 1 are observed but used as free pixels
+            If the mask is not supplied, then it is assumed that the above
+            special values are used.
     :param support: initial support in real space (1 = inside support,
-     0 = outside)
+        0 = outside)
     :param obj: initial object. If None, it should be initialised later.
     :param mask: mask for the diffraction data (0: valid pixel, >0: masked)
     :param auto_center_resize: if used (command-line keyword) or =True,
-     the input data will be centered and cropped  so that the size of the
-     array is compatible with the (GPU) FFT library used. If 'roi' is used,
-     centering is based on ROI. [default=False]
+        the input data will be centered and cropped  so that the size of the
+        array is compatible with the (GPU) FFT library used. If 'roi' is used,
+        centering is based on ROI. [default=False]
     :param max_size=256: maximum size for the array used for analysis,
-     along all dimensions. The data will be cropped to this value after
-     centering. [default: no maximum size]
+        along all dimensions. The data will be cropped to this value after
+        centering. [default: no maximum size]
     :param support_threshold: must be between 0 and 1. Only points with
-     object amplitude above a value equal to relative_threshold *
-     reference_value are kept in the support.
-     reference_value can either:
-        - use the fact that when converged, the square norm of the object
-        is equal to the number of recorded photons (normalized Fourier
-        Transform). Then: reference_value = sqrt((abs(obj)**2).sum()/
+        object amplitude above a value equal to relative_threshold *
+        reference_value are kept in the support.
+        reference_value can use the fact that when converged, the square norm
+        of the object is equal to the number of recorded photons (normalized
+        Fourier Transform). Then: reference_value = sqrt((abs(obj)**2).sum()/
         nb_points_support)
-        - or use threshold_percentile (see below, very slow, deprecated)
-    :param support_smooth_width: smooth the object amplitude using a
-     gaussian of this width before calculating new support
-     If this is a scalar, the smooth width is fixed to this value.
-     If this is a 3-value tuple (or list or array), i.e. 'smooth_width=2,
-     0.5,600', the smooth width will vary with the number of cycles
-     recorded in the CDI object (as cdi.cycle), varying exponentially from
-     the first to the second value over the number of cycles specified by
-     the last value.
-     With 'smooth_width=a,b,nb':
-     - smooth_width = a * exp(-cdi.cycle/nb*log(b/a)) if cdi.cycle < nb
-     - smooth_width = b if cdi.cycle >= nb
+    :param support_smooth_width: smooth the object amplitude using a gaussian
+        of this width before calculating new support.
+        If this is a scalar, the smooth width is fixed to this value.
+        If this is a 3-value tuple (or list or array), i.e. 'smooth_width=2,
+        0.5,600', the smooth width will vary with the number of cycles
+        recorded in the CDI object (as cdi.cycle), varying exponentially from
+        the first to the second value over the number of cycles specified by
+        the last value.
+        With 'smooth_width=a,b,nb':
+        - smooth_width = a * exp(-cdi.cycle/nb*log(b/a)) if cdi.cycle < nb
+        - smooth_width = b if cdi.cycle >= nb
     :param support_only_shrink: if True, the support can only shrink
     :param support_post_expand=1: after the new support has been calculated,
-     it can be processed using the SupportExpand operator, either one or
-     multiple times, in order to 'clean' the support:
-     - 'post_expand=1' will expand the support by 1 pixel
-     - 'post_expand=-1' will shrink the support by 1 pixel
-     - 'post_expand=(-1,1)' will shrink and then expand the support by
-     1 pixel
-     - 'post_expand=(-2,3)' will shrink and then expand the support by
-     respectively 2 and 3 pixels
+        it can be processed using the SupportExpand operator, either one or
+        multiple times, in order to 'clean' the support:
+        - 'post_expand=1' will expand the support by 1 pixel
+        - 'post_expand=-1' will shrink the support by 1 pixel
+        - 'post_expand=(-1,1)' will shrink and then expand the support by
+            1 pixel
+        - 'post_expand=(-2,3)' will shrink and then expand the support by
+            respectively 2 and 3 pixels
     :param support_method: either 'max' or 'average' or 'rms' (default), the
-     threshold will be relative to either the maximum amplitude in the
-     object, or the average or root-mean-square amplitude (computed inside
-     support)
+        threshold will be relative to either the maximum amplitude in the
+        object, or the average or root-mean-square amplitude (computed inside
+        support)
     :param psf: e.g. True
-     whether or not to use the PSF, partial coherence point-spread function,
-     estimated with 50 cycles of Richardson-Lucy
+        whether or not to use the PSF, partial coherence point-spread function,
+        estimated with 50 cycles of Richardson-Lucy
     :param psf_model: "lorentzian", "gaussian" or "pseudo-voigt", or None
-     to deactivate
+        to deactivate
     :param psf_filter: either None, "hann" or "tukey": window type to
-     filter the PSF update
+        filter the PSF update
     :param fwhm: the full-width at half maximum, in pixels
     :param eta: the eta parameter for the pseudo-voigt
     :param update_psf: how often the psf is updated
     :param nb_raar: number of relaxed averaged alternating reflections
-     cycles, which the algorithm will use first. During RAAR and HIO, the
-     support is updated regularly
+        cycles, which the algorithm will use first. During RAAR and HIO, the
+        support is updated regularly
     :param nb_hio: number of hybrid input/output cycles, which the
-     algorithm will use after RAAR. During RAAR and HIO, the support is
-     updated regularly
+        algorithm will use after RAAR. During RAAR and HIO, the support is
+        updated regularly
     :param nb_er: number of error reduction cycles, performed after HIO,
-     without support update
+        without support update
     :param nb_ml: number of maximum-likelihood conjugate gradient to
-     perform after ER
+        perform after ER
     :param nb_run: number of times to run the optimization
     :param nb_run_keep: number of best run results to keep, according to
-     filter_criteria.
+        filter_criteria.
     :param filter_criteria: e.g. "FLLK"
         criteria onto which the best solutions will be chosen
     :param live_plot: a live plot will be displayed every N cycle
     :param plot_axis: for 3D data, the axis along which the cut plane will be
-     selected
+        selected
     :param beta: the beta value for the HIO operator
     :param positivity: True or False
     :param zero_mask: if True, masked pixels (iobs<-1e19) are forced to
-     zero, otherwise the calculated complex amplitude is kept with an
-     optional scale factor.
-     'auto' is only valid if using the command line
+        zero, otherwise the calculated complex amplitude is kept with an
+        optional scale factor.
+        'auto' is only valid if using the command line
+    :param mask_interp: e.g. 16,2: interpolate masked pixels from surrounding
+        pixels, using an inverse distance weighting. The first number N
+        indicates that the pixels used for interpolation range from i-N to i+N
+        for pixel i around all dimensions. The second number n that the weight
+        is equal to 1/d**n for pixels with at a distance n.
+        The interpolated values iobs_m are stored in memory as -1e19*(iobs_m+1)
+        so that the algorithm knows these are not trul observations, and are
+        applied with a large confidence interval.
     :param detwin: if set (command-line) or if detwin=True (parameters
-     file), 10 cycles will be performed at 25% of the total number of
-     RAAR or HIO cycles, with a support cut in half to bias towards one
-     twin image
+        file), 10 cycles will be performed at 25% of the total number of
+        RAAR or HIO cycles, with a support cut in half to bias towards one
+        twin image
     :param calc_llk: interval at which the different Log Likelihood are
-     computed
+        computed
     :param pixel_size_detector: detector pixel size (meters)
     :param wavelength: experiment wavelength (meters)
     :param detector_distance: detector distance (meters)
@@ -198,11 +205,8 @@ def init_phase_retrieval_tab(
     interface.Dataset.auto_center_resize = auto_center_resize
     interface.Dataset.max_size = max_size
 
-    interface.Dataset.support_threshold = support_threshold
     interface.Dataset.support_only_shrink = support_only_shrink
     interface.Dataset.support_update_period = support_update_period
-    interface.Dataset.support_smooth_width = support_smooth_width
-    interface.Dataset.support_post_expand = support_post_expand
     interface.Dataset.support_method = support_method
 
     interface.Dataset.psf = psf
@@ -222,7 +226,6 @@ def init_phase_retrieval_tab(
     interface.Dataset.nb_run_keep = nb_run_keep
     interface.Dataset.live_plot = live_plot
     interface.Dataset.verbose = verbose
-    interface.Dataset.rebin = rebin
     interface.Dataset.positivity = positivity
     interface.Dataset.beta = beta
     interface.Dataset.detwin = detwin
@@ -233,13 +236,11 @@ def init_phase_retrieval_tab(
     interface.Dataset.zero_mask = zero_mask
 
     # Extract dict, list and tuple from strings
-    interface.Dataset.support_threshold = literal_eval(
-        interface.Dataset.support_threshold)
-    interface.Dataset.support_smooth_width = literal_eval(
-        interface.Dataset.support_smooth_width)
-    interface.Dataset.support_post_expand = literal_eval(
-        interface.Dataset.support_post_expand)
-    interface.Dataset.rebin = literal_eval(interface.Dataset.rebin)
+    interface.Dataset.support_threshold = literal_eval(support_threshold)
+    interface.Dataset.support_smooth_width = literal_eval(support_smooth_width)
+    interface.Dataset.support_post_expand = literal_eval(support_post_expand)
+    interface.Dataset.rebin = literal_eval(rebin)
+    interface.Dataset.mask_interp = literal_eval(mask_interp)
 
     if interface.Dataset.live_plot == 0:
         interface.Dataset.live_plot = False
@@ -366,7 +367,7 @@ def init_phase_retrieval_tab(
                 f'# max_size = {interface.Dataset.max_size}\n',
                 f'zero_mask = {interface.Dataset.zero_mask}\n',
                 'crop_output= 0 # set to 0 to avoid cropping the output in the .cxi\n',
-                "mask_interp=8,2\n"
+                f"mask_interp={mask_interp[0]},{mask_interp[1]}\n"
                 "confidence_interval_factor_mask=0.5,1.2\n"
                 '\n',
                 f'positivity = {interface.Dataset.positivity}\n',
@@ -517,6 +518,14 @@ def init_phase_retrieval_tab(
                     # Initialize the free pixels for FLLK
                     cdi = InitFreePixels() * cdi
 
+                    # Interpolate the detector gaps
+                    if not interface.Dataset.live_plot:
+                        cdi = ShowCDI(plot_axis=plot_axis) * InterpIobsMask(
+                            mask_interp[0], mask_interp[1]) * cdi
+                    else:
+                        cdi = InterpIobsMask(
+                            mask_interp[0], mask_interp[1]) * cdi
+
                     # Initialize the support with autocorrelation, if no
                     # support given
                     if not interface.Dataset.support:
@@ -535,8 +544,7 @@ def init_phase_retrieval_tab(
                     else:
                         sup_init = "support"
 
-                    # Begin with HIO cycles without PSF and with support
-                    # updates
+                    # Begin phase retrieval
                     try:
                         if interface.Dataset.psf:
                             if interface.Dataset.support_update_period == 0:
@@ -1329,7 +1337,7 @@ def save_cdi_operator_as_cxi(
     # cdi_parameters["free_pixel_mask"] = gwaihir_dataset.free_pixel_mask
     # cdi_parameters["support_formula"] = gwaihir_dataset.support_formula
     # cdi_parameters["mpi"] = "run"
-    # cdi_parameters["mask_interp"] = gwaihir_dataset.mask_interp
+    cdi_parameters["mask_interp"] = gwaihir_dataset.mask_interp
     # cdi_parameters["confidence_interval_factor_mask_min"] \
     # = gwaihir_dataset.confidence_interval_factor_mask_min
     # cdi_parameters["confidence_interval_factor_mask_max"] \

@@ -1,7 +1,7 @@
 from IPython.display import display, Markdown, clear_output
 from bcdi.postprocessing import facet_analysis
 from gwaihir.controller import control_preprocess
-# from gwaihir.controller import control_phase_retrieval
+from gwaihir.controller import control_phase_retrieval
 from gwaihir.controller import control_postprocess
 import ipywidgets as widgets
 
@@ -20,7 +20,7 @@ def init_readme_tab(contents):
 
     elif contents == "Phase retrieval":
         clear_output(True)
-        # print(help(control_phase_retrieval.init_phase_retrieval_tab))
+        print(help(control_phase_retrieval.init_phase_retrieval_tab))
 
     elif contents == "Postprocessing":
         clear_output(True)

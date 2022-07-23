@@ -287,6 +287,7 @@ class Interface:
                     pixel_size_detector=self.TabPhaseRetrieval.pixel_size_detector,
                     unused_label_mask_options=self.TabPhaseRetrieval.unused_label_mask_options,
                     zero_mask=self.TabPhaseRetrieval.zero_mask,
+                    mask_interp=self.TabPhaseRetrieval.mask_interp,
                     unused_label_phase_retrieval=self.TabPhaseRetrieval.unused_label_phase_retrieval,
                     run_phase_retrieval=self.TabPhaseRetrieval.run_phase_retrieval,
                     unused_label_run_pynx_tools=self.TabPhaseRetrieval.unused_label_run_pynx_tools,

@@ -484,9 +484,18 @@ class TabPhaseRetrieval(widgets.VBox):
             indent=False,
             style={
                 'description_width': 'initial'},
+            layout=widgets.Layout(width="20%"),
+            icon='check'
+        )
+
+        self.mask_interp = widgets.Text(
+            value="(8, 2)",
+            value="(8, 2)",
+            description='Mask interp.',
             layout=widgets.Layout(
                 height="50px", width="20%"),
-            icon='check'
+            continuous_update=False,
+            style={'description_width': 'initial'}
         )
 
         self.unused_label_phase_retrieval = widgets.HTML(
@@ -625,6 +634,7 @@ class TabPhaseRetrieval(widgets.VBox):
             self.unused_label_mask_options,
             widgets.HBox([
                 self.zero_mask,
+                self.mask_interp,
             ]),
             self.unused_label_phase_retrieval,
             self.run_phase_retrieval,

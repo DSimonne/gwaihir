@@ -156,7 +156,7 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.isosurface_strain = widgets.FloatText(
-            value=0.3,
+            value=0.1,
             step=0.01,
             max=1,
             min=0,
