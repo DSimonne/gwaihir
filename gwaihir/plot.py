@@ -1082,7 +1082,7 @@ def plot_3d_slices(
 
         # Plot first image
         if sum_over_axis:  # Compute sum
-            two_d_array = np.sum(data_array, axis=(0))
+            two_d_array = np.sum(np.nan_to_num(data_array), axis=(0))
 
         else:  # Get middle slice
             two_d_array = data_array[shape[0]//2, :, :]
@@ -1101,7 +1101,7 @@ def plot_3d_slices(
 
         # Plot second image
         if sum_over_axis:  # Compute sum
-            two_d_array = np.sum(data_array, axis=(1))
+            two_d_array = np.sum(np.nan_to_num(data_array), axis=(1))
 
         else:  # Get middle slice
             two_d_array = data_array[:, shape[1]//2, :]
@@ -1120,7 +1120,7 @@ def plot_3d_slices(
 
         # Plot third image
         if sum_over_axis:  # Compute sum
-            two_d_array = np.sum(data_array, axis=(2))
+            two_d_array = np.sum(np.nan_to_num(data_array), axis=(2))
 
         else:  # Get middle slice
             two_d_array = data_array[:, :, shape[2]//2]
