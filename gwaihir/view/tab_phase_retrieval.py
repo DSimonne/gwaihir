@@ -134,7 +134,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=20,
             step=5,
             layout=widgets.Layout(
-                height="50px", width="25%"),
+                height="50px", width="20%"),
             continuous_update=False,
             description='Support update period:',
             readout=True,
@@ -147,7 +147,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(2, 1, 600)",
             description='Support smooth width',
             layout=widgets.Layout(
-                height="50px", width="25%"),
+                height="50px", width="20%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -157,7 +157,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(1, -2, 1)",
             description='Support post expand',
             layout=widgets.Layout(
-                height="50px", width="25%"),
+                height="50px", width="20%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -167,7 +167,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value="rms",
             description='Support method',
             layout=widgets.Layout(
-                width='15%', height="50px"),
+                height="50px", width='15%'),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -731,12 +731,21 @@ class TabPhaseRetrieval(widgets.VBox):
 
         if change.new:
             for w in self.children[:-1]:
-                w.disabled = True
+                if isinstance(w, widgets.widgets.widget_box.HBox):
+                    for wc in self.children[:-1]:
+                        wc.disabled = True
+                else:
+                    w.disabled = True
+
             self.run_phase_retrieval.disabled = False
 
         elif not change.new:
             for w in self.children[:-1]:
-                w.disabled = False
+                if isinstance(w, widgets.widgets.widget_box.HBox):
+                    for wc in self.children[:-1]:
+                        wc.disabled = False
+                else:
+                    w.disabled = False
 
             self.pynx_psf_handler(
                 change=self.psf.value)

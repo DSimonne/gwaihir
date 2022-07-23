@@ -129,8 +129,8 @@ class TabPlotData(widgets.VBox):
             key=os.path.getmtime)
         ]
 
-        self.filename.options = [os.path.basename(f)
-                                 for f in options]
+        self.filename.options = [
+            os.path.basename(f) for f in options]
 
         if self.plot_tab_only:
             self.parent_folder.options = [
