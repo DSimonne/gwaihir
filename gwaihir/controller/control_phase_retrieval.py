@@ -37,6 +37,7 @@ def init_phase_retrieval_tab(
     support_update_period,
     support_smooth_width,
     support_post_expand,
+    support_method,
     unused_label_psf,
     psf,
     psf_model,
@@ -122,19 +123,19 @@ def init_phase_retrieval_tab(
      - smooth_width = a * exp(-cdi.cycle/nb*log(b/a)) if cdi.cycle < nb
      - smooth_width = b if cdi.cycle >= nb
     :param support_only_shrink: if True, the support can only shrink
-    :param method: either 'max' or 'average' or 'rms' (default), the
-     threshold will be relative to either the maximum amplitude in the
-     object, or the average or root-mean-square amplitude (computed inside
-     support)
     :param support_post_expand=1: after the new support has been calculated,
-    it can be processed using the SupportExpand operator, either one or
-    multiple times, in order to 'clean' the support:
+     it can be processed using the SupportExpand operator, either one or
+     multiple times, in order to 'clean' the support:
      - 'post_expand=1' will expand the support by 1 pixel
      - 'post_expand=-1' will shrink the support by 1 pixel
      - 'post_expand=(-1,1)' will shrink and then expand the support by
      1 pixel
      - 'post_expand=(-2,3)' will shrink and then expand the support by
      respectively 2 and 3 pixels
+    :param support_method: either 'max' or 'average' or 'rms' (default), the
+     threshold will be relative to either the maximum amplitude in the
+     object, or the average or root-mean-square amplitude (computed inside
+     support)
     :param psf: e.g. True
      whether or not to use the PSF, partial coherence point-spread function,
      estimated with 50 cycles of Richardson-Lucy
@@ -200,6 +201,7 @@ def init_phase_retrieval_tab(
     interface.Dataset.support_update_period = support_update_period
     interface.Dataset.support_smooth_width = support_smooth_width
     interface.Dataset.support_post_expand = support_post_expand
+    interface.Dataset.support_method = support_method
     interface.Dataset.psf = psf
     interface.Dataset.psf_model = psf_model
     interface.Dataset.psf_filter = if psf_filter != "None" else None
@@ -488,7 +490,7 @@ def init_phase_retrieval_tab(
                         threshold_relative=interface.Dataset.threshold_relative,
                         smooth_width=interface.Dataset.support_smooth_width,
                         force_shrink=interface.Dataset.support_only_shrink,
-                        method='rms',
+                        method=interface.Dataset.support_method,
                         post_expand=interface.Dataset.support_post_expand,
                     )
 
@@ -1279,8 +1281,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["rebin"] = gwaihir_dataset.rebin
     # cdi_parameters["support_update_border_n"] \
     # = gwaihir_dataset.support_update_border_n
-    # cdi_parameters["support_threshold_method"] \
-    # = gwaihir_dataset.support_threshold_method
+    cdi_parameters["support_threshold_method"] = gwaihir_dataset.support_threshold_method
     cdi_parameters["support_post_expand"] = gwaihir_dataset.support_post_expand
     cdi_parameters["psf"] = gwaihir_dataset.psf
     # cdi_parameters["note"] = gwaihir_dataset.note

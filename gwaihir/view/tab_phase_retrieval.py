@@ -115,7 +115,7 @@ class TabPhaseRetrieval(widgets.VBox):
             placeholder="(0.23, 0.30)",
             description='Support threshold',
             layout=widgets.Layout(
-                height="50px", width="30%"),
+                height="50px", width="20%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -158,6 +158,16 @@ class TabPhaseRetrieval(widgets.VBox):
             description='Support post expand',
             layout=widgets.Layout(
                 height="50px", width="25%"),
+            continuous_update=False,
+            style={'description_width': 'initial'}
+        )
+
+        self.support_method = widgets.Dropdown(
+            options=["max", "average", "rms"],
+            value="rms",
+            description='Support method',
+            layout=widgets.Layout(
+                width='10%', height="50px"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -253,7 +263,7 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description='Nb of RAAR:',
             layout=widgets.Layout(
-                height="35px", width="20%"),
+                height="35px", width="15%"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -267,7 +277,7 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description='Nb of HIO:',
             layout=widgets.Layout(
-                height="35px", width="20%"),
+                height="35px", width="15%"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -281,7 +291,7 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description='Nb of ER:',
             layout=widgets.Layout(
-                height="35px", width="20%"),
+                height="35px", width="15%"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -295,7 +305,7 @@ class TabPhaseRetrieval(widgets.VBox):
             continuous_update=False,
             description='Nb of ML:',
             layout=widgets.Layout(
-                height="35px", width="20%"),
+                height="35px", width="15%"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -307,7 +317,7 @@ class TabPhaseRetrieval(widgets.VBox):
             max=100,
             continuous_update=False,
             description='Number of run:',
-            layout=widgets.Layout(width="20%", height="50px"),
+            layout=widgets.Layout(width="15%", height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -342,7 +352,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=10,
             continuous_update=False,
             description='Number of run to keep:',
-            layout=widgets.Layout(height="50px"),
+            layout=widgets.Layout(width='10%', height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -552,6 +562,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 self.support_update_period,
                 self.support_smooth_width,
                 self.support_post_expand,
+                self.support_method,
             ]),
             self.unused_label_psf,
             widgets.HBox([
