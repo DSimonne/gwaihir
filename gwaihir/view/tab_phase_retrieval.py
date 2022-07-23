@@ -156,8 +156,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value="(1, -2, 1)",
             placeholder="(1, -2, 1)",
             description='Support post expand',
-            layout=widgets.Layout(
-                height="50px", width="20%"),
+            layout=widgets.Layout(width="20%"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -166,8 +165,7 @@ class TabPhaseRetrieval(widgets.VBox):
             options=["max", "average", "rms"],
             value="rms",
             description='Support method',
-            layout=widgets.Layout(
-                height="50px", width='15%'),
+            layout=widgets.Layout(width='15%'),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -192,10 +190,10 @@ class TabPhaseRetrieval(widgets.VBox):
 
         self.psf = widgets.Checkbox(
             value=True,
-            description='Use point spread function:',
+            description='Use point spread function',
             continuous_update=False,
             indent=False,
-            layout=widgets.Layout(height="50px"),
+            layout=widgets.Layout(width = "20%", height="50px"),
             icon='check'
         )
 
@@ -238,8 +236,7 @@ class TabPhaseRetrieval(widgets.VBox):
             options=["None", "hann", "tukey"],
             value="None",
             description='PSF filter',
-            layout=widgets.Layout(
-                width='15%', height="50px"),
+            layout=widgets.Layout(width='15%'),
             continuous_update=False,
             style={'description_width': 'initial'}
         )

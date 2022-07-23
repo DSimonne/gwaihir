@@ -14,7 +14,8 @@ from ast import literal_eval
 
 # GPU will be auto-selected
 from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport,\
-    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI, InitFreePixels
+    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI, InitFreePixels, \
+    InterpIobsMask
 from pynx.cdi.runner.id01 import params
 from pynx.utils.math import smaller_primes
 
