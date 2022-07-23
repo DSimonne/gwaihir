@@ -41,9 +41,9 @@ def init_phase_retrieval_tab(
     unused_label_psf,
     psf,
     psf_model,
-    psf_filter,
     fwhm,
     eta,
+    psf_filter,
     update_psf,
     unused_label_algo,
     nb_hio,
@@ -57,15 +57,15 @@ def init_phase_retrieval_tab(
     unused_label_options,
     live_plot,
     plot_axis,
-    # zero_mask TODO,
-    # crop_output TODO,
+    verbose,
+    rebin,
+    pixel_size_detector,
     positivity,
     beta,
     detwin,
     calc_llk,
-    rebin,
-    verbose,
-    pixel_size_detector,
+    unused_label_masking,
+    zero_mask,
     unused_label_phase_retrieval,
     run_phase_retrieval,
     unused_label_run_pynx_tools,
@@ -169,6 +169,7 @@ def init_phase_retrieval_tab(
     :param zero_mask: if True, masked pixels (iobs<-1e19) are forced to
      zero, otherwise the calculated complex amplitude is kept with an
      optional scale factor.
+     'auto' is only valid if using the command line
     :param detwin: if set (command-line) or if detwin=True (parameters
      file), 10 cycles will be performed at 25% of the total number of
      RAAR or HIO cycles, with a support cut in half to bias towards one
@@ -196,36 +197,40 @@ def init_phase_retrieval_tab(
         interface.Dataset.obj = ""
     interface.Dataset.auto_center_resize = auto_center_resize
     interface.Dataset.max_size = max_size
+
     interface.Dataset.support_threshold = support_threshold
     interface.Dataset.support_only_shrink = support_only_shrink
     interface.Dataset.support_update_period = support_update_period
     interface.Dataset.support_smooth_width = support_smooth_width
     interface.Dataset.support_post_expand = support_post_expand
     interface.Dataset.support_method = support_method
+
     interface.Dataset.psf = psf
     interface.Dataset.psf_model = psf_model
-    interface.Dataset.psf_filter = if psf_filter != "None" else None
     interface.Dataset.fwhm = fwhm
     interface.Dataset.eta = eta
+    interface.Dataset.psf_filter = if psf_filter != "None" else None
     interface.Dataset.update_psf = update_psf
+
     interface.Dataset.nb_raar = nb_raar
     interface.Dataset.nb_hio = nb_hio
     interface.Dataset.nb_er = nb_er
     interface.Dataset.nb_ml = nb_ml
     interface.Dataset.nb_run = nb_run
+
     interface.Dataset.filter_criteria = filter_criteria
     interface.Dataset.nb_run_keep = nb_run_keep
     interface.Dataset.live_plot = live_plot
-    # interface.Dataset.zero_mask = zero_mask # TODO
-    # interface.Dataset.crop_output = crop_output # TODO
+    interface.Dataset.verbose = verbose
+    interface.Dataset.rebin = rebin
     interface.Dataset.positivity = positivity
     interface.Dataset.beta = beta
     interface.Dataset.detwin = detwin
     interface.Dataset.calc_llk = calc_llk
-    interface.Dataset.rebin = rebin
-    interface.Dataset.verbose = verbose
     interface.Dataset.pixel_size_detector = np.round(
         pixel_size_detector * 1e-6, 6)
+
+    interface.Dataset.zero_mask = zero_mask
 
     # Extract dict, list and tuple from strings
     interface.Dataset.support_threshold = literal_eval(
@@ -252,7 +257,7 @@ def init_phase_retrieval_tab(
     print(
         f"\tCXI input: detector pixel size = {interface.Dataset.pixel_size_detector} m")
 
-    # PyNX arguments text files
+    # PyNX arguments text file
     interface.Dataset.pynx_parameter_gui_file = interface.preprocessing_folder\
         + "/pynx_run.txt"
 
@@ -269,6 +274,7 @@ def init_phase_retrieval_tab(
                 print(
                     f"{interface.preprocessing_folder}/gui_run/ exists", end="\n\n")
 
+            # Init parameter file
             interface.text_file = []
             interface.Dataset.live_plot = False
 
@@ -301,6 +307,7 @@ def init_phase_retrieval_tab(
                 f'support_smooth_width_begin = {interface.Dataset.support_smooth_width[0]}\n',
                 f'support_smooth_width_end = {interface.Dataset.support_smooth_width[1]}\n',
                 f'support_post_expand = {interface.Dataset.support_post_expand}\n'
+                f'support_threshold_method = {interface.Dataset.support_method}\n'
                 '\n',
             ]
 
@@ -313,7 +320,12 @@ def init_phase_retrieval_tab(
                 if interface.Dataset.psf_model == "pseudo-voigt":
                     interface.text_file.append(
                         f"psf = \"{interface.Dataset.psf_model},{interface.Dataset.fwhm},{interface.Dataset.eta}\"\n")
-            # no PSF, just don't write anything
+
+                # Don't use bc experimental
+                interface.text_file.append(
+                    f"# psf_filter = \"{interface.Dataset.psf_filter}\"\n")
+
+            # else no PSF, just don't write anything
 
             # Filtering the reconstructions
             if interface.Dataset.filter_criteria == "FLLK":
@@ -334,6 +346,10 @@ def init_phase_retrieval_tab(
             rebin = rebin.replace(")", "")
             rebin = rebin.replace(" ", "")
 
+            # Convert zero_mask parameter
+            interface.Dataset.zero_mask = {"True": "1", "False": "1", "auto": "auto"}[
+                interface.Dataset.zero_mask]
+
             # Other parameters
             interface.text_file += [
                 'data2cxi = True\n',
@@ -348,7 +364,7 @@ def init_phase_retrieval_tab(
                 f'nb_run_keep = {nb_run_keep_FLLK}\n',
                 '\n',
                 f'# max_size = {interface.Dataset.max_size}\n',
-                'zero_mask = auto # masked pixels will start from imposed 0 and then let free\n',
+                f'zero_mask = {interface.Dataset.zero_mask}\n',
                 'crop_output= 0 # set to 0 to avoid cropping the output in the .cxi\n',
                 "mask_interp=8,2\n"
                 "confidence_interval_factor_mask=0.5,1.2\n"
@@ -430,6 +446,10 @@ def init_phase_retrieval_tab(
 
             # Keep a list of the resulting scans
             interface.reconstruction_file_list = []
+
+            # Convert zero_mask parameter
+            interface.Dataset.zero_mask = {"True": True, "False": False, "auto": False}[
+                interface.Dataset.zero_mask]
 
             try:
                 # Initialise the cdi operator
@@ -526,7 +546,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
@@ -534,7 +554,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
 
                                 # PSF is introduced at 66% of HIO and RAAR
@@ -542,7 +562,7 @@ def init_phase_retrieval_tab(
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
-                                        filter=psf_filter,
+                                        filter=None,  # None for now bc experimental
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
@@ -550,7 +570,7 @@ def init_phase_retrieval_tab(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
                                         eta=interface.Dataset.eta,
-                                        filter=psf_filter,
+                                        filter=None,
                                     ) * cdi
 
                                 cdi = RAAR(
@@ -560,7 +580,8 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
@@ -568,7 +589,8 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -586,7 +608,8 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
@@ -595,7 +618,8 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
 
@@ -623,7 +647,8 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
@@ -632,20 +657,20 @@ def init_phase_retrieval_tab(
                                     update_psf=interface.Dataset.update_psf,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
                         if not interface.Dataset.psf:
                             if interface.Dataset.support_update_period == 0:
-
                                 cdi = HIO(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
@@ -653,14 +678,14 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_raar * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -677,7 +702,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
@@ -686,7 +711,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
@@ -694,7 +719,7 @@ def init_phase_retrieval_tab(
                                     show_cdi=interface.Dataset.live_plot,
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
-                                    psf_filter=psf_filter,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
@@ -1292,7 +1317,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["sample_name"] = gwaihir_dataset.sample_name
     # cdi_parameters["fig_num"] = gwaihir_dataset.fig_num
     # cdi_parameters["algorithm"] = gwaihir_dataset.algorithm
-    cdi_parameters["zero_mask"] = "auto"
+    cdi_parameters["zero_mask"] = gwaihir_dataset.zero_mask
     cdi_parameters["nb_run_keep"] = gwaihir_dataset.nb_run_keep
     # cdi_parameters["save"] = gwaihir_dataset.save
     # cdi_parameters["gps_inertia"] = gwaihir_dataset.gps_inertia

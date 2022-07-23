@@ -234,7 +234,6 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-
         self.update_psf = widgets.BoundedIntText(
             value=20,
             step=5,
@@ -469,6 +468,27 @@ class TabPhaseRetrieval(widgets.VBox):
                 'description_width': 'initial'},
         )
 
+        self.unused_label_mask_options = widgets.HTML(
+            description="<p style='font-weight: bold;font-size:1.2em'>\
+            Mask options</p>",
+            style={
+                'description_width': 'initial'},
+            layout=widgets.Layout(width='90%', height="35px")
+        )
+
+        self.zero_mask = widgets.Dropdown(
+            options=("True", "False", 'auto'),
+            value='False',
+            description='Force mask pixels to zero',
+            continuous_update=False,
+            indent=False,
+            style={
+                'description_width': 'initial'},
+            layout=widgets.Layout(
+                height="50px", width="15%"),
+            icon='check'
+        )
+
         self.unused_label_phase_retrieval = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Click below to run the phase retrieval</p>",
@@ -575,8 +595,8 @@ class TabPhaseRetrieval(widgets.VBox):
             self.update_psf,
             self.unused_label_algo,
             widgets.HBox([
-                self.nb_raar,
                 self.nb_hio,
+                self.nb_raar,
                 self.nb_er,
                 self.nb_ml,
             ]),
@@ -601,6 +621,10 @@ class TabPhaseRetrieval(widgets.VBox):
                 self.beta,
                 self.detwin,
                 self.calc_llk,
+            ]),
+            self.unused_label_mask_options,
+            widgets.HBox([
+                self.zero_mask,
             ]),
             self.unused_label_phase_retrieval,
             self.run_phase_retrieval,

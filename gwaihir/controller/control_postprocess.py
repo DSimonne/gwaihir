@@ -829,6 +829,7 @@ def center_and_crop(
 
 # Resolution
 
+
 def compute_prtf(
     iobs,
     obj,
