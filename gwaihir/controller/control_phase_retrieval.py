@@ -1306,7 +1306,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["rebin"] = gwaihir_dataset.rebin
     # cdi_parameters["support_update_border_n"] \
     # = gwaihir_dataset.support_update_border_n
-    cdi_parameters["support_threshold_method"] = gwaihir_dataset.support_threshold_method
+    cdi_parameters["support_threshold_method"] = gwaihir_dataset.support_method
     cdi_parameters["support_post_expand"] = gwaihir_dataset.support_post_expand
     cdi_parameters["psf"] = gwaihir_dataset.psf
     # cdi_parameters["note"] = gwaihir_dataset.note

@@ -167,7 +167,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value="rms",
             description='Support method',
             layout=widgets.Layout(
-                width='10%', height="50px"),
+                width='15%', height="50px"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -229,7 +229,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value="None",
             description='PSF filter',
             layout=widgets.Layout(
-                width='10%', height="50px"),
+                width='15%', height="50px"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -351,7 +351,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=10,
             continuous_update=False,
             description='Number of run to keep:',
-            layout=widgets.Layout(width='10%', height="50px"),
+            layout=widgets.Layout(width='20%', height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -403,7 +403,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value="(1, 1, 1)",
             placeholder="(1, 1, 1)",
             description='Rebin',
-            layout=widgets.Layout(width='15%', height="50px"),
+            layout=widgets.Layout(width='10%', height="50px"),
             continuous_update=False,
             style={'description_width': 'initial'}
         )
@@ -412,7 +412,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=55,
             continuous_update=False,
             description='Pixel size of detector (um):',
-            layout=widgets.Layout(height="50px"),
+            layout=widgets.Layout(width = "15%", height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -485,7 +485,7 @@ class TabPhaseRetrieval(widgets.VBox):
             style={
                 'description_width': 'initial'},
             layout=widgets.Layout(
-                height="50px", width="15%"),
+                height="50px", width="20%"),
             icon='check'
         )
 
