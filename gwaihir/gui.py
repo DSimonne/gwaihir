@@ -259,6 +259,7 @@ class Interface:
                     support_smooth_width=self.TabPhaseRetrieval.support_smooth_width,
                     support_post_expand=self.TabPhaseRetrieval.support_post_expand,
                     support_method=self.TabPhaseRetrieval.support_method,
+                    support_autocorrelation_threshold=self.TabPhaseRetrieval.support_autocorrelation_threshold,
                     unused_label_psf=self.TabPhaseRetrieval.unused_label_psf,
                     psf=self.TabPhaseRetrieval.psf,
                     psf_model=self.TabPhaseRetrieval.psf_model,

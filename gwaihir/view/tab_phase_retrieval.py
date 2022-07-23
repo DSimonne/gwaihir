@@ -172,6 +172,16 @@ class TabPhaseRetrieval(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
+        self.support_autocorrelation_threshold = widgets.Text(
+            value="(0.10)",
+            placeholder="(0.10)",
+            description='Support autocorrelation threshold',
+            layout=widgets.Layout(
+                height="50px", width="30%"),
+            continuous_update=False,
+            style={'description_width': 'initial'}
+        )
+
         self.unused_label_psf = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
             Point spread function parameters",
@@ -412,7 +422,7 @@ class TabPhaseRetrieval(widgets.VBox):
             value=55,
             continuous_update=False,
             description='Pixel size of detector (um):',
-            layout=widgets.Layout(width = "15%", height="50px"),
+            layout=widgets.Layout(width="15%", height="50px"),
             readout=True,
             style={
                 'description_width': 'initial'},
@@ -593,6 +603,7 @@ class TabPhaseRetrieval(widgets.VBox):
                 self.support_post_expand,
                 self.support_method,
             ]),
+            self.support_autocorrelation_threshold,
             self.unused_label_psf,
             widgets.HBox([
                 self.psf,

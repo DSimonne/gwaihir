@@ -38,6 +38,7 @@ def init_phase_retrieval_tab(
     support_smooth_width,
     support_post_expand,
     support_method,
+    support_autocorrelation_threshold,
     unused_label_psf,
     psf,
     psf_model,
@@ -135,6 +136,11 @@ def init_phase_retrieval_tab(
         threshold will be relative to either the maximum amplitude in the
         object, or the average or root-mean-square amplitude (computed inside
         support)
+    :param support_autocorrelation_threshold: if no support is given, it will
+        be estimated from the intensity auto-correlation, with this relative
+        threshold. A range can also be given, e.g.
+        support_autocorrelation_threshold=0.09,0.11 and the actual threshold
+        will be randomly chosen between the min and max.
     :param psf: e.g. True
         whether or not to use the PSF, partial coherence point-spread function,
         estimated with 50 cycles of Richardson-Lucy
@@ -237,6 +243,8 @@ def init_phase_retrieval_tab(
 
     # Extract dict, list and tuple from strings
     interface.Dataset.support_threshold = literal_eval(support_threshold)
+    interface.Dataset.support_autocorrelation_threshold = literal_eval(
+        support_autocorrelation_threshold)
     interface.Dataset.support_smooth_width = literal_eval(support_smooth_width)
     interface.Dataset.support_post_expand = literal_eval(support_post_expand)
     interface.Dataset.rebin = literal_eval(rebin)
@@ -309,6 +317,7 @@ def init_phase_retrieval_tab(
                 f'support_smooth_width_end = {interface.Dataset.support_smooth_width[1]}\n',
                 f'support_post_expand = {interface.Dataset.support_post_expand}\n'
                 f'support_threshold_method = {interface.Dataset.support_method}\n'
+                f'support_autocorrelation_threshold = {interface.Dataset.support_autocorrelation_threshold}\n'
                 '\n',
             ]
 
@@ -521,10 +530,14 @@ def init_phase_retrieval_tab(
                     # Interpolate the detector gaps
                     if not interface.Dataset.live_plot:
                         cdi = ShowCDI(plot_axis=plot_axis) * InterpIobsMask(
-                            mask_interp[0], mask_interp[1]) * cdi
+                            interface.Dataset.mask_interp[0],
+                            interface.Dataset.mask_interp[1]
+                        ) * cdi
                     else:
                         cdi = InterpIobsMask(
-                            mask_interp[0], mask_interp[1]) * cdi
+                            interface.Dataset.mask_interp[0],
+                            interface.Dataset.mask_interp[1]
+                        ) * cdi
 
                     # Initialize the support with autocorrelation, if no
                     # support given
@@ -532,13 +545,13 @@ def init_phase_retrieval_tab(
                         sup_init = "autocorrelation"
                         if not interface.Dataset.live_plot:
                             cdi = ScaleObj() * AutoCorrelationSupport(
-                                threshold=0.1,  # extra argument
+                                threshold=interface.Dataset.support_autocorrelation_threshold,
                                 verbose=True) * cdi
 
                         else:
                             cdi = ShowCDI(plot_axis=plot_axis) * ScaleObj() \
                                 * AutoCorrelationSupport(
-                                threshold=0.1,  # extra argument
+                                threshold=interface.Dataset.support_autocorrelation_threshold,
                                 verbose=True) * cdi
 
                     else:
@@ -1297,8 +1310,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["output_format"] = "cxi"
     cdi_parameters["mask"] = gwaihir_dataset.mask
     cdi_parameters["support"] = gwaihir_dataset.support
-    # cdi_parameters["support_autocorrelation_threshold"]\
-    # = gwaihir_dataset.support_autocorrelation_threshold
+    cdi_parameters["support_autocorrelation_threshold"] = gwaihir_dataset.support_autocorrelation_threshold
     cdi_parameters["support_only_shrink"] = gwaihir_dataset.support_only_shrink
     cdi_parameters["object"] = gwaihir_dataset.obj
     cdi_parameters["support_update_period"] = gwaihir_dataset.support_update_period
