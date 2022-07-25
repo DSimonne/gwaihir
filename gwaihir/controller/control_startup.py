@@ -387,10 +387,10 @@ def rotate_sixs_data(path_to_nxs_data):
     # Check if already rotated
     with h5py.File(path_to_nxs_data, "a") as f:
         try:
+            data_already_rotated = f['rotation'][...]
+        except (ValueError, RuntimeError):
             f.create_dataset("rotation", data=True)
             data_already_rotated = False
-        except (ValueError, RuntimeError):
-            data_already_rotated = f['rotation'][...]
 
     # Find 3D array key
     three_d_data_keys = []
