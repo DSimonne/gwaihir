@@ -532,12 +532,12 @@ def init_phase_retrieval_tab(
                     if not interface.Dataset.live_plot:
                         cdi = ShowCDI(plot_axis=plot_axis) * InterpIobsMask(
                             interface.Dataset.mask_interp[0],
-                            interface.Dataset.mask_interp[1]
+                            interface.Dataset.mask_interp[1],
                         ) * cdi
                     else:
                         cdi = InterpIobsMask(
                             interface.Dataset.mask_interp[0],
-                            interface.Dataset.mask_interp[1]
+                            interface.Dataset.mask_interp[1],
                         ) * cdi
 
                     # Initialize the support with autocorrelation, if no

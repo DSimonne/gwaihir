@@ -56,17 +56,17 @@ class Dataset:
         Save all the parameters used in the data analysis with a specific
         architecture based on NeXuS.
 
-        :param raw_data_cxi_filename: path to .cxi file that contains the preprocessed
-         data, created thanks to PyNX.
-         This file is used as base for the final cxi file.
+        :param raw_data_cxi_filename: path to .cxi file that contains the
+            preprocessed data, created thanks to PyNX.
+            This file is used as base for the final cxi file.
         :param final_cxi_filename: path to .cxi file that will regroup all the
-         data and parameters of the Dataset object.
+            data and parameters of the Dataset object.
         :param reconstruction_filename: path to .cxi or .h5 file, output of
-         phase retrieval chosen for postprocessing.
+            phase retrieval chosen for postprocessing.
         :param strain_output_file: path to .h5 file, output from postprocessing
         """
 
-        # Copy cxi file, and use it as starter for the end file
+        # Copy raw data cxi file, and use it as starter for the end file
         shutil.copy(raw_data_cxi_filename,  # src
                     final_cxi_filename,  # dest
                     )
@@ -343,27 +343,6 @@ class Dataset:
             except (TypeError, AttributeError):
                 pass
 
-            # Temperature estimation, not really used
-            # temperature_estimation = parameters.create_group(
-            #     "temperature_estimation")
-            # try:
-            #     temperature_estimation.create_dataset(
-            #         "reflection", data=self.reflection)
-            #     temperature_estimation.create_dataset(
-            #         "reference_spacing", data=self.reference_spacing)
-            #     temperature_estimation.create_dataset(
-            #         "reference_temperature", data=self.reference_temperature)
-            #     temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
-
-            # except AttributeError:
-            #     print("Could not save temperature_estimation parameters")
-
-            # try:
-            #     temperature_estimation.create_dataset(
-            #         "estimated_temperature", data=self.temperature)
-            # except AttributeError:
-            #     print("No estimated temperature")
-
             # Angles correction
             angles_corrections = parameters.create_group("angles_corrections")
             try:
@@ -458,13 +437,6 @@ class Dataset:
                     "tilt_detector", data=self.tilt_detector)
             except AttributeError:
                 print("Could not save xrayutilities parameters")
-
-            # Tranformation matrix
-            try:
-                orthogonalisation.create_dataset(
-                    "transfer_matrix", data=self.transfer_matrix)
-            except AttributeError:
-                print("Could not save transfer_matrix")
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
@@ -654,6 +626,8 @@ class Dataset:
 
                         image_3.create_dataset("q_com",
                                                data=fi["output"]["q_com"])
+
+                        # Need to add trans matrix here
 
                     image_3.attrs['signal'] = 'phase'
 
