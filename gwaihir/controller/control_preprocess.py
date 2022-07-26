@@ -501,8 +501,8 @@ def init_preprocess_tab(
 
         # Create centering_method dict
         centering_method = {
-            "direct_space":interface.Dataset.centering_method_direct_space,
-            "reciprocal_space":interface.Dataset.centering_method_reciprocal_space,
+            "direct_space": interface.Dataset.centering_method_direct_space,
+            "reciprocal_space": interface.Dataset.centering_method_reciprocal_space,
         }
 
         # Create config file
@@ -729,7 +729,7 @@ def create_yaml_file(
         elif isinstance(v, dict):
             config_file.append(f"{k}:")
             for kc, vc in v.items():
-                config_file.append(f"\t{k}: \"{v}\"")
+                config_file.append(f"    {kc}: \"{vc}\"")
         else:
             config_file.append(f"{k}: {v}")
 

@@ -227,9 +227,9 @@ class TabPostprocess(widgets.VBox):
             options=[
                 "com", "max", "max_com"],
             value="com",
-            description='Centering method in reciprocal space:',
+            description='Centering method in direct space:',
             continuous_update=False,
-            layout=widgets.Layout(width='20%'),
+            layout=widgets.Layout(width='25%'),
             style={'description_width': 'initial'}
         )
 
