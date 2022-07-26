@@ -49,8 +49,6 @@ class Dataset:
         self,
         raw_data_cxi_filename,
         final_cxi_filename,
-        reconstruction_filename=None,
-        strain_output_file=None,
     ):
         """
         Save all the parameters used in the data analysis with a specific
@@ -61,9 +59,12 @@ class Dataset:
             This file is used as base for the final cxi file.
         :param final_cxi_filename: path to .cxi file that will regroup all the
             data and parameters of the Dataset object.
-        :param reconstruction_filename: path to .cxi or .h5 file, output of
+
+        Uses the following attributes from the class that should be defined in
+            te workflow:
+        :reconstruction_file: path to .cxi or .h5 file, output of
             phase retrieval chosen for postprocessing.
-        :param strain_output_file: path to .h5 file, output from postprocessing
+        :strain_output_file: path to .h5 file, output from postprocessing
         """
 
         # Copy raw data cxi file, and use it as starter for the end file
@@ -72,39 +73,39 @@ class Dataset:
                     )
 
         # Add info from postprocessing if possible
-        if os.path.isfile(reconstruction_filename):
-            with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
+        if os.path.isfile(self.reconstruction_file):
+            with h5py.File(self.reconstruction_file, "r") as self.reconstruction_file, \
                     h5py.File(final_cxi_filename, "a") as final_file:
 
                 print("\nSaving phase retrieval output ...")
 
                 # Copy image_1 from reconstruction to entry_1.image_2
                 try:
-                    reconstruction_file.copy(
+                    self.reconstruction_file.copy(
                         '/entry_1/image_1/', final_file["entry_1"],
                         name="image_2")
                 except RuntimeError:
                     del final_file["entry_1"]["image_2"]
-                    reconstruction_file.copy(
+                    self.reconstruction_file.copy(
                         '/entry_1/image_1/', final_file["entry_1"],
                         name="image_2")
 
                 # Save file name
                 final_file["entry_1"]["image_2"].create_dataset(
-                    "reconstruction_filename",
-                    data=reconstruction_filename
+                    "reconstruction_file",
+                    data=self.strain_output_file
                 )
 
                 # Update params if reconstruction file results
                 # from mode decomposition
-                if reconstruction_filename.endswith(".h5"):
+                if self.strain_output_file.endswith(".h5"):
                     final_file["entry_1"]["image_2"].create_dataset(
                         "data_space", data="real")
                     final_file["entry_1"]["image_2"].create_dataset(
                         "data_type", data="electron density")
 
                 # Update entry_1.image_2.support softlink
-                if reconstruction_filename.endswith(".cxi"):
+                if self.strain_output_file.endswith(".cxi"):
                     del final_file["entry_1"]["image_2"]["support"]
                     final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
                         "/entry_1/image_2/mask")
@@ -141,7 +142,7 @@ class Dataset:
                 # Move PyNX configuration
                 try:
                     conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
-                    if reconstruction_filename.endswith(".h5"):
+                    if self.strain_output_file.endswith(".h5"):
                         final_file.create_group(
                             "entry_1/image_2/process_2/configuration/")
                     for k in conf.keys():
@@ -164,15 +165,15 @@ class Dataset:
                     pass
 
                 # Also copy mode data to entry_1.image_2.modes_percentage
-                if reconstruction_filename.endswith(".h5"):
+                if self.strain_output_file.endswith(".h5"):
                     try:
-                        reconstruction_file.copy(
+                        self.strain_output_file.copy(
                             '/entry_1/data_2/',
                             final_file["entry_1"]["image_2"],
                             name="modes_percentage")
                     except RuntimeError:
                         del final_file["entry_1"]["image_2"]["modes_percentage"]
-                        reconstruction_file.copy(
+                        self.strain_output_file.copy(
                             '/entry_1/data_2/',
                             final_file["entry_1"]["image_2"],
                             name="modes_percentage")
@@ -592,11 +593,11 @@ class Dataset:
 
             # Save strain output
             try:
-                if os.path.isfile(strain_output_file):
+                if os.path.isfile(self.strain_output_file):
                     image_3.create_dataset("strain_analysis_output_file",
-                                           data=strain_output_file)
+                                           data=self.strain_output_file)
 
-                    with h5py.File(strain_output_file, "r") as fi:
+                    with h5py.File(self.strain_output_file, "r") as fi:
                         image_3.create_dataset("amplitude",
                                                data=fi["output"]["amp"][:],
                                                chunks=True,

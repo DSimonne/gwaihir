@@ -77,11 +77,8 @@ class Interface:
         self.Dataset = None
         self.text_file = None
         self.params = None
-        self.Facets = None
         self.preprocessing_folder = None
         self.postprocessing_folder = None
-        self.reconstruction_files = None
-        self.strain_output_file = None
 
         # Init tabs
         self.TabStartup = TabStartup()

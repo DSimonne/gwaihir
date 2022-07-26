@@ -358,11 +358,12 @@ def init_postprocess_tab(
     interface.Dataset.apodization_mu = apodization_mu
     interface.Dataset.apodization_sigma = apodization_sigma
     interface.Dataset.apodization_alpha = apodization_alpha
-    interface.reconstruction_files = strain_folder + reconstruction_files
+    interface.Dataset.reconstruction_files = strain_folder + reconstruction_files
 
     if init_postprocess_parameters == "run_strain":
         # Save directory
-        save_dir = f"{interface.postprocessing_folder}/result_{interface.Dataset.save_frame}/"
+        save_dir = f"{interface.postprocessing_folder}/" + \
+            f"result_{interface.Dataset.save_frame}/"
 
         # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
@@ -450,7 +451,7 @@ def init_postprocess_tab(
                 data_dir=data_dir,
                 sample_name=interface.Dataset.sample_name,
                 comment=interface.Dataset.comment,
-                reconstruction_files=interface.reconstruction_files,
+                reconstruction_files=interface.Dataset.reconstruction_files,
                 backend=interface.matplotlib_backend,
                 # parameters used when averaging several reconstruction #
                 sort_method=interface.Dataset.sort_method,
@@ -574,17 +575,17 @@ def init_postprocess_tab(
                     f"strain*{interface.Dataset.comment}.h5",
                     recursive=True),
                 key=os.path.getmtime)
-            interface.strain_output_file = files[0]
+            interface.Dataset.strain_output_file = files[0]
 
             creation_time = datetime.fromtimestamp(
-                os.path.getmtime(interface.strain_output_file)
+                os.path.getmtime(interface.Dataset.strain_output_file)
             ).strftime('%Y-%m-%d %H:%M:%S')
 
             print(
                 "\n###########################################"
                 "#############################################"
                 f"\nResult file used to extract results saved in the .cxi file:"
-                f"\n{interface.strain_output_file}"
+                f"\n{interface.Dataset.strain_output_file}"
                 f"\n\tCreated: {creation_time}"
                 "\nMake sure it is the latest one!!"
                 "\n###########################################"

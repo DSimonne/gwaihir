@@ -136,7 +136,7 @@ def init_startup_tab(
                 clear_output(True)
                 display(button_save_as_cxi)
                 print("Saving data ...")
-                self.save_data_analysis_workflow()
+                save_data_analysis_workflow(interface.Dataset)
 
     elif not run_dir_init:
         print("Cleared window.")
@@ -145,23 +145,23 @@ def init_startup_tab(
         return None, None, None, None
 
 
-def save_data_analysis_workflow():
+def save_data_analysis_workflow(Dataset):
     """
     """
     # Path to the final .cxi file
-    final_cxi_filename = "{}{}.cxi".format(
+    final_cxi_file = "{}{}.cxi".format(
         Dataset.scan_folder,
         Dataset.scan_name,
     )
 
     # Path to the .cxi file with the raw data
-    raw_data_cxi_filename = "{}/preprocessing/{}.cxi".format(
+    raw_data_cxi_file = "{}/preprocessing/{}.cxi".format(
         Dataset.scan_folder,
         Dataset.iobs.split("/")[-1].split(".")[0],
     )
 
     # Check if the raw data file was already created during phase retrieval
-    if not os.path.isfile(raw_data_cxi_filename):
+    if not os.path.isfile(raw_data_cxi_file):
         print(
             "Saving the raw diffraction data and mask from the files "
             "selected in the PyNX tab..."
@@ -182,25 +182,23 @@ def save_data_analysis_workflow():
         save_cdi_operator_as_cxi(
             gwaihir_dataset=Dataset,
             cdi_operator=cdi,
-            path_to_cxi=raw_data_cxi_filename,
+            path_to_cxi=raw_data_cxi_file,
         )
 
     # Save all the data in a single .cxi file
     Dataset.to_cxi(
-        raw_data_cxi_filename=raw_data_cxi_filename,
-        final_cxi_filename=final_cxi_filename,
-        reconstruction_filename=interface.reconstruction_files,
-        strain_output_file=interface.strain_output_file
+        raw_data_cxi_file=raw_data_cxi_file,
+        final_cxi_file=final_cxi_file,
     )
 
     # Save the Facets analysis output data as well
     try:
         print("Saving Facets class data")
-        interface.Facets.to_hdf5(
+        interface.Dataset.Facets.to_hdf5(
             f"{Dataset.scan_folder}{Dataset.scan_name}.cxi")
     except AttributeError:
         print(
-            "Could not save facet extraction data, "
+            "Could not save Facet data, "
             "run the analysis in the `Facets` tab first."
         )
 
