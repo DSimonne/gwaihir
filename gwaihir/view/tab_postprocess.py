@@ -209,7 +209,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(x, y, z), leave None for automatic.",
             description='Phase offset origin',
             continuous_update=False,
-            layout=widgets.Layout(width='40%'),
+            layout=widgets.Layout(width='30%'),
             style={
                 'description_width': 'initial'},
         )
@@ -223,11 +223,11 @@ class TabPostprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.centering_method = widgets.Dropdown(
+        self.centering_method_direct_space = widgets.Dropdown(
             options=[
                 "com", "max", "max_com"],
             value="com",
-            description='Centering method:',
+            description='Centering method in reciprocal space:',
             continuous_update=False,
             layout=widgets.Layout(width='20%'),
             style={'description_width': 'initial'}
@@ -631,7 +631,7 @@ class TabPostprocess(widgets.VBox):
             ]),
             widgets.HBox([
                 self.phase_offset, self.phase_offset_origin,
-                self.offset_method, self.centering_method
+                self.offset_method, self.centering_method_direct_space
             ]),
             self.unused_label_refraction,
             widgets.HBox([self.correct_refraction, self.optical_path_method]),

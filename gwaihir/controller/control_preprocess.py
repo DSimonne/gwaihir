@@ -31,7 +31,7 @@ def init_preprocess_tab(
     flag_interact,
     background_plot,
     unused_label_centering,
-    centering_method,
+    centering_method_reciprocal_space,
     bragg_peak,
     fix_size,
     center_fft,
@@ -98,7 +98,7 @@ def init_preprocess_tab(
     run_preprocess,
 ):
     """
-    Initialize the parameters used in bcdi_preprocess_BCDI.py.
+    Initialize the parameters used in bcdi_preprocess.py.
     Necessary for preprocessing and postprocessing.
 
     All the parameters values are then saved in a yaml configuration file.
@@ -118,7 +118,7 @@ def init_preprocess_tab(
 
     Parameters related to data cropping/padding/centering #
 
-    :param centering_method: e.g. "max"
+    :param centering_method_reciprocal_space: e.g. "max"
      Bragg peak determination: 'max' or 'com', 'max' is better usually.
      It will be overridden by 'fix_bragg' if not empty
     :param fix_size: e.g. [0, 256, 10, 240, 50, 350]
@@ -358,7 +358,7 @@ def init_preprocess_tab(
     interface.Dataset.rocking_angle = rocking_angle
     interface.Dataset.flag_interact = flag_interact
     interface.Dataset.background_plot = str(background_plot)
-    interface.Dataset.centering_method = centering_method
+    interface.Dataset.centering_method_reciprocal_space = centering_method_reciprocal_space
     interface.Dataset.bragg_peak = bragg_peak
     interface.Dataset.fix_size = fix_size
     interface.Dataset.center_fft = center_fft
@@ -499,6 +499,12 @@ def init_preprocess_tab(
 
         backend = interface.matplotlib_backend if run_preprocess == "GUI" else "Qt5Agg"
 
+        # Create centering_method dict
+        centering_method = {
+            "direct_space":interface.Dataset.centering_method_direct_space,
+            "reciprocal_space":interface.Dataset.centering_method_reciprocal_space,
+        }
+
         # Create config file
         create_yaml_file(
             fname=f"{interface.preprocessing_folder}config_preprocessing.yml",
@@ -514,7 +520,7 @@ def init_preprocess_tab(
             background_plot=interface.Dataset.background_plot,
             backend=backend,
             # parameters related to data cropping/padding/centering
-            centering_method=interface.Dataset.centering_method,
+            centering_method=centering_method,
             fix_size=interface.Dataset.fix_size,
             center_fft=interface.Dataset.center_fft,
             pad_size=interface.Dataset.pad_size,
@@ -595,7 +601,7 @@ def init_preprocess_tab(
             print(
                 "\n###########################################"
                 "#############################################"
-                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
+                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess.py"
                 f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
                 "\n###########################################"
                 "#############################################"
@@ -616,7 +622,7 @@ def init_preprocess_tab(
             print(
                 "\n###########################################"
                 "#############################################"
-                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
+                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess.py"
                 f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
                 "\n###########################################"
                 "#############################################"
@@ -625,12 +631,12 @@ def init_preprocess_tab(
             # Run function
             print(
                 f"cd {interface.preprocessing_folder}; "
-                f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
+                f"{interface.path_scripts}/bcdi_preprocess.py "
                 "-c config_preprocessing.yml"
             )
             os.system(
                 f"cd {interface.preprocessing_folder}; "
-                f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
+                f"{interface.path_scripts}/bcdi_preprocess.py "
                 "-c config_preprocessing.yml"
             )
 
@@ -720,6 +726,10 @@ def create_yaml_file(
                 config_file.append(f"{k}: {v}")
             else:
                 config_file.append(f"{k}: None")
+        elif isinstance(v, dict):
+            config_file.append(f"{k}:")
+            for kc, vc in v.items():
+                config_file.append(f"\t{k}: \"{v}\"")
         else:
             config_file.append(f"{k}: {v}")
 
@@ -757,7 +767,7 @@ def extract_metadata(
 
     :param scan_nb: int, nb of scan, used for indexing in csv file.
     :param metadata_file: absolute path to metadata file (.h5) created by
-     bcdi.preprocessing_BCDI.py script
+     bcdi.preprocessing.py script
     :param gwaihir_dataset: Dataset object in which the metadata is saved,
      optionnal
     :param metadata_csv_file: csv file in which the metadata is saved.
@@ -769,11 +779,11 @@ def extract_metadata(
         # Save metadata in a pd.DataFrame
         temp_df = pd.DataFrame([[
             scan_nb,
-            f.root.output.q[...][0],
-            f.root.output.q[...][1],
-            f.root.output.q[...][2],
+            f.root.output.q_bragg[...][0],
+            f.root.output.q_bragg[...][1],
+            f.root.output.q_bragg[...][2],
             f.root.output.qnorm[...],
-            f.root.output.dist_plane[...],
+            f.root.output.planar_distance[...],
             f.root.output.bragg_inplane[...],
             f.root.output.bragg_outofplane[...],
             f.root.output.bragg_peak[...],

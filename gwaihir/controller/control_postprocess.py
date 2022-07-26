@@ -42,7 +42,7 @@ def init_postprocess_tab(
     phase_offset,
     phase_offset_origin,
     offset_method,
-    centering_method,
+    centering_method_direct_space,
     unused_label_refraction,
     correct_refraction,
     optical_path_method,
@@ -121,7 +121,7 @@ def init_postprocess_tab(
 
     Parameters related to centering:
 
-    :param centering_method: e.g. "max_com"
+    :param centering_method_direct_space: e.g. "max_com"
     'com' (center of mass), 'max', 'max_com' (max then com), 'do_nothing'
     :param roll_modes: e.g. [0, 0, 0]
     correct a roll of few pixels after the decomposition into modes in PyNX
@@ -318,7 +318,7 @@ def init_postprocess_tab(
     interface.Dataset.phase_offset = phase_offset
     interface.Dataset.phase_offset_origin = phase_offset_origin
     interface.Dataset.offset_method = offset_method
-    interface.Dataset.centering_method = centering_method
+    interface.Dataset.centering_method_direct_space = centering_method_direct_space
     # parameters related to the refraction correction
     interface.Dataset.correct_refraction = correct_refraction
     interface.Dataset.optical_path_method = optical_path_method
@@ -447,6 +447,12 @@ def init_postprocess_tab(
             root_folder = interface.Dataset.root_folder
             data_dir = interface.Dataset.data_dir
 
+        # Create centering_method dict
+        centering_method = {
+            "direct_space":interface.Dataset.centering_method_direct_space,
+            "reciprocal_space":interface.Dataset.centering_method_reciprocal_space,
+        }
+
         try:
             create_yaml_file(
                 fname=f"{interface.postprocessing_folder}/config_postprocessing.yml",
@@ -463,7 +469,7 @@ def init_postprocess_tab(
                 averaging_space=interface.Dataset.averaging_space,
                 correlation_threshold=interface.Dataset.correlation_threshold,
                 # parameters related to centering #
-                centering_method=interface.Dataset.centering_method,
+                centering_method=centering_method,
                 roll_modes=interface.Dataset.roll_modes,
                 # parameters relative to the FFT window and voxel sizes #
                 original_size=interface.Dataset.original_size,

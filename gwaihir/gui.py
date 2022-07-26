@@ -203,7 +203,7 @@ class Interface:
                 flag_interact=self.TabPreprocess.flag_interact,
                 background_plot=self.TabPreprocess.background_plot,
                 unused_label_centering=self.TabPreprocess.unused_label_centering,
-                centering_method=self.TabPreprocess.centering_method,
+                centering_method_reciprocal_space=self.TabPreprocess.centering_method_reciprocal_space,
                 bragg_peak=self.TabPreprocess.bragg_peak,
                 fix_size=self.TabPreprocess.fix_size,
                 center_fft=self.TabPreprocess.center_fft,
@@ -315,7 +315,7 @@ class Interface:
                 phase_offset=self.TabPostprocess.phase_offset,
                 phase_offset_origin=self.TabPostprocess.phase_offset_origin,
                 offset_method=self.TabPostprocess.offset_method,
-                centering_method=self.TabPostprocess.centering_method,
+                centering_method_direct_space=self.TabPostprocess.centering_method_direct_space,
                 unused_label_refraction=self.TabPostprocess.unused_label_refraction,
                 correct_refraction=self.TabPostprocess.correct_refraction,
                 optical_path_method=self.TabPostprocess.optical_path_method,
@@ -541,7 +541,7 @@ class Interface:
             self.TabPreprocess.beamline_handler(
                 change=self.TabPreprocess.beamline.value)
             self.TabPreprocess.bragg_peak_centering_handler(
-                change=self.TabPreprocess.centering_method.value)
+                change=self.TabPreprocess.centering_method_reciprocal_space.value)
             self.TabPreprocess.reload_data_handler(
                 change=self.TabPreprocess.reload_previous.value)
 
@@ -564,7 +564,7 @@ class Interface:
             self.TabPreprocess.beamline_handler(
                 change=self.TabPreprocess.beamline.value)
             self.TabPreprocess.bragg_peak_centering_handler(
-                change=self.TabPreprocess.centering_method.value)
+                change=self.TabPreprocess.centering_method_reciprocal_space.value)
             self.TabPreprocess.reload_data_handler(
                 change=self.TabPreprocess.reload_previous.value)
 

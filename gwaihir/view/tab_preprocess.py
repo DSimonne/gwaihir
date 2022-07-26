@@ -159,7 +159,7 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='60%', height="35px")
         )
 
-        self.centering_method = widgets.Dropdown(
+        self.centering_method_reciprocal_space = widgets.Dropdown(
             options=[
                 "max", "com", "manual"],
             value="max",
@@ -447,7 +447,7 @@ class TabPreprocess(widgets.VBox):
 
             # Parameters related to data cropping/padding/centering
             self.unused_label_centering,
-            widgets.HBox([self.centering_method, self.bragg_peak]),
+            widgets.HBox([self.centering_method_reciprocal_space, self.bragg_peak]),
             self.fix_size,
             widgets.HBox(
                 [self.center_fft, self.pad_size, self.normalize_flux]),
@@ -470,7 +470,7 @@ class TabPreprocess(widgets.VBox):
         # Assign handlers
         self.beamline.observe(
             self.beamline_handler, names="value")
-        self.centering_method.observe(
+        self.centering_method_reciprocal_space.observe(
             self.bragg_peak_centering_handler, names="value")
         self.reload_previous.observe(
             self.reload_data_handler, names="value")

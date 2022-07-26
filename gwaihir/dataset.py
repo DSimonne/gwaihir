@@ -258,7 +258,8 @@ class Dataset:
                 "cropping_padding_centering")
             try:
                 cropping_padding_centering.create_dataset(
-                    "centering_method", data=self.centering_method)
+                    "centering_method_reciprocal_space", 
+                    data=self.centering_method_reciprocal_space)
                 cropping_padding_centering.create_dataset(
                     "fix_size", data=self.fix_size)
                 cropping_padding_centering.create_dataset(
@@ -520,7 +521,8 @@ class Dataset:
                 displacement_strain_calculation.create_dataset(
                     "offset_method", data=self.offset_method)
                 displacement_strain_calculation.create_dataset(
-                    "centering_method", data=self.centering_method)
+                    "centering_method_direct_space", 
+                    data=self.centering_method_direct_space)
             except AttributeError:
                 print("\tCould not save displacement & strain calculation parameters")
 
