@@ -749,7 +749,7 @@ class TabPhaseRetrieval(widgets.VBox):
         if change.new:
             for w in self.children[:-1]:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
-                    for wc in w[:-1]:
+                    for wc in w.children:
                         wc.disabled = True
                 else:
                     w.disabled = True
@@ -759,7 +759,7 @@ class TabPhaseRetrieval(widgets.VBox):
         elif not change.new:
             for w in self.children[:-1]:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
-                    for wc in w[:-1]:
+                    for wc in w.children:
                         wc.disabled = False
                 else:
                     w.disabled = False

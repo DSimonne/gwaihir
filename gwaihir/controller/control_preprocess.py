@@ -95,14 +95,11 @@ def init_preprocess_tab(
     tiltazimuth,
     tilt_detector,
     unused_label_preprocess,
-    init_para,
+    run_preprocess,
 ):
     """
     Initialize the parameters used in bcdi_preprocess_BCDI.py.
     Necessary for preprocessing and postprocessing.
-
-    If init_para is True, displays a button that allow
-    the user to run the bcdi_preprocess_BCDI script
 
     All the parameters values are then saved in a yaml configuration file.
 
@@ -350,356 +347,346 @@ def init_preprocess_tab(
     :param tilt_detector: e.g. 0
      tilt parameter from xrayutilities 2D detector calibration
     """
-    if init_para:
-        # Disable all widgets until the end of the program, will update
-        # automatically after
-        for w in interface.TabStartup.children[:-1]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = True
+    # Save parameter values as attributes
+    interface.Dataset.beamline = beamline
+    interface.Dataset.actuators = actuators
+    interface.Dataset.is_series = is_series
+    interface.Dataset.custom_scan = custom_scan
+    interface.Dataset.custom_images = custom_images
+    interface.Dataset.custom_monitor = custom_monitor
+    interface.Dataset.specfile_name = specfile_name
+    interface.Dataset.rocking_angle = rocking_angle
+    interface.Dataset.flag_interact = flag_interact
+    interface.Dataset.background_plot = str(background_plot)
+    interface.Dataset.centering_method = centering_method
+    interface.Dataset.bragg_peak = bragg_peak
+    interface.Dataset.fix_size = fix_size
+    interface.Dataset.center_fft = center_fft
+    interface.Dataset.pad_size = pad_size
+    interface.Dataset.mask_zero_event = mask_zero_event
+    interface.Dataset.median_filter = median_filter
+    interface.Dataset.median_filter_order = median_filter_order
+    interface.Dataset.reload_previous = reload_previous
+    interface.Dataset.reload_orthogonal = reload_orthogonal
+    interface.Dataset.preprocessing_binning = preprocessing_binning
+    interface.Dataset.save_rawdata = save_rawdata
+    interface.Dataset.save_to_npz = save_to_npz
+    interface.Dataset.save_to_mat = save_to_mat
+    interface.Dataset.save_to_vti = save_to_vti
+    interface.Dataset.save_as_int = save_as_int
+    interface.Dataset.detector = detector
+    interface.Dataset.phasing_binning = phasing_binning
+    interface.Dataset.linearity_func = None  # TODO
+    interface.Dataset.roi_detector = roi_detector
+    interface.Dataset.normalize_flux = normalize_flux
+    interface.Dataset.photon_threshold = photon_threshold
+    interface.Dataset.photon_filter = photon_filter
+    interface.Dataset.bin_during_loading = True  # TODO
+    interface.Dataset.frames_pattern = None  # TODO
+    interface.Dataset.background_file = background_file
+    interface.Dataset.hotpixels_file = hotpixels_file
+    interface.Dataset.flatfield_file = flatfield_file
+    interface.Dataset.template_imagefile = template_imagefile
+    interface.Dataset.use_rawdata = not use_rawdata
+    interface.Dataset.interpolation_method = interpolation_method
+    interface.Dataset.fill_value_mask = fill_value_mask
+    interface.Dataset.beam_direction = beam_direction
+    interface.Dataset.sample_offsets = sample_offsets
+    interface.Dataset.detector_distance = detector_distance
+    interface.Dataset.energy = energy
+    interface.Dataset.custom_motors = custom_motors
+    interface.Dataset.align_q = align_q
+    interface.Dataset.ref_axis_q = ref_axis_q
+    interface.Dataset.direct_beam = direct_beam
+    interface.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
+    interface.Dataset.outofplane_angle = outofplane_angle
+    interface.Dataset.inplane_angle = inplane_angle
+    interface.Dataset.tilt_angle = tilt_angle
+    interface.Dataset.sample_inplane = sample_inplane
+    interface.Dataset.sample_outofplane = sample_outofplane
+    interface.Dataset.offset_inplane = offset_inplane
+    interface.Dataset.cch1 = cch1
+    interface.Dataset.cch2 = cch2
+    interface.Dataset.detrot = detrot
+    interface.Dataset.tiltazimuth = tiltazimuth
+    interface.Dataset.tilt_detector = tilt_detector
 
+    # Extract dict, list and tuple from strings
+    list_parameters = ["bragg_peak", "custom_images",
+                       "fix_size", "pad_size", "roi_detector",
+                       "direct_beam", "dirbeam_detector_angles"]
+
+    tuple_parameters = [
+        "phasing_binning", "preprocessing_binning",  "beam_direction",
+        "sample_offsets", "sample_inplane", "sample_outofplane"]
+
+    dict_parameters = ["actuators", "custom_motors"]
+
+    try:
+        for p in list_parameters:
+            if getattr(interface.Dataset, p) == "":
+                setattr(interface.Dataset, p, [])
+            else:
+                setattr(interface.Dataset, p, literal_eval(
+                    getattr(interface.Dataset, p)))
+    except ValueError:
+        print(f"Wrong list syntax for {p}")
+
+    try:
+        for p in tuple_parameters:
+            if getattr(interface.Dataset, p) == "":
+                setattr(interface.Dataset, p, ())
+            else:
+                setattr(interface.Dataset, p, literal_eval(
+                    getattr(interface.Dataset, p)))
+    except ValueError:
+        print(f"Wrong tuple syntax for {p}")
+
+    try:
+        for p in dict_parameters:
+            if getattr(interface.Dataset, p) == "":
+                setattr(interface.Dataset, p, None)  # or {}
+            else:
+                if literal_eval(getattr(interface.Dataset, p)) == {}:
+                    setattr(interface.Dataset, p, None)
+                else:
+                    setattr(interface.Dataset, p, literal_eval(
+                        getattr(interface.Dataset, p)))
+    except ValueError:
+        print(f"Wrong dict syntax for {p}")
+
+    # Set None if we are not using custom scans
+    if not interface.Dataset.custom_scan:
+        interface.Dataset.custom_images = None
+        interface.Dataset.custom_monitor = None
+
+    # Empty parameters are set to None (bcdi syntax)
+    if interface.Dataset.background_file == "":
+        interface.Dataset.background_file = None
+
+    if interface.Dataset.hotpixels_file == "":
+        interface.Dataset.hotpixels_file = None
+
+    if interface.Dataset.flatfield_file == "":
+        interface.Dataset.flatfield_file = None
+
+    if interface.Dataset.specfile_name == "":
+        interface.Dataset.specfile_name = None
+
+    if run_preprocess in ("GUI", "terminal"):
+        # Disable all widgets until the end of the program
         for w in interface.TabPreprocess.children[:-2]:
-            if not isinstance(w, widgets.HTML):
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = True
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = True
 
-        # Save parameter values as attributes
-        interface.Dataset.beamline = beamline
-        interface.Dataset.actuators = actuators
-        interface.Dataset.is_series = is_series
-        interface.Dataset.custom_scan = custom_scan
-        interface.Dataset.custom_images = custom_images
-        interface.Dataset.custom_monitor = custom_monitor
-        interface.Dataset.specfile_name = specfile_name
-        interface.Dataset.rocking_angle = rocking_angle
-        interface.Dataset.flag_interact = flag_interact
-        interface.Dataset.background_plot = str(background_plot)
-        interface.Dataset.centering_method = centering_method
-        interface.Dataset.bragg_peak = bragg_peak
-        interface.Dataset.fix_size = fix_size
-        interface.Dataset.center_fft = center_fft
-        interface.Dataset.pad_size = pad_size
-        interface.Dataset.mask_zero_event = mask_zero_event
-        interface.Dataset.median_filter = median_filter
-        interface.Dataset.median_filter_order = median_filter_order
-        interface.Dataset.reload_previous = reload_previous
-        interface.Dataset.reload_orthogonal = reload_orthogonal
-        interface.Dataset.preprocessing_binning = preprocessing_binning
-        interface.Dataset.save_rawdata = save_rawdata
-        interface.Dataset.save_to_npz = save_to_npz
-        interface.Dataset.save_to_mat = save_to_mat
-        interface.Dataset.save_to_vti = save_to_vti
-        interface.Dataset.save_as_int = save_as_int
-        interface.Dataset.detector = detector
-        interface.Dataset.phasing_binning = phasing_binning
-        interface.Dataset.linearity_func = None  # TODO
-        interface.Dataset.roi_detector = roi_detector
-        interface.Dataset.normalize_flux = normalize_flux
-        interface.Dataset.photon_threshold = photon_threshold
-        interface.Dataset.photon_filter = photon_filter
-        interface.Dataset.bin_during_loading = True  # TODO
-        interface.Dataset.frames_pattern = None  # TODO
-        interface.Dataset.background_file = background_file
-        interface.Dataset.hotpixels_file = hotpixels_file
-        interface.Dataset.flatfield_file = flatfield_file
-        interface.Dataset.template_imagefile = template_imagefile
-        interface.Dataset.use_rawdata = not use_rawdata
-        interface.Dataset.interpolation_method = interpolation_method
-        interface.Dataset.fill_value_mask = fill_value_mask
-        interface.Dataset.beam_direction = beam_direction
-        interface.Dataset.sample_offsets = sample_offsets
-        interface.Dataset.detector_distance = detector_distance
-        interface.Dataset.energy = energy
-        interface.Dataset.custom_motors = custom_motors
-        interface.Dataset.align_q = align_q
-        interface.Dataset.ref_axis_q = ref_axis_q
-        interface.Dataset.direct_beam = direct_beam
-        interface.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
-        interface.Dataset.outofplane_angle = outofplane_angle
-        interface.Dataset.inplane_angle = inplane_angle
-        interface.Dataset.tilt_angle = tilt_angle
-        interface.Dataset.sample_inplane = sample_inplane
-        interface.Dataset.sample_outofplane = sample_outofplane
-        interface.Dataset.offset_inplane = offset_inplane
-        interface.Dataset.cch1 = cch1
-        interface.Dataset.cch2 = cch2
-        interface.Dataset.detrot = detrot
-        interface.Dataset.tiltazimuth = tiltazimuth
-        interface.Dataset.tilt_detector = tilt_detector
+        # Change data_dir and root folder depending on beamline
+        if interface.Dataset.beamline == "SIXS_2019":
+            root_folder = interface.Dataset.root_folder
+            data_dir = interface.Dataset.data_dir
 
-        # Extract dict, list and tuple from strings
-        list_parameters = ["bragg_peak", "custom_images",
-                           "fix_size", "pad_size", "roi_detector",
-                           "direct_beam", "dirbeam_detector_angles"]
+        elif interface.Dataset.beamline == "P10":
+            root_folder = interface.Dataset.data_dir
+            data_dir = None
 
-        tuple_parameters = [
-            "phasing_binning", "preprocessing_binning",  "beam_direction",
-            "sample_offsets", "sample_inplane", "sample_outofplane"]
+        else:
+            root_folder = interface.Dataset.root_folder
+            data_dir = interface.Dataset.data_dir
 
-        dict_parameters = ["actuators", "custom_motors"]
+        backend = interface.matplotlib_backend if run_preprocess == "GUI" else "Qt5Agg"
 
-        try:
-            for p in list_parameters:
-                if getattr(interface.Dataset, p) == "":
-                    setattr(interface.Dataset, p, [])
-                else:
-                    setattr(interface.Dataset, p, literal_eval(
-                        getattr(interface.Dataset, p)))
-        except ValueError:
-            print(f"Wrong list syntax for {p}")
+        # Create config file
+        create_yaml_file(
+            fname=f"{interface.preprocessing_folder}config_preprocessing.yml",
+            scans=interface.Dataset.scan,
+            root_folder=root_folder,
+            save_dir=interface.preprocessing_folder,
+            data_dir=data_dir,
+            sample_name=interface.Dataset.sample_name,
+            comment=interface.Dataset.comment,
+            debug=interface.Dataset.debug,
+            # parameters used in masking
+            flag_interact=interface.Dataset.flag_interact,
+            background_plot=interface.Dataset.background_plot,
+            backend=backend,
+            # parameters related to data cropping/padding/centering
+            centering_method=interface.Dataset.centering_method,
+            fix_size=interface.Dataset.fix_size,
+            center_fft=interface.Dataset.center_fft,
+            pad_size=interface.Dataset.pad_size,
+            # parameters for data filtering
+            mask_zero_event=interface.Dataset.mask_zero_event,
+            median_filter=interface.Dataset.median_filter,
+            median_filter_order=interface.Dataset.median_filter_order,
+            # parameters used when reloading processed data
+            reload_previous=interface.Dataset.reload_previous,
+            reload_orthogonal=interface.Dataset.reload_orthogonal,
+            preprocessing_binning=interface.Dataset.preprocessing_binning,
+            # saving options
+            save_rawdata=interface.Dataset.save_rawdata,
+            save_to_npz=interface.Dataset.save_to_npz,
+            save_to_mat=interface.Dataset.save_to_mat,
+            save_to_vti=interface.Dataset.save_to_vti,
+            save_as_int=interface.Dataset.save_as_int,
+            # define beamline related parameters
+            beamline=interface.Dataset.beamline,
+            actuators=interface.Dataset.actuators,
+            is_series=interface.Dataset.is_series,
+            rocking_angle=interface.Dataset.rocking_angle,
+            specfile_name=interface.Dataset.specfile_name,
+            # parameters for custom scans
+            custom_scan=interface.Dataset.custom_scan,
+            custom_images=interface.Dataset.custom_images,
+            custom_monitor=interface.Dataset.custom_monitor,
+            # detector related parameters
+            detector=interface.Dataset.detector,
+            phasing_binning=interface.Dataset.phasing_binning,
+            linearity_func=interface.Dataset.linearity_func,
+            # center_roi_x
+            # center_roi_y
+            roi_detector=interface.Dataset.roi_detector,
+            normalize_flux=interface.Dataset.normalize_flux,
+            photon_threshold=interface.Dataset.photon_threshold,
+            photon_filter=interface.Dataset.photon_filter,
+            bin_during_loading=interface.Dataset.bin_during_loading,
+            frames_pattern=interface.Dataset.frames_pattern,
+            background_file=interface.Dataset.background_file,
+            hotpixels_file=interface.Dataset.hotpixels_file,
+            flatfield_file=interface.Dataset.flatfield_file,
+            template_imagefile=interface.Dataset.template_imagefile,
+            # define parameters below if you want to orthogonalize the
+            # data before phasing
+            use_rawdata=interface.Dataset.use_rawdata,
+            interpolation_method=interface.Dataset.interpolation_method,
+            fill_value_mask=interface.Dataset.fill_value_mask,
+            beam_direction=interface.Dataset.beam_direction,
+            sample_offsets=interface.Dataset.sample_offsets,
+            detector_distance=interface.Dataset.detector_distance,
+            energy=interface.Dataset.energy,
+            custom_motors=interface.Dataset.custom_motors,
+            # parameters when orthogonalizing the data before
+            # phasing  using the linearized transformation matrix
+            align_q=interface.Dataset.align_q,
+            ref_axis_q=interface.Dataset.ref_axis_q,
+            direct_beam=interface.Dataset.direct_beam,
+            dirbeam_detector_angles=interface.Dataset.dirbeam_detector_angles,
+            bragg_peak=interface.Dataset.bragg_peak,
+            outofplane_angle=interface.Dataset.outofplane_angle,
+            inplane_angle=interface.Dataset.inplane_angle,
+            tilt_angle=interface.Dataset.tilt_angle,
+            # parameters when orthogonalizing the data before phasing
+            # using xrayutilities
+            sample_inplane=interface.Dataset.sample_inplane,
+            sample_outofplane=interface.Dataset.sample_outofplane,
+            offset_inplane=interface.Dataset.offset_inplane,
+            cch1=interface.Dataset.cch1,
+            cch2=interface.Dataset.cch2,
+            detrot=interface.Dataset.detrot,
+            tiltazimuth=interface.Dataset.tiltazimuth,
+            tilt_detector=interface.Dataset.tilt_detector,
+        )
 
-        try:
-            for p in tuple_parameters:
-                if getattr(interface.Dataset, p) == "":
-                    setattr(interface.Dataset, p, ())
-                else:
-                    setattr(interface.Dataset, p, literal_eval(
-                        getattr(interface.Dataset, p)))
-        except ValueError:
-            print(f"Wrong tuple syntax for {p}")
+        if run_preprocess == "GUI":
+            # Run bcdi_preprocess in GUI
+            print(
+                "\n###########################################"
+                "#############################################"
+                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
+                f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
+                "\n###########################################"
+                "#############################################"
+            )
 
-        try:
-            for p in dict_parameters:
-                if getattr(interface.Dataset, p) == "":
-                    setattr(interface.Dataset, p, None)  # or {}
-                else:
-                    if literal_eval(getattr(interface.Dataset, p)) == {}:
-                        setattr(interface.Dataset, p, None)
-                    else:
-                        setattr(interface.Dataset, p, literal_eval(
-                            getattr(interface.Dataset, p)))
-        except ValueError:
-            print(f"Wrong dict syntax for {p}")
+            # Load the config file
+            config_file = interface.preprocessing_folder + "/config_preprocessing.yml"
+            parser = ConfigParser(config_file)
+            args = parser.load_arguments()
+            args["time"] = f"{datetime.now()}"
 
-        # Set None if we are not using custom scans
-        if not interface.Dataset.custom_scan:
-            interface.Dataset.custom_images = None
-            interface.Dataset.custom_monitor = None
+            # Run function
+            run_preprocessing(prm=args)
+            print("End of script")
 
-        # Empty parameters are set to None (bcdi syntax)
-        if interface.Dataset.background_file == "":
-            interface.Dataset.background_file = None
+        elif run_preprocess == "terminal":
+            # Run bcdi_preprocess in the terminal
+            print(
+                "\n###########################################"
+                "#############################################"
+                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
+                f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
+                "\n###########################################"
+                "#############################################"
+            )
 
-        if interface.Dataset.hotpixels_file == "":
-            interface.Dataset.hotpixels_file = None
+            # Run function
+            print(
+                f"cd {interface.preprocessing_folder}; "
+                f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
+                "-c config_preprocessing.yml"
+            )
+            os.system(
+                f"cd {interface.preprocessing_folder}; "
+                f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
+                "-c config_preprocessing.yml"
+            )
 
-        if interface.Dataset.flatfield_file == "":
-            interface.Dataset.flatfield_file = None
+        # Button to save metadata
+        button_save_metadata = widgets.Button(
+            description="Save metadata",
+            continuous_update=False,
+            button_style='',
+            layout=widgets.Layout(width='40%'),
+            style={'description_width': 'initial'},
+            icon='fast-forward')
 
-        if interface.Dataset.specfile_name == "":
-            interface.Dataset.specfile_name = None
+        @ button_save_metadata.on_click
+        def action_button_save_metadata(selfbutton):
+            try:
+                # Get latest file
+                metadata_file = sorted(
+                    glob.glob(
+                        f"{interface.preprocessing_folder}*preprocessing*.h5"),
+                    key=os.path.getmtime)[-1]
 
-        @ interact(
-            run_preprocess=widgets.ToggleButtons(
-                options=[
-                    ("False", False),
-                    ("In GUI.", "GUI"),
-                    ("In terminal.", "terminal"),
-                ],
-                value=False,
-                description="Run preprocess:",
-                continuous_update=False,
-                button_style='',
-                layout=widgets.Layout(
-                    width='100%', height="50px"),
-                style={
-                    'description_width': 'initial'},
-                icon='fast-forward'))
-        def action_button_run_preprocess(run_preprocess):
-            """Run preprocessing script"""
-            if run_preprocess in ("GUI", "terminal"):
-                # Change data_dir and root folder depending on beamline
-                if interface.Dataset.beamline == "SIXS_2019":
-                    root_folder = interface.Dataset.root_folder
-                    data_dir = interface.Dataset.data_dir
-
-                elif interface.Dataset.beamline == "P10":
-                    root_folder = interface.Dataset.data_dir
-                    data_dir = None
-
-                else:
-                    root_folder = interface.Dataset.root_folder
-                    data_dir = interface.Dataset.data_dir
-
-                backend = interface.matplotlib_backend if run_preprocess == "GUI" else "Qt5Agg"
-
-                # Create config file
-                create_yaml_file(
-                    fname=f"{interface.preprocessing_folder}config_preprocessing.yml",
-                    scans=interface.Dataset.scan,
-                    root_folder=root_folder,
-                    save_dir=interface.preprocessing_folder,
-                    data_dir=data_dir,
-                    sample_name=interface.Dataset.sample_name,
-                    comment=interface.Dataset.comment,
-                    debug=interface.Dataset.debug,
-                    # parameters used in masking
-                    flag_interact=interface.Dataset.flag_interact,
-                    background_plot=interface.Dataset.background_plot,
-                    backend=backend,
-                    # parameters related to data cropping/padding/centering
-                    centering_method=interface.Dataset.centering_method,
-                    fix_size=interface.Dataset.fix_size,
-                    center_fft=interface.Dataset.center_fft,
-                    pad_size=interface.Dataset.pad_size,
-                    # parameters for data filtering
-                    mask_zero_event=interface.Dataset.mask_zero_event,
-                    median_filter=interface.Dataset.median_filter,
-                    median_filter_order=interface.Dataset.median_filter_order,
-                    # parameters used when reloading processed data
-                    reload_previous=interface.Dataset.reload_previous,
-                    reload_orthogonal=interface.Dataset.reload_orthogonal,
-                    preprocessing_binning=interface.Dataset.preprocessing_binning,
-                    # saving options
-                    save_rawdata=interface.Dataset.save_rawdata,
-                    save_to_npz=interface.Dataset.save_to_npz,
-                    save_to_mat=interface.Dataset.save_to_mat,
-                    save_to_vti=interface.Dataset.save_to_vti,
-                    save_as_int=interface.Dataset.save_as_int,
-                    # define beamline related parameters
-                    beamline=interface.Dataset.beamline,
-                    actuators=interface.Dataset.actuators,
-                    is_series=interface.Dataset.is_series,
-                    rocking_angle=interface.Dataset.rocking_angle,
-                    specfile_name=interface.Dataset.specfile_name,
-                    # parameters for custom scans
-                    custom_scan=interface.Dataset.custom_scan,
-                    custom_images=interface.Dataset.custom_images,
-                    custom_monitor=interface.Dataset.custom_monitor,
-                    # detector related parameters
-                    detector=interface.Dataset.detector,
-                    phasing_binning=interface.Dataset.phasing_binning,
-                    linearity_func=interface.Dataset.linearity_func,
-                    # center_roi_x
-                    # center_roi_y
-                    roi_detector=interface.Dataset.roi_detector,
-                    normalize_flux=interface.Dataset.normalize_flux,
-                    photon_threshold=interface.Dataset.photon_threshold,
-                    photon_filter=interface.Dataset.photon_filter,
-                    bin_during_loading=interface.Dataset.bin_during_loading,
-                    frames_pattern=interface.Dataset.frames_pattern,
-                    background_file=interface.Dataset.background_file,
-                    hotpixels_file=interface.Dataset.hotpixels_file,
-                    flatfield_file=interface.Dataset.flatfield_file,
-                    template_imagefile=interface.Dataset.template_imagefile,
-                    # define parameters below if you want to orthogonalize the
-                    # data before phasing
-                    use_rawdata=interface.Dataset.use_rawdata,
-                    interpolation_method=interface.Dataset.interpolation_method,
-                    fill_value_mask=interface.Dataset.fill_value_mask,
-                    beam_direction=interface.Dataset.beam_direction,
-                    sample_offsets=interface.Dataset.sample_offsets,
-                    detector_distance=interface.Dataset.detector_distance,
-                    energy=interface.Dataset.energy,
-                    custom_motors=interface.Dataset.custom_motors,
-                    # parameters when orthogonalizing the data before
-                    # phasing  using the linearized transformation matrix
-                    align_q=interface.Dataset.align_q,
-                    ref_axis_q=interface.Dataset.ref_axis_q,
-                    direct_beam=interface.Dataset.direct_beam,
-                    dirbeam_detector_angles=interface.Dataset.dirbeam_detector_angles,
-                    bragg_peak=interface.Dataset.bragg_peak,
-                    outofplane_angle=interface.Dataset.outofplane_angle,
-                    inplane_angle=interface.Dataset.inplane_angle,
-                    tilt_angle=interface.Dataset.tilt_angle,
-                    # parameters when orthogonalizing the data before phasing
-                    # using xrayutilities
-                    sample_inplane=interface.Dataset.sample_inplane,
-                    sample_outofplane=interface.Dataset.sample_outofplane,
-                    offset_inplane=interface.Dataset.offset_inplane,
-                    cch1=interface.Dataset.cch1,
-                    cch2=interface.Dataset.cch2,
-                    detrot=interface.Dataset.detrot,
-                    tiltazimuth=interface.Dataset.tiltazimuth,
-                    tilt_detector=interface.Dataset.tilt_detector,
+                extract_metadata(
+                    scan_nb=interface.Dataset.scan,
+                    metadata_file=metadata_file,
+                    gwaihir_dataset=interface.Dataset,
+                    metadata_csv_file=os.getcwd() + "/metadata.csv"
                 )
+            except (IndexError, TypeError):
+                print(
+                    f"Could not find any .h5 file in {interface.preprocessing_folder}")
 
-                if run_preprocess == "GUI":
-                    # Run bcdi_preprocess in GUI
-                    print(
-                        "\n###########################################"
-                        "#############################################"
-                        f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
-                        f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
-                        "\n###########################################"
-                        "#############################################"
-                    )
+        # PyNX folder
+        interface.TabPhaseRetrieval.parent_folder.value\
+            = interface.preprocessing_folder
+        interface.TabPhaseRetrieval.pynx_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
-                    # Load the config file
-                    config_file = interface.preprocessing_folder + "/config_preprocessing.yml"
-                    parser = ConfigParser(config_file)
-                    args = parser.load_arguments()
-                    args["time"] = f"{datetime.now()}"
+        # Plot folder
+        interface.TabPlotData.parent_folder.value = interface.preprocessing_folder
+        interface.TabPlotData.plot_folder_handler(
+            change=interface.preprocessing_folder
+        )
 
-                    # Run function
-                    run_preprocessing(prm=args)
-                    print("End of script")
+        display(button_save_metadata)
 
-                elif run_preprocess == "terminal":
-                    # Run bcdi_preprocess in the terminal
-                    print(
-                        "\n###########################################"
-                        "#############################################"
-                        f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
-                        f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
-                        "\n###########################################"
-                        "#############################################"
-                    )
-
-                    # Run function
-                    print(
-                        f"cd {interface.preprocessing_folder}; "
-                        f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
-                        "-c config_preprocessing.yml"
-                    )
-                    os.system(
-                        f"cd {interface.preprocessing_folder}; "
-                        f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
-                        "-c config_preprocessing.yml"
-                    )
-
-                # Button to save metadata
-                button_save_metadata = widgets.Button(
-                    description="Save metadata",
-                    continuous_update=False,
-                    button_style='',
-                    layout=widgets.Layout(width='40%'),
-                    style={'description_width': 'initial'},
-                    icon='fast-forward')
-
-                @ button_save_metadata.on_click
-                def action_button_save_metadata(selfbutton):
-                    try:
-                        # Get latest file
-                        metadata_file = sorted(
-                            glob.glob(
-                                f"{interface.preprocessing_folder}*preprocessing*.h5"),
-                            key=os.path.getmtime)[-1]
-
-                        extract_metadata(
-                            scan_nb=interface.Dataset.scan,
-                            metadata_file=metadata_file,
-                            gwaihir_dataset=interface.Dataset,
-                            metadata_csv_file=os.getcwd() + "/metadata.csv"
-                        )
-                    except (IndexError, TypeError):
-                        print(
-                            f"Could not find any .h5 file in {interface.preprocessing_folder}")
-
-                # PyNX folder
-                interface.TabPhaseRetrieval.parent_folder.value\
-                    = interface.preprocessing_folder
-                interface.TabPhaseRetrieval.pynx_folder_handler(
-                    change=interface.preprocessing_folder
-                )
-
-                # Plot folder
-                interface.TabPlotData.parent_folder.value = interface.preprocessing_folder
-                interface.TabPlotData.plot_folder_handler(
-                    change=interface.preprocessing_folder
-                )
-
-                display(button_save_metadata)
-
-    if not init_para:
+    else:
+        # Disable all widgets until the end of the program
+        for w in interface.TabPreprocess.children[:-2]:
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = False
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
+                w.disabled = False
         plt.close()
         clear_output(True)
         print("Cleared window.")

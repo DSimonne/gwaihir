@@ -83,7 +83,7 @@ def init_postprocess_tab(
     apodization_alpha,
     unused_label_strain,
     strain_folder,
-    reconstruction_files,
+    reconstruction_file,
     init_postprocess_parameters,
 ):
     """
@@ -358,7 +358,18 @@ def init_postprocess_tab(
     interface.Dataset.apodization_mu = apodization_mu
     interface.Dataset.apodization_sigma = apodization_sigma
     interface.Dataset.apodization_alpha = apodization_alpha
-    interface.Dataset.reconstruction_files = strain_folder + reconstruction_files
+    interface.Dataset.reconstruction_file = strain_folder + reconstruction_file
+    if os.path.isfile(str(interface.Dataset.reconstruction_file)):
+        print(
+            "\n###########################################"
+            "#############################################"
+            "\nReconstruction file used to save phase "
+            "retrieval results in the final .cxi file:"
+            f"\n\t{os.path.split(interface.Dataset.reconstruction_file)[0]}"
+            f"\n\t{os.path.split(interface.Dataset.reconstruction_file)[1]}"
+            "\n###########################################"
+            "#############################################"
+        )
 
     if init_postprocess_parameters == "run_strain":
         # Save directory
@@ -367,11 +378,21 @@ def init_postprocess_tab(
 
         # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
-            if not isinstance(w, widgets.HTML):
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = True
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = True
 
-        for w in interface.TabPreprocess.children[:-2]:
-            if not isinstance(w, widgets.HTML):
+        for w in interface.TabPreprocess.children[:-1]:
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = True
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = True
 
         # Extract dict, list and tuple from strings
@@ -413,34 +434,18 @@ def init_postprocess_tab(
         if interface.Dataset.phase_offset_origin == ():
             interface.Dataset.phase_offset_origin = (None)
 
-        # Check beamline for save folder
-        try:
-            # Change data_dir and root folder depending on beamline
-            if interface.Dataset.beamline == "SIXS_2019":
-                root_folder = interface.Dataset.root_folder
-                data_dir = interface.Dataset.data_dir
+        # Change data_dir and root folder depending on beamline
+        if interface.Dataset.beamline == "SIXS_2019":
+            root_folder = interface.Dataset.root_folder
+            data_dir = interface.Dataset.data_dir
 
-            elif interface.Dataset.beamline == "P10":
-                root_folder = interface.Dataset.data_dir
-                data_dir = None
+        elif interface.Dataset.beamline == "P10":
+            root_folder = interface.Dataset.data_dir
+            data_dir = None
 
-            else:
-                root_folder = interface.Dataset.root_folder
-                data_dir = interface.Dataset.data_dir
-
-        except AttributeError:
-            for w in interface.TabPostprocess.children[:-1]:
-                if not isinstance(w, widgets.HTML):
-                    w.disabled = False
-
-            for w in interface.TabPreprocess.children[:-2]:
-                if not isinstance(w, widgets.HTML):
-                    w.disabled = False
-
-            print(
-                "You need to initialize all the parameters in the"
-                "preprocess tab first.\nSome parameters are redundant."
-            )
+        else:
+            root_folder = interface.Dataset.root_folder
+            data_dir = interface.Dataset.data_dir
 
         try:
             create_yaml_file(
@@ -451,7 +456,7 @@ def init_postprocess_tab(
                 data_dir=data_dir,
                 sample_name=interface.Dataset.sample_name,
                 comment=interface.Dataset.comment,
-                reconstruction_files=interface.Dataset.reconstruction_files,
+                reconstruction_files=interface.Dataset.reconstruction_file,  # keep s here
                 backend=interface.matplotlib_backend,
                 # parameters used when averaging several reconstruction #
                 sort_method=interface.Dataset.sort_method,
@@ -571,31 +576,23 @@ def init_postprocess_tab(
             files = sorted(
                 glob.glob(
                     f"{interface.postprocessing_folder}/**/"
-                    f"S{interface.Dataset.scan}_amp{phase_fieldname}"
+                    f"{interface.Dataset.scan_name}_amp{phase_fieldname}"
                     f"strain*{interface.Dataset.comment}.h5",
                     recursive=True),
                 key=os.path.getmtime)
-            interface.Dataset.strain_output_file = files[0]
+            interface.Dataset.postprocessing_output_file = files[0]
 
             creation_time = datetime.fromtimestamp(
-                os.path.getmtime(interface.Dataset.strain_output_file)
+                os.path.getmtime(interface.Dataset.postprocessing_output_file)
             ).strftime('%Y-%m-%d %H:%M:%S')
 
             print(
                 "\n###########################################"
                 "#############################################"
                 f"\nResult file used to extract results saved in the .cxi file:"
-                f"\n{interface.Dataset.strain_output_file}"
+                f"\n{interface.Dataset.postprocessing_output_file}"
                 f"\n\tCreated: {creation_time}"
                 "\nMake sure it is the latest one!!"
-                "\n###########################################"
-                "#############################################"
-            )
-
-            print(
-                "\n###########################################"
-                "#############################################"
-                "\nRemember to save your progress as a cxi file !"
                 "\n###########################################"
                 "#############################################"
             )
@@ -604,9 +601,6 @@ def init_postprocess_tab(
             print("Strain analysis stopped by user ...")
 
         finally:
-            # At the end of the function
-            interface.TabPostprocess.init_postprocess_parameters.disabled = False
-
             # Refresh folders
             interface.root_folder_handler(
                 change=interface.Dataset.scan_folder
@@ -629,17 +623,29 @@ def init_postprocess_tab(
     #     compute_prtf(
     #         iobs=interface.Dataset.iobs,
     #         mask=interface.Dataset.mask,
-    #         obj=interface.reconstruction_files,
+    #         obj=interface.reconstruction_file,
     #     )
 
     elif not init_postprocess_parameters:
+        # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
-            if not isinstance(w, widgets.HTML):
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = False
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = False
 
-        for w in interface.TabPreprocess.children[:-2]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = False
+        if interface.TabPreprocess.run_preprocess.value == False:
+            for w in interface.TabPreprocess.children[:-1]:
+                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                    for wc in w.children:
+                        wc.disabled = False
+                elif isinstance(w, widgets.HTML):
+                    pass
+                else:
+                    w.disabled = False
 
         # Refresh folders
         interface.root_folder_handler(
@@ -652,14 +658,34 @@ def init_postprocess_tab(
             change=interface.preprocessing_folder
         )
 
-        # PyNX folder
-        interface.TabPhaseRetrieval.parent_folder.value\
-            = interface.preprocessing_folder
-        interface.TabPhaseRetrieval.pynx_folder_handler(
-            change=interface.preprocessing_folder
-        )
+        # Find latest .h5 file, output from postprocessing
+        h5_files = sorted(
+            glob.glob(
+                f"{interface.postprocessing_folder}/**/"
+                f"{interface.Dataset.scan_name}_amp*"
+                f"strain*{interface.Dataset.comment}.h5",
+                recursive=True),
+            key=os.path.getmtime)
+        try:
+            interface.Dataset.postprocessing_output_file = h5_files[0]
 
-        print("Cleared window.")
+            creation_time = datetime.fromtimestamp(
+                os.path.getmtime(interface.Dataset.postprocessing_output_file)
+            ).strftime('%Y-%m-%d %H:%M:%S')
+
+            print(
+                "\n###########################################"
+                "#############################################"
+                "\nResult file used to save postprocessing "
+                "results in the final .cxi file:"
+                f"\n\t{os.path.split(interface.Dataset.postprocessing_output_file)[0]}"
+                f"\n\t{os.path.split(interface.Dataset.postprocessing_output_file)[1]}"
+                f"\n\tCreated: {creation_time}"
+                "\n###########################################"
+                "#############################################"
+            )
+        except KeyError:
+            pass
         clear_output(True)
     else:
         print("Not yet supported.")

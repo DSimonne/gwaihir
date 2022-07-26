@@ -225,7 +225,7 @@ class Interface:
                 save_to_vti=self.TabPreprocess.save_to_vti,
                 save_as_int=self.TabPreprocess.save_as_int,
                 unused_label_preprocess=self.TabPreprocess.unused_label_preprocess,
-                init_para=self.TabPreprocess.init_para,
+                run_preprocess=self.TabPreprocess.run_preprocess,
             )
 
             self.init_data_frame_tab_gui = interactive(
@@ -356,7 +356,7 @@ class Interface:
                 apodization_alpha=self.TabPostprocess.apodization_alpha,
                 unused_label_strain=self.TabPostprocess.unused_label_strain,
                 strain_folder=self.TabPostprocess.strain_folder,
-                reconstruction_files=self.TabPostprocess.reconstruction_files,
+                reconstruction_file=self.TabPostprocess.reconstruction_file,
                 init_postprocess_parameters=self.TabPostprocess.init_postprocess_parameters,
             )
 
@@ -486,7 +486,7 @@ class Interface:
                 self.root_folder_handler, names="value")
             self.TabStartup.run_dir_init.observe(
                 self.init_handler, names="value")
-            self.TabPreprocess.init_para.observe(
+            self.TabPreprocess.run_preprocess.observe(
                 self.preprocess_handler, names="value")
 
         # Display the final window
@@ -510,30 +510,30 @@ class Interface:
         if not change.new:
             for w in self.TabStartup.children[:-1]:
                 if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
-                    for w in w.children:
-                        w.disabled = False
+                    for wc in w.children:
+                        wc.disabled = False
                 else:
                     w.disabled = False
 
             for w in self.TabDetector.children + self.TabInstrument.children + self.TabPreprocess.children:
                 if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
-                    for w in w.children:
-                        w.disabled = True
+                    for wc in w.children:
+                        wc.disabled = True
                 else:
                     w.disabled = True
 
         if change.new:
             for w in self.TabStartup.children[:-1]:
                 if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
-                    for w in w.children:
-                        w.disabled = True
+                    for wc in w.children:
+                        wc.disabled = True
                 else:
                     w.disabled = True
 
             for w in self.TabDetector.children + self.TabInstrument.children + self.TabPreprocess.children:
                 if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
-                    for w in w.children:
-                        w.disabled = False
+                    for wc in w.children:
+                        wc.disabled = False
                 else:
                     w.disabled = False
 
@@ -555,8 +555,8 @@ class Interface:
 
             for w in self.TabPreprocess.children[:-1]:
                 if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
-                    for w in w.children:
-                        w.disabled = False
+                    for wc in w.children:
+                        wc.disabled = False
                 else:
                     w.disabled = False
 
@@ -573,7 +573,7 @@ class Interface:
 
             for w in self.TabPreprocess.children[:-1]:
                 if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
-                    for w in w.children:
-                        w.disabled = True
+                    for wc in w.children:
+                        wc.disabled = True
                 else:
                     w.disabled = True

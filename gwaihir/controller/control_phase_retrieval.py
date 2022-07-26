@@ -1072,31 +1072,29 @@ def initialize_cdi_operator(
 
     return: cdi operator
     """
-    if iobs in ("", None) and os.path.isfile(iobs):
-        # Dataset.iobs = None
+    if os.path.isfile(str(iobs)):
+        if iobs.endswith(".npy"):
+            iobs = np.load(iobs)
+            print("\tCXI input: loading data")
+        elif iobs.endswith(".npz"):
+            try:
+                iobs = np.load(iobs)["data"]
+                print("\tCXI input: loading data")
+            except KeyError:
+                print("\t\"data\" key does not exist.")
+                return None
+        if rebin != (1, 1, 1):
+            iobs = bin_data(iobs, rebin)
+            print("\tBinned data.")
+
+        iobs = fftshift(iobs)
+
+    else:
         iobs = None
         print("At least iobs must exist.")
-        return None  # stop function directly
+        return None
 
-    if iobs.endswith(".npy"):
-        iobs = np.load(iobs)
-        print("\tCXI input: loading data")
-    elif iobs.endswith(".npz"):
-        try:
-            iobs = np.load(iobs)["data"]
-            print("\tCXI input: loading data")
-        except KeyError:
-            print("\t\"data\" key does not exist.")
-            raise KeyboardInterrupt
-
-    if rebin != (1, 1, 1):
-        iobs = bin_data(iobs, rebin)
-        print("\tBinned data.")
-
-    # fft shift
-    iobs = fftshift(iobs)
-
-    if mask not in ("", None) and os.path.isfile(mask):
+    if os.path.isfile(str(mask)):
         if mask.endswith(".npy"):
             mask = np.load(mask).astype(np.int8)
             nb = mask.sum()
@@ -1116,13 +1114,12 @@ def initialize_cdi_operator(
             mask = bin_data(mask, rebin)
             print("\tBinned mask.")
 
-        # fft shift
         mask = fftshift(mask)
 
     else:
         mask = None
 
-    if support not in ("", None) and os.path.isfile(support):
+    if os.path.isfile(str(support)):
         if support.endswith(".npy"):
             support = np.load(support)
             print("\tCXI input: loading support")
@@ -1152,13 +1149,12 @@ def initialize_cdi_operator(
             support = bin_data(support, rebin)
             print("\tBinned support.")
 
-        # fft shift
         support = fftshift(support)
 
     else:
         support = None
 
-    if obj not in ("", None) and os.path.isfile(obj):
+    if os.path.isfile(str(obj)):
         if obj.endswith(".npy"):
             obj = np.load(obj)
             print("\tCXI input: loading object")
@@ -1173,7 +1169,6 @@ def initialize_cdi_operator(
             obj = bin_data(obj, rebin)
             print("\tBinned obj.")
 
-        # fft shift
         obj = fftshift(obj)
 
     else:

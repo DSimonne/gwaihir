@@ -68,7 +68,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(1, 1, 1)",
             description='Binning factor used in phase retrieval',
             continuous_update=False,
-            layout=widgets.Layout(width='45%'),
+            layout=widgets.Layout(width='30%'),
             style={
                 'description_width': 'initial'},
         )
@@ -78,7 +78,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(1, 1, 1)",
             description='Binning factors used in preprocessing',
             continuous_update=False,
-            layout=widgets.Layout(width='45%'),
+            layout=widgets.Layout(width='30%'),
             style={
                 'description_width': 'initial'},
         )
@@ -165,7 +165,7 @@ class TabPostprocess(widgets.VBox):
             tooltip="Threshold use for removing the outer layer (strain is\
              undefined at the exact surface voxel)",
             readout=True,
-            layout=widgets.Layout(width='20%'),
+            layout=widgets.Layout(width='15%'),
             style={
                 'description_width': 'initial'},
         )
@@ -219,7 +219,7 @@ class TabPostprocess(widgets.VBox):
             value="com",
             description='Offset method:',
             continuous_update=False,
-            layout=widgets.Layout(width='20%'),
+            layout=widgets.Layout(width='15%'),
             style={'description_width': 'initial'}
         )
 
@@ -229,7 +229,7 @@ class TabPostprocess(widgets.VBox):
             value="com",
             description='Centering method:',
             continuous_update=False,
-            layout=widgets.Layout(width='25%'),
+            layout=widgets.Layout(width='20%'),
             style={'description_width': 'initial'}
         )
 
@@ -378,7 +378,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(0, 0, 0)",
             description='Roll modes',
             continuous_update=False,
-            layout=widgets.Layout(width='30%'),
+            layout=widgets.Layout(width='20%'),
             style={
                 'description_width': 'initial'},
         )
@@ -586,7 +586,7 @@ class TabPostprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.reconstruction_files = widgets.Dropdown(
+        self.reconstruction_file = widgets.Dropdown(
             options=[""]
             + [os.path.basename(f) for f in sorted(
                 glob.glob(os.getcwd() + "/*.h5")
@@ -658,7 +658,7 @@ class TabPostprocess(widgets.VBox):
                 [self.apodization_mu, self.apodization_sigma, self.apodization_alpha]),
             self.unused_label_strain,
             self.strain_folder,
-            self.reconstruction_files,
+            self.reconstruction_file,
             self.init_postprocess_parameters,
         )
 
@@ -680,4 +680,4 @@ class TabPostprocess(widgets.VBox):
             key=os.path.getmtime)
         ]
 
-        self.reconstruction_files.options = options
+        self.reconstruction_file.options = options

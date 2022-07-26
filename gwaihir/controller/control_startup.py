@@ -12,7 +12,8 @@ import ipywidgets as widgets
 import gwaihir.dataset as gd
 
 try:
-    from gwaihir.controller.control_phase_retrieval import save_cdi_operator_as_cxi
+    from gwaihir.controller.control_phase_retrieval import save_cdi_operator_as_cxi, \
+        initialize_cdi_operator
     pynx_import_success = True
 except ModuleNotFoundError:
     pynx_import_success = False
@@ -154,31 +155,30 @@ def save_data_analysis_workflow(Dataset):
         Dataset.scan_name,
     )
 
+    cdi = initialize_cdi_operator(
+        iobs=Dataset.iobs,
+        mask=Dataset.mask,
+        support=Dataset.support,
+        obj=Dataset.obj,
+        rebin=Dataset.rebin,
+        auto_center_resize=Dataset.auto_center_resize,
+        max_size=Dataset.max_size,
+        wavelength=Dataset.wavelength,
+        pixel_size_detector=Dataset.pixel_size_detector,
+        detector_distance=Dataset.detector_distance,
+    )
+
+    if cdi == None:
+        raise TypeError("Could not initiliaze the cdi object.")
+
     # Path to the .cxi file with the raw data
-    raw_data_cxi_file = "{}/preprocessing/{}.cxi".format(
+    raw_data_cxi_file = "{}/preprocessing/{}".format(
         Dataset.scan_folder,
-        Dataset.iobs.split("/")[-1].split(".")[0],
+        Dataset.iobs.split("/")[-1].replace(".npz", ".cxi"),
     )
 
     # Check if the raw data file was already created during phase retrieval
     if not os.path.isfile(raw_data_cxi_file):
-        print(
-            "Saving the raw diffraction data and mask from the files "
-            "selected in the PyNX tab..."
-        )
-        cdi = initialize_cdi_operator(
-            iobs=Dataset.iobs,
-            mask=Dataset.mask,
-            support=Dataset.support,
-            obj=Dataset.obj,
-            rebin=Dataset.rebin,
-            auto_center_resize=Dataset.auto_center_resize,
-            max_size=Dataset.max_size,
-            wavelength=Dataset.wavelength,
-            pixel_size_detector=Dataset.pixel_size_detector,
-            detector_distance=Dataset.detector_distance,
-        )
-
         save_cdi_operator_as_cxi(
             gwaihir_dataset=Dataset,
             cdi_operator=cdi,
@@ -192,15 +192,21 @@ def save_data_analysis_workflow(Dataset):
     )
 
     # Save the Facets analysis output data as well
+    print(
+        "\n#######################################"
+        "########################################\n")
     try:
-        print("Saving Facets class data")
-        interface.Dataset.Facets.to_hdf5(
+        Dataset.Facets.to_hdf5(
             f"{Dataset.scan_folder}{Dataset.scan_name}.cxi")
+        print("Saved Facets class data")
     except AttributeError:
         print(
-            "Could not save Facet data, "
+            "Could not append Facet data, "
             "run the analysis in the `Facets` tab first."
         )
+    print(
+        "\n#######################################"
+        "########################################\n")
 
 
 def init_directories(
