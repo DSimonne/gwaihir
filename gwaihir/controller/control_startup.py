@@ -347,25 +347,16 @@ def find_and_copy_raw_data(
 
         # Move data file to scan_folder + "data/"
         try:
-            shutil.copy2(path_to_nxs_data, scan_folder + "data/")
-            print(f"Copied {path_to_nxs_data} to {data_dir}")
+            if not os.path.isfile(file):
+                shutil.copy2(path_to_nxs_data, scan_folder + "data/")
+                print(f"Copied {path_to_nxs_data} to {scan_folder}data/")
+            else:
+                print(f"{path_to_nxs_data} already exists in {scan_folder}data/")
 
             # Change data_dir, only if copy successful
             data_dir = scan_folder + "data/"
 
             # Change path_to_nxs_data, only if copy successful
-            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
-
-            # Rotate the data
-            rotate_sixs_data(path_to_nxs_data)
-
-        except (FileExistsError, PermissionError, shutil.SameFileError):
-            print(f"File exists in {scan_folder}data/")
-
-            # Change data_dir, since data already copied
-            data_dir = scan_folder + "data/"
-
-            # Change path_to_nxs_data, since data already copied
             path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
 
             # Rotate the data
