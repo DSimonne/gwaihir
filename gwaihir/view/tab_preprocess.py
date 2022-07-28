@@ -447,7 +447,8 @@ class TabPreprocess(widgets.VBox):
 
             # Parameters related to data cropping/padding/centering
             self.unused_label_centering,
-            widgets.HBox([self.centering_method_reciprocal_space, self.bragg_peak]),
+            widgets.HBox(
+                [self.centering_method_reciprocal_space, self.bragg_peak]),
             self.fix_size,
             widgets.HBox(
                 [self.center_fft, self.pad_size, self.normalize_flux]),

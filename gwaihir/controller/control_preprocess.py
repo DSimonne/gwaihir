@@ -818,12 +818,12 @@ def extract_metadata(
         # Save metadata in the Dataset object
         if isinstance(gwaihir_dataset, gwaihir.dataset.Dataset):
 
-            gwaihir_dataset.bragg_peak = f.root.output.bragg_peak[...]
-            gwaihir_dataset.q = f.root.output.q[...]
+            gwaihir_dataset.q = f.root.output.q_bragg[...]
             gwaihir_dataset.qnorm = f.root.output.qnorm[...]
-            gwaihir_dataset.dist_plane = f.root.output.dist_plane[...]
+            gwaihir_dataset.dist_plane = f.root.output.planar_distance[...]
             gwaihir_dataset.bragg_inplane = f.root.output.bragg_inplane[...]
             gwaihir_dataset.bragg_outofplane = f.root.output.bragg_outofplane[...]
+            gwaihir_dataset.bragg_peak = f.root.output.bragg_peak[...]
 
             # Extra metadata that is not always computed
             try:

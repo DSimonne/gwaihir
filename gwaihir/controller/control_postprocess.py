@@ -449,8 +449,8 @@ def init_postprocess_tab(
 
         # Create centering_method dict
         centering_method = {
-            "direct_space":interface.Dataset.centering_method_direct_space,
-            "reciprocal_space":interface.Dataset.centering_method_reciprocal_space,
+            "direct_space": interface.Dataset.centering_method_direct_space,
+            "reciprocal_space": interface.Dataset.centering_method_reciprocal_space,
         }
 
         try:
