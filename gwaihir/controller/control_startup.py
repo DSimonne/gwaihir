@@ -392,7 +392,7 @@ def rotate_sixs_data(path_to_nxs_data):
     with h5py.File(path_to_nxs_data, "a") as f:
         try:
             data_already_rotated = f['rotation'][...]
-        except (ValueError, RuntimeError):
+        except (ValueError, RuntimeError, KeyError):
             f.create_dataset("rotation", data=True)
             data_already_rotated = False
 
