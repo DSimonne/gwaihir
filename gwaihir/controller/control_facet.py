@@ -40,12 +40,13 @@ def init_facet_tab(
             pass
 
         try:
-            interface.Facets = facet_analysis.Facets(
+            interface.Dataset.Facets = facet_analysis.Facets(
                 filename=os.path.basename(vtk_file),
                 pathdir=vtk_file.replace(os.path.basename(vtk_file), ""))
             print(
-                "Facets object saved as interface.Facets, call help(interface.Facets) \
-                for more details.")
+                "Facets object saved as interface.Dataset.Facets. "
+                "Use help(interface.Dataset.Facets) for more details."
+            )
 
             # Button to rotate data
             button_rotate = widgets.Button(
@@ -78,7 +79,7 @@ def init_facet_tab(
                 @ interact(
                     facet_a_id=widgets.Dropdown(
                         options=[
-                            i + 1 for i in range(interface.Facets.nb_facets)],
+                            i + 1 for i in range(interface.Dataset.Facets.nb_facets)],
                         value=1,
                         description='Facet a id:',
                         continuous_update=True,
@@ -86,7 +87,7 @@ def init_facet_tab(
                         style={'description_width': 'initial'}),
                     facet_b_id=widgets.Dropdown(
                         options=[
-                            i + 1 for i in range(interface.Facets.nb_facets)],
+                            i + 1 for i in range(interface.Dataset.Facets.nb_facets)],
                         value=2,
                         description='Facet b id:',
                         continuous_update=True,
@@ -150,41 +151,49 @@ def init_facet_tab(
                     will be chosen, to also help pick two vectors.
                     """
                     # Save parameters value
-                    interface.Facets.facet_a_id = facet_a_id
-                    interface.Facets.facet_b_id = facet_b_id
-                    interface.Facets.u0 = u0
-                    interface.Facets.v0 = v0
-                    interface.Facets.w0 = w0
-                    interface.Facets.hkl_reference = hkl_reference
-                    interface.Facets.elev = elev
-                    interface.Facets.azim = azim
+                    interface.Dataset.Facets.facet_a_id = facet_a_id
+                    interface.Dataset.Facets.facet_b_id = facet_b_id
+                    interface.Dataset.Facets.u0 = u0
+                    interface.Dataset.Facets.v0 = v0
+                    interface.Dataset.Facets.w0 = w0
+                    interface.Dataset.Facets.hkl_reference = hkl_reference
+                    interface.Dataset.Facets.elev = elev
+                    interface.Dataset.Facets.azim = azim
 
                     # Extract list from strings
                     list_parameters = ["u0", "v0",
                                        "w0", "hkl_reference"]
                     try:
                         for p in list_parameters:
-                            if getattr(interface.Facets, p) == "":
-                                setattr(interface.Facets, p, [])
+                            if getattr(interface.Dataset.Facets, p) == "":
+                                setattr(interface.Dataset.Facets, p, [])
                             else:
-                                setattr(interface.Facets, p, literal_eval(
-                                    getattr(interface.Facets, p)))
+                                setattr(interface.Dataset.Facets, p, literal_eval(
+                                    getattr(interface.Dataset.Facets, p)))
                     except ValueError:
                         print(f"Wrong list syntax for {p}")
 
                     # Plot the chosen facet to help the user to pick the facets
                     # he wants to use to orient the particule
-                    interface.Facets.extract_facet(
-                        facet_id=interface.Facets.facet_a_id, plot=True,
-                        elev=interface.Facets.elev, azim=interface.Facets.azim,
-                        output=False, save=False)
-                    interface.Facets.extract_facet(
-                        facet_id=interface.Facets.facet_b_id, plot=True,
-                        elev=interface.Facets.elev, azim=interface.Facets.azim,
-                        output=False, save=False)
+                    interface.Dataset.Facets.extract_facet(
+                        facet_id=interface.Dataset.Facets.facet_a_id,
+                        plot=True,
+                        elev=interface.Dataset.Facets.elev,
+                        azim=interface.Dataset.Facets.azim,
+                        output=False,
+                        save=False
+                    )
+                    interface.Dataset.Facets.extract_facet(
+                        facet_id=interface.Dataset.Facets.facet_b_id,
+                        plot=True,
+                        elev=interface.Dataset.Facets.elev,
+                        azim=interface.Dataset.Facets.azim,
+                        output=False,
+                        save=False
+                    )
 
                     display(Markdown("""# Field data"""))
-                    display(interface.Facets.field_data)
+                    display(interface.Dataset.Facets.field_data)
 
                     button_fix_facets = widgets.Button(
                         description="Fix parameters and extract data.",
@@ -206,55 +215,61 @@ def init_facet_tab(
 
                         # Take those facets' vectors
                         u = np.array([
-                            interface.Facets.field_data.n0[interface.Facets.facet_a_id],
-                            interface.Facets.field_data.n1[interface.Facets.facet_a_id],
-                            interface.Facets.field_data.n2[interface.Facets.facet_a_id]])
+                            interface.Dataset.Facets.field_data.n0[interface.Dataset.Facets.facet_a_id],
+                            interface.Dataset.Facets.field_data.n1[interface.Dataset.Facets.facet_a_id],
+                            interface.Dataset.Facets.field_data.n2[interface.Dataset.Facets.facet_a_id]
+                        ])
                         v = np.array([
-                            interface.Facets.field_data.n0[interface.Facets.facet_b_id],
-                            interface.Facets.field_data.n1[interface.Facets.facet_b_id],
-                            interface.Facets.field_data.n2[interface.Facets.facet_b_id]])
+                            interface.Dataset.Facets.field_data.n0[interface.Dataset.Facets.facet_b_id],
+                            interface.Dataset.Facets.field_data.n1[interface.Dataset.Facets.facet_b_id],
+                            interface.Dataset.Facets.field_data.n2[interface.Dataset.Facets.facet_b_id]
+                        ])
 
-                        interface.Facets.set_rotation_matrix(
-                            u0=interface.Facets.u0 /
-                            np.linalg.norm(interface.Facets.u0),
-                            v0=interface.Facets.v0 /
-                            np.linalg.norm(interface.Facets.v0),
-                            w0=interface.Facets.w0 /
-                            np.linalg.norm(interface.Facets.w0),
+                        interface.Dataset.Facets.set_rotation_matrix(
+                            u0=interface.Dataset.Facets.u0 /
+                            np.linalg.norm(interface.Dataset.Facets.u0),
+                            v0=interface.Dataset.Facets.v0 /
+                            np.linalg.norm(interface.Dataset.Facets.v0),
+                            w0=interface.Dataset.Facets.w0 /
+                            np.linalg.norm(interface.Dataset.Facets.w0),
                             u=u,
                             v=v,
                         )
 
-                        interface.Facets.rotate_particle()
+                        interface.Dataset.Facets.rotate_particle()
 
-                        display(
-                            Markdown("""# Computing interplanar angles from \
-                                reference"""))
+                        display(Markdown(
+                            "# Computing interplanar angles from reference"
+                        ))
                         print(
-                            f"Used reference: {interface.Facets.hkl_reference}")
-                        interface.Facets.fixed_reference(
-                            hkl_reference=interface.Facets.hkl_reference)
+                            f"Used reference: {interface.Dataset.Facets.hkl_reference}")
+                        interface.Dataset.Facets.fixed_reference(
+                            hkl_reference=interface.Dataset.Facets.hkl_reference)
 
                         display(
                             Markdown("""# Strain values for each surface voxel \
                             and averaged per facet"""))
-                        interface.Facets.plot_strain(
-                            elev=interface.Facets.elev, azim=interface.Facets.azim)
+                        interface.Dataset.Facets.plot_strain(
+                            elev=interface.Dataset.Facets.elev,
+                            azim=interface.Dataset.Facets.azim
+                        )
 
                         display(Markdown(
                             """# Displacement values for each surface voxel \
                             and averaged per facet"""))
-                        interface.Facets.plot_displacement(
-                            elev=interface.Facets.elev, azim=interface.Facets.azim)
+                        interface.Dataset.Facets.plot_displacement(
+                            elev=interface.Dataset.Facets.elev,
+                            azim=interface.Dataset.Facets.azim
+                        )
 
                         display(Markdown("""# Evolution curves"""))
-                        interface.Facets.evolution_curves()
+                        interface.Dataset.Facets.evolution_curves()
 
                         # Also save edges and corners data
-                        interface.Facets.save_edges_corners_data()
+                        interface.Dataset.Facets.save_edges_corners_data()
 
                         display(Markdown("""# Field data"""))
-                        display(interface.Facets.field_data)
+                        display(interface.Dataset.Facets.field_data)
 
                         button_save_facet_data = widgets.Button(
                             description="Save data",
@@ -282,7 +297,7 @@ def init_facet_tab(
                                     )
 
                                 # Save data
-                                interface.Facets.save_data(
+                                interface.Dataset.Facets.save_data(
                                     f"{interface.Dataset.scan_folder}/postprocessing/"
                                     f"facets_analysis/field_data_{interface.Dataset.scan}.csv"
                                 )
@@ -292,7 +307,7 @@ def init_facet_tab(
                                     f"field_data_{interface.Dataset.scan}.csv"
                                 )
 
-                                interface.Facets.to_hdf5(
+                                interface.Dataset.Facets.to_hdf5(
                                     f"{interface.Dataset.scan_folder}{interface.Dataset.scan_name}.cxi")
                                 print(
                                     f"Saved Facets class attributes in {interface.Dataset.scan_folder}"
@@ -310,7 +325,7 @@ def init_facet_tab(
                 display(buttons_facets)
 
                 # Display visualisation window of facet class
-                display(interface.Facets.window)
+                display(interface.Dataset.Facets.window)
 
             # Display button
             display(buttons_facets)

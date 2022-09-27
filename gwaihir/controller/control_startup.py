@@ -11,6 +11,13 @@ import ipywidgets as widgets
 
 import gwaihir.dataset as gd
 
+try:
+    from gwaihir.controller.control_phase_retrieval import save_cdi_operator_as_cxi, \
+        initialize_cdi_operator
+    pynx_import_success = True
+except ModuleNotFoundError:
+    pynx_import_success = False
+
 
 def init_startup_tab(
     interface,
@@ -111,6 +118,27 @@ def init_startup_tab(
         interface.TabFacet.vtk_file_handler(
             change=interface.postprocessing_folder)
 
+        # Allow to save cxi files if pynx is imported
+        if pynx_import_success:
+            # Button to save data
+            button_save_as_cxi = widgets.Button(
+                description="Save work as .cxi file",
+                continuous_update=False,
+                button_style='',
+                layout=widgets.Layout(width='40%'),
+                style={'description_width': 'initial'},
+                icon='step-forward')
+
+            display(button_save_as_cxi)
+
+            @ button_save_as_cxi.on_click
+            def action_button_save_as_cxi(selfbutton):
+                """Create button to save Dataset object as .cxi file."""
+                clear_output(True)
+                display(button_save_as_cxi)
+                print("Saving data ...")
+                save_data_analysis_workflow(interface.Dataset)
+
     elif not run_dir_init:
         print("Cleared window.")
         clear_output(True)
@@ -118,97 +146,67 @@ def init_startup_tab(
         return None, None, None, None
 
 
-def save_dataset():
+def save_data_analysis_workflow(Dataset):
     """
     """
-    # Only allow to save data if PyNX is imported to avoid errors
-    if pynx_import:
-        # Button to save data
-        button_save_as_cxi = widgets.Button(
-            description="Save work as .cxi file",
-            continuous_update=False,
-            button_style='',
-            layout=widgets.Layout(width='40%'),
-            style={'description_width': 'initial'},
-            icon='step-forward')
+    # Path to the final .cxi file
+    final_cxi_file = "{}{}.cxi".format(
+        Dataset.scan_folder,
+        Dataset.scan_name,
+    )
 
-        display(button_save_as_cxi)
+    cdi = initialize_cdi_operator(
+        iobs=Dataset.iobs,
+        mask=Dataset.mask,
+        support=Dataset.support,
+        obj=Dataset.obj,
+        rebin=Dataset.rebin,
+        auto_center_resize=Dataset.auto_center_resize,
+        max_size=Dataset.max_size,
+        wavelength=Dataset.wavelength,
+        pixel_size_detector=Dataset.pixel_size_detector,
+        detector_distance=Dataset.detector_distance,
+    )
 
-        @ button_save_as_cxi.on_click
-        def action_button_save_as_cxi(selfbutton):
-            """Create button to save Dataset object as .cxi file."""
-            clear_output(True)
-            display(button_save_as_cxi)
-            print("Saving data ...")
+    if cdi == None:
+        raise TypeError("Could not initiliaze the cdi object.")
 
-            try:
-                # Reciprocal space data
-                # Define path to .cxi file that will contain the
-                # preprocessed data, created thanks to PyNX.
-                cxi_filename = "{}/preprocessing/{}.cxi".format(
-                    Dataset.scan_folder,
-                    Dataset.iobs.split("/")[-1].split(".")[0]
-                )
+    # Path to the .cxi file with the raw data
+    raw_data_cxi_file = "{}/preprocessing/{}".format(
+        Dataset.scan_folder,
+        Dataset.iobs.split("/")[-1].replace(".npz", ".cxi"),
+    )
 
-                # Check if this file already exists or not
-                if not os.path.isfile(cxi_filename):
-                    print(
-                        "Saving diffraction data and mask selected in the PyNX tab..."
-                    )
+    # Check if the raw data file was already created during phase retrieval
+    if not os.path.isfile(raw_data_cxi_file):
+        save_cdi_operator_as_cxi(
+            gwaihir_dataset=Dataset,
+            cdi_operator=cdi,
+            path_to_cxi=raw_data_cxi_file,
+        )
 
-                    # Define cxi file with the data selected
-                    # in the phase retrieval tab and save as cxi
-                    cdi = initialize_cdi_operator(
-                        iobs=Dataset.iobs,
-                        mask=Dataset.mask,
-                        support=Dataset.support,
-                        obj=Dataset.obj,
-                        rebin=Dataset.rebin,
-                        auto_center_resize=Dataset.auto_center_resize,
-                        max_size=Dataset.max_size,
-                        wavelength=Dataset.wavelength,
-                        pixel_size_detector=Dataset.pixel_size_detector,
-                        detector_distance=Dataset.detector_distance,
-                    )
+    # Save all the data in a single .cxi file
+    Dataset.to_cxi(
+        raw_data_cxi_file=raw_data_cxi_file,
+        final_cxi_file=final_cxi_file,
+    )
 
-                    save_cdi_operator_as_cxi(
-                        gwaihir_dataset=Dataset,
-                        cdi_operator=cdi,
-                        path_to_cxi=cxi_filename,
-                    )
-
-                # Real space data
-                # Path to final file
-                final_cxi_filename = "{}{}{}.cxi".format(
-                    Dataset.scan_folder,
-                    Dataset.sample_name,
-                    Dataset.scan,
-                )
-
-                Dataset.to_cxi(
-                    raw_data_cxi_filename=cxi_filename,
-                    final_cxi_filename=final_cxi_filename,
-                    reconstruction_filename=interface.reconstruction_files,
-                    strain_output_file=interface.strain_output_file
-                )
-
-            except (AttributeError, UnboundLocalError):
-                print(
-                    "Could not save reciprocal space data, select the"
-                    "intensity and the mask files in the phase"
-                    "retrieval tab first"
-                )
-
-            # Facets analysis output
-            try:
-                print("Saving Facets class data")
-                interface.Facets.to_hdf5(
-                    f"{Dataset.scan_folder}{Dataset.scan_name}.cxi")
-            except AttributeError:
-                print(
-                    "Could not save facet extraction data, "
-                    "run the analysis in the `Facets` tab first."
-                )
+    # Save the Facets analysis output data as well
+    print(
+        "\n#######################################"
+        "########################################\n")
+    try:
+        Dataset.Facets.to_hdf5(
+            f"{Dataset.scan_folder}{Dataset.scan_name}.cxi")
+        print("Saved Facets class data")
+    except AttributeError:
+        print(
+            "Could not append Facet data, "
+            "run the analysis in the `Facets` tab first."
+        )
+    print(
+        "\n#######################################"
+        "########################################\n")
 
 
 def init_directories(
@@ -349,25 +347,16 @@ def find_and_copy_raw_data(
 
         # Move data file to scan_folder + "data/"
         try:
-            shutil.copy2(path_to_nxs_data, scan_folder + "data/")
-            print(f"Copied {path_to_nxs_data} to {data_dir}")
+            if not os.path.isfile(file):
+                shutil.copy2(path_to_nxs_data, scan_folder + "data/")
+                print(f"Copied {path_to_nxs_data} to {scan_folder}data/")
+            else:
+                print(f"{path_to_nxs_data} already exists in {scan_folder}data/")
 
             # Change data_dir, only if copy successful
             data_dir = scan_folder + "data/"
 
             # Change path_to_nxs_data, only if copy successful
-            path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
-
-            # Rotate the data
-            rotate_sixs_data(path_to_nxs_data)
-
-        except (FileExistsError, PermissionError, shutil.SameFileError):
-            print(f"File exists in {scan_folder}data/")
-
-            # Change data_dir, since data already copied
-            data_dir = scan_folder + "data/"
-
-            # Change path_to_nxs_data, since data already copied
             path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
 
             # Rotate the data
@@ -393,10 +382,10 @@ def rotate_sixs_data(path_to_nxs_data):
     # Check if already rotated
     with h5py.File(path_to_nxs_data, "a") as f:
         try:
+            data_already_rotated = f['rotation'][...]
+        except (ValueError, RuntimeError, KeyError):
             f.create_dataset("rotation", data=True)
             data_already_rotated = False
-        except (ValueError, RuntimeError):
-            data_already_rotated = f['rotation'][...]
 
     # Find 3D array key
     three_d_data_keys = []

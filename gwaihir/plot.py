@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 import h5py as h5
+import os
 
 from tornado.ioloop import PeriodicCallback
 
@@ -53,7 +54,11 @@ class Plotter:
         :param filename: path to data, supported files extensions are .cxi,
          .npy or .npz
         :param data_array: a np.ndarray
-        :param plot: either '2D', 'slices', '3D' or False
+        :param plot: str in [
+            '2D', 'slices', 'contour_slices',
+            'sum_slices', 'sum_contour_slices',
+            '3D', False,
+         ]
         :param log: True to have a logarithmic scale
          False to have a linear scale
         :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
@@ -75,39 +80,73 @@ class Plotter:
         self.interact_scale = False
 
         # Get data array from any of the supported files
-        if isinstance(data, str):
+        if os.path.isfile(data):
             self.filename = data
             self.get_data_array()
 
         elif isinstance(data, np.ndarray):
             self.data_array = data
-            # Plot data
-            if self.plot == "2D":
-                self.plot_data(figsize=self.figsize, fontsize=self.fontsize,
-                               log=self.log, cmap=self.cmap, title=self.title)
-
-            elif self.plot == "slices" and self.data_array.ndim == 3:
-                self.plot_3d_slices(figsize=None, log=self.log, cmap=self.cmap,
-                                    fontsize=self.fontsize, title=self.title)
-
-            elif self.plot == "3D" and self.data_array.ndim == 3:
-                ThreeDViewer(self.data_array)
-
-            else:
-                print(
-                    "#########################################################"
-                    "########################################################\n"
-                    f"Loaded data array\n"
-                    f"\tNb of dimensions: {self.data_array.ndim}\n"
-                    f"\tShape: {self.data_array.shape}\n"
-                    "\t'plot' keyword accepted values: ('2D', 'slices', 3D')"
-                    "\n#########################################################"
-                    "########################################################"
-                )
+            self.init_plot()
 
         else:
             print(
-                "Please provide either a filename (arg filename) or directly an np.ndarray (arg data_array).")
+                "Please provide either a valid filename (arg filename)"
+                " or directly an np.ndarray (arg data_array)."
+            )
+
+    def init_plot(self):
+        if self.plot == "2D":
+            plot_data(
+                data_array=self.data_array,
+                figsize=self.figsize, fontsize=self.fontsize,
+                log=self.log, cmap=self.cmap, title=self.title,
+            )
+
+        elif self.plot == "slices" and self.data_array.ndim == 3:
+            plot_3d_slices(
+                data_array=self.data_array,
+                fontsize=self.fontsize, title=self.title,
+                figsize=None, log=self.log, cmap=self.cmap,
+                contour=False, sum_over_axis=False,
+            )
+
+        elif self.plot == "contour_slices" and self.data_array.ndim == 3:
+            plot_3d_slices(
+                data_array=self.data_array,
+                fontsize=self.fontsize, title=self.title,
+                figsize=None, log=self.log, cmap=self.cmap,
+                contour=True, sum_over_axis=False,
+            )
+
+        elif self.plot == "sum_slices" and self.data_array.ndim == 3:
+            plot_3d_slices(
+                data_array=self.data_array,
+                fontsize=self.fontsize, title=self.title,
+                figsize=None, log=self.log, cmap=self.cmap,
+                contour=False, sum_over_axis=True,
+            )
+
+        elif self.plot == "sum_contour_slices" and self.data_array.ndim == 3:
+            plot_3d_slices(
+                data_array=self.data_array,
+                fontsize=self.fontsize, title=self.title,
+                figsize=None, log=self.log, cmap=self.cmap,
+                contour=True, sum_over_axis=True,
+            )
+
+        elif self.plot == "3D" and self.data_array.ndim == 3:
+            ThreeDViewer(self.data_array)
+
+        else:
+            print(
+                "#########################################################"
+                "########################################################\n"
+                f"Loaded data array\n"
+                f"\tNb of dimensions: {self.data_array.ndim}\n"
+                f"\tShape: {self.data_array.shape}\n"
+                "\n#########################################################"
+                "########################################################"
+            )
 
     def get_data_array(self):
         """Get numpy array from file.
@@ -164,28 +203,7 @@ class Plotter:
                             """)
 
             # Plot data
-            if self.plot == "2D":
-                self.plot_data(figsize=self.figsize, fontsize=self.fontsize,
-                               log=self.log, cmap=self.cmap, title=self.title)
-
-            elif self.plot == "slices" and self.data_array.ndim == 3:
-                self.plot_3d_slices(figsize=None, log=self.log, fontsize=self.fontsize,
-                                    cmap=self.cmap, title=self.title)
-
-            elif self.plot == "3D" and self.data_array.ndim == 3:
-                ThreeDViewer(self.data_array)
-
-            else:
-                print(
-                    "#########################################################"
-                    "########################################################\n"
-                    f"Loaded data array from {self.filename}\n"
-                    f"\tNb of dimensions: {self.data_array.ndim}\n"
-                    f"\tShape: {self.data_array.shape}\n"
-                    "\t'plot' keyword accepted values: ('2D', 'slices', 3D')"
-                    "\n#########################################################"
-                    "########################################################"
-                )
+            self.init_plot()
 
         # Need to select data array interactively
         elif self.filename.endswith(".npz"):
@@ -207,32 +225,7 @@ class Plotter:
                         print("Key not valid, is this an array ?")
 
                     # Plot data
-                    if self.plot == "2D":
-                        print(
-                            "\n#############################################"
-                            f"\nArray shape (x, y, z): {self.data_array.shape}\n"
-                            "##############################################"
-                        )
-                        self.plot_data(fontsize=self.fontsize, title=self.title,
-                                       figsize=self.figsize, log=self.log,
-                                       cmap=self.cmap)
-
-                    elif self.plot == "slices" and self.data_array.ndim == 3:
-                        self.plot_3d_slices(fontsize=self.fontsize, title=self.title,
-                                            figsize=None, log=self.log,
-                                            cmap=self.cmap)
-
-                    elif self.plot == "3D" and self.data_array.ndim == 3:
-                        ThreeDViewer(self.data_array)
-
-                    else:
-                        print(
-                            "\n#############################################"
-                            f"\nLoaded data array from {self.filename}\n"
-                            f"\tNb of dimensions: {self.data_array.ndim}\n"
-                            f"\tShape: {self.data_array.shape}\n"
-                            "##############################################\n"
-                        )
+                    self.init_plot()
 
             except ValueError:
                 print("Could not load data.")
@@ -240,39 +233,13 @@ class Plotter:
         else:
             print("Data type not supported.")
 
-    def plot_data(self, **kwargs):
-        """Run plot_data function with class arguments."""
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-        plot_data(
-            data_array=self.data_array,
-            figsize=self.figsize,
-            fontsize=self.fontsize,
-            cmap=self.cmap,
-            title=self.title,
-        )
-
-    def plot_3d_slices(self, **kwargs):
-        """Run plot_3d_slices function with class arguments."""
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-        plot_3d_slices(
-            data_array=self.data_array,
-            figsize=self.figsize,
-            log=self.log,
-            cmap=self.cmap,
-            title=self.title,
-        )
-
 
 class ThreeDViewer(widgets.Box):
     """
     Widget to display 3D objects from CDI optimisation, loaded from a result
     CXI file or a mode file.
 
-    Quickly adapted from @Vincent Favre Nicolin (ESRF)
+    Simplified from the widgets class in PyNX @Vincent Favre Nicolin (ESRF)
     """
 
     def __init__(self, input_file=None, html_width=None):
@@ -623,8 +590,9 @@ def plot_data(
 ):
     """
     Create figure based on the data dimensions.
-    Data in 2D is here always plotted as an image
-    Data in 3D is plotted as 3 slices or directly in 3D
+    Data in 1D is plotted as a curve
+    Data in 2D is plotted as a 2D image
+    Data in 3D is plotted with Bokeh along one axis
 
     :param data_array: np.ndarray to plot
     :param figsize: default (10, 10)
@@ -666,7 +634,6 @@ def plot_data(
                 # Create figure
                 if not figsize:
                     figsize = (7, 7)
-                    print("Figure size defaulted to", figsize)
 
                 _, ax = plt.subplots(figsize=figsize)
 
@@ -685,8 +652,9 @@ def plot_data(
     elif data_dimensions == 2:
         # Depends on log scale
         if isinstance(log, bool):
-            img = plot_2d_image(data_array, log=log, cmap=cmap,
-                                title=title, fontsize=fontsize)
+            img = plot_2d_image(
+                data_array, log=log, cmap=cmap, title=title, fontsize=fontsize
+            )
 
             # Create axis for colorbar
             cbar_ax = make_axes_locatable(ax).append_axes(
@@ -713,7 +681,6 @@ def plot_data(
                 # Create figure
                 if not figsize:
                     figsize = (10, 10)
-                    print("Figure size defaulted to", figsize)
 
                 fig, ax = plt.subplots(figsize=figsize)
 
@@ -721,8 +688,9 @@ def plot_data(
                 log = scale == "logarithmic"
 
                 # Plot
-                img = plot_2d_image(data_array, log=log,
-                                    fig=fig, ax=ax, cmap=cmap)
+                img = plot_2d_image(
+                    data_array, log=log, fig=fig, ax=ax, cmap=cmap
+                )
 
                 # Create axis for colorbar
                 cbar_ax = make_axes_locatable(ax).append_axes(
@@ -746,16 +714,14 @@ def plot_data(
             scale="linear",
         ):
             """
-            Function used when using widgets with callbacks
-            on the 3D image
+            Function used when using widgets with callbacks on the 3D image
 
             :param data: 3D data array
-            :param axis: axis on which the data is projected
-             in ("x", "y", "z")
+            :param axis: axis on which the data is projected in ("x", "y", "z")
             :param index: index along param axis
-            :param data_type: plot module, phase,
-             real or imaginary part of the data
-            :param scale: log or lin
+            :param data_type: plot module, phase, real or imaginary part of
+                the data
+            :param scale: "logarithmic" for log scale, otherwise linear scale
             """
             # Project on specific index
             if axis == "x":
@@ -1009,7 +975,8 @@ def plot_2d_image(
     cmap="turbo",
     title=None,
     x_label="x",
-    y_label="y"
+    y_label="y",
+    contour=False,
 ):
     """
     Plot 2d image from 2d array.
@@ -1020,9 +987,13 @@ def plot_2d_image(
      will create a figure, used to add 2d images to 3d figures
     :param ax: axes of figure, default is None and will create axes
     :param log: True to have a logarithmic scale, False to have a linear scale
-    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
+    :param cmap: matplotlib cmap used for plot, default 'turbo'
     :param title: str, title for this axe
-    :return: image on ax (ax.imshow())
+    :param x_label: label on x axis
+    :param y_label: label on y axis
+    :param contour: True to plot contour of data
+
+    :return: image on ax : ax.imshow()
     """
     if not fig and not ax:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
@@ -1030,28 +1001,25 @@ def plot_2d_image(
     scale = "logarithmic" if log else "linear"
 
     try:
-        img = ax.imshow(
-            two_d_array,
-            norm={"linear": None, "logarithmic": LogNorm()}[
-                scale],
-            cmap=cmap,
-        )
-        ax.set_xlabel(x_label, fontsize=fontsize)
-        ax.set_ylabel(y_label, fontsize=fontsize)
-        if isinstance(title, str):
-            ax.set_title(title, fontsize=fontsize + 2)
-
-        return img
-
-    except TypeError:
-        print("Using complex data, automatically switching to array module")
-
-        img = ax.imshow(
-            np.abs(two_d_array),
-            norm={"linear": None, "logarithmic": LogNorm()}[
-                scale],
-            cmap=cmap,
-        )
+        if np.iscomplex(two_d_array).any():
+            print(
+                "Using complex data, switching to array module for plot."
+            )
+            two_d_array = np.abs(two_d_array)
+        if contour:
+            img = ax.contourf(
+                two_d_array,
+                norm={"linear": None, "logarithmic": LogNorm()}[
+                    scale],
+                cmap=cmap,
+            )
+        else:
+            img = ax.imshow(
+                two_d_array,
+                norm={"linear": None, "logarithmic": LogNorm()}[
+                    scale],
+                cmap=cmap,
+            )
         ax.set_xlabel(x_label, fontsize=fontsize)
         ax.set_ylabel(y_label, fontsize=fontsize)
         if isinstance(title, str):
@@ -1074,7 +1042,9 @@ def plot_3d_slices(
     figsize=None,
     log=False,
     cmap="turbo",
-    title=None
+    title=None,
+    contour=False,
+    sum_over_axis=False,
 ):
     """
     Plot 3 slices for 3d data.
@@ -1087,32 +1057,40 @@ def plot_3d_slices(
     :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
     :param title: string to set as title for main plot or list of
      strings of length 3 for sub axes
+    :param contour: True to plot contour of data
+    :param sum_over_axis: True to plot sum intead of slices
     """
     if isinstance(log, bool):
         # Create figure
         if not figsize:
             figsize = (15, 7)
-            print("Figure size defaulted to", figsize)
 
         fig, axs = plt.subplots(1, 3, figsize=figsize)
 
         # Add titles
         if isinstance(title, str):
-            fig.suptitle(title, fontsize=fontsize + 2)
+            fig.suptitle(title, fontsize=fontsize + 2, y=0.95)
             titles = [None, None, None]
-        elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
+        elif isinstance(title, tuple) and len(title) == 3\
+                or isinstance(title, list) and len(title) == 3:
             titles = title
         else:
             titles = [None, None, None]
 
-        # Each axis has a dimension
+        # 3D array shape
         shape = data_array.shape
 
         # Plot first image
-        two_d_array = data_array[shape[0]//2, :, :]
-        img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
-                              ax=axs[0], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="z", y_label="y")
+        if sum_over_axis:  # Compute sum
+            two_d_array = np.sum(np.nan_to_num(data_array), axis=(0))
+
+        else:  # Get middle slice
+            two_d_array = data_array[shape[0]//2, :, :]
+        img_x = plot_2d_image(
+            two_d_array, fig=fig, title=titles[0], ax=axs[0], log=log,
+            cmap=cmap, fontsize=fontsize, x_label="z", y_label="y",
+            contour=contour
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[0]).append_axes(
@@ -1122,10 +1100,16 @@ def plot_3d_slices(
         fig.colorbar(mappable=img_x, cax=cbar_ax)
 
         # Plot second image
-        two_d_array = data_array[:, shape[1]//2, :]
-        img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
-                              ax=axs[1], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="z", y_label="x")
+        if sum_over_axis:  # Compute sum
+            two_d_array = np.sum(np.nan_to_num(data_array), axis=(1))
+
+        else:  # Get middle slice
+            two_d_array = data_array[:, shape[1]//2, :]
+        img_y = plot_2d_image(
+            two_d_array, fig=fig, title=titles[1], ax=axs[1], log=log,
+            cmap=cmap, fontsize=fontsize, x_label="z", y_label="x",
+            contour=contour
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[1]).append_axes(
@@ -1135,10 +1119,16 @@ def plot_3d_slices(
         fig.colorbar(mappable=img_y, cax=cbar_ax)
 
         # Plot third image
-        two_d_array = data_array[:, :, shape[2]//2]
-        img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
-                              ax=axs[2], log=log, cmap=cmap, fontsize=fontsize,
-                              x_label="y", y_label="x")
+        if sum_over_axis:  # Compute sum
+            two_d_array = np.sum(np.nan_to_num(data_array), axis=(2))
+
+        else:  # Get middle slice
+            two_d_array = data_array[:, :, shape[2]//2]
+        img_z = plot_2d_image(
+            two_d_array, fig=fig, title=titles[2], ax=axs[2], log=log,
+            cmap=cmap, fontsize=fontsize, x_label="y", y_label="x",
+            contour=contour
+        )
 
         # Create axis for colorbar
         cbar_ax = make_axes_locatable(axs[2]).append_axes(
@@ -1154,79 +1144,28 @@ def plot_3d_slices(
     else:
         @interact(
             scale=widgets.ToggleButtons(
-                options=["linear", "logarithmic"],
-                value="linear",
+                options=[
+                    ("linear", False),
+                    ("logarithmic", True),
+                ],
+                value=False,
                 description='Scale',
                 disabled=False,
                 style={'description_width': 'initial'}),
             figsize=fixed(figsize)
         )
         def plot_with_interactive_scale(scale, figsize):
-            # Create figure
-            if not figsize:
-                figsize = (15, 7)
-                print("Figure size defaulted to", figsize)
-
-            fig, axs = plt.subplots(1, 3, figsize=figsize)
-
-            if isinstance(title, str):
-                fig.suptitle(title, fontsize=fontsize + 2)
-                titles = [None, None, None]
-            elif isinstance(title, tuple) and len(title) == 3 or isinstance(title, list) and len(title) == 3:
-                titles = title
-            else:
-                titles = [None, None, None]
-
-            # Each axis has a dimension
-            shape = data_array.shape
-
-            # Get scale
-            log = scale == "logarithmic"
-
             try:
-                # Create image slice along x
-                two_d_array = data_array[shape[0]//2, :, :]
-                img_x = plot_2d_image(two_d_array, fig=fig, title=titles[0],
-                                      ax=axs[0], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="z", y_label="y")
-
-                # Create axis for colorbar
-                cbar_ax = make_axes_locatable(axs[0]).append_axes(
-                    position='right', size='5%', pad=0.1)
-
-                # Create colorbar
-                fig.colorbar(mappable=img_x, cax=cbar_ax)
-
-                # Create image slice along y
-                two_d_array = data_array[:, shape[1]//2, :]
-                img_y = plot_2d_image(two_d_array, fig=fig, title=titles[1],
-                                      ax=axs[1], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="z", y_label="x")
-
-                # Create axis for colorbar
-                cbar_ax = make_axes_locatable(axs[1]).append_axes(
-                    position='right', size='5%', pad=0.1)
-
-                # Create colorbar
-                fig.colorbar(mappable=img_y, cax=cbar_ax)
-
-                # Create image slice along z
-                two_d_array = data_array[:, :, shape[2]//2]
-                img_z = plot_2d_image(two_d_array, fig=fig, title=titles[2],
-                                      ax=axs[2], log=log, cmap=cmap,
-                                      fontsize=fontsize, x_label="y", y_label="x")
-
-                # Create axis for colorbar
-                cbar_ax = make_axes_locatable(axs[2]).append_axes(
-                    position='right', size='5%', pad=0.1)
-
-                # Create colorbar
-                fig.colorbar(mappable=img_z, cax=cbar_ax)
-
-                # Show figure
-                plt.tight_layout()
-                plt.show()
-                plt.close()
+                plot_3d_slices(
+                    data_array=data_array,
+                    fontsize=fontsize,
+                    figsize=figsize,
+                    log=scale,
+                    cmap=cmap,
+                    title=title,
+                    contour=contour,
+                    sum_over_axis=sum_over_axis,
+                )
             except IndexError:
                 plt.close()
                 print("Is this a 3D array?")

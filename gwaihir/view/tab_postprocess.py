@@ -68,7 +68,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(1, 1, 1)",
             description='Binning factor used in phase retrieval',
             continuous_update=False,
-            layout=widgets.Layout(width='45%'),
+            layout=widgets.Layout(width='30%'),
             style={
                 'description_width': 'initial'},
         )
@@ -78,7 +78,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(1, 1, 1)",
             description='Binning factors used in preprocessing',
             continuous_update=False,
-            layout=widgets.Layout(width='45%'),
+            layout=widgets.Layout(width='30%'),
             style={
                 'description_width': 'initial'},
         )
@@ -156,7 +156,7 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.isosurface_strain = widgets.FloatText(
-            value=0.3,
+            value=0.1,
             step=0.01,
             max=1,
             min=0,
@@ -165,7 +165,7 @@ class TabPostprocess(widgets.VBox):
             tooltip="Threshold use for removing the outer layer (strain is\
              undefined at the exact surface voxel)",
             readout=True,
-            layout=widgets.Layout(width='20%'),
+            layout=widgets.Layout(width='15%'),
             style={
                 'description_width': 'initial'},
         )
@@ -209,25 +209,25 @@ class TabPostprocess(widgets.VBox):
             placeholder="(x, y, z), leave None for automatic.",
             description='Phase offset origin',
             continuous_update=False,
-            layout=widgets.Layout(width='40%'),
+            layout=widgets.Layout(width='30%'),
             style={
                 'description_width': 'initial'},
         )
 
         self.offset_method = widgets.Dropdown(
-            options=["COM", "mean"],
-            value="mean",
+            options=["com", "mean"],
+            value="com",
             description='Offset method:',
             continuous_update=False,
-            layout=widgets.Layout(width='20%'),
+            layout=widgets.Layout(width='15%'),
             style={'description_width': 'initial'}
         )
 
-        self.centering_method = widgets.Dropdown(
+        self.centering_method_direct_space = widgets.Dropdown(
             options=[
-                "COM", "max", "max_com"],
-            value="max_com",
-            description='Centering method:',
+                "com", "max", "max_com"],
+            value="com",
+            description='Centering method in direct space:',
             continuous_update=False,
             layout=widgets.Layout(width='25%'),
             style={'description_width': 'initial'}
@@ -378,7 +378,7 @@ class TabPostprocess(widgets.VBox):
             placeholder="(0, 0, 0)",
             description='Roll modes',
             continuous_update=False,
-            layout=widgets.Layout(width='30%'),
+            layout=widgets.Layout(width='20%'),
             style={
                 'description_width': 'initial'},
         )
@@ -417,8 +417,8 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.strain_range = widgets.FloatText(
-            value=0.002,
-            step=0.00001,
+            value=0.0001,
+            step=0.000001,
             continuous_update=False,
             description='Strain range:',
             readout=True,
@@ -586,7 +586,7 @@ class TabPostprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.reconstruction_files = widgets.Dropdown(
+        self.reconstruction_file = widgets.Dropdown(
             options=[""]
             + [os.path.basename(f) for f in sorted(
                 glob.glob(os.getcwd() + "/*.h5")
@@ -631,7 +631,7 @@ class TabPostprocess(widgets.VBox):
             ]),
             widgets.HBox([
                 self.phase_offset, self.phase_offset_origin,
-                self.offset_method, self.centering_method
+                self.offset_method, self.centering_method_direct_space
             ]),
             self.unused_label_refraction,
             widgets.HBox([self.correct_refraction, self.optical_path_method]),
@@ -658,7 +658,7 @@ class TabPostprocess(widgets.VBox):
                 [self.apodization_mu, self.apodization_sigma, self.apodization_alpha]),
             self.unused_label_strain,
             self.strain_folder,
-            self.reconstruction_files,
+            self.reconstruction_file,
             self.init_postprocess_parameters,
         )
 
@@ -680,4 +680,4 @@ class TabPostprocess(widgets.VBox):
             key=os.path.getmtime)
         ]
 
-        self.reconstruction_files.options = options
+        self.reconstruction_file.options = options

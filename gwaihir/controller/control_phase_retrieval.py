@@ -14,7 +14,8 @@ from ast import literal_eval
 
 # GPU will be auto-selected
 from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport,\
-    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI
+    InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI, InitFreePixels, \
+    InterpIobsMask
 from pynx.cdi.runner.id01 import params
 from pynx.utils.math import smaller_primes
 
@@ -37,11 +38,14 @@ def init_phase_retrieval_tab(
     support_update_period,
     support_smooth_width,
     support_post_expand,
+    support_method,
+    support_autocorrelation_threshold,
     unused_label_psf,
     psf,
     psf_model,
     fwhm,
     eta,
+    psf_filter,
     update_psf,
     unused_label_algo,
     nb_hio,
@@ -54,14 +58,17 @@ def init_phase_retrieval_tab(
     nb_run_keep,
     unused_label_options,
     live_plot,
-    # zero_mask TODO,
-    # crop_output TODO,
+    plot_axis,
+    verbose,
+    rebin,
+    pixel_size_detector,
     positivity,
     beta,
     detwin,
-    rebin,
-    verbose,
-    pixel_size_detector,
+    calc_llk,
+    unused_label_mask_options,
+    zero_mask,
+    mask_interp,
     unused_label_phase_retrieval,
     run_phase_retrieval,
     unused_label_run_pynx_tools,
@@ -73,98 +80,116 @@ def init_phase_retrieval_tab(
     python using the operators.
 
     :param parent_folder: folder in which the raw data files are, and where the
-     output will be saved
+        output will be saved
     :param iobs: 2D/3D observed diffraction data (intensity).
-      Assumed to be corrected and following Poisson statistics, will be
-      converted to float32. Dimensions should be divisible by 4 and have a
-      prime factor decomposition up to 7. Internally, the following special
-      values are used:
-      * values<=-1e19 are masked. Among those, values in ]-1e38;-1e19] are
-         estimated values, stored as -(iobs_est+1)*1e19, which can be used
-         to make a loose amplitude projection.
-        Values <=-1e38 are masked (no amplitude projection applied), just
-        below the minimum float32 value
-      * -1e19 < values <= 1 are observed but used as free pixels
-        If the mask is not supplied, then it is assumed that the above
-        special values are used.
+        Assumed to be corrected and following Poisson statistics, will be
+        converted to float32. Dimensions should be divisible by 4 and have a
+        prime factor decomposition up to 7. Internally, the following special
+        values are used:
+        * values<=-1e19 are masked. Among those, values in ]-1e38;-1e19] are
+            estimated values, stored as -(iobs_est+1)*1e19, which can be used
+            to make a loose amplitude projection.
+            Values <=-1e38 are masked (no amplitude projection applied), just
+            below the minimum float32 value
+        * -1e19 < values <= 1 are observed but used as free pixels
+            If the mask is not supplied, then it is assumed that the above
+            special values are used.
     :param support: initial support in real space (1 = inside support,
-     0 = outside)
+        0 = outside)
     :param obj: initial object. If None, it should be initialised later.
     :param mask: mask for the diffraction data (0: valid pixel, >0: masked)
     :param auto_center_resize: if used (command-line keyword) or =True,
-     the input data will be centered and cropped  so that the size of the
-     array is compatible with the (GPU) FFT library used. If 'roi' is used,
-     centering is based on ROI. [default=False]
+        the input data will be centered and cropped  so that the size of the
+        array is compatible with the (GPU) FFT library used. If 'roi' is used,
+        centering is based on ROI. [default=False]
     :param max_size=256: maximum size for the array used for analysis,
-     along all dimensions. The data will be cropped to this value after
-     centering. [default: no maximum size]
+        along all dimensions. The data will be cropped to this value after
+        centering. [default: no maximum size]
     :param support_threshold: must be between 0 and 1. Only points with
-     object amplitude above a value equal to relative_threshold *
-     reference_value are kept in the support.
-     reference_value can either:
-        - use the fact that when converged, the square norm of the object
-        is equal to the number of recorded photons (normalized Fourier
-        Transform). Then: reference_value = sqrt((abs(obj)**2).sum()/
+        object amplitude above a value equal to relative_threshold *
+        reference_value are kept in the support.
+        reference_value can use the fact that when converged, the square norm
+        of the object is equal to the number of recorded photons (normalized
+        Fourier Transform). Then: reference_value = sqrt((abs(obj)**2).sum()/
         nb_points_support)
-        - or use threshold_percentile (see below, very slow, deprecated)
-    :param support_smooth_width: smooth the object amplitude using a
-     gaussian of this width before calculating new support
-     If this is a scalar, the smooth width is fixed to this value.
-     If this is a 3-value tuple (or list or array), i.e. 'smooth_width=2,
-     0.5,600', the smooth width will vary with the number of cycles
-     recorded in the CDI object (as cdi.cycle), varying exponentially from
-     the first to the second value over the number of cycles specified by
-     the last value.
-     With 'smooth_width=a,b,nb':
-     - smooth_width = a * exp(-cdi.cycle/nb*log(b/a)) if cdi.cycle < nb
-     - smooth_width = b if cdi.cycle >= nb
+    :param support_smooth_width: smooth the object amplitude using a gaussian
+        of this width before calculating new support.
+        If this is a scalar, the smooth width is fixed to this value.
+        If this is a 3-value tuple (or list or array), i.e. 'smooth_width=2,
+        0.5,600', the smooth width will vary with the number of cycles
+        recorded in the CDI object (as cdi.cycle), varying exponentially from
+        the first to the second value over the number of cycles specified by
+        the last value.
+        With 'smooth_width=a,b,nb':
+        - smooth_width = a * exp(-cdi.cycle/nb*log(b/a)) if cdi.cycle < nb
+        - smooth_width = b if cdi.cycle >= nb
     :param support_only_shrink: if True, the support can only shrink
-    :param method: either 'max' or 'average' or 'rms' (default), the
-     threshold will be relative to either the maximum amplitude in the
-     object, or the average or root-mean-square amplitude (computed inside
-     support)
     :param support_post_expand=1: after the new support has been calculated,
-    it can be processed using the SupportExpand operator, either one or
-    multiple times, in order to 'clean' the support:
-     - 'post_expand=1' will expand the support by 1 pixel
-     - 'post_expand=-1' will shrink the support by 1 pixel
-     - 'post_expand=(-1,1)' will shrink and then expand the support by
-     1 pixel
-     - 'post_expand=(-2,3)' will shrink and then expand the support by
-     respectively 2 and 3 pixels
+        it can be processed using the SupportExpand operator, either one or
+        multiple times, in order to 'clean' the support:
+        - 'post_expand=1' will expand the support by 1 pixel
+        - 'post_expand=-1' will shrink the support by 1 pixel
+        - 'post_expand=(-1,1)' will shrink and then expand the support by
+            1 pixel
+        - 'post_expand=(-2,3)' will shrink and then expand the support by
+            respectively 2 and 3 pixels
+    :param support_method: either 'max' or 'average' or 'rms' (default), the
+        threshold will be relative to either the maximum amplitude in the
+        object, or the average or root-mean-square amplitude (computed inside
+        support)
+    :param support_autocorrelation_threshold: if no support is given, it will
+        be estimated from the intensity auto-correlation, with this relative
+        threshold. A range can also be given, e.g.
+        support_autocorrelation_threshold=0.09,0.11 and the actual threshold
+        will be randomly chosen between the min and max.
     :param psf: e.g. True
-     whether or not to use the PSF, partial coherence point-spread function,
-     estimated with 50 cycles of Richardson-Lucy
+        whether or not to use the PSF, partial coherence point-spread function,
+        estimated with 50 cycles of Richardson-Lucy
     :param psf_model: "lorentzian", "gaussian" or "pseudo-voigt", or None
-     to deactivate
+        to deactivate
+    :param psf_filter: either None, "hann" or "tukey": window type to
+        filter the PSF update
     :param fwhm: the full-width at half maximum, in pixels
     :param eta: the eta parameter for the pseudo-voigt
     :param update_psf: how often the psf is updated
     :param nb_raar: number of relaxed averaged alternating reflections
-     cycles, which the algorithm will use first. During RAAR and HIO, the
-     support is updated regularly
+        cycles, which the algorithm will use first. During RAAR and HIO, the
+        support is updated regularly
     :param nb_hio: number of hybrid input/output cycles, which the
-     algorithm will use after RAAR. During RAAR and HIO, the support is
-     updated regularly
+        algorithm will use after RAAR. During RAAR and HIO, the support is
+        updated regularly
     :param nb_er: number of error reduction cycles, performed after HIO,
-     without support update
+        without support update
     :param nb_ml: number of maximum-likelihood conjugate gradient to
-     perform after ER
+        perform after ER
     :param nb_run: number of times to run the optimization
     :param nb_run_keep: number of best run results to keep, according to
-     filter_criteria.
-    :param filter_criteria: e.g. "LLK"
+        filter_criteria.
+    :param filter_criteria: e.g. "FLLK"
         criteria onto which the best solutions will be chosen
     :param live_plot: a live plot will be displayed every N cycle
+    :param plot_axis: for 3D data, the axis along which the cut plane will be
+        selected
     :param beta: the beta value for the HIO operator
     :param positivity: True or False
     :param zero_mask: if True, masked pixels (iobs<-1e19) are forced to
-     zero, otherwise the calculated complex amplitude is kept with an
-     optional scale factor.
+        zero, otherwise the calculated complex amplitude is kept with an
+        optional scale factor.
+        'auto' is only valid if using the command line
+    :param mask_interp: e.g. 16,2: interpolate masked pixels from surrounding
+        pixels, using an inverse distance weighting. The first number N
+        indicates that the pixels used for interpolation range from i-N to i+N
+        for pixel i around all dimensions. The second number n that the weight
+        is equal to 1/d**n for pixels with at a distance n.
+        The interpolated values iobs_m are stored in memory as -1e19*(iobs_m+1)
+        so that the algorithm knows these are not trul observations, and are
+        applied with a large confidence interval.
     :param detwin: if set (command-line) or if detwin=True (parameters
-     file), 10 cycles will be performed at 25% of the total number of
-     RAAR or HIO cycles, with a support cut in half to bias towards one
-     twin image
+        file), 10 cycles will be performed at 25% of the total number of
+        RAAR or HIO cycles, with a support cut in half to bias towards one
+        twin image
+    :param calc_llk: interval at which the different Log Likelihood are
+        computed
     :param pixel_size_detector: detector pixel size (meters)
     :param wavelength: experiment wavelength (meters)
     :param detector_distance: detector distance (meters)
@@ -186,42 +211,45 @@ def init_phase_retrieval_tab(
         interface.Dataset.obj = ""
     interface.Dataset.auto_center_resize = auto_center_resize
     interface.Dataset.max_size = max_size
-    interface.Dataset.support_threshold = support_threshold
+
     interface.Dataset.support_only_shrink = support_only_shrink
     interface.Dataset.support_update_period = support_update_period
-    interface.Dataset.support_smooth_width = support_smooth_width
-    interface.Dataset.support_post_expand = support_post_expand
+    interface.Dataset.support_method = support_method
+
     interface.Dataset.psf = psf
     interface.Dataset.psf_model = psf_model
     interface.Dataset.fwhm = fwhm
     interface.Dataset.eta = eta
+    interface.Dataset.psf_filter = None
     interface.Dataset.update_psf = update_psf
+
     interface.Dataset.nb_raar = nb_raar
     interface.Dataset.nb_hio = nb_hio
     interface.Dataset.nb_er = nb_er
     interface.Dataset.nb_ml = nb_ml
     interface.Dataset.nb_run = nb_run
+
     interface.Dataset.filter_criteria = filter_criteria
     interface.Dataset.nb_run_keep = nb_run_keep
     interface.Dataset.live_plot = live_plot
-    # interface.Dataset.zero_mask = zero_mask # TODO
-    # interface.Dataset.crop_output = crop_output # TODO
+    interface.Dataset.verbose = verbose
     interface.Dataset.positivity = positivity
     interface.Dataset.beta = beta
     interface.Dataset.detwin = detwin
-    interface.Dataset.rebin = rebin
-    interface.Dataset.verbose = verbose
+    interface.Dataset.calc_llk = calc_llk
     interface.Dataset.pixel_size_detector = np.round(
         pixel_size_detector * 1e-6, 6)
 
+    interface.Dataset.zero_mask = zero_mask
+
     # Extract dict, list and tuple from strings
-    interface.Dataset.support_threshold = literal_eval(
-        interface.Dataset.support_threshold)
-    interface.Dataset.support_smooth_width = literal_eval(
-        interface.Dataset.support_smooth_width)
-    interface.Dataset.support_post_expand = literal_eval(
-        interface.Dataset.support_post_expand)
-    interface.Dataset.rebin = literal_eval(interface.Dataset.rebin)
+    interface.Dataset.support_threshold = literal_eval(support_threshold)
+    interface.Dataset.support_autocorrelation_threshold = literal_eval(
+        support_autocorrelation_threshold)
+    interface.Dataset.support_smooth_width = literal_eval(support_smooth_width)
+    interface.Dataset.support_post_expand = literal_eval(support_post_expand)
+    interface.Dataset.rebin = literal_eval(rebin)
+    interface.Dataset.mask_interp = literal_eval(mask_interp)
 
     if interface.Dataset.live_plot == 0:
         interface.Dataset.live_plot = False
@@ -239,7 +267,7 @@ def init_phase_retrieval_tab(
     print(
         f"\tCXI input: detector pixel size = {interface.Dataset.pixel_size_detector} m")
 
-    # PyNX arguments text files
+    # PyNX arguments text file
     interface.Dataset.pynx_parameter_gui_file = interface.preprocessing_folder\
         + "/pynx_run.txt"
 
@@ -256,6 +284,7 @@ def init_phase_retrieval_tab(
                 print(
                     f"{interface.preprocessing_folder}/gui_run/ exists", end="\n\n")
 
+            # Init parameter file
             interface.text_file = []
             interface.Dataset.live_plot = False
 
@@ -288,6 +317,8 @@ def init_phase_retrieval_tab(
                 f'support_smooth_width_begin = {interface.Dataset.support_smooth_width[0]}\n',
                 f'support_smooth_width_end = {interface.Dataset.support_smooth_width[1]}\n',
                 f'support_post_expand = {interface.Dataset.support_post_expand}\n'
+                f'support_threshold_method = {interface.Dataset.support_method}\n'
+                f'support_autocorrelation_threshold = {interface.Dataset.support_autocorrelation_threshold}\n'
                 '\n',
             ]
 
@@ -300,19 +331,24 @@ def init_phase_retrieval_tab(
                 if interface.Dataset.psf_model == "pseudo-voigt":
                     interface.text_file.append(
                         f"psf = \"{interface.Dataset.psf_model},{interface.Dataset.fwhm},{interface.Dataset.eta}\"\n")
-            # no PSF, just don't write anything
+
+                # Don't use bc experimental
+                interface.text_file.append(
+                    f"# psf_filter = \"none\"\n")
+
+            # else no PSF, just don't write anything
 
             # Filtering the reconstructions
-            if interface.Dataset.filter_criteria == "LLK":
-                nb_run_keep_LLK = interface.Dataset.nb_run_keep
+            if interface.Dataset.filter_criteria == "FLLK":
+                nb_run_keep_FLLK = interface.Dataset.nb_run_keep
                 nb_run_keep_std = False
 
             elif interface.Dataset.filter_criteria == "std":
-                nb_run_keep_LLK = interface.Dataset.nb_run
+                nb_run_keep_FLLK = interface.Dataset.nb_run
                 nb_run_keep_std = interface.Dataset.nb_run_keep
 
-            elif interface.Dataset.filter_criteria == "LLK_standard_deviation":
-                nb_run_keep_LLK = interface.Dataset.nb_run_keep + \
+            elif interface.Dataset.filter_criteria == "FLLK_standard_deviation":
+                nb_run_keep_FLLK = interface.Dataset.nb_run_keep + \
                     (interface.Dataset.nb_run - interface.Dataset.nb_run_keep) // 2
                 nb_run_keep_std = interface.Dataset.nb_run_keep
 
@@ -320,6 +356,10 @@ def init_phase_retrieval_tab(
             rebin = rebin.replace("(", "")
             rebin = rebin.replace(")", "")
             rebin = rebin.replace(" ", "")
+
+            # Convert zero_mask parameter
+            interface.Dataset.zero_mask = {"True": "1", "False": "1", "auto": "auto"}[
+                interface.Dataset.zero_mask]
 
             # Other parameters
             interface.text_file += [
@@ -332,12 +372,12 @@ def init_phase_retrieval_tab(
                 f'nb_ml = {interface.Dataset.nb_ml}\n',
                 '\n',
                 f'nb_run = {interface.Dataset.nb_run}\n',
-                f'nb_run_keep = {nb_run_keep_LLK}\n',
+                f'nb_run_keep = {nb_run_keep_FLLK}\n',
                 '\n',
                 f'# max_size = {interface.Dataset.max_size}\n',
-                'zero_mask = auto # masked pixels will start from imposed 0 and then let free\n',
+                f'zero_mask = {interface.Dataset.zero_mask}\n',
                 'crop_output= 0 # set to 0 to avoid cropping the output in the .cxi\n',
-                "mask_interp=8,2\n"
+                f"mask_interp={mask_interp[0]},{mask_interp[1]}\n"
                 "confidence_interval_factor_mask=0.5,1.2\n"
                 '\n',
                 f'positivity = {interface.Dataset.positivity}\n',
@@ -364,7 +404,7 @@ def init_phase_retrieval_tab(
 
             if run_phase_retrieval == "batch":
                 # Runs modes directly and saves all data in a "gui_run"
-                # subdir, filter based on LLK
+                # subdir, filter based on FLLK
                 print(
                     f"\nRunning: $ {interface.path_scripts}/run_slurm_job.sh "
                     f"--reconstruct gui --username {interface.user_name} "
@@ -411,11 +451,16 @@ def init_phase_retrieval_tab(
         elif run_phase_retrieval == "operators":
             # Extract data
             print(
-                "\tLog likelihood is updated every 50 iterations.")
-            interface.Dataset.calc_llk = 50  # TODO
+                "\tLog likelihood is updated every "
+                f"{interface.Dataset.calc_llk} iterations."
+            )
 
             # Keep a list of the resulting scans
             interface.reconstruction_file_list = []
+
+            # Convert zero_mask parameter
+            interface.Dataset.zero_mask = {"True": True, "False": False, "auto": False}[
+                interface.Dataset.zero_mask]
 
             try:
                 # Initialise the cdi operator
@@ -443,7 +488,7 @@ def init_phase_retrieval_tab(
                     # Make a copy to gain time
                     cdi = raw_cdi.copy()
 
-                    # Save instance
+                    # Save input data as cxi
                     if i == 0:
                         cxi_filename = "{}/preprocessing/{}.cxi".format(
                             interface.Dataset.scan_folder,
@@ -476,45 +521,62 @@ def init_phase_retrieval_tab(
                         threshold_relative=interface.Dataset.threshold_relative,
                         smooth_width=interface.Dataset.support_smooth_width,
                         force_shrink=interface.Dataset.support_only_shrink,
-                        method='rms',
+                        method=interface.Dataset.support_method,
                         post_expand=interface.Dataset.support_post_expand,
                     )
 
-                    # Initialize the free pixels for LLK
-                    # cdi = InitFreePixels() * cdi
+                    # Initialize the free pixels for FLLK
+                    cdi = InitFreePixels() * cdi
+
+                    # Interpolate the detector gaps
+                    if not interface.Dataset.live_plot:
+                        cdi = ShowCDI(plot_axis=plot_axis) * InterpIobsMask(
+                            interface.Dataset.mask_interp[0],
+                            interface.Dataset.mask_interp[1],
+                        ) * cdi
+                    else:
+                        cdi = InterpIobsMask(
+                            interface.Dataset.mask_interp[0],
+                            interface.Dataset.mask_interp[1],
+                        ) * cdi
 
                     # Initialize the support with autocorrelation, if no
                     # support given
                     if not interface.Dataset.support:
                         sup_init = "autocorrelation"
-                        if isinstance(interface.Dataset.live_plot, int):
-                            cdi = ShowCDI() * ScaleObj() \
-                                * AutoCorrelationSupport(
-                                threshold=0.1,
+                        if not interface.Dataset.live_plot:
+                            cdi = ScaleObj() * AutoCorrelationSupport(
+                                threshold=interface.Dataset.support_autocorrelation_threshold,
                                 verbose=True) * cdi
 
                         else:
-                            cdi = ScaleObj() * AutoCorrelationSupport(
-                                threshold=0.1,
+                            cdi = ShowCDI(plot_axis=plot_axis) * ScaleObj() \
+                                * AutoCorrelationSupport(
+                                threshold=interface.Dataset.support_autocorrelation_threshold,
                                 verbose=True) * cdi
+
                     else:
                         sup_init = "support"
 
-                    # Begin with HIO cycles without PSF and with support
-                    # updates
+                    # Begin phase retrieval
                     try:
-                        # update_psf = 0 probably enough but not sure
                         if interface.Dataset.psf:
                             if interface.Dataset.support_update_period == 0:
                                 cdi = HIO(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
 
                                 # PSF is introduced at 66% of HIO and RAAR
@@ -522,6 +584,7 @@ def init_phase_retrieval_tab(
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
+                                        filter=None,  # None for now bc experimental
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
@@ -529,18 +592,27 @@ def init_phase_retrieval_tab(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
                                         eta=interface.Dataset.eta,
+                                        filter=None,
                                     ) * cdi
 
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    update_psf=interface.Dataset.update_psf
+                                    update_psf=interface.Dataset.update_psf,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** (interface.Dataset.nb_raar // 2) * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    update_psf=interface.Dataset.update_psf
+                                    update_psf=interface.Dataset.update_psf,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -555,13 +627,21 @@ def init_phase_retrieval_tab(
                                 cdi = (sup * HIO(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
 
@@ -571,6 +651,7 @@ def init_phase_retrieval_tab(
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
+                                        filter=None,
                                     ) * cdi
 
                                 elif psf_model == "pseudo-voigt":
@@ -578,38 +659,55 @@ def init_phase_retrieval_tab(
                                         model=interface.Dataset.psf_model,
                                         fwhm=interface.Dataset.fwhm,
                                         eta=interface.Dataset.eta,
+                                        filter=None,
                                     ) * cdi
 
                                 cdi = (sup * RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    update_psf=interface.Dataset.update_psf
+                                    update_psf=interface.Dataset.update_psf,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
-                                    update_psf=interface.Dataset.update_psf
+                                    update_psf=interface.Dataset.update_psf,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
                         if not interface.Dataset.psf:
                             if interface.Dataset.support_update_period == 0:
-
                                 cdi = HIO(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_hio * cdi
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_raar * cdi
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
@@ -623,26 +721,36 @@ def init_phase_retrieval_tab(
                                 cdi = (sup * HIO(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
                                 cdi = (sup * RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
                                 cdi = (sup * ER(
                                     calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** er_power * cdi
 
-                        fn = "{}/result_scan_{}_run_{}_LLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
+                        fn = "{}/result_scan_{}_run_{}_FLLK_{:.4}_support_threshold_{:.4}_shape_{}_{}_{}_{}.cxi".format(
                             interface.Dataset.parent_folder,
                             interface.Dataset.scan,
                             i,
-                            cdi.get_llk()[0],
+                            cdi.get_llk(normalized=True)[
+                                3],  # check pynx for this
                             interface.Dataset.threshold_relative,
                             cdi.iobs.shape[0],
                             cdi.iobs.shape[1],
@@ -677,9 +785,10 @@ def init_phase_retrieval_tab(
                     "Phase retrieval stopped by user, cxi file list below."
                 )
 
-            interface.cxi_file_list = list_reconstructions(
+            interface.cxi_files_list = list_files(
                 folder=interface.preprocessing_folder,
-                scan_name=interface.Dataset.scan_name
+                glob_pattern="*.cxi",
+                verbose=True,
             )
 
     # Modes decomposition and solution filtering
@@ -703,9 +812,10 @@ def init_phase_retrieval_tab(
         print("Cleared output.")
         clear_output(True)
 
-        interface.cxi_file_list = list_reconstructions(
-            folder=interface.preprocessing_folder,
-            scan_name=interface.Dataset.scan_name
+        interface.cxi_files_list = list_files(
+            folder=interface.Dataset.parent_folder,
+            glob_pattern="*.cxi",
+            verbose=True,
         )
 
         # Refresh folders
@@ -731,14 +841,14 @@ def filter_reconstructions(
     folder,
     nb_run_keep,
     nb_run=None,
-    filter_criteria="LLK"
+    filter_criteria="FLLK"
 ):
     """
     Filter the phase retrieval output depending on a given parameter,
-    for now only LLK and standard deviation are available. This allows the
+    for now only FLLK and standard deviation are available. This allows the
     user to run a lot of reconstructions but to then automatically keep the
     "best" ones, according to this parameter. filter_criteria can take the
-    values "LLK" or "standard_deviation" If you filter based on both, the
+    values "FLLK" or "standard_deviation" If you filter based on both, the
     function will filter nb_run_keep/2 files by the first criteria, and the
     remaining files by the second criteria.
 
@@ -749,10 +859,10 @@ def filter_reconstructions(
      according to filter_criteria.
     :param nb_run: number of times to run the optimization, if None, equal
      to nb of files detected
-    :param filter_criteria: default "LLK"
+    :param filter_criteria: default "FLLK"
      criteria onto which the best solutions will be chosen
-     possible values are ("standard_deviation", "LLK",
-     "standard_deviation_LLK", "LLK_standard_deviation")
+     possible values are ("standard_deviation", "FLLK",
+     "standard_deviation_FLLK", "FLLK_standard_deviation")
     """
     # Sorting functions depending on filtering criteria
     def filter_by_std(cxi_files, nb_run_keep):
@@ -800,7 +910,7 @@ def filter_reconstructions(
             "###################\n"
         )
 
-    def filter_by_LLK(cxi_files, nb_run_keep):
+    def filter_by_FLLK(cxi_files, nb_run_keep):
         """
         Use the free log-likelihood values of the reconstructed object
         as filtering criteria.
@@ -817,13 +927,13 @@ def filter_reconstructions(
             "#####################"
             "#####################"
         )
-        print("Extracting LLK value (poisson statistics) for scans:")
+        print("Extracting FLLK value (poisson statistics) for scans:")
         for filename in cxi_files:
             print(f"\t{os.path.basename(filename)}")
             with tb.open_file(filename, "r") as f:
-                llk = f.root.entry_1.image_1.process_1.\
-                    results.llk_poisson[...]
-                filtering_criteria_value[filename] = llk
+                fllk = f.root.entry_1.image_1.process_1.\
+                    results.free_llk_poisson[...]
+                filtering_criteria_value[filename] = fllk
 
         # Sort files
         sorted_dict = sorted(
@@ -845,36 +955,44 @@ def filter_reconstructions(
 
     # Main function supporting different cases
     try:
+        glob_pattern = "*FLLK*.cxi"
         print(
-            "\n###################"
-            "#####################"
-            "#####################"
-            "#####################"
+            "\n########################################"
+            "##########################################"
         )
         print("Iterating on files matching:")
-        print(f"\t{folder}/*LLK*.cxi")
-        cxi_files = sorted(glob.glob(f"{folder}/*LLK*.cxi"))
+        print(f"\t{folder}/{glob_pattern}")
+        cxi_files = list_files(
+            folder=folder,
+            glob_pattern=glob_pattern,
+        )
         print(
-            "#####################"
-            "#####################"
-            "#####################"
-            "###################\n"
+            "##########################################"
+            "########################################\n"
         )
 
         if cxi_files == []:
-            print(f"No *LLK*.cxi files in {folder}/*LLK*.cxi")
+            print(
+                f"No match for {folder}/*FLLK*.cxi"
+                f"Trying with {folder}/*LLK*.cxi"
+            )
+            glob_pattern = "*LLK*.cxi"
+            cxi_files = list_files(
+                folder=folder,
+                glob_pattern=glob_pattern,
+            )
 
         else:
             # only standard_deviation
             if filter_criteria is "standard_deviation":
                 filter_by_std(cxi_files, nb_run_keep)
 
-            # only LLK
-            elif filter_criteria is "LLK":
-                filter_by_LLK(cxi_files, nb_run_keep)
+            # only FLLK
+            elif filter_criteria is "FLLK":
+                filter_by_FLLK(cxi_files, nb_run_keep)
 
-            # standard_deviation then LLK
-            elif filter_criteria is "standard_deviation_LLK":
+            # standard_deviation then FLLK
+            elif filter_criteria is "standard_deviation_FLLK":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
@@ -883,33 +1001,35 @@ def filter_reconstructions(
 
                 print("Iterating on remaining files.")
 
-                cxi_files = sorted(
-                    glob.glob(f"{folder}/*LLK*.cxi"))
+                cxi_files = list_files(
+                    folder=folder,
+                    glob_pattern=glob_pattern,
+                )
 
                 if cxi_files == []:
                     print(
-                        f"No *LLK*.cxi files remaining in \
-                        {folder}/*LLK*.cxi")
+                        f"No {glob_pattern} files remaining in {folder}")
                 else:
-                    filter_by_LLK(cxi_files, nb_run_keep)
+                    filter_by_FLLK(cxi_files, nb_run_keep)
 
-            # LLK then standard_deviation
-            elif filter_criteria is "LLK_standard_deviation":
+            # FLLK then standard_deviation
+            elif filter_criteria is "FLLK_standard_deviation":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
-                filter_by_LLK(cxi_files, nb_run_keep +
-                              (nb_run - nb_run_keep) // 2)
+                filter_by_FLLK(cxi_files, nb_run_keep +
+                               (nb_run - nb_run_keep) // 2)
 
                 print("Iterating on remaining files.")
 
-                cxi_files = sorted(
-                    glob.glob(f"{folder}/*LLK*.cxi"))
+                cxi_files = list_files(
+                    folder=folder,
+                    glob_pattern=glob_pattern,
+                )
 
                 if cxi_files == []:
                     print(
-                        f"No *LLK*.cxi files remaining in \
-                        {folder}/*LLK*.cxi")
+                        f"No {glob_pattern} files remaining in {folder}")
                 else:
                     filter_by_std(cxi_files, nb_run_keep)
 
@@ -952,31 +1072,29 @@ def initialize_cdi_operator(
 
     return: cdi operator
     """
-    if iobs in ("", None) and os.path.isfile(iobs):
-        # Dataset.iobs = None
+    if os.path.isfile(str(iobs)):
+        if iobs.endswith(".npy"):
+            iobs = np.load(iobs)
+            print("\tCXI input: loading data")
+        elif iobs.endswith(".npz"):
+            try:
+                iobs = np.load(iobs)["data"]
+                print("\tCXI input: loading data")
+            except KeyError:
+                print("\t\"data\" key does not exist.")
+                return None
+        if rebin != (1, 1, 1):
+            iobs = bin_data(iobs, rebin)
+            print("\tBinned data.")
+
+        iobs = fftshift(iobs)
+
+    else:
         iobs = None
         print("At least iobs must exist.")
-        return None  # stop function directly
+        return None
 
-    if iobs.endswith(".npy"):
-        iobs = np.load(iobs)
-        print("\tCXI input: loading data")
-    elif iobs.endswith(".npz"):
-        try:
-            iobs = np.load(iobs)["data"]
-            print("\tCXI input: loading data")
-        except KeyError:
-            print("\t\"data\" key does not exist.")
-            raise KeyboardInterrupt
-
-    if rebin != (1, 1, 1):
-        iobs = bin_data(iobs, rebin)
-        print("\tBinned data.")
-
-    # fft shift
-    iobs = fftshift(iobs)
-
-    if mask not in ("", None) and os.path.isfile(mask):
+    if os.path.isfile(str(mask)):
         if mask.endswith(".npy"):
             mask = np.load(mask).astype(np.int8)
             nb = mask.sum()
@@ -996,13 +1114,12 @@ def initialize_cdi_operator(
             mask = bin_data(mask, rebin)
             print("\tBinned mask.")
 
-        # fft shift
         mask = fftshift(mask)
 
     else:
         mask = None
 
-    if support not in ("", None) and os.path.isfile(support):
+    if os.path.isfile(str(support)):
         if support.endswith(".npy"):
             support = np.load(support)
             print("\tCXI input: loading support")
@@ -1032,13 +1149,12 @@ def initialize_cdi_operator(
             support = bin_data(support, rebin)
             print("\tBinned support.")
 
-        # fft shift
         support = fftshift(support)
 
     else:
         support = None
 
-    if obj not in ("", None) and os.path.isfile(obj):
+    if os.path.isfile(str(obj)):
         if obj.endswith(".npy"):
             obj = np.load(obj)
             print("\tCXI input: loading object")
@@ -1053,7 +1169,6 @@ def initialize_cdi_operator(
             obj = bin_data(obj, rebin)
             print("\tBinned obj.")
 
-        # fft shift
         obj = fftshift(obj)
 
     else:
@@ -1191,8 +1306,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["output_format"] = "cxi"
     cdi_parameters["mask"] = gwaihir_dataset.mask
     cdi_parameters["support"] = gwaihir_dataset.support
-    # cdi_parameters["support_autocorrelation_threshold"]\
-    # = gwaihir_dataset.support_autocorrelation_threshold
+    cdi_parameters["support_autocorrelation_threshold"] = gwaihir_dataset.support_autocorrelation_threshold
     cdi_parameters["support_only_shrink"] = gwaihir_dataset.support_only_shrink
     cdi_parameters["object"] = gwaihir_dataset.obj
     cdi_parameters["support_update_period"] = gwaihir_dataset.support_update_period
@@ -1208,8 +1322,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["rebin"] = gwaihir_dataset.rebin
     # cdi_parameters["support_update_border_n"] \
     # = gwaihir_dataset.support_update_border_n
-    # cdi_parameters["support_threshold_method"] \
-    # = gwaihir_dataset.support_threshold_method
+    cdi_parameters["support_threshold_method"] = gwaihir_dataset.support_method
     cdi_parameters["support_post_expand"] = gwaihir_dataset.support_post_expand
     cdi_parameters["psf"] = gwaihir_dataset.psf
     # cdi_parameters["note"] = gwaihir_dataset.note
@@ -1220,7 +1333,7 @@ def save_cdi_operator_as_cxi(
     cdi_parameters["sample_name"] = gwaihir_dataset.sample_name
     # cdi_parameters["fig_num"] = gwaihir_dataset.fig_num
     # cdi_parameters["algorithm"] = gwaihir_dataset.algorithm
-    cdi_parameters["zero_mask"] = "auto"
+    cdi_parameters["zero_mask"] = gwaihir_dataset.zero_mask
     cdi_parameters["nb_run_keep"] = gwaihir_dataset.nb_run_keep
     # cdi_parameters["save"] = gwaihir_dataset.save
     # cdi_parameters["gps_inertia"] = gwaihir_dataset.gps_inertia
@@ -1232,7 +1345,7 @@ def save_cdi_operator_as_cxi(
     # cdi_parameters["free_pixel_mask"] = gwaihir_dataset.free_pixel_mask
     # cdi_parameters["support_formula"] = gwaihir_dataset.support_formula
     # cdi_parameters["mpi"] = "run"
-    # cdi_parameters["mask_interp"] = gwaihir_dataset.mask_interp
+    cdi_parameters["mask_interp"] = gwaihir_dataset.mask_interp
     # cdi_parameters["confidence_interval_factor_mask_min"] \
     # = gwaihir_dataset.confidence_interval_factor_mask_min
     # cdi_parameters["confidence_interval_factor_mask_max"] \
@@ -1247,7 +1360,7 @@ def save_cdi_operator_as_cxi(
     # cdi_parameters["nb_run_keep_max_obj2_out"] \
     # = gwaihir_dataset.nb_run_keep_max_obj2_out
     # cdi_parameters["flatfield"] = gwaihir_dataset.flatfield
-    # cdi_parameters["psf_filter"] = gwaihir_dataset.psf_filter
+    cdi_parameters["psf_filter"] = gwaihir_dataset.psf_filter
     cdi_parameters["detwin"] = gwaihir_dataset.detwin
     cdi_parameters["nb_raar"] = gwaihir_dataset.nb_raar
     cdi_parameters["nb_hio"] = gwaihir_dataset.nb_hio
@@ -1271,38 +1384,37 @@ def save_cdi_operator_as_cxi(
     )
 
 
-def list_reconstructions(
+def list_files(
     folder,
-    scan_name,
+    glob_pattern="*FLLK*.cxi",
+    verbose=False,
 ):
     """List all cxi files in the folder and sort by creation time"""
-    cxi_file_list = [f for f in sorted(
-        glob.glob(folder + "*.cxi"),
+    file_list = [f for f in sorted(
+        glob.glob(folder + "/" + glob_pattern),
         key=os.path.getmtime,
         reverse=True,
-    )  # if not os.path.basename(f).startswith(scan_name)
+    )
     ]
 
-    print(
-        "################################################"
-        "################################################"
-    )
-    for j, f in enumerate(cxi_file_list):
-        file_timestamp = datetime.fromtimestamp(
-            os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
+    if verbose:
         print(
-            f"File: {os.path.basename(f)}"
-            f"\n\tCreated: {file_timestamp}"
+            "################################################"
+            "################################################"
         )
-        if j != len(cxi_file_list)-1:
-            print("")
-        else:
+        for j, f in enumerate(file_list):
+            file_timestamp = datetime.fromtimestamp(
+                os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
             print(
-                "################################################"
-                "################################################"
+                f"\nFile: {os.path.basename(f)}"
+                f"\n\tCreated: {file_timestamp}"
             )
+        print(
+            "################################################"
+            "################################################"
+        )
 
-    return cxi_file_list
+    return file_list
 
 
 def run_modes_decomposition(
@@ -1313,27 +1425,50 @@ def run_modes_decomposition(
     Decomposes several phase retrieval solutions into modes, saves only
     the first mode to save space.
 
+    All files corresponding to *FLLK* pattern are loaded, if no files are
+    loaded, trying with *LLK* pattern.
+
     :param path_scripts: absolute path to script containing
      folder
-    :param folder: path to folder in which are stored
-     the .cxi files, all files corresponding to
-     *LLK* pattern are loaded
+    :param folder: path to folder in which are stored the reconstructions
     """
-    try:
+
+    glob_pattern = "*FLLK*.cxi"
+    cxi_files_list = list_files(
+        folder=folder,
+        glob_pattern=glob_pattern,
+    )
+
+    if cxi_files_list == []:
+        glob_pattern = "*LLK*.cxi"
+        cxi_files_list = list_files(
+            folder=folder,
+            glob_pattern=glob_pattern,
+        )
+        if cxi_files_list == []:
+            print(
+                "Could not find any files matching the *LLK*.cxi* "
+                "or *FLLK*.cxi patterns."
+            )
+            glob_pattern = False
+
+    if isinstance(glob_pattern, str):
         print(
             "\n###########################################"
             "#############################################"
-            f"\nUsing {path_scripts}/pynx-cdi-analysis.py"
-            f"\nUsing {folder}/*LLK* files."
-            f"\nRunning: $ pynx-cdi-analysis.py *LLK* modes=1"
+            f"\nUsing {path_scripts}/pynx-cdi-analysis"
+            f"\nUsing {folder}/{glob_pattern} files."
+            f"\nRunning: $ pynx-cdi-analysis {glob_pattern} modes=1"
             f"\nOutput in {folder}/modes_gui.h5"
             "\n###########################################"
             "#############################################"
         )
+    try:
         os.system(
-            "{}/pynx-cdi-analysis.py {}/*LLK* modes=1 modes_output={}/modes_gui.h5".format(
+            "{}/pynx-cdi-analysis {}/{} modes=1 modes_output={}/modes_gui.h5".format(
                 quote(path_scripts),
                 quote(folder),
+                glob_pattern,
                 quote(folder),
             )
         )

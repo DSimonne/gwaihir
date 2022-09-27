@@ -20,6 +20,9 @@ class Dataset:
         self.scan = scan
         self.sample_name = sample_name
         self.data_dir = data_dir
+        self.reconstruction_file = None
+        self.postprocessing_output_file = None
+
         if root_folder.endswith("/"):
             self.root_folder = root_folder
         else:
@@ -47,138 +50,158 @@ class Dataset:
 
     def to_cxi(
         self,
-        raw_data_cxi_filename,
-        final_cxi_filename,
-        reconstruction_filename=None,
-        strain_output_file=None,
+        raw_data_cxi_file,
+        final_cxi_file,
     ):
         """
         Save all the parameters used in the data analysis with a specific
         architecture based on NeXuS.
 
-        :param raw_data_cxi_filename: path to .cxi file that contains the preprocessed
-         data, created thanks to PyNX.
-         This file is used as base for the final cxi file.
-        :param final_cxi_filename: path to .cxi file that will regroup all the
-         data and parameters of the Dataset object.
-        :param reconstruction_filename: path to .cxi or .h5 file, output of
-         phase retrieval chosen for postprocessing.
-        :param strain_output_file: path to .h5 file, output from postprocessing
-        """
+        :param raw_data_cxi_file: path to .cxi file that contains the
+            preprocessed data, created thanks to PyNX.
+            This file is used as base for the final cxi file.
+        :param final_cxi_file: path to .cxi file that will regroup all the
+            data and parameters of the Dataset object.
 
-        # Copy cxi file, and use it as starter for the end file
-        shutil.copy(raw_data_cxi_filename,  # src
-                    final_cxi_filename,  # dest
-                    )
+        Uses the following attributes from the class that should be defined in
+            te workflow:
+        :reconstruction_file: path to .cxi or .h5 file, output of
+            phase retrieval chosen for postprocessing.
+        :postprocessing_output_file: path to .h5 file, output from postprocessing
+        """
+        # Delete the file if it already exists
+        if os.path.exists(final_cxi_file):
+            os.remove(final_cxi_file)
+
+        # Copy raw data cxi file, and use it as starter for the end file
+        shutil.copy(raw_data_cxi_file,  final_cxi_file)
 
         # Add info from postprocessing if possible
-        if os.path.isfile(reconstruction_filename):
-            with h5py.File(reconstruction_filename, "r") as reconstruction_file, \
-                    h5py.File(final_cxi_filename, "a") as final_file:
-
+        if os.path.isfile(str(self.reconstruction_file)):
+            print(
+                "\n###########################################"
+                "#############################################"
+                "\nReconstruction file used to save phase "
+                "retrieval results in the final .cxi file:"
+                f"\n\t{os.path.split(self.reconstruction_file)[0]}"
+                f"\n\t{os.path.split(self.reconstruction_file)[1]}"
+                "\n###########################################"
+                "#############################################"
+            )
+            with h5py.File(self.reconstruction_file, "r") as reconstruction_file, \
+                    h5py.File(final_cxi_file, "a") as f:
                 print("\nSaving phase retrieval output ...")
 
                 # Copy image_1 from reconstruction to entry_1.image_2
                 try:
                     reconstruction_file.copy(
-                        '/entry_1/image_1/', final_file["entry_1"],
+                        '/entry_1/image_1/', f["entry_1"],
                         name="image_2")
                 except RuntimeError:
-                    del final_file["entry_1"]["image_2"]
+                    del f["entry_1"]["image_2"]
                     reconstruction_file.copy(
-                        '/entry_1/image_1/', final_file["entry_1"],
+                        '/entry_1/image_1/', f["entry_1"],
                         name="image_2")
 
                 # Save file name
-                final_file["entry_1"]["image_2"].create_dataset(
-                    "reconstruction_filename",
-                    data=reconstruction_filename
+                f["entry_1"]["image_2"].create_dataset(
+                    "reconstruction_file",
+                    data=self.reconstruction_file
                 )
 
                 # Update params if reconstruction file results
                 # from mode decomposition
-                if reconstruction_filename.endswith(".h5"):
-                    final_file["entry_1"]["image_2"].create_dataset(
+                if self.reconstruction_file.endswith(".h5"):
+                    f["entry_1"]["image_2"].create_dataset(
                         "data_space", data="real")
-                    final_file["entry_1"]["image_2"].create_dataset(
+                    f["entry_1"]["image_2"].create_dataset(
                         "data_type", data="electron density")
 
                 # Update entry_1.image_2.support softlink
-                if reconstruction_filename.endswith(".cxi"):
-                    del final_file["entry_1"]["image_2"]["support"]
-                    final_file["entry_1"]["image_2"]["support"] = h5py.SoftLink(
+                elif self.reconstruction_file.endswith(".cxi"):
+                    del f["entry_1"]["image_2"]["support"]
+                    f["entry_1"]["image_2"]["support"] = h5py.SoftLink(
                         "/entry_1/image_2/mask")
 
                 # Create entry_1.data_2 and create softlink to
                 # entry_1.image_2.data
                 try:
-                    group = final_file["entry_1"].create_group(
-                        "data_2")
-                    group["data"] = h5py.SoftLink(
-                        "/entry_1/image_2/data")
+                    group = f["entry_1"].create_group("data_2")
+                    group["data"] = h5py.SoftLink("/entry_1/image_2/data")
                 except ValueError:
-                    group = final_file["entry_1"]["data_2"]
-                    del final_file["entry_1"]["data_2"]["data"]
-                    group["data"] = h5py.SoftLink(
-                        "/entry_1/image_2/data")
+                    del f["entry_1"]["data_2"]["data"]
+                    group = f["entry_1"]["data_2"]
+                    group["data"] = h5py.SoftLink("/entry_1/image_2/data")
                 # Assign correct type to entry_1.data_2
-                final_file["entry_1"]["data_2"].attrs['NX_class'] = 'NXdata'
-                final_file["entry_1"]["data_2"].attrs['signal'] = 'data'
+                f["entry_1"]["data_2"].attrs['NX_class'] = 'NXdata'
+                f["entry_1"]["data_2"].attrs['signal'] = 'data'
 
                 # Rename entry_1.image_2.process_1 to entry_1.image_2.process_2
                 try:
-                    final_file["entry_1"]["image_2"]["process_1"].move(
+                    f["entry_1"]["image_2"]["process_1"].move(
                         "/entry_1/image_2/process_1/",
                         "/entry_1/image_2/process_2/")
                 except ValueError:
-                    del final_file["entry_1"]["image_2"]["process_2"]
-                    final_file["entry_1"]["image_2"]["process_1"].move(
+                    del f["entry_1"]["image_2"]["process_2"]
+                    f["entry_1"]["image_2"]["process_1"].move(
                         "/entry_1/image_2/process_1/",
                         "/entry_1/image_2/process_2/")
                 # Assign correct type to entry_1.image_2.process_2
-                final_file["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
+                f["entry_1"]["image_2"]["process_2"].attrs['NX_class'] = 'NXprocess'
 
                 # Move PyNX configuration
                 try:
-                    conf = final_file["entry_1"]["data_1"]["process_1"]["configuration"]
-                    if reconstruction_filename.endswith(".h5"):
-                        final_file.create_group(
+                    conf = f["entry_1"]["data_1"]["process_1"]["configuration"]
+                    if self.reconstruction_file.endswith(".h5"):
+                        f.create_group(
                             "entry_1/image_2/process_2/configuration/")
                     for k in conf.keys():
-                        final_file.move(
+                        f.move(
                             f"entry_1/data_1/process_1/configuration/{k}",
                             f"entry_1/image_2/process_2/configuration/{k}"
                         )
 
-                    del final_file["entry_1"]["data_1"]["process_1"]
+                    del f["entry_1"]["data_1"]["process_1"]
                 except KeyError:
                     # Already moved or does not exist
                     pass
-                final_file.move("entry_1/program_name",
-                                "entry_1/image_2/process_2/program_name")
+                f.move(
+                    "entry_1/program_name",
+                    "entry_1/image_2/process_2/program_name"
+                )
 
                 # Delete entry_1.instrument_1 if exists
                 try:
-                    del final_file["entry_1"]["image_2"]["instrument_1"]
+                    del f["entry_1"]["image_2"]["instrument_1"]
                 except KeyError:
                     pass
 
                 # Also copy mode data to entry_1.image_2.modes_percentage
-                if reconstruction_filename.endswith(".h5"):
+                if self.reconstruction_file.endswith(".h5"):
                     try:
-                        reconstruction_file.copy(
+                        self.reconstruction_file.copy(
                             '/entry_1/data_2/',
-                            final_file["entry_1"]["image_2"],
+                            f["entry_1"]["image_2"],
                             name="modes_percentage")
                     except RuntimeError:
-                        del final_file["entry_1"]["image_2"]["modes_percentage"]
-                        reconstruction_file.copy(
+                        del f["entry_1"]["image_2"]["modes_percentage"]
+                        self.reconstruction_file.copy(
                             '/entry_1/data_2/',
-                            final_file["entry_1"]["image_2"],
+                            f["entry_1"]["image_2"],
                             name="modes_percentage")
 
+        else:
+            print(
+                "\n###########################################"
+                "#############################################"
+                "No file selected for phase retrieval output."
+                "\n\tUse Dataset.reconstruction_file attribute."
+                "\n###########################################"
+                "#############################################"
+            )
+
         # Add GUI data
-        with h5py.File(final_cxi_filename, "a") as f:
+        with h5py.File(final_cxi_file, "a") as f:
             # Save packages version
             f.create_dataset("gwaihir_version", data="gwaihir %s" %
                              self._gwaihir_version)
@@ -228,14 +251,15 @@ class Dataset:
                     "background_plot", data=self.background_plot)
 
             except AttributeError:
-                print("Could not save masking parameters")
+                print("\tCould not save masking parameters")
 
             # Cropping padding centering
             cropping_padding_centering = preprocessing.create_group(
                 "cropping_padding_centering")
             try:
                 cropping_padding_centering.create_dataset(
-                    "centering_method", data=self.centering_method)
+                    "centering_method_reciprocal_space",
+                    data=self.centering_method_reciprocal_space)
                 cropping_padding_centering.create_dataset(
                     "fix_size", data=self.fix_size)
                 cropping_padding_centering.create_dataset(
@@ -243,7 +267,7 @@ class Dataset:
                 cropping_padding_centering.create_dataset(
                     "pad_size", data=self.pad_size)
             except AttributeError:
-                print("Could not save cropping padding centering parameters")
+                print("\tCould not save cropping padding centering parameters")
 
             # Intensity normalization
             intensity_normalization = preprocessing.create_group(
@@ -252,7 +276,7 @@ class Dataset:
                 intensity_normalization.create_dataset(
                     "normalize_flux", data=self.normalize_flux)
             except AttributeError:
-                print("Could not save intensity normalization parameters")
+                print("\tCould not save intensity normalization parameters")
 
             # Data filtering
             data_filtering = preprocessing.create_group("data_filtering")
@@ -264,7 +288,7 @@ class Dataset:
                 data_filtering.create_dataset(
                     "median_filter_order", data=self.median_filter_order)
             except AttributeError:
-                print("Could not save data filtering parameters")
+                print("\tCould not save data filtering parameters")
 
             # Saving options
             saving_options = preprocessing.create_group("saving_options")
@@ -280,7 +304,7 @@ class Dataset:
                 saving_options.create_dataset(
                     "save_as_int", data=self.save_as_int)
             except AttributeError:
-                print("Could not save saving options")
+                print("\tCould not save saving options")
 
             # Reloading options
             reload_options = preprocessing.create_group("reload_options")
@@ -292,7 +316,7 @@ class Dataset:
                 reload_options.create_dataset(
                     "preprocessing_binning", data=self.preprocessing_binning)
             except AttributeError:
-                print("Could not save reloading options")
+                print("\tCould not save reloading options")
 
             # Beamline
             beamline = preprocessing.create_group("beamline")
@@ -305,7 +329,7 @@ class Dataset:
                 beamline.create_dataset(
                     "rocking_angle", data=self.rocking_angle)
             except (AttributeError, TypeError):
-                print("Could not save beamline parameters")
+                print("\tCould not save beamline parameters")
 
             try:
                 beamline.create_dataset("custom_scan", data=self.custom_scan)
@@ -316,7 +340,7 @@ class Dataset:
                 beamline.create_dataset(
                     "custom_monitor", data=self.custom_motors)
             except (AttributeError, TypeError):
-                print("Could not save custom parameters")
+                print("\tCould not save custom parameters")
 
             # Detector
             detector = preprocessing.create_group("detector")
@@ -335,34 +359,13 @@ class Dataset:
                 detector.create_dataset(
                     "template_imagefile", data=str(self.template_imagefile))
             except AttributeError:
-                print("Could not save detector parameters")
+                print("\tCould not save detector parameters")
 
             try:
                 detector.create_dataset("nb_pixel_x", data=self.nb_pixel_x)
                 detector.create_dataset("nb_pixel_y", data=self.nb_pixel_y)
             except (TypeError, AttributeError):
                 pass
-
-            # Temperature estimation, not really used
-            # temperature_estimation = parameters.create_group(
-            #     "temperature_estimation")
-            # try:
-            #     temperature_estimation.create_dataset(
-            #         "reflection", data=self.reflection)
-            #     temperature_estimation.create_dataset(
-            #         "reference_spacing", data=self.reference_spacing)
-            #     temperature_estimation.create_dataset(
-            #         "reference_temperature", data=self.reference_temperature)
-            #     temperature_estimation["reference_temperature"].attrs['units'] = 'Celsius'
-
-            # except AttributeError:
-            #     print("Could not save temperature_estimation parameters")
-
-            # try:
-            #     temperature_estimation.create_dataset(
-            #         "estimated_temperature", data=self.temperature)
-            # except AttributeError:
-            #     print("No estimated temperature")
 
             # Angles correction
             angles_corrections = parameters.create_group("angles_corrections")
@@ -390,7 +393,7 @@ class Dataset:
                 angles_corrections.create_dataset(
                     "bragg_outofplane", data=self.bragg_outofplane)
             except AttributeError:
-                print("Could not save setup parameters")
+                print("\tCould not save setup parameters")
 
             # Orthogonalisation
             print(
@@ -422,7 +425,7 @@ class Dataset:
                 linearized_transformation_matrix.create_dataset(
                     "custom_motors", data=str(self.custom_motors))
             except AttributeError:
-                print("Could not save linearized transformation matrix parameters")
+                print("\tCould not save linearized transformation matrix parameters")
 
             # xrayutilities
             xrayutilities = orthogonalisation.create_group("xrayutilities")
@@ -457,14 +460,7 @@ class Dataset:
                 xrayutilities.create_dataset(
                     "tilt_detector", data=self.tilt_detector)
             except AttributeError:
-                print("Could not save xrayutilities parameters")
-
-            # Tranformation matrix
-            try:
-                orthogonalisation.create_dataset(
-                    "transfer_matrix", data=self.transfer_matrix)
-            except AttributeError:
-                print("Could not save transfer_matrix")
+                print("\tCould not save xrayutilities parameters")
 
             # Postprocessing
             postprocessing = parameters.create_group("postprocessing")
@@ -482,7 +478,7 @@ class Dataset:
                 averaging_reconstructions.create_dataset(
                     "correlation_threshold", data=self.correlation_threshold)
             except AttributeError:
-                print("Could not save averaging reconstructions parameters")
+                print("\tCould not save averaging reconstructions parameters")
 
             # FFT_window_voxel
             FFT_window_voxel = postprocessing.create_group("FFT_window_voxel")
@@ -500,7 +496,7 @@ class Dataset:
                 FFT_window_voxel.create_dataset(
                     "fix_voxel", data=str(self.fix_voxel))
             except AttributeError:
-                print("Could not save angles_corrections parameters")
+                print("\tCould not save angles_corrections parameters")
 
             # Displacement strain calculation
             displacement_strain_calculation = postprocessing.create_group(
@@ -525,9 +521,10 @@ class Dataset:
                 displacement_strain_calculation.create_dataset(
                     "offset_method", data=self.offset_method)
                 displacement_strain_calculation.create_dataset(
-                    "centering_method", data=self.centering_method)
+                    "centering_method_direct_space",
+                    data=self.centering_method_direct_space)
             except AttributeError:
-                print("Could not save displacement & strain calculation parameters")
+                print("\tCould not save displacement & strain calculation parameters")
 
             # Refraction
             refraction = postprocessing.create_group("refraction")
@@ -542,7 +539,7 @@ class Dataset:
                     "threshold_unwrap_refraction",
                     data=self.threshold_unwrap_refraction)
             except AttributeError:
-                print("Could not save refraction parameters")
+                print("\tCould not save refraction parameters")
 
             # Options
             options = postprocessing.create_group("options")
@@ -561,7 +558,7 @@ class Dataset:
                 options.create_dataset("debug", data=self.debug)
                 options.create_dataset("roll_modes", data=self.roll_modes)
             except AttributeError:
-                print("Could not save postprocessing options")
+                print("\tCould not save postprocessing options")
 
             # Data visualisation
             data_visualisation = postprocessing.create_group(
@@ -588,7 +585,7 @@ class Dataset:
                 data_visualisation.create_dataset(
                     "tick_width", data=self.tick_width)
             except AttributeError:
-                print("Could not save data visualisation parameters")
+                print("\tCould not save data visualisation parameters")
 
             # Averaging reconstructed objects
             averaging_reconstructed_objects = postprocessing.create_group(
@@ -597,7 +594,7 @@ class Dataset:
                 averaging_reconstructed_objects.create_dataset(
                     "averaging_space", data=self.averaging_space)
             except AttributeError:
-                print("Could not save averaging reconstructed objects parameters")
+                print("\tCould not save averaging reconstructed objects parameters")
 
             # Phase averaging apodization
             phase_averaging_apodization = postprocessing.create_group(
@@ -616,15 +613,25 @@ class Dataset:
                 phase_averaging_apodization.create_dataset(
                     "apodization_alpha", data=self.apodization_alpha)
             except AttributeError:
-                print("Could not save phase averaging apodization parameters")
+                print("\tCould not save phase averaging apodization parameters")
 
-            # Save strain output
-            try:
-                if os.path.isfile(strain_output_file):
-                    image_3.create_dataset("strain_analysis_output_file",
-                                           data=strain_output_file)
+            # Save postprocessing output
+            if os.path.isfile(str(self.postprocessing_output_file)):
+                print(
+                    "\n###########################################"
+                    "#############################################"
+                    "\nResult file used to save postprocessing "
+                    "results in the final .cxi file:"
+                    f"\n\t{os.path.split(self.postprocessing_output_file)[0]}"
+                    f"\n\t{os.path.split(self.postprocessing_output_file)[1]}"
+                    "\n###########################################"
+                    "#############################################"
+                )
+                try:
+                    image_3.create_dataset("postprocessing_output_file",
+                                           data=self.postprocessing_output_file)
 
-                    with h5py.File(strain_output_file, "r") as fi:
+                    with h5py.File(self.postprocessing_output_file, "r") as fi:
                         image_3.create_dataset("amplitude",
                                                data=fi["output"]["amp"][:],
                                                chunks=True,
@@ -655,20 +662,32 @@ class Dataset:
                         image_3.create_dataset("q_com",
                                                data=fi["output"]["q_com"])
 
+                        # Need to add trans matrix here
+
                     image_3.attrs['signal'] = 'phase'
 
-            except (AttributeError, TypeError):
-                print("Could not save strain output")
+                    # Create data_3 link
+                    data_3["data"] = h5py.SoftLink("/entry_1/image_3/phase")
+                    data_3.attrs['signal'] = 'data'
 
-            # Create data_3 link
-            try:
-                f["entry_1"]["image_3"]["phase"]
-                data_3["data"] = h5py.SoftLink(
-                    "/entry_1/image_3/phase")
-                data_3.attrs['signal'] = 'data'
+                except (AttributeError, TypeError):
+                    print("\tCould not save postprocessing output")
 
-            except KeyError:
-                pass
+            else:
+                print(
+                    "\n###########################################"
+                    "#############################################"
+                    "No file selected for postprocessing output."
+                    "\n\tUse Dataset.postprocessing_output_file attribute."
+                    "\n###########################################"
+                    "#############################################"
+                )
 
         print(
-            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.cxi")
+            "\n###########################################"
+            "#############################################"
+            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.cxi"
+            "\n\tUse Dataset.postprocessing_output_file attribute."
+            "\n###########################################"
+            "#############################################"
+        )

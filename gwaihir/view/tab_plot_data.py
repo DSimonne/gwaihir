@@ -48,7 +48,7 @@ class TabPlotData(widgets.VBox):
                 + glob.glob(os.getcwd() + "/*.nxs")
                 + glob.glob(os.getcwd() + "/*.png"),
                 key=os.path.getmtime)],
-            rows=10,
+            rows=20,
             description='Compatible file list',
             layout=widgets.Layout(width='90%'),
             style={'description_width': 'initial'}
@@ -68,6 +68,9 @@ class TabPlotData(widgets.VBox):
                 ("Clear/ Reload folder", False),
                 ('2D plot', "2D"),
                 ("Plot slices", "slices"),
+                ("Plot contour slices", "contour_slices"),
+                ("Plot sum over axes", "sum_slices"),
+                ("Plot contour of sum over axes", "sum_contour_slices"),
                 ("3D plot", "3D"),
                 ("Create support", "create_support"),
                 ("Extract support", "extract_support"),
@@ -126,8 +129,8 @@ class TabPlotData(widgets.VBox):
             key=os.path.getmtime)
         ]
 
-        self.filename.options = [os.path.basename(f)
-                                 for f in options]
+        self.filename.options = [
+            os.path.basename(f) for f in options]
 
         if self.plot_tab_only:
             self.parent_folder.options = [

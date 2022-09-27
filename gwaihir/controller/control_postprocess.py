@@ -14,7 +14,7 @@ from scipy.ndimage import center_of_mass
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
 from bcdi.utils.parser import ConfigParser
 
-from pynx.utils import phase_retrieval_transfer_function
+# from pynx.utils import phase_retrieval_transfer_function
 
 from gwaihir import plot
 from gwaihir.controller.control_preprocess import create_yaml_file
@@ -42,7 +42,7 @@ def init_postprocess_tab(
     phase_offset,
     phase_offset_origin,
     offset_method,
-    centering_method,
+    centering_method_direct_space,
     unused_label_refraction,
     correct_refraction,
     optical_path_method,
@@ -83,7 +83,7 @@ def init_postprocess_tab(
     apodization_alpha,
     unused_label_strain,
     strain_folder,
-    reconstruction_files,
+    reconstruction_file,
     init_postprocess_parameters,
 ):
     """
@@ -121,7 +121,7 @@ def init_postprocess_tab(
 
     Parameters related to centering:
 
-    :param centering_method: e.g. "max_com"
+    :param centering_method_direct_space: e.g. "max_com"
     'com' (center of mass), 'max', 'max_com' (max then com), 'do_nothing'
     :param roll_modes: e.g. [0, 0, 0]
     correct a roll of few pixels after the decomposition into modes in PyNX
@@ -318,7 +318,7 @@ def init_postprocess_tab(
     interface.Dataset.phase_offset = phase_offset
     interface.Dataset.phase_offset_origin = phase_offset_origin
     interface.Dataset.offset_method = offset_method
-    interface.Dataset.centering_method = centering_method
+    interface.Dataset.centering_method_direct_space = centering_method_direct_space
     # parameters related to the refraction correction
     interface.Dataset.correct_refraction = correct_refraction
     interface.Dataset.optical_path_method = optical_path_method
@@ -358,19 +358,41 @@ def init_postprocess_tab(
     interface.Dataset.apodization_mu = apodization_mu
     interface.Dataset.apodization_sigma = apodization_sigma
     interface.Dataset.apodization_alpha = apodization_alpha
-    interface.reconstruction_files = strain_folder + reconstruction_files
+    interface.Dataset.reconstruction_file = strain_folder + reconstruction_file
+    if os.path.isfile(str(interface.Dataset.reconstruction_file)):
+        print(
+            "\n###########################################"
+            "#############################################"
+            "\nReconstruction file used to save phase "
+            "retrieval results in the final .cxi file:"
+            f"\n\t{os.path.split(interface.Dataset.reconstruction_file)[0]}"
+            f"\n\t{os.path.split(interface.Dataset.reconstruction_file)[1]}"
+            "\n###########################################"
+            "#############################################"
+        )
 
     if init_postprocess_parameters == "run_strain":
         # Save directory
-        save_dir = f"{interface.postprocessing_folder}/result_{interface.Dataset.save_frame}/"
+        save_dir = f"{interface.postprocessing_folder}/" + \
+            f"result_{interface.Dataset.save_frame}/"
 
         # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
-            if not isinstance(w, widgets.HTML):
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = True
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = True
 
-        for w in interface.TabPreprocess.children[:-2]:
-            if not isinstance(w, widgets.HTML):
+        for w in interface.TabPreprocess.children[:-1]:
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = True
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = True
 
         # Extract dict, list and tuple from strings
@@ -412,34 +434,24 @@ def init_postprocess_tab(
         if interface.Dataset.phase_offset_origin == ():
             interface.Dataset.phase_offset_origin = (None)
 
-        # Check beamline for save folder
-        try:
-            # Change data_dir and root folder depending on beamline
-            if interface.Dataset.beamline == "SIXS_2019":
-                root_folder = interface.Dataset.root_folder
-                data_dir = interface.Dataset.data_dir
+        # Change data_dir and root folder depending on beamline
+        if interface.Dataset.beamline == "SIXS_2019":
+            root_folder = interface.Dataset.root_folder
+            data_dir = interface.Dataset.data_dir
 
-            elif interface.Dataset.beamline == "P10":
-                root_folder = interface.Dataset.data_dir
-                data_dir = None
+        elif interface.Dataset.beamline == "P10":
+            root_folder = interface.Dataset.data_dir
+            data_dir = None
 
-            else:
-                root_folder = interface.Dataset.root_folder
-                data_dir = interface.Dataset.data_dir
+        else:
+            root_folder = interface.Dataset.root_folder
+            data_dir = interface.Dataset.data_dir
 
-        except AttributeError:
-            for w in interface.TabPostprocess.children[:-1]:
-                if not isinstance(w, widgets.HTML):
-                    w.disabled = False
-
-            for w in interface.TabPreprocess.children[:-2]:
-                if not isinstance(w, widgets.HTML):
-                    w.disabled = False
-
-            print(
-                "You need to initialize all the parameters in the"
-                "preprocess tab first.\nSome parameters are redundant."
-            )
+        # Create centering_method dict
+        centering_method = {
+            "direct_space": interface.Dataset.centering_method_direct_space,
+            "reciprocal_space": interface.Dataset.centering_method_reciprocal_space,
+        }
 
         try:
             create_yaml_file(
@@ -450,14 +462,14 @@ def init_postprocess_tab(
                 data_dir=data_dir,
                 sample_name=interface.Dataset.sample_name,
                 comment=interface.Dataset.comment,
-                reconstruction_files=interface.reconstruction_files,
+                reconstruction_files=interface.Dataset.reconstruction_file,  # keep s here
                 backend=interface.matplotlib_backend,
                 # parameters used when averaging several reconstruction #
                 sort_method=interface.Dataset.sort_method,
                 averaging_space=interface.Dataset.averaging_space,
                 correlation_threshold=interface.Dataset.correlation_threshold,
                 # parameters related to centering #
-                centering_method=interface.Dataset.centering_method,
+                centering_method=centering_method,
                 roll_modes=interface.Dataset.roll_modes,
                 # parameters relative to the FFT window and voxel sizes #
                 original_size=interface.Dataset.original_size,
@@ -570,31 +582,23 @@ def init_postprocess_tab(
             files = sorted(
                 glob.glob(
                     f"{interface.postprocessing_folder}/**/"
-                    f"S{interface.Dataset.scan}_amp{phase_fieldname}"
+                    f"{interface.Dataset.scan_name}_amp{phase_fieldname}"
                     f"strain*{interface.Dataset.comment}.h5",
                     recursive=True),
                 key=os.path.getmtime)
-            interface.strain_output_file = files[0]
+            interface.Dataset.postprocessing_output_file = files[0]
 
             creation_time = datetime.fromtimestamp(
-                os.path.getmtime(interface.strain_output_file)
+                os.path.getmtime(interface.Dataset.postprocessing_output_file)
             ).strftime('%Y-%m-%d %H:%M:%S')
 
             print(
                 "\n###########################################"
                 "#############################################"
                 f"\nResult file used to extract results saved in the .cxi file:"
-                f"\n{interface.strain_output_file}"
+                f"\n{interface.Dataset.postprocessing_output_file}"
                 f"\n\tCreated: {creation_time}"
                 "\nMake sure it is the latest one!!"
-                "\n###########################################"
-                "#############################################"
-            )
-
-            print(
-                "\n###########################################"
-                "#############################################"
-                "\nRemember to save your progress as a cxi file !"
                 "\n###########################################"
                 "#############################################"
             )
@@ -603,9 +607,6 @@ def init_postprocess_tab(
             print("Strain analysis stopped by user ...")
 
         finally:
-            # At the end of the function
-            interface.TabPostprocess.init_postprocess_parameters.disabled = False
-
             # Refresh folders
             interface.root_folder_handler(
                 change=interface.Dataset.scan_folder
@@ -624,21 +625,33 @@ def init_postprocess_tab(
                 change=interface.preprocessing_folder
             )
 
-    elif init_postprocess_parameters == "run_prtf":
-        compute_prtf(
-            iobs=interface.Dataset.iobs,
-            mask=interface.Dataset.mask,
-            obj=interface.reconstruction_files,
-        )
+    # elif init_postprocess_parameters == "run_prtf":
+    #     compute_prtf(
+    #         iobs=interface.Dataset.iobs,
+    #         mask=interface.Dataset.mask,
+    #         obj=interface.reconstruction_file,
+    #     )
 
     elif not init_postprocess_parameters:
+        # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
-            if not isinstance(w, widgets.HTML):
+            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                for wc in w.children:
+                    wc.disabled = False
+            elif isinstance(w, widgets.HTML):
+                pass
+            else:
                 w.disabled = False
 
-        for w in interface.TabPreprocess.children[:-2]:
-            if not isinstance(w, widgets.HTML):
-                w.disabled = False
+        if interface.TabPreprocess.run_preprocess.value == False:
+            for w in interface.TabPreprocess.children[:-1]:
+                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                    for wc in w.children:
+                        wc.disabled = False
+                elif isinstance(w, widgets.HTML):
+                    pass
+                else:
+                    w.disabled = False
 
         # Refresh folders
         interface.root_folder_handler(
@@ -651,49 +664,72 @@ def init_postprocess_tab(
             change=interface.preprocessing_folder
         )
 
-        # PyNX folder
-        interface.TabPhaseRetrieval.parent_folder.value\
-            = interface.preprocessing_folder
-        interface.TabPhaseRetrieval.pynx_folder_handler(
-            change=interface.preprocessing_folder
-        )
+        # Find latest .h5 file, output from postprocessing
+        h5_files = sorted(
+            glob.glob(
+                f"{interface.postprocessing_folder}/**/"
+                f"{interface.Dataset.scan_name}_amp*"
+                f"strain*{interface.Dataset.comment}.h5",
+                recursive=True),
+            key=os.path.getmtime)
+        try:
+            interface.Dataset.postprocessing_output_file = h5_files[0]
 
-        print("Cleared window.")
+            creation_time = datetime.fromtimestamp(
+                os.path.getmtime(interface.Dataset.postprocessing_output_file)
+            ).strftime('%Y-%m-%d %H:%M:%S')
+
+            print(
+                "\n###########################################"
+                "#############################################"
+                "\nResult file used to save postprocessing "
+                "results in the final .cxi file:"
+                f"\n\t{os.path.split(interface.Dataset.postprocessing_output_file)[0]}"
+                f"\n\t{os.path.split(interface.Dataset.postprocessing_output_file)[1]}"
+                f"\n\tCreated: {creation_time}"
+                "\n###########################################"
+                "#############################################"
+            )
+        except KeyError:
+            pass
         clear_output(True)
     else:
         print("Not yet supported.")
         clear_output(True)
 
 
-def center(data, mask=None, center=None, method="com"):
+def center_array(data, mask=None, center=None, method="com"):
     """
     Center 3D volume data such that the center of mass of data is at
     the very center of the 3D matrix.
-    :param data: volume data (np.array). 3D numpy array which will be
-    centered.
-    :param mask: volume mask (np.array). 3D numpy array of same size 
-    as data which will be centered based on data
-    :param com: center of mass coordinates(list, np.array). If no com is
-    provided, com of the given data is computed (default: None).
-    :param method: what region to place at the center (str), either
-    com or max.
 
-    Written by @Clatlan 
-    :returns: centered 3D numpy array.
+    :param data: volume data (np.array). 3D numpy array which will be
+        centered.
+    :param mask: volume mask (np.array). 3D numpy array of same size
+        as data which will be centered based on data
+    :param center: center of mass coordinates(list, np.array). If no center
+        is provided, center of the given data is computed (default: None).
+    :param method: what region to place at the center (str), either
+        com or max.
+
+    Adapted from @Clatlan
+
+    :returns: centered data, centered mask
     """
     shape = data.shape
 
-    if method == "com":
-        if center is None:
+    if center is None:
+        if method == "com":
             xcenter, ycenter, zcenter = (
                 int(round(c)) for c in center_of_mass(data)
             )
-    elif method == "max":
-        if center is None:
+        elif method == "max":
             xcenter, ycenter, zcenter = np.where(data == np.max(data))
+        else:
+            print("method unknown, please choose between ['com', 'max']")
+            return data, None
     else:
-        print("method unknown, please choose between ['com', 'max']")
-        return data, None
+        xcenter, ycenter, zcenter = center
 
     centered_data = np.roll(data, shape[0] // 2 - xcenter, axis=0)
     centered_data = np.roll(centered_data, shape[1] // 2 - ycenter, axis=1)
@@ -710,6 +746,123 @@ def center(data, mask=None, center=None, method="com"):
         return centered_data, None
 
 
+def crop_at_center(data, mask=None, final_shape=None):
+    """
+    Crop 3D array data to match the final_shape. Center of the input
+    data remains the center of cropped data.
+
+    :param data: volume data (np.array). 3D numpy array which will be
+        centered.
+    :param mask: volume mask (np.array). 3D numpy array of same size
+        as data which will be centered based on data
+    :param final_shape: the targetted shape (list). If None, nothing
+    happens.
+
+    Adapted from @Clatlan
+
+    :returns: cropped 3D array (np.array).
+    """
+    if final_shape is None:
+        print("No final shape specified, did not proceed to cropping")
+        return data
+
+    shape = data.shape
+    final_shape = np.array(final_shape)
+
+    if not (final_shape <= data.shape).all():
+        print(
+            "One of the axis of the final shape is larger than "
+            "the initial axis (initial shape: {}, final shape: {}).\n"
+            "Did not proceed to cropping.".format(shape, tuple(final_shape))
+        )
+        return data, mask
+
+    # Crop data
+    c = np.array(shape) // 2  # coordinates of the center
+    to_crop = final_shape // 2  # indices to crop at both sides
+    plus_one = np.where((final_shape % 2 == 0), 0, 1)
+
+    cropped_data = data[c[0] - to_crop[0]: c[0] + to_crop[0] + plus_one[0],
+                        c[1] - to_crop[1]: c[1] + to_crop[1] + plus_one[1],
+                        c[2] - to_crop[2]: c[2] + to_crop[2] + plus_one[2]]
+
+    # Crop mask
+    if isinstance(mask, np.ndarray):
+        cropped_mask = mask[c[0] - to_crop[0]: c[0] + to_crop[0] + plus_one[0],
+                            c[1] - to_crop[1]: c[1] + to_crop[1] + plus_one[1],
+                            c[2] - to_crop[2]: c[2] + to_crop[2] + plus_one[2]]
+
+        return cropped_data, cropped_mask
+
+    else:
+        return cropped_data, mask
+
+
+def center_and_crop(
+    data,
+    mask=None,
+    center=None,
+    method="com",
+    final_shape=None,
+):
+    print("Original shape:", data.shape)
+    # Determine center if not given with `method`
+    if center is None:
+        if method == "com":
+            center = [
+                int(round(c)) for c in center_of_mass(data)
+            ]
+        elif method == "max":
+            center = np.where(data == np.max(data))
+        else:
+            print("method unknown, please choose between ['com', 'max']")
+            return data, None
+    print("Center of array:", center)
+
+    # Determine the final shape if not given
+    if final_shape is None:
+        final_shape = []
+        for s, c in zip(data.shape, center):
+            if c > s/2:
+                final_shape.append(int(np.rint(s-c)*2))
+            else:
+                final_shape.append(int(np.rint(c)*2))
+    print("Final shape after centering and cropping:", final_shape)
+
+    if isinstance(mask, np.ndarray):
+        # Plot before
+        plot.Plotter(data, log=True)
+        plot.Plotter(mask, log=True)
+
+        # Crop and center
+        centered_data, centered_mask = center_array(
+            data=data, mask=mask, center=center, method=method)
+        cropped_data, cropped_mask = crop_at_center(
+            data=centered_data, mask=centered_mask, final_shape=final_shape)
+
+        # Plot after
+        plot.Plotter(cropped_data, log=True)
+        plot.Plotter(cropped_mask, log=True)
+
+        return cropped_data, cropped_mask
+
+    else:
+        # Plot before
+        plot.Plotter(data, log=True)
+
+        # Crop and center
+        centered_data, __ = center_array(
+            data=data, center=center, method=method)
+        cropped_data, __ = crop_at_center(
+            data=centered_data, final_shape=final_shape)
+
+        # Plot after
+        plot.Plotter(cropped_data, log=True)
+        return cropped_data, None
+
+# Resolution
+
+
 def compute_prtf(
     iobs,
     obj,
@@ -723,7 +876,7 @@ def compute_prtf(
     mask = plot.Plotter(mask, plot=False).data_array
 
     # Center and plot the observed data and mask
-    iobs, mask = center(data=iobs, mask=mask)
+    iobs, mask = center_array(data=iobs, mask=mask)
 
     plot.plot_3d_slices(iobs, log=log_in_plots)
     plt.show()

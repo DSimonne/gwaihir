@@ -156,10 +156,10 @@ class TabPreprocess(widgets.VBox):
             Parameters related to data cropping/padding/centering</p>",
             style={
                 'description_width': 'initial'},
-            layout=widgets.Layout(width='90%', height="35px")
+            layout=widgets.Layout(width='60%', height="35px")
         )
 
-        self.centering_method = widgets.Dropdown(
+        self.centering_method_reciprocal_space = widgets.Dropdown(
             options=[
                 "max", "com", "manual"],
             value="max",
@@ -226,7 +226,7 @@ class TabPreprocess(widgets.VBox):
             disabled=True,
             continuous_update=False,
             layout=widgets.Layout(
-                height="50px"),
+                height="50px", width="25%"),
             tooltip='Monitor to normalize the intensity by the default \
             monitor values, skip to do nothing',
             style={'description_width': 'initial'}
@@ -416,14 +416,18 @@ class TabPreprocess(widgets.VBox):
             layout=widgets.Layout(width='90%', height="35px")
         )
 
-        self.init_para = widgets.ToggleButton(
+        self.run_preprocess = widgets.ToggleButtons(
+            options=[
+                ("False", False),
+                ("In GUI.", "GUI"),
+                ("In terminal.", "terminal"),
+            ],
             value=False,
-            description='Initialize parameters ...',
-            disabled=True,
+            description="Run preprocess:",
             continuous_update=False,
             button_style='',
             layout=widgets.Layout(
-                width='40%'),
+                width='100%', height="50px"),
             style={
                 'description_width': 'initial'},
             icon='fast-forward')
@@ -443,7 +447,8 @@ class TabPreprocess(widgets.VBox):
 
             # Parameters related to data cropping/padding/centering
             self.unused_label_centering,
-            widgets.HBox([self.centering_method, self.bragg_peak]),
+            widgets.HBox(
+                [self.centering_method_reciprocal_space, self.bragg_peak]),
             self.fix_size,
             widgets.HBox(
                 [self.center_fft, self.pad_size, self.normalize_flux]),
@@ -460,13 +465,13 @@ class TabPreprocess(widgets.VBox):
             widgets.HBox([self.save_rawdata, self.save_to_npz,
                          self.save_to_mat, self.save_to_vti, self.save_as_int]),
             self.unused_label_preprocess,
-            self.init_para,
+            self.run_preprocess,
         )
 
         # Assign handlers
         self.beamline.observe(
             self.beamline_handler, names="value")
-        self.centering_method.observe(
+        self.centering_method_reciprocal_space.observe(
             self.bragg_peak_centering_handler, names="value")
         self.reload_previous.observe(
             self.reload_data_handler, names="value")
