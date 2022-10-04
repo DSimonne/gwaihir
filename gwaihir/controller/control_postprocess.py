@@ -664,15 +664,16 @@ def init_postprocess_tab(
             change=interface.preprocessing_folder
         )
 
-        # Find latest .h5 file, output from postprocessing
-        h5_files = sorted(
-            glob.glob(
-                f"{interface.postprocessing_folder}/**/"
-                f"{interface.Dataset.scan_name}_amp*"
-                f"strain*{interface.Dataset.comment}.h5",
-                recursive=True),
-            key=os.path.getmtime)
         try:
+            # Find latest .h5 file, output from postprocessing
+            h5_files = sorted(
+                glob.glob(
+                    f"{interface.postprocessing_folder}/**/"
+                    f"{interface.Dataset.scan_name}_amp*"
+                    f"strain*{interface.Dataset.comment}.h5",
+                    recursive=True),
+                key=os.path.getmtime)
+
             interface.Dataset.postprocessing_output_file = h5_files[0]
 
             creation_time = datetime.fromtimestamp(
@@ -690,7 +691,7 @@ def init_postprocess_tab(
                 "\n###########################################"
                 "#############################################"
             )
-        except KeyError:
+        except (KeyError, IndexError):
             pass
         clear_output(True)
     else:

@@ -377,7 +377,7 @@ def init_phase_retrieval_tab(
                 f'# max_size = {interface.Dataset.max_size}\n',
                 f'zero_mask = {interface.Dataset.zero_mask}\n',
                 'crop_output= 0 # set to 0 to avoid cropping the output in the .cxi\n',
-                f"mask_interp={mask_interp[0]},{mask_interp[1]}\n"
+                f"mask_interp={mask_interp[0]},{mask_interp[1]})\n"
                 "confidence_interval_factor_mask=0.5,1.2\n"
                 '\n',
                 f'positivity = {interface.Dataset.positivity}\n',

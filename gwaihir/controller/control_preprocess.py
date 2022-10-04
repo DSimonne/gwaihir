@@ -293,7 +293,7 @@ def init_preprocess_tab(
      use this to declare motor positions if there is not log file,
      None otherwise
 
-    Parameters when orthogonalizing the data before phasing  using the
+    Parameters when orthogonalizing the data before phasing using the
     linearized transformation matrix:
 
     :param align_q: e.g. True

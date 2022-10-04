@@ -426,7 +426,7 @@ class Interface:
                 # Set tab names
                 self.window.set_title(0, "Startup")
                 self.window.set_title(1, "Detector")
-                self.window.set_title(2, "Setup")
+                self.window.set_title(2, "Instrument")
                 self.window.set_title(3, "Preprocess")
                 self.window.set_title(4, "Metadata")
                 self.window.set_title(5, "Phase retrieval")
@@ -472,7 +472,7 @@ class Interface:
                 # Set tab names
                 self.window.set_title(0, "Startup")
                 self.window.set_title(1, "Detector")
-                self.window.set_title(2, "Setup")
+                self.window.set_title(2, "Instrument")
                 self.window.set_title(3, "Preprocess")
                 self.window.set_title(4, "Metadata")
                 self.window.set_title(5, "Postprocess")
