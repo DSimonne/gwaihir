@@ -28,7 +28,7 @@ class TabInstrument(widgets.VBox):
         self.use_rawdata = widgets.Checkbox(
             value=False,
             continuous_update=False,
-            description='Orthogonalize data',
+            description='Orthogonalize data before phase retrieval',
             disabled=True,
             indent=False,
             tooltip='False for using data gridded in laboratory frame/ \
@@ -352,6 +352,15 @@ class TabInstrument(widgets.VBox):
 
         for w in self.children[2:]:
             if change:
-                w.disabled = False
+                if isinstance(w, widgets.widgets.widget_box.HBox):
+                    for wc in w.children:
+                        wc.disabled = False
+                else:
+                    w.disabled = False
+
             else:
-                w.disabled = True
+                if isinstance(w, widgets.widgets.widget_box.HBox):
+                    for wc in w.children:
+                        wc.disabled = True
+                else:
+                    w.disabled = True

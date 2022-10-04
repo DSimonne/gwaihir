@@ -161,7 +161,7 @@ class TabPreprocess(widgets.VBox):
 
         self.centering_method_reciprocal_space = widgets.Dropdown(
             options=[
-                "max", "com", "manual"],
+                "max", "com", "user", "skip"],
             value="max",
             description='Centering of Bragg peak method:',
             continuous_update=False,
@@ -499,10 +499,10 @@ class TabPreprocess(widgets.VBox):
         if hasattr(change, "new"):
             change = change.new
 
-        if change == "manual":
+        if change == "user":
             self.bragg_peak.disabled = False
 
-        if change != "manual":
+        if change != "user":
             self.bragg_peak.disabled = True
 
     def reload_data_handler(self, change):
