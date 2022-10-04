@@ -123,10 +123,11 @@ A GPU is installed on cristal4, a computer available on the beamline, for phase 
 
 Please respect the following steps:
 * Make sure that you are logged in as `com-cristal`
-* Activate the environment `source_py3.9` or `source /home/experiences/sixs/simonne/py39-env/bin/activate`, this environment is protected and you cannot modify it.
+* Activate the environment `source_gwaihir` or `source /home/experiences/crystal/com-cristal/PackagesGwaihir/py-gwaihir/bin/activate`, this environment is protected and you cannot modify it.
 * Launch `jupyter notebook`
 * Go to the test_data folder and then choose the beamline you want to test
 * Follow the instructions in the notebook
+
 # Installing different packages yourself
 
 * First, I advise you to create a `/Packages` directory to keep these.
