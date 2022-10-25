@@ -1,11 +1,11 @@
 import setuptools
 
-with open("./gwaihir/README.md", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="gwaihir",
-    version="0.0.4",
+    version="0.0.5",
     description="Python package for BCDI data analysis",
     author="David Simonne",
     author_email="david.simonne@universite-paris-saclay.fr",

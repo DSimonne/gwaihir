@@ -2,15 +2,16 @@
 
 Contact : david.simonne@universite-paris-saclay.fr
 
-You can install gwaihir via the `setup.py` script (`pip install .`)
+You can install the latest version of the package by cloning the repository and via the `setup.py` script (`pip install .`) or you can just type `pip install -U gwaihir` in your command line.
 
-Gwaihir is also avaible on pypi.org, each new stable version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
-On the contrary, if you follow the github changes on the you will have the latest updates.
+* On pypi.org, each new stable version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
+* On the contrary, if you follow the github changes on the you will have the latest updates.
 
 Here is a link to a poster that tries to present Gwaihir:
 [Poster_Gwaihir.pdf](https://www.dsimonne.eu/PhDAttachments/Poster_Gwaihir.pdf)
 
-And to the [paper](https://scripts.iucr.org/cgi-bin/paper?S1600576722005854)
+And to the paper: [Simonne, D., Carnis, J., Atlan, C., Chatelier, C., Favre-Nicolin, V., Dupraz, M., Leake, S.  J., Zatterin, E., Resta, A., Coati, A. & Richard, M.  I. (2022). J. Appl. Cryst. 55, 1045-1054](https://scripts.iucr.org/cgi-bin/paper?S1600576722005854)
+
 
 ![Gwahir](https://user-images.githubusercontent.com/51970962/168030371-7212abe3-f8be-4fef-9231-8b1be87abc2e.png)
 
@@ -30,6 +31,14 @@ IPython.OutputArea.prototype._should_scroll = function(lines) {
 }
 ```
 
+To open the GUI
+
+```python
+from gwaihir.gui import Interface
+GUI = Interface()
+```
+
+
 # GUI Preview:
 ## Pre-processing data
 https://user-images.githubusercontent.com/51970962/154160601-f3e7878a-d2c6-4560-95e5-adf7087f59ab.mp4
@@ -43,12 +52,17 @@ https://user-images.githubusercontent.com/51970962/154160549-c5caea1b-afa0-4a29-
 ## Post-processing
 https://user-images.githubusercontent.com/51970962/154236802-24643473-1ee9-4d01-823c-beca07ea1c58.mp4
 
-## Facet analysis
-No video yet.
+An example file can be downloaded at: https://www.dsimonne.eu/Attachments/align_031968.cxi
 
-## CXI file
-An example file can be downloaded at: https://www.dsimonne.eu/PhDAttachments/align_031968.cxi
+# Known bog
 
+The first time you install `gwaihir`, it is possible that when you open the Interface, you only see some text printed, or the content of the readme tab, but you cannot interact with anything. This is solved by restarting your computer.
+
+Bog with printed text:
+![index](https://user-images.githubusercontent.com/51970962/197808456-26cbb8b3-266f-419e-88c1-dd020dc6f432.jpeg)
+
+Bog with README tab:
+![image](https://user-images.githubusercontent.com/51970962/197807789-dc597beb-fd6f-4d4f-a9a4-0464319ef542.png)
 
 # Clusters at ESRF
 
@@ -56,21 +70,21 @@ Gwaihir **only** works on slurm, while using the p9 GPUs, for phase retrieval.
 
 if you want to use it for data analysis, you can install `gwaihir` and `bcdi` on rnice.
 
-## slurm
+## SLURM
 
 How to access:
-`ssh -X <login>@slurm-nice-devel`
+* Web browser: https://jupyter-slurm.esrf.fr/hub/spawn
+* Terminal (for advanced users) :
+    * `ssh -X <login>@slurm-nice-devel`
+    * Ask for a GPU: `srun -N 1 --partition=p9gpu --gres=gpu:1 --time=06:00:00 --pty bash`
 
-Ask for a GPU:
-`srun -N 1 --partition=p9gpu --gres=gpu:1 --time=01:00:00 --pty bash`
-
-#### Environments on slurm
+#### Environments (kernels) available on SLURM
 * `/usr/bin/python3`: your personal environemnt
 * p9.dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/p9.dev/bin/activate`
 * p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
 * p9.pynx-devel : pynx only, frequently updated : `source /sware/exp/pynx/devel.p9/bin/activate`
 
-You are not allowed to modify these environments but you can link a kernel if you wish to use them in jupyter.
+You are not allowed to **modify** these environments but you can **link** a kernel if you wish to **use** them in jupyter.
 
 To do so:
 * Source the environment; e.g. `source /data/id01/inhouse/david/p9.dev/bin/activate`
@@ -87,7 +101,9 @@ To list the kernels you have installed: `jupyter kernelspec list`
 
 And to remove them: `jupyter kernelspec uninstall <kernelname>`
 
-### Connect with ssh without using password (mandatory for batch jobs)
+Make sure that you are using the right kernel on your Jupyter Notebook !
+
+### Set up ssh connection without using password (mandatory for batch jobs)
 * Login into slurm (make sure that you asked for a GPU)
 * Open a terminal (new -> terminal)
 
@@ -100,11 +116,18 @@ Enter the following commands (replace `<username>` with your username, for me it
 You should not need a password anymore when login into slurm, make sure it is the case by typing
 * `ssh <username>@slurm-nice-devel`
 
-# Beamlines at SOLEIL
+# CLuster at SOLEIL
 
-To access SOLEIL from your personal computer, you can use NoMachine (easiest way, to the best of my knowledge).
+## GRADES
 
-Otherwise you may use a remote desktop, the documentation can be found here (must be on SOLEIL network) http://confluence.synchrotron-soleil.fr/display/EG/Service%3A+Remote+Desktop
+To analyse data recorded at SOLEIL from your personal computer, you can use Jupyter Notebook via GRADES. The documentation is here (accessible from SOLEIL) : http://confluence.synchrotron-soleil.fr/display/EG/Service%3A+Jupyter+Notebook
+
+Use this link to open Jupyter Notebook : http://grades-01.synchrotron-soleil.fr/notebook/
+You may launch a Terminal (command line) from the upper-right 'New' menu. The system is a Debian 10, so you can enter linux commands there.
+
+`PyNX` is already installed on GRADES, a version that is out of my control. So you 'just' have to download the `bcdi` and `gwaihir` packages by typing `pip3 install --proxy=http://195.221.0.35:8080 -U gwaihir bcdi`
+
+If you encounter an error with gwaihir or bcdi, it is possible that the pip packages are not up to date. Then you should follow the procedure described [below](https://github.com/DSimonne/gwaihir#installing-different-packages-yourself) and manually download the packages. Just replace `pip install` by `pip3 install --proxy=http://195.221.0.35:8080`,  the proxy IP can be 195.221.0.34:8080 or 195.221.0.35:8080 on the ReS (offices and VPN), and 195.221.10.6:8080 or 195.221.10.7:8080 on the REL (beam-lines, RAS).
 
 ## SixS
 
@@ -158,7 +181,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `cd gwaihir`
 * `source_p9`
 * `pip install .`
-* cite <>
+* cite `Simonne, D., Carnis, J., Atlan, C., Chatelier, C., Favre-Nicolin, V., Dupraz, M., Leake, S.  J., Zatterin, E., Resta, A., Coati, A. & Richard, M.  I. (2022). J. Appl. Cryst. 55, 1045-1054.`
 
 ## 3) Install bcdi
 * `cd /Packages`
@@ -195,7 +218,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 ![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
 
 
-## Quick navigation between `vtk` files in the GUI
+## Quick navigation between `vtk` files in the GUI (outdated)
 
 It is possible to automate the navigation in the GUI !
 
