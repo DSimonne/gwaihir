@@ -347,11 +347,17 @@ def find_and_copy_raw_data(
 
         # Move data file to scan_folder + "data/"
         try:
-            if not os.path.isfile(file):
+            if not os.path.isfile(scan_folder + "data/" + os.path.basename(
+                path_to_nxs_data)
+            ):
                 shutil.copy2(path_to_nxs_data, scan_folder + "data/")
                 print(f"Copied {path_to_nxs_data} to {scan_folder}data/")
             else:
-                print(f"{path_to_nxs_data} already exists in {scan_folder}data/")
+                print("{} already exists in {}data/".format(
+                        os.path.basename(path_to_nxs_data),
+                        scan_folder
+                    )
+                )
 
             # Change data_dir, only if copy successful
             data_dir = scan_folder + "data/"
