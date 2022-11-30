@@ -167,6 +167,7 @@ Please respect the following steps:
 Then you should create an alias such as: `alias source_p9="source /home/user/py38-env/bin/activate"`
 
 ## 1) Install PyNX
+* Use the latest version
 * `cd /Packages`
 * `mkdir PyNX_install`
 * `cd PyNX_install/`
@@ -184,6 +185,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * cite `Simonne, D., Carnis, J., Atlan, C., Chatelier, C., Favre-Nicolin, V., Dupraz, M., Leake, S.  J., Zatterin, E., Resta, A., Coati, A. & Richard, M.  I. (2022). J. Appl. Cryst. 55, 1045-1054.`
 
 ## 3) Install bcdi
+* Latest version tested : v0.2.8
 * `cd /Packages`
 * `git clone https://github.com/carnisj/bcdi.git`
 * `cd bcdi`
