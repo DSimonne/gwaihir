@@ -529,7 +529,7 @@ def init_phase_retrieval_tab(
                     cdi = InitFreePixels() * cdi
 
                     # Interpolate the detector gaps
-                    if not interface.Dataset.live_plot:
+                    if interface.Dataset.live_plot:
                         cdi = ShowCDI(plot_axis=plot_axis) * InterpIobsMask(
                             interface.Dataset.mask_interp[0],
                             interface.Dataset.mask_interp[1],
