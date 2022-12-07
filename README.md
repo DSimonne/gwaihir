@@ -2,10 +2,10 @@
 
 Contact : david.simonne@universite-paris-saclay.fr
 
-You can install the latest version of the package by cloning the repository and via the `setup.py` script (`pip install .`) or you can just type `pip install -U gwaihir` in your command line.
+You can install the latest version of the package by cloning the repository and via the `setup.py` script (`pip install .`)
 
-* On pypi.org, each new stable version from the master branch is uploaded: `https://pypi.org/project/gwaihir/`
-* On the contrary, if you follow the github changes on the you will have the latest updates.
+* You can install gwaihir by typing `pip install -U gwaihir` in your command line. A stable version from the master branch uploaded to pypi.org will be used (`https://pypi.org/project/gwaihir/`)
+* Otherwise, you can install the latest commit of the package by cloning this repository and typing `pip install .` in the terminal (you must be in the same directory as the `setup.py` script), this will allow you to have the latest updates.
 
 Here is a link to a poster that tries to present Gwaihir:
 [Poster_Gwaihir.pdf](https://www.dsimonne.eu/PhDAttachments/Poster_Gwaihir.pdf)
@@ -66,11 +66,11 @@ Bog with README tab:
 
 # Clusters at ESRF
 
-Gwaihir **only** works on slurm, while using the p9 GPUs, for phase retrieval.
+Gwaihir **only** works with the p9 partition at the ESRF, optimized for phase retrieval.
 
-if you want to use it for data analysis, you can install `gwaihir` and `bcdi` on rnice.
+If you want to use it for data analysis, you can install `gwaihir` and `bcdi` on rnice.
 
-## SLURM
+## Jupyter-slurm
 
 How to access:
 * Web browser: https://jupyter-slurm.esrf.fr/hub/spawn
@@ -103,7 +103,7 @@ And to remove them: `jupyter kernelspec uninstall <kernelname>`
 
 Make sure that you are using the right kernel on your Jupyter Notebook !
 
-### Set up ssh connection without using password (mandatory for batch jobs)
+### Set up `ssh` connection without using password (mandatory for batch jobs)
 * Login into slurm (make sure that you asked for a GPU)
 * Open a terminal (new -> terminal)
 
@@ -120,7 +120,7 @@ You should not need a password anymore when login into slurm, make sure it is th
 
 ## GRADES
 
-To analyse data recorded at SOLEIL from your personal computer, you can use Jupyter Notebook via GRADES. The documentation is here (accessible from SOLEIL) : http://confluence.synchrotron-soleil.fr/display/EG/Service%3A+Jupyter+Notebook
+To analyse data recorded at SOLEIL from your personal computer, you can use Jupyter Notebook via GRADES. The documentation is here (accessible on- site via the SOLEIL wifi or with the SOLEIL VPN) : http://confluence.synchrotron-soleil.fr/display/EG/Service%3A+Jupyter+Notebook
 
 Use this link to open Jupyter Notebook : http://grades-01.synchrotron-soleil.fr/notebook/
 You may launch a Terminal (command line) from the upper-right 'New' menu. The system is a Debian 10, so you can enter linux commands there.
@@ -162,9 +162,13 @@ Please respect the following steps:
 * `cd py38-env/`
 * `python3.8 -m venv .`
 * `source bin/activate` # To activate the environment
-* Make sure `wheel` is installed: `pip install wheel`
+* Make sure `wheel` and `setuptools` are installed: `pip install wheel setuptools pip --upgrade`
 
 Then you should create an alias such as: `alias source_p9="source /home/user/py38-env/bin/activate"`
+
+## Specific instructions for the p.9 cluster
+* If `vtk` does not install (on the p9 cluster at the ESRF for example), you can type : `pip install --trusted-host www.silx.org --find-links http://www.silx.org/pub/wheelhouse vtk`, you may also need to remove the version requirements in `bcdi/setup.py`
+* If `PyQt5` does not install (also on the p9 cluster at the ESRF), you can install it by activating your environment from the rnice cluster.
 
 ## 1) Install PyNX
 * Use the latest version
@@ -192,7 +196,6 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 * `source_p9`
 * `pip install .`
 * cite `DOI: 10.5281/zenodo.3257616`
-* If `vtk` does not install (on slurm), you can type : `pip install --trusted-host www.silx.org --find-links http://www.silx.org/pub/wheelhouse vtk`, you may also need to remove the version requirements in `bcdi/setup.py`
 
 ## 4) Install facet-analyser (Debian 11 only)
 * Send a thank you email to Fred Picca =D
@@ -220,7 +223,7 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 ![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
 
 
-## Quick navigation between `vtk` files in the GUI (outdated)
+## Quick navigation between `vtk` files in the GUI (outdated but it can give you some ideas)
 
 It is possible to automate the navigation in the GUI !
 
