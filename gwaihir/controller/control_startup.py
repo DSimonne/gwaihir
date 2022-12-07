@@ -396,10 +396,13 @@ def rotate_sixs_data(path_to_nxs_data):
     # Find 3D array key
     three_d_data_keys = []
     with h5py.File(path_to_nxs_data, "a") as f:
-        for key in f['com']['scan_data'].keys():
-            shape = f['com']['scan_data'][key].shape
-            if len(shape) == 3:
-                three_d_data_keys.append(key)
+        try:
+            for key in f['com']['scan_data'].keys():
+                shape = f['com']['scan_data'][key].shape
+                if len(shape) == 3:
+                    three_d_data_keys.append(key)
+        except:
+            pass # Not sixs data
 
         if not data_already_rotated:
             print("Rotating SIXS data ...")
