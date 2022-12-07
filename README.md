@@ -78,7 +78,7 @@ How to access:
     * `ssh -X <login>@slurm-nice-devel`
     * Ask for a GPU: `srun -N 1 --partition=p9gpu --gres=gpu:1 --time=06:00:00 --pty bash`
 
-#### Environments (kernels) available on SLURM
+#### Available environements
 * `/usr/bin/python3`: your personal environemnt
 * p9.dev : optimised for BCDI, gwaihir and PyNX, development version, `source /data/id01/inhouse/david/p9.dev/bin/activate`
 * p9.stable : optimised for BCDI, gwaihir and PyNX, stable version, `source /data/id01/inhouse/david/p9.stable/bin/activate`
@@ -122,12 +122,19 @@ You should not need a password anymore when login into slurm, make sure it is th
 
 To analyse data recorded at SOLEIL from your personal computer, you can use Jupyter Notebook via GRADES. The documentation is here (accessible on- site via the SOLEIL wifi or with the SOLEIL VPN) : http://confluence.synchrotron-soleil.fr/display/EG/Service%3A+Jupyter+Notebook
 
-Use this link to open Jupyter Notebook : http://grades-01.synchrotron-soleil.fr/notebook/
-You may launch a Terminal (command line) from the upper-right 'New' menu. The system is a Debian 10, so you can enter linux commands there.
+* Use this link to open Jupyter Notebook : http://grades-01.synchrotron-soleil.fr/notebook/
+* Launch a Terminal (command line) from the upper-right 'New' menu. The system is a Debian 10, so you can enter linux commands there.
 
 `PyNX` is already installed on GRADES, a version that is out of my control. So you 'just' have to download the `bcdi` and `gwaihir` packages by typing `pip3 install --proxy=http://195.221.0.35:8080 -U gwaihir bcdi`
 
 If you encounter an error with gwaihir or bcdi, it is possible that the pip packages are not up to date. Then you should follow the procedure described [below](https://github.com/DSimonne/gwaihir#installing-different-packages-yourself) and manually download the packages. Just replace `pip install` by `pip3 install --proxy=http://195.221.0.35:8080`,  the proxy IP can be 195.221.0.34:8080 or 195.221.0.35:8080 on the ReS (offices and VPN), and 195.221.10.6:8080 or 195.221.10.7:8080 on the REL (beam-lines, RAS).
+
+You can also directly use a virtual machine provided by GRADES
+* Go to https://re-grades-01.exp.synchrotron-soleil.fr/qemu-web-desktop/
+* Use the SUNset/LDAP id.
+* Click on `Create` then on `Connect` (after 10 sec).
+* Once the desktop is available, search "gwaihir" in the bottom left menu and execute the program.
+* You are now connected to the ruche with an environment that has all the necessary packages, you just need to open a notebook.
 
 ## SixS
 

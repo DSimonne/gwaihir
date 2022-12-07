@@ -339,7 +339,7 @@ def find_and_copy_raw_data(
         try:
             print("File path:", path_to_nxs_data)
             template_imagefile = os.path.basename(path_to_nxs_data).split(
-                "%05d" % scan)[0] + "%05d.nxs"
+                "%05d" % scan)[0] + "%05d.nxs" # Does not work at crystal
             print(f"File template: {template_imagefile}\n\n")
 
         except (IndexError, AttributeError):
