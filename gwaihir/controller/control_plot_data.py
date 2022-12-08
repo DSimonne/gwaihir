@@ -1,7 +1,5 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import glob
 import os
 import tables as tb
 from IPython.display import display, clear_output, Image

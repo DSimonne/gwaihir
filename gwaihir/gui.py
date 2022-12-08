@@ -509,14 +509,14 @@ class Interface:
         """Handles changes on the widget used for the initialization."""
         if not change.new:
             for w in self.TabStartup.children[:-1]:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = False
                 else:
                     w.disabled = False
 
             for w in self.TabDetector.children + self.TabInstrument.children + self.TabPreprocess.children:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = True
                 else:
@@ -524,14 +524,14 @@ class Interface:
 
         if change.new:
             for w in self.TabStartup.children[:-1]:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = True
                 else:
                     w.disabled = True
 
             for w in self.TabDetector.children + self.TabInstrument.children + self.TabPreprocess.children:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = False
                 else:
@@ -554,7 +554,7 @@ class Interface:
             self.TabStartup.run_dir_init.disabled = False
 
             for w in self.TabPreprocess.children[:-1]:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = False
                 else:
@@ -572,7 +572,7 @@ class Interface:
             self.TabStartup.run_dir_init.disabled = True
 
             for w in self.TabPreprocess.children[:-1]:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = True
                 else:

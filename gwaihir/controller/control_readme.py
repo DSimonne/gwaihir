@@ -3,7 +3,6 @@ from bcdi.postprocessing import facet_analysis
 from gwaihir.controller import control_preprocess
 from gwaihir.controller import control_phase_retrieval
 from gwaihir.controller import control_postprocess
-import ipywidgets as widgets
 
 
 def init_readme_tab(contents):

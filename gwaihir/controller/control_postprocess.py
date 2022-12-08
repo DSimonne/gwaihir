@@ -1,14 +1,13 @@
 import glob
 import os
-import tables as tb
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from datetime import datetime
 import ipywidgets as widgets
 from IPython.display import clear_output
 from ast import literal_eval
 
-from scipy.fftpack import fftn, ifftn, fftshift, fftfreq
+# from scipy.fftpack import ifftn, fftshift
 from scipy.ndimage import center_of_mass
 
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
@@ -378,7 +377,7 @@ def init_postprocess_tab(
 
         # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
-            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+            if isinstance(w, (widgets.VBox, widgets.HBox)):
                 for wc in w.children:
                     wc.disabled = True
             elif isinstance(w, widgets.HTML):
@@ -387,7 +386,7 @@ def init_postprocess_tab(
                 w.disabled = True
 
         for w in interface.TabPreprocess.children[:-1]:
-            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+            if isinstance(w, (widgets.VBox, widgets.HBox)):
                 for wc in w.children:
                     wc.disabled = True
             elif isinstance(w, widgets.HTML):
@@ -635,7 +634,7 @@ def init_postprocess_tab(
     elif not init_postprocess_parameters:
         # Disable all widgets until the end of the program
         for w in interface.TabPostprocess.children[:-1]:
-            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+            if isinstance(w, (widgets.VBox, widgets.HBox)):
                 for wc in w.children:
                     wc.disabled = False
             elif isinstance(w, widgets.HTML):
@@ -643,9 +642,9 @@ def init_postprocess_tab(
             else:
                 w.disabled = False
 
-        if interface.TabPreprocess.run_preprocess.value == False:
+        if interface.TabPreprocess.run_preprocess.value is False:
             for w in interface.TabPreprocess.children[:-1]:
-                if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+                if isinstance(w, (widgets.VBox, widgets.HBox)):
                     for wc in w.children:
                         wc.disabled = False
                 elif isinstance(w, widgets.HTML):
@@ -743,8 +742,7 @@ def center_array(data, mask=None, center=None, method="com"):
 
         return centered_data, centered_mask
 
-    else:
-        return centered_data, None
+    return centered_data, None
 
 
 def crop_at_center(data, mask=None, final_shape=None):
@@ -773,8 +771,9 @@ def crop_at_center(data, mask=None, final_shape=None):
     if not (final_shape <= data.shape).all():
         print(
             "One of the axis of the final shape is larger than "
-            "the initial axis (initial shape: {}, final shape: {}).\n"
-            "Did not proceed to cropping.".format(shape, tuple(final_shape))
+            f"the initial axis (initial shape: {shape}, final shape: "
+            f"{tuple(final_shape)}).\n"
+            "Did not proceed to cropping."
         )
         return data, mask
 
@@ -795,8 +794,7 @@ def crop_at_center(data, mask=None, final_shape=None):
 
         return cropped_data, cropped_mask
 
-    else:
-        return cropped_data, mask
+    return cropped_data, mask
 
 
 def center_and_crop(
@@ -806,6 +804,19 @@ def center_and_crop(
     method="com",
     final_shape=None,
 ):
+    """
+    Center and crop the data
+
+    :param data: volume data (np.array). 3D numpy array which will be
+        centered.
+    :param mask: volume mask (np.array). 3D numpy array of same size
+        as data which will be centered based on data
+    :param center: tuple of length 3, new array center
+    :param method: method to determine the array center, can be "com"
+        or "max"
+    :param final_shape: the targetted shape (list). If None, nothing
+    happens.
+    """
     print("Original shape:", data.shape)
     # Determine center if not given with `method`
     if center is None:
@@ -847,69 +858,68 @@ def center_and_crop(
 
         return cropped_data, cropped_mask
 
-    else:
-        # Plot before
-        plot.Plotter(data, log=True)
+    # Plot before
+    plot.Plotter(data, log=True)
 
-        # Crop and center
-        centered_data, __ = center_array(
-            data=data, center=center, method=method)
-        cropped_data, __ = crop_at_center(
-            data=centered_data, final_shape=final_shape)
+    # Crop and center
+    centered_data, __ = center_array(
+        data=data, center=center, method=method)
+    cropped_data, __ = crop_at_center(
+        data=centered_data, final_shape=final_shape)
 
-        # Plot after
-        plot.Plotter(cropped_data, log=True)
-        return cropped_data, None
+    # Plot after
+    plot.Plotter(cropped_data, log=True)
+    return cropped_data, None
 
 # Resolution
 
+# TODO
+# def compute_prtf(
+#     iobs,
+#     obj,
+#     mask=None,
+#     log_in_plots=True,
+# ):
+#     """
+#     """
+#     # Get arrays
+#     iobs = plot.Plotter(iobs, plot=False).data_array
+#     mask = plot.Plotter(mask, plot=False).data_array
 
-def compute_prtf(
-    iobs,
-    obj,
-    mask=None,
-    log_in_plots=True,
-):
-    """
-    """
-    # Get arrays
-    iobs = plot.Plotter(iobs, plot=False).data_array
-    mask = plot.Plotter(mask, plot=False).data_array
+#     # Center and plot the observed data and mask
+#     iobs, mask = center_array(data=iobs, mask=mask)
 
-    # Center and plot the observed data and mask
-    iobs, mask = center_array(data=iobs, mask=mask)
+#     plot.plot_3d_slices(iobs, log=log_in_plots)
+#     plt.show()
+#     if isinstance(mask, np.ndarray):
+#         plot.plot_3d_slices(mask, log=log_in_plots)
+#         plt.show()
 
-    plot.plot_3d_slices(iobs, log=log_in_plots)
-    plt.show()
-    if isinstance(mask, np.ndarray):
-        plot.plot_3d_slices(mask, log=log_in_plots)
-        plt.show()
+#     # Get data array from cxi or h5 file:
+#     obj = plot.Plotter(obj, plot=False).data_array
 
-    # Get data array from cxi or h5 file:
-    obj = plot.Plotter(obj, plot=False).data_array
+#     # IFFT and FFT shift
+#     fft_obj = fftshift(ifftn(obj))
+#     plt.show()
 
-    # IFFT and FFT shift
-    fft_obj = fftshift(ifftn(obj))
-    plt.show()
+#     # square of the modulus, center
+#     icalc = np.abs(fft_obj)**2
+#     icalc, _ = center(icalc)
 
-    # square of the modulus, center
-    icalc = np.abs(fft_obj)**2
-    icalc, _ = center(icalc)
+#     # flip data (not all the time ?)
+#     icalc = np.flip(icalc)
 
-    # flip data (not all the time ?)
-    icalc = np.flip(icalc)
+#     plot.plot_3d_slices(icalc, log=True)
+#     plt.show()
 
-    plot.plot_3d_slices(icalc, log=True)
-    plt.show()
+#     frequency, frequency_nyquist, prtf, iobs = phase_retrieval_transfer_function.prtf(
+#         icalc=icalc,
+#         iobs=iobs,
+#         mask=mask,
+#     )
 
-    frequency, frequency_nyquist, prtf, iobs = phase_retrieval_transfer_function.prtf(
-        icalc=icalc,
-        iobs=iobs,
-        mask=mask,
-    )
+#     phase_retrieval_transfer_function.plot_prtf(
+#         frequency, frequency_nyquist, prtf, iobs)
+#     plt.show()
 
-    phase_retrieval_transfer_function.plot_prtf(
-        frequency, frequency_nyquist, prtf, iobs)
-    plt.show()
-
-    return frequency, frequency_nyquist, prtf, iobs
+#     return frequency, frequency_nyquist, prtf, iobs

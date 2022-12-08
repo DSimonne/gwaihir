@@ -1,13 +1,11 @@
 import numpy as np
-import pandas as pd
 import os
 from ast import literal_eval
 
-from IPython.display import display, clear_output
+from IPython.display import display, clear_output, Markdown
 import ipywidgets as widgets
 from ipywidgets import interact
 
-from bcdi.preprocessing import ReadNxs3 as rd
 from bcdi.postprocessing import facet_analysis
 
 

@@ -8,7 +8,6 @@ import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
-import ipywidgets as widgets
 from IPython.display import clear_output
 from ast import literal_eval
 
@@ -334,7 +333,7 @@ def init_phase_retrieval_tab(
 
                 # Don't use bc experimental
                 interface.text_file.append(
-                    f"# psf_filter = \"none\"\n")
+                    "# psf_filter = \"none\"\n")
 
             # else no PSF, just don't write anything
 
@@ -984,15 +983,15 @@ def filter_reconstructions(
 
         else:
             # only standard_deviation
-            if filter_criteria is "standard_deviation":
+            if filter_criteria == "standard_deviation":
                 filter_by_std(cxi_files, nb_run_keep)
 
             # only FLLK
-            elif filter_criteria is "FLLK":
+            elif filter_criteria == "FLLK":
                 filter_by_FLLK(cxi_files, nb_run_keep)
 
             # standard_deviation then FLLK
-            elif filter_criteria is "standard_deviation_FLLK":
+            elif filter_criteria == "standard_deviation_FLLK":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
@@ -1013,7 +1012,7 @@ def filter_reconstructions(
                     filter_by_FLLK(cxi_files, nb_run_keep)
 
             # FLLK then standard_deviation
-            elif filter_criteria is "FLLK_standard_deviation":
+            elif filter_criteria == "FLLK_standard_deviation":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
@@ -1098,15 +1097,21 @@ def initialize_cdi_operator(
         if mask.endswith(".npy"):
             mask = np.load(mask).astype(np.int8)
             nb = mask.sum()
-            print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                nb, nb * 100 / mask.size))
+            mask_percentage = nb * 100 / mask.size
+            print(
+                f"\tCXI input: loading mask, "
+                f"with {nb} pixels masked ({mask_percentage:0.3f}%)"
+            )
         elif mask.endswith(".npz"):
             try:
                 mask = np.load(mask)[
                     "mask"].astype(np.int8)
                 nb = mask.sum()
-                print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                    nb, nb * 100 / mask.size))
+                mask_percentage = nb * 100 / mask.size
+                print(
+                    f"\tCXI input: loading mask, "
+                    f"with {nb} pixels masked ({mask_percentage:0.3f}%)"
+                )
             except KeyError:
                 print("\t\"mask\" key does not exist.")
 
@@ -1182,8 +1187,7 @@ def initialize_cdi_operator(
             # Find center of mass
             z0, y0, x0 = center_of_mass(iobs)
             print("Center of mass at:", z0, y0, x0)
-            iz0, iy0, ix0 = int(round(z0)), int(
-                round(y0)), int(round(x0))
+            iz0, iy0, ix0 = int(round(z0)), int(round(y0)), int(round(x0))
 
             # Max symmetrical box around center of mass
             nx = 2 * min(ix0, nx0 - ix0)
@@ -1197,10 +1201,15 @@ def initialize_cdi_operator(
 
             # Crop data to fulfill FFT size requirements
             nz1, ny1, nx1 = smaller_primes(
-                (nz, ny, nx), maxprime=7, required_dividers=(2,))
+                (nz, ny, nx),
+                maxprime=7,
+                required_dividers=(2,)
+            )
 
-            print("Centering & reshaping data: (%d, %d, %d) -> \
-                (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+            print(
+                f"Centering & reshaping data: ({nz0}, {ny0}, {nx0}) -> "
+                f"({nz1}, {ny1}, {nx1})"
+            )
             iobs = iobs[
                 iz0 - nz1 // 2:iz0 + nz1 // 2,
                 iy0 - ny1 // 2:iy0 + ny1 // 2,
@@ -1210,8 +1219,10 @@ def initialize_cdi_operator(
                     iz0 - nz1 // 2:iz0 + nz1 // 2,
                     iy0 - ny1 // 2:iy0 + ny1 // 2,
                     ix0 - nx1 // 2:ix0 + nx1 // 2]
-                print("Centering & reshaping mask: (%d, %d, %d) -> \
-                    (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+                print(
+                    f"Centering & reshaping mask: ({nz0}, {ny0}, {nx0}) -> "
+                    f"({nz1}, {ny1}, {nx1})"
+                )
 
         else:
             ny0, nx0 = iobs.shape
@@ -1233,8 +1244,9 @@ def initialize_cdi_operator(
             ny1, nx1 = smaller_primes(
                 (ny, nx), maxprime=7, required_dividers=(2,))
 
-            print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
-                  (ny0, nx0, ny1, nx1))
+            print(
+                f"Centering & reshaping data: ({ny0}, {nx0}) -> ({ny1}, {nx1})"
+            )
             iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
                         2, ix0 - nx1 // 2:ix0 + nx1 // 2]
 
@@ -1390,19 +1402,18 @@ def list_files(
     verbose=False,
 ):
     """List all cxi files in the folder and sort by creation time"""
-    file_list = [f for f in sorted(
+    file_list = sorted(
         glob.glob(folder + "/" + glob_pattern),
         key=os.path.getmtime,
         reverse=True,
     )
-    ]
 
     if verbose:
         print(
             "################################################"
             "################################################"
         )
-        for j, f in enumerate(file_list):
+        for f in file_list:
             file_timestamp = datetime.fromtimestamp(
                 os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
             print(
@@ -1432,7 +1443,6 @@ def run_modes_decomposition(
      folder
     :param folder: path to folder in which are stored the reconstructions
     """
-
     glob_pattern = "*FLLK*.cxi"
     cxi_files_list = list_files(
         folder=folder,
