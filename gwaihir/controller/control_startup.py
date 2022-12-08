@@ -3,7 +3,6 @@ from numpy import random
 import matplotlib.pyplot as plt
 import glob
 import os
-import tables as tb
 import h5py
 import shutil
 from IPython.display import display, clear_output
@@ -143,9 +142,6 @@ def init_startup_tab(
         print("Cleared window.")
         clear_output(True)
 
-        return None, None, None, None
-
-
 def save_data_analysis_workflow(Dataset):
     """
     """
@@ -168,7 +164,7 @@ def save_data_analysis_workflow(Dataset):
         detector_distance=Dataset.detector_distance,
     )
 
-    if cdi == None:
+    if cdi is None:
         raise TypeError("Could not initiliaze the cdi object.")
 
     # Path to the .cxi file with the raw data
@@ -339,7 +335,7 @@ def find_and_copy_raw_data(
         try:
             print("File path:", path_to_nxs_data)
             template_imagefile = os.path.basename(path_to_nxs_data).split(
-                "%05d" % scan)[0] + "%05d.nxs" # Does not work at crystal
+                "%05d" % scan)[0] + "%05d.nxs"  # Does not work at crystal
             print(f"File template: {template_imagefile}\n\n")
 
         except (IndexError, AttributeError):
@@ -354,9 +350,9 @@ def find_and_copy_raw_data(
                 print(f"Copied {path_to_nxs_data} to {scan_folder}data/")
             else:
                 print("{} already exists in {}data/".format(
-                        os.path.basename(path_to_nxs_data),
-                        scan_folder
-                    )
+                    os.path.basename(path_to_nxs_data),
+                    scan_folder
+                )
                 )
 
             # Change data_dir, only if copy successful
@@ -370,7 +366,6 @@ def find_and_copy_raw_data(
 
         except (AttributeError, FileNotFoundError):
             print("Could not move the data file.")
-            pass
 
     return template_imagefile, data_dir, path_to_nxs_data
 
@@ -390,7 +385,6 @@ def rotate_sixs_data(path_to_nxs_data):
         try:
             data_already_rotated = f['rotation'][...]
         except (ValueError, RuntimeError, KeyError):
-            f.create_dataset("rotation", data=True)
             data_already_rotated = False
 
     # Find 3D array key
@@ -401,88 +395,95 @@ def rotate_sixs_data(path_to_nxs_data):
                 shape = f['com']['scan_data'][key].shape
                 if len(shape) == 3:
                     three_d_data_keys.append(key)
-        except:
-            pass # Not sixs data
 
-        if not data_already_rotated:
-            print("Rotating SIXS data ...")
-            # Get data
-            if len(three_d_data_keys) == 1:
-                good_data_key = three_d_data_keys[0]
-                print(f"Found 3D array for key: {good_data_key}")
-                data_og = f['com']['scan_data'][good_data_key][...]
-
-            else:  # There are multiple 3D arrays :O
-                for key in three_d_data_keys:
-                    data = f['com']['scan_data'][key][...]
-
-                    # We know that the Merlin detector array shape
-                    # should be either 512 or 515
-                    if not data_og.shape[1] in (512, 515) and data_og.shape[2] in (512, 515):
-                        three_d_data_keys.remove(key)
-
-                if len(three_d_data_keys) == 1:  # we removed 3D arrays from other detectors
+            if not data_already_rotated:
+                print("Rotating SIXS data ...")
+                # Get data
+                if len(three_d_data_keys) == 1:
                     good_data_key = three_d_data_keys[0]
                     print(f"Found 3D array for key: {good_data_key}")
                     data_og = f['com']['scan_data'][good_data_key][...]
-                else:
-                    raise IndexError("Could not find 3D array")
 
-            # Just an index for plotting schemes
-            half = int(data_og.shape[0] / 2)
+                else:  # There are multiple 3D arrays
+                    for key in three_d_data_keys:
+                        data = f['com']['scan_data'][key][...]
 
-            # Transpose and flip lr data
-            data = np.transpose(data_og, axes=(0, 2, 1))
-            for idx in range(data.shape[0]):
-                tmp = data[idx, :, :]
-                data[idx, :, :] = np.fliplr(tmp)
-            print("Data well rotated by 90°.")
+                        # We know that the Merlin detector array shape
+                        # should be either 512 or 515
+                        # we remove 3D arrays from other detectors
+                        if not data_og.shape[1] in (512, 515) \
+                                and data_og.shape[2] in (512, 515):
+                            three_d_data_keys.remove(key)
 
-            # Find bad frames
-            sum_along_rc = data.sum(axis=(1, 2))
+                    if len(three_d_data_keys) == 1:
+                        good_data_key = three_d_data_keys[0]
+                        print(f"Found 3D array for key: {good_data_key}")
+                        data_og = f['com']['scan_data'][good_data_key][...]
+                    else:
+                        raise IndexError("Could not find 3D array")
 
-            bad_frames = []
-            for j, summed_frame in enumerate(sum_along_rc):
-                if j == 0:
-                    if 100 * sum_along_rc[1] < summed_frame:
-                        bad_frames.append(j)
-                elif j == len(sum_along_rc)-1:
-                    if 100 * sum_along_rc[-2] < summed_frame:
-                        bad_frames.append(j)
-                else:
-                    if 100 * sum_along_rc[j-1] < summed_frame and 100 * sum_along_rc[j+1] < summed_frame:
-                        bad_frames.append(j)
+                # Save that we rotated the data
+                f.create_dataset("rotation", data=True)
 
-            # Mask bad frames
-            for j in bad_frames:
-                print("Masked frame", j)
-                data[j] = np.zeros((data.shape[1], data.shape[2]))
+                # Just an index for plotting schemes
+                half = int(data_og.shape[0] / 2)
 
-                # Put one random pixel to 1, so that bcdi does not skip the frame
-                # since it is boggy for now
-                data[j, random.randint(0, data.shape[1]),
-                     random.randint(0, data.shape[1])] = 1
+                # Transpose and flip lr data
+                data = np.transpose(data_og, axes=(0, 2, 1))
+                for idx in range(data.shape[0]):
+                    tmp = data[idx, :, :]
+                    data[idx, :, :] = np.fliplr(tmp)
+                print("Data well rotated by 90°.")
 
-            # Overwrite data in copied file
-            f['com']['scan_data'][good_data_key][...] = data
+                # Find bad frames
+                sum_along_rc = data.sum(axis=(1, 2))
 
-            # Plot data
-            print("Saving example figures...", end="\n\n")
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data_og[half, :, :], vmax=10)
-            plt.xlabel('Delta')
-            plt.ylabel('Gamma')
-            plt.tight_layout()
-            plt.savefig(save_folder + "/data_before_rotation.png")
-            plt.close()
+                bad_frames = []
+                for j, summed_frame in enumerate(sum_along_rc):
+                    if j == 0:
+                        if 100 * sum_along_rc[1] < summed_frame:
+                            bad_frames.append(j)
+                    elif j == len(sum_along_rc)-1:
+                        if 100 * sum_along_rc[-2] < summed_frame:
+                            bad_frames.append(j)
+                    else:
+                        if 100 * sum_along_rc[j-1] < summed_frame \
+                                and 100 * sum_along_rc[j+1] < summed_frame:
+                            bad_frames.append(j)
 
-            plt.figure(figsize=(16, 9))
-            plt.imshow(data[half, :, :], vmax=10)
-            plt.xlabel('Gamma')
-            plt.ylabel('Delta')
-            plt.tight_layout()
-            plt.savefig(save_folder + "/data_after_rotation.png")
-            plt.close()
+                # Mask bad frames
+                for j in bad_frames:
+                    print("Masked frame", j)
+                    data[j] = np.zeros((data.shape[1], data.shape[2]))
 
-        else:
-            print("Data already rotated ...")
+                    # Put one random pixel to 1, so that bcdi
+                    # does not skip the frame since it is boggy for now
+                    data[j, random.randint(0, data.shape[1]),
+                         random.randint(0, data.shape[1])] = 1
+
+                # Overwrite data in copied file
+                f['com']['scan_data'][good_data_key][...] = data
+
+                # Plot data
+                print("Saving example figures...", end="\n\n")
+                plt.figure(figsize=(16, 9))
+                plt.imshow(data_og[half, :, :], vmax=10)
+                plt.xlabel('Delta')
+                plt.ylabel('Gamma')
+                plt.tight_layout()
+                plt.savefig(save_folder + "/data_before_rotation.png")
+                plt.close()
+
+                plt.figure(figsize=(16, 9))
+                plt.imshow(data[half, :, :], vmax=10)
+                plt.xlabel('Gamma')
+                plt.ylabel('Delta')
+                plt.tight_layout()
+                plt.savefig(save_folder + "/data_after_rotation.png")
+                plt.close()
+
+            else:
+                print("Data already rotated ...")
+
+        except (ValueError, RuntimeError, KeyError):
+            pass  # Not sixs data

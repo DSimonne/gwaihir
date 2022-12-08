@@ -8,7 +8,6 @@ import shutil
 from numpy.fft import fftshift
 from scipy.ndimage import center_of_mass
 from shlex import quote
-import ipywidgets as widgets
 from IPython.display import clear_output
 from ast import literal_eval
 
@@ -334,7 +333,7 @@ def init_phase_retrieval_tab(
 
                 # Don't use bc experimental
                 interface.text_file.append(
-                    f"# psf_filter = \"none\"\n")
+                    "# psf_filter = \"none\"\n")
 
             # else no PSF, just don't write anything
 
@@ -984,15 +983,15 @@ def filter_reconstructions(
 
         else:
             # only standard_deviation
-            if filter_criteria is "standard_deviation":
+            if filter_criteria == "standard_deviation":
                 filter_by_std(cxi_files, nb_run_keep)
 
             # only FLLK
-            elif filter_criteria is "FLLK":
+            elif filter_criteria == "FLLK":
                 filter_by_FLLK(cxi_files, nb_run_keep)
 
             # standard_deviation then FLLK
-            elif filter_criteria is "standard_deviation_FLLK":
+            elif filter_criteria == "standard_deviation_FLLK":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
@@ -1013,7 +1012,7 @@ def filter_reconstructions(
                     filter_by_FLLK(cxi_files, nb_run_keep)
 
             # FLLK then standard_deviation
-            elif filter_criteria is "FLLK_standard_deviation":
+            elif filter_criteria == "FLLK_standard_deviation":
                 if nb_run is None:
                     nb_run = len(cxi_files)
 
@@ -1390,19 +1389,18 @@ def list_files(
     verbose=False,
 ):
     """List all cxi files in the folder and sort by creation time"""
-    file_list = [f for f in sorted(
+    file_list = sorted(
         glob.glob(folder + "/" + glob_pattern),
         key=os.path.getmtime,
         reverse=True,
     )
-    ]
 
     if verbose:
         print(
             "################################################"
             "################################################"
         )
-        for j, f in enumerate(file_list):
+        for f in file_list:
             file_timestamp = datetime.fromtimestamp(
                 os.path.getmtime(f)).strftime('%Y-%m-%d %H:%M:%S')
             print(
@@ -1432,7 +1430,6 @@ def run_modes_decomposition(
      folder
     :param folder: path to folder in which are stored the reconstructions
     """
-
     glob_pattern = "*FLLK*.cxi"
     cxi_files_list = list_files(
         folder=folder,

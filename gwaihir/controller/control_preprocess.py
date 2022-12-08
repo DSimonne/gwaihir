@@ -7,7 +7,6 @@ from datetime import datetime
 import tables as tb
 from IPython.display import display, clear_output
 import ipywidgets as widgets
-from ipywidgets import interact
 from ast import literal_eval
 import gwaihir
 
@@ -476,7 +475,7 @@ def init_preprocess_tab(
     if run_preprocess in ("GUI", "terminal"):
         # Disable all widgets until the end of the program
         for w in interface.TabPreprocess.children[:-2]:
-            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+            if isinstance(w, (widgets.VBox, widgets.HBox)):
                 for wc in w.children:
                     wc.disabled = True
             elif isinstance(w, widgets.HTML):
@@ -686,7 +685,7 @@ def init_preprocess_tab(
     else:
         # Disable all widgets until the end of the program
         for w in interface.TabPreprocess.children[:-2]:
-            if isinstance(w, widgets.VBox) or isinstance(w, widgets.HBox):
+            if isinstance(w, (widgets.VBox, widgets.HBox)):
                 for wc in w.children:
                     wc.disabled = False
             elif isinstance(w, widgets.HTML):
@@ -752,7 +751,7 @@ def create_yaml_file(
             for line in config_file:
                 v.write(line + "\n")
     else:
-        raise FileError("Parameter fname must end with .yaml or .yml")
+        raise Exception("Parameter fname must end with .yaml or .yml")
 
 
 def extract_metadata(
@@ -841,7 +840,7 @@ def extract_metadata(
                 pass
 
             # Extra metadata for SixS to save in df
-            if gwaihir_dataset.beamline is "SIXS_2019":
+            if gwaihir_dataset.beamline == "SIXS_2019":
                 data = rd.DataSet(gwaihir_dataset.path_to_nxs_data)
                 try:
                     temp_df["x"] = data.x[0]

@@ -95,6 +95,7 @@ class Plotter:
             )
 
     def init_plot(self):
+        """Initialize plotting widget with the given parameters"""
         if self.plot == "2D":
             plot_data(
                 data_array=self.data_array,
@@ -349,10 +350,9 @@ class ThreeDViewer(widgets.Box):
         self.toggle_rotate.observe(self.on_animate)
 
         # Future attributes
-        # self.mesh = None
-        # self.color = None
-        # self.d0 = None
-        # self.progress.value = None
+        self.mesh = None
+        self.color = None
+        self.d0 = None
 
         # Create final vertical box with all the widgets
         self.vbox = widgets.VBox([self.threshold,
@@ -474,17 +474,18 @@ class ThreeDViewer(widgets.Box):
                 elif 'log' in newv and 'log' not in oldv:
                     self.d0 = self.data
                     data = np.log10(np.maximum(0.1, abs(self.d0)))
-                    self.set_data(data, threshold=np.log10(self.threshold.value))
+                    self.set_data(data, threshold=np.log10(
+                        self.threshold.value))
                     return
             self.on_update_plot()
 
     def set_data(self, data, threshold=None):
-        """Check if data is complex or not
+        """
+        Check if data is complex or not
 
         :param data: data 3d array, complex ot not, to be plotted
         :param threshold: threshold for contour, if None set to max/2
         """
-
         # Update progress bar
         self.progress.value = 5
 
@@ -554,8 +555,7 @@ class ThreeDViewer(widgets.Box):
         self.on_update_plot()
 
     def on_animate(self, v):
-        """Trigger the animation (rotation around vertical axis)
-        """
+        """Trigger the animation (rotation around vertical axis)"""
         if self.pcb_rotate is None:
             self.pcb_rotate = PeriodicCallback(self.callback_rotate, 50.)
         if self.toggle_rotate.value:

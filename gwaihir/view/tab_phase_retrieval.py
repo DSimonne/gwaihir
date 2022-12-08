@@ -745,7 +745,6 @@ class TabPhaseRetrieval(widgets.VBox):
 
     def run_pynx_handler(self, change):
         """Handles changes related to the phase retrieval."""
-
         if change.new:
             for w in self.children[:-1]:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
