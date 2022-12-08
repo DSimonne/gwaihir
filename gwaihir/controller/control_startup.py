@@ -339,7 +339,7 @@ def find_and_copy_raw_data(
         try:
             print("File path:", path_to_nxs_data)
             template_imagefile = os.path.basename(path_to_nxs_data).split(
-                "%05d" % scan)[0] + "%05d.nxs" # Does not work at crystal
+                "%05d" % scan)[0] + "%05d.nxs"  # Does not work at crystal
             print(f"File template: {template_imagefile}\n\n")
 
         except (IndexError, AttributeError):
@@ -354,9 +354,9 @@ def find_and_copy_raw_data(
                 print(f"Copied {path_to_nxs_data} to {scan_folder}data/")
             else:
                 print("{} already exists in {}data/".format(
-                        os.path.basename(path_to_nxs_data),
-                        scan_folder
-                    )
+                    os.path.basename(path_to_nxs_data),
+                    scan_folder
+                )
                 )
 
             # Change data_dir, only if copy successful
@@ -402,7 +402,7 @@ def rotate_sixs_data(path_to_nxs_data):
                 if len(shape) == 3:
                     three_d_data_keys.append(key)
         except:
-            pass # Not sixs data
+            pass  # Not sixs data
 
         if not data_already_rotated:
             print("Rotating SIXS data ...")

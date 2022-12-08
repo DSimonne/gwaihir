@@ -474,7 +474,8 @@ class ThreeDViewer(widgets.Box):
                 elif 'log' in newv and 'log' not in oldv:
                     self.d0 = self.data
                     data = np.log10(np.maximum(0.1, abs(self.d0)))
-                    self.set_data(data, threshold=np.log10(self.threshold.value))
+                    self.set_data(data, threshold=np.log10(
+                        self.threshold.value))
                     return
             self.on_update_plot()
 
