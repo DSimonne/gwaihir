@@ -40,10 +40,7 @@ class Dataset:
             self._pynx_version = None
 
     def __repr__(self):
-        return "Dataset {}{}.\n".format(
-            self.sample_name,
-            self.scan,
-        )
+        return f"Dataset {self.sample_name}{self.scan}.\n"
 
     def __str__(self):
         return repr(self)
@@ -203,12 +200,18 @@ class Dataset:
         # Add GUI data
         with h5py.File(final_cxi_file, "a") as f:
             # Save packages version
-            f.create_dataset("gwaihir_version", data="gwaihir %s" %
-                             self._gwaihir_version)
-            f.create_dataset("bcdi_version", data="bcdi %s" %
-                             self._bcdi_version)
-            f.create_dataset("pynx_version", data="pynx %s" %
-                             self._pynx_version)
+            f.create_dataset(
+                "gwaihir_version",
+                data=f"gwaihir {self._gwaihir_version}"
+            )
+            f.create_dataset(
+                "bcdi_version",
+                data=f"bcdi {self._bcdi_version}"
+            )
+            f.create_dataset(
+                "pynx_version",
+                data=f"pynx {self._pynx_version}"
+            )
 
             # Create parameter groups
             try:

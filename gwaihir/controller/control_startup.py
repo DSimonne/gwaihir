@@ -31,7 +31,8 @@ def init_startup_tab(
     run_dir_init,
 ):
     """
-    Mandatory to run before any other step
+    Mandatory to run before any other step, updates the directories and
+    the creates the Dataset instance
 
     :param sample_name: e.g. "S"
      str of sample names (usually string in front of the scan number in the
@@ -142,9 +143,9 @@ def init_startup_tab(
         print("Cleared window.")
         clear_output(True)
 
+
 def save_data_analysis_workflow(Dataset):
-    """
-    """
+    """Save the Dataset instance as a `.cxi` file."""
     # Path to the final .cxi file
     final_cxi_file = "{}{}.cxi".format(
         Dataset.scan_folder,

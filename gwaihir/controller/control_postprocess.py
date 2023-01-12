@@ -1,13 +1,13 @@
 import glob
 import os
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from datetime import datetime
 import ipywidgets as widgets
 from IPython.display import clear_output
 from ast import literal_eval
 
-from scipy.fftpack import ifftn, fftshift
+# from scipy.fftpack import ifftn, fftshift
 from scipy.ndimage import center_of_mass
 
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
@@ -771,8 +771,9 @@ def crop_at_center(data, mask=None, final_shape=None):
     if not (final_shape <= data.shape).all():
         print(
             "One of the axis of the final shape is larger than "
-            "the initial axis (initial shape: {}, final shape: {}).\n"
-            "Did not proceed to cropping.".format(shape, tuple(final_shape))
+            f"the initial axis (initial shape: {shape}, final shape: "
+            f"{tuple(final_shape)}).\n"
+            "Did not proceed to cropping."
         )
         return data, mask
 

@@ -1097,15 +1097,21 @@ def initialize_cdi_operator(
         if mask.endswith(".npy"):
             mask = np.load(mask).astype(np.int8)
             nb = mask.sum()
-            print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                nb, nb * 100 / mask.size))
+            mask_percentage = nb * 100 / mask.size
+            print(
+                f"\tCXI input: loading mask, "
+                f"with {nb} pixels masked ({mask_percentage:0.3f}%)"
+            )
         elif mask.endswith(".npz"):
             try:
                 mask = np.load(mask)[
                     "mask"].astype(np.int8)
                 nb = mask.sum()
-                print("\tCXI input: loading mask, with %d pixels masked (%6.3f%%)" % (
-                    nb, nb * 100 / mask.size))
+                mask_percentage = nb * 100 / mask.size
+                print(
+                    f"\tCXI input: loading mask, "
+                    f"with {nb} pixels masked ({mask_percentage:0.3f}%)"
+                )
             except KeyError:
                 print("\t\"mask\" key does not exist.")
 
@@ -1181,8 +1187,7 @@ def initialize_cdi_operator(
             # Find center of mass
             z0, y0, x0 = center_of_mass(iobs)
             print("Center of mass at:", z0, y0, x0)
-            iz0, iy0, ix0 = int(round(z0)), int(
-                round(y0)), int(round(x0))
+            iz0, iy0, ix0 = int(round(z0)), int(round(y0)), int(round(x0))
 
             # Max symmetrical box around center of mass
             nx = 2 * min(ix0, nx0 - ix0)
@@ -1196,10 +1201,15 @@ def initialize_cdi_operator(
 
             # Crop data to fulfill FFT size requirements
             nz1, ny1, nx1 = smaller_primes(
-                (nz, ny, nx), maxprime=7, required_dividers=(2,))
+                (nz, ny, nx),
+                maxprime=7,
+                required_dividers=(2,)
+            )
 
-            print("Centering & reshaping data: (%d, %d, %d) -> \
-                (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+            print(
+                f"Centering & reshaping data: ({nz0}, {ny0}, {nx0}) -> "
+                f"({nz1}, {ny1}, {nx1})"
+            )
             iobs = iobs[
                 iz0 - nz1 // 2:iz0 + nz1 // 2,
                 iy0 - ny1 // 2:iy0 + ny1 // 2,
@@ -1209,8 +1219,10 @@ def initialize_cdi_operator(
                     iz0 - nz1 // 2:iz0 + nz1 // 2,
                     iy0 - ny1 // 2:iy0 + ny1 // 2,
                     ix0 - nx1 // 2:ix0 + nx1 // 2]
-                print("Centering & reshaping mask: (%d, %d, %d) -> \
-                    (%d, %d, %d)" % (nz0, ny0, nx0, nz1, ny1, nx1))
+                print(
+                    f"Centering & reshaping mask: ({nz0}, {ny0}, {nx0}) -> "
+                    f"({nz1}, {ny1}, {nx1})"
+                )
 
         else:
             ny0, nx0 = iobs.shape
@@ -1232,8 +1244,9 @@ def initialize_cdi_operator(
             ny1, nx1 = smaller_primes(
                 (ny, nx), maxprime=7, required_dividers=(2,))
 
-            print("Centering & reshaping data: (%d, %d) -> (%d, %d)" %
-                  (ny0, nx0, ny1, nx1))
+            print(
+                f"Centering & reshaping data: ({ny0}, {nx0}) -> ({ny1}, {nx1})"
+            )
             iobs = iobs[iy0 - ny1 // 2:iy0 + ny1 //
                         2, ix0 - nx1 // 2:ix0 + nx1 // 2]
 
