@@ -653,8 +653,15 @@ def plot_data(
     elif data_dimensions == 2:
         # Depends on log scale
         if isinstance(log, bool):
+            # Create figure
+            if not figsize:
+                figsize = (10, 10)
+
+            fig, ax = plt.subplots(figsize=figsize)
+
             img = plot_2d_image(
-                data_array, log=log, cmap=cmap, title=title, fontsize=fontsize
+                data_array, log=log, fig=fig, ax=ax, cmap=cmap,
+                title=title, fontsize=fontsize
             )
 
             # Create axis for colorbar
