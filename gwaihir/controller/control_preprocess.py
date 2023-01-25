@@ -496,8 +496,6 @@ def init_preprocess_tab(
             root_folder = interface.Dataset.root_folder
             data_dir = interface.Dataset.data_dir
 
-        backend = interface.matplotlib_backend if run_preprocess == "GUI" else "Qt5Agg"
-
         # Create centering_method dict
         centering_method = {
             "direct_space": interface.Dataset.centering_method_direct_space,
