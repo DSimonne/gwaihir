@@ -363,7 +363,7 @@ def find_and_copy_raw_data(
             path_to_nxs_data = data_dir + os.path.basename(path_to_nxs_data)
 
             # Rotate the data
-            rotate_sixs_data(path_to_nxs_data)
+            # rotate_sixs_data(path_to_nxs_data)
 
         except (AttributeError, FileNotFoundError):
             print("Could not move the data file.")
