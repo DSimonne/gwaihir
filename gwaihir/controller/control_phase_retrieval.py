@@ -410,10 +410,6 @@ def init_phase_retrieval_tab(
                     f"--path {interface.preprocessing_folder} "
                     f"--filtering {nb_run_keep_std} --modes true"
                 )
-                print(
-                    "\nSolution filtering and modes decomposition are "
-                    "automatically applied at the end of the batch job."
-                )
                 os.system(
                     "{}/run_slurm_job.sh \
                     --reconstruct gui \
