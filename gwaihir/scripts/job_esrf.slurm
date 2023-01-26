@@ -8,7 +8,6 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4G
 #SBATCH --output=gwaihir_%x-%j.out
-#SBATCH --export=NONE
 
 # Example:
 # job_esrf.slurm
@@ -55,14 +54,14 @@ echo
 ## GUI
 if [[ $reconstruct = "gui" ]]; then
     echo "################################################################################################################"
-    echo "Loading pynx_run_gui.txt arguments..."
-    echo "/data/id01/inhouse/david/p9.dev/bin/pynx-id01cdi.py pynx_run_gui.txt |& tee README_pynx_gui.md"
-    mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/p9.dev/bin/pynx-id01cdi.py pynx_run.txt |& tee README_pynx.md
+    echo "Loading pynx_run.txt arguments..."
+    echo "/data/id01/inhouse/david/p9.dev/bin/pynx-id01cdi.py pynx_run.txt |& tee README_pynx.md"
+    mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/p9.dev/bin/pynx-cdi-id01 pynx_run.txt |& tee README_pynx.md
 
     # Moving the results in gui_run/ sub-directory
     echo "Creating a subdirector gui_run/ and moving all the .cxi files there..."
     mv S*LLK*.cxi gui_run/
-    mv README_pynx_gui.md gui_run/
+    mv README_pynx.md gui_run/
     cd gui_run/
     echo "################################################################################################################"
     echo
@@ -72,7 +71,7 @@ elif [[ $reconstruct = "terminal" ]]; then
     echo "################################################################################################################"
     echo "Loading pynx_run.txt arguments..."
     echo "/data/id01/inhouse/david/p9.dev/bin/pynx-id01cdi.py pynx_run.txt |& tee README_pynx_terminal.md"
-    mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/p9.dev/bin/pynx-id01cdi.py pynx_run.txt |& tee README_pynx_terminal.md
+    mpiexec -n $SLURM_NTASKS /data/id01/inhouse/david/p9.dev/bin/pynx-cdi-id01 pynx_run.txt |& tee README_pynx_terminal.md
 
     # Moving the results in terminal_run/ sub-directory
     echo "Creating a subdirector terminal_run/ and moving all the .cxi files there..."
@@ -88,7 +87,7 @@ if [[ $modes = "true" ]]; then
     echo "################################################################################################################"
     echo "Running modes decomposition ..."
     echo "/data/id01/inhouse/david/p9.dev/bin/pynx-cdi-analysis.py *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md"
-    /data/id01/inhouse/david/p9.dev/bin/pynx-cdi-analysis.py *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md
+    /data/id01/inhouse/david/p9.dev/bin/pynx-cdi-analysis *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md
     echo "################################################################################################################"
     echo
 
