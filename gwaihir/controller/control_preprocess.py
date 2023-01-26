@@ -602,7 +602,7 @@ def init_preprocess_tab(
             print(
                 "\n###########################################"
                 "#############################################"
-                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess.py"
+                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
                 f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
                 "\n###########################################"
                 "#############################################"
@@ -623,7 +623,7 @@ def init_preprocess_tab(
             print(
                 "\n###########################################"
                 "#############################################"
-                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess.py"
+                f"\nRunning: $ {interface.path_scripts}/bcdi_preprocess_BCDI.py"
                 f"\nConfig file: {interface.preprocessing_folder}config_preprocessing.yml"
                 "\n###########################################"
                 "#############################################"
@@ -632,12 +632,12 @@ def init_preprocess_tab(
             # Run function
             print(
                 f"cd {interface.preprocessing_folder}; "
-                f"{interface.path_scripts}/bcdi_preprocess.py "
+                f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
                 "-c config_preprocessing.yml"
             )
             os.system(
                 f"cd {interface.preprocessing_folder}; "
-                f"{interface.path_scripts}/bcdi_preprocess.py "
+                f"{interface.path_scripts}/bcdi_preprocess_BCDI.py "
                 "-c config_preprocessing.yml"
             )
 
