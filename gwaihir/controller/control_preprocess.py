@@ -9,6 +9,7 @@ from IPython.display import display, clear_output
 import ipywidgets as widgets
 from ast import literal_eval
 import gwaihir
+from gwaihir import dataset
 
 from bcdi.preprocessing import ReadNxs3 as rd
 from bcdi.preprocessing.preprocessing_runner import run as run_preprocessing
@@ -347,130 +348,133 @@ def init_preprocess_tab(
      tilt parameter from xrayutilities 2D detector calibration
     """
     # Save parameter values as attributes
-    interface.Dataset.beamline = beamline
-    interface.Dataset.actuators = actuators
-    interface.Dataset.is_series = is_series
-    interface.Dataset.custom_scan = custom_scan
-    interface.Dataset.custom_images = custom_images
-    interface.Dataset.custom_monitor = custom_monitor
-    interface.Dataset.specfile_name = specfile_name
-    interface.Dataset.rocking_angle = rocking_angle
-    interface.Dataset.flag_interact = flag_interact
-    interface.Dataset.background_plot = str(background_plot)
-    interface.Dataset.centering_method_reciprocal_space = centering_method_reciprocal_space
-    interface.Dataset.bragg_peak = bragg_peak
-    interface.Dataset.fix_size = fix_size
-    interface.Dataset.center_fft = center_fft
-    interface.Dataset.pad_size = pad_size
-    interface.Dataset.mask_zero_event = mask_zero_event
-    interface.Dataset.median_filter = median_filter
-    interface.Dataset.median_filter_order = median_filter_order
-    interface.Dataset.reload_previous = reload_previous
-    interface.Dataset.reload_orthogonal = reload_orthogonal
-    interface.Dataset.preprocessing_binning = preprocessing_binning
-    interface.Dataset.save_rawdata = save_rawdata
-    interface.Dataset.save_to_npz = save_to_npz
-    interface.Dataset.save_to_mat = save_to_mat
-    interface.Dataset.save_to_vti = save_to_vti
-    interface.Dataset.save_as_int = save_as_int
-    interface.Dataset.detector = detector
-    interface.Dataset.phasing_binning = phasing_binning
-    interface.Dataset.linearity_func = None  # TODO
-    interface.Dataset.roi_detector = roi_detector
-    interface.Dataset.normalize_flux = normalize_flux
-    interface.Dataset.photon_threshold = photon_threshold
-    interface.Dataset.photon_filter = photon_filter
-    interface.Dataset.bin_during_loading = True  # TODO
-    interface.Dataset.frames_pattern = None  # TODO
-    interface.Dataset.background_file = background_file
-    interface.Dataset.hotpixels_file = hotpixels_file
-    interface.Dataset.flatfield_file = flatfield_file
-    interface.Dataset.template_imagefile = template_imagefile
-    interface.Dataset.use_rawdata = not use_rawdata
-    interface.Dataset.interpolation_method = interpolation_method
-    interface.Dataset.fill_value_mask = fill_value_mask
-    interface.Dataset.beam_direction = beam_direction
-    interface.Dataset.sample_offsets = sample_offsets
-    interface.Dataset.detector_distance = detector_distance
-    interface.Dataset.energy = energy
-    interface.Dataset.custom_motors = custom_motors
-    interface.Dataset.align_q = align_q
-    interface.Dataset.ref_axis_q = ref_axis_q
-    interface.Dataset.direct_beam = direct_beam
-    interface.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
-    interface.Dataset.outofplane_angle = outofplane_angle
-    interface.Dataset.inplane_angle = inplane_angle
-    interface.Dataset.tilt_angle = tilt_angle
-    interface.Dataset.sample_inplane = sample_inplane
-    interface.Dataset.sample_outofplane = sample_outofplane
-    interface.Dataset.offset_inplane = offset_inplane
-    interface.Dataset.cch1 = cch1
-    interface.Dataset.cch2 = cch2
-    interface.Dataset.detrot = detrot
-    interface.Dataset.tiltazimuth = tiltazimuth
-    interface.Dataset.tilt_detector = tilt_detector
+    if isinstance(interface.Dataset, dataset.Dataset):
+        interface.Dataset.beamline = beamline
+        interface.Dataset.actuators = actuators
+        interface.Dataset.is_series = is_series
+        interface.Dataset.custom_scan = custom_scan
+        interface.Dataset.custom_images = custom_images
+        interface.Dataset.custom_monitor = custom_monitor
+        interface.Dataset.specfile_name = specfile_name
+        interface.Dataset.rocking_angle = rocking_angle
+        interface.Dataset.flag_interact = flag_interact
+        interface.Dataset.background_plot = str(background_plot)
+        interface.Dataset.centering_method_reciprocal_space = centering_method_reciprocal_space
+        interface.Dataset.bragg_peak = bragg_peak
+        interface.Dataset.fix_size = fix_size
+        interface.Dataset.center_fft = center_fft
+        interface.Dataset.pad_size = pad_size
+        interface.Dataset.mask_zero_event = mask_zero_event
+        interface.Dataset.median_filter = median_filter
+        interface.Dataset.median_filter_order = median_filter_order
+        interface.Dataset.reload_previous = reload_previous
+        interface.Dataset.reload_orthogonal = reload_orthogonal
+        interface.Dataset.preprocessing_binning = preprocessing_binning
+        interface.Dataset.save_rawdata = save_rawdata
+        interface.Dataset.save_to_npz = save_to_npz
+        interface.Dataset.save_to_mat = save_to_mat
+        interface.Dataset.save_to_vti = save_to_vti
+        interface.Dataset.save_as_int = save_as_int
+        interface.Dataset.detector = detector
+        interface.Dataset.phasing_binning = phasing_binning
+        interface.Dataset.linearity_func = None  # TODO
+        interface.Dataset.roi_detector = roi_detector
+        interface.Dataset.normalize_flux = normalize_flux
+        interface.Dataset.photon_threshold = photon_threshold
+        interface.Dataset.photon_filter = photon_filter
+        interface.Dataset.bin_during_loading = True  # TODO
+        interface.Dataset.frames_pattern = None  # TODO
+        interface.Dataset.background_file = background_file
+        interface.Dataset.hotpixels_file = hotpixels_file
+        interface.Dataset.flatfield_file = flatfield_file
+        interface.Dataset.template_imagefile = template_imagefile
+        interface.Dataset.use_rawdata = not use_rawdata
+        interface.Dataset.interpolation_method = interpolation_method
+        interface.Dataset.fill_value_mask = fill_value_mask
+        interface.Dataset.beam_direction = beam_direction
+        interface.Dataset.sample_offsets = sample_offsets
+        interface.Dataset.detector_distance = detector_distance
+        interface.Dataset.energy = energy
+        interface.Dataset.custom_motors = custom_motors
+        interface.Dataset.align_q = align_q
+        interface.Dataset.ref_axis_q = ref_axis_q
+        interface.Dataset.direct_beam = direct_beam
+        interface.Dataset.dirbeam_detector_angles = dirbeam_detector_angles
+        interface.Dataset.outofplane_angle = outofplane_angle
+        interface.Dataset.inplane_angle = inplane_angle
+        interface.Dataset.tilt_angle = tilt_angle
+        interface.Dataset.sample_inplane = sample_inplane
+        interface.Dataset.sample_outofplane = sample_outofplane
+        interface.Dataset.offset_inplane = offset_inplane
+        interface.Dataset.cch1 = cch1
+        interface.Dataset.cch2 = cch2
+        interface.Dataset.detrot = detrot
+        interface.Dataset.tiltazimuth = tiltazimuth
+        interface.Dataset.tilt_detector = tilt_detector
 
-    # Extract dict, list and tuple from strings
-    list_parameters = ["bragg_peak", "custom_images",
-                       "fix_size", "pad_size", "roi_detector",
-                       "direct_beam", "dirbeam_detector_angles"]
+        # Extract dict, list and tuple from strings
+        list_parameters = ["bragg_peak", "custom_images",
+                           "fix_size", "pad_size", "roi_detector",
+                           "direct_beam", "dirbeam_detector_angles"]
 
-    tuple_parameters = [
-        "phasing_binning", "preprocessing_binning",  "beam_direction",
-        "sample_offsets", "sample_inplane", "sample_outofplane"]
+        tuple_parameters = [
+            "phasing_binning", "preprocessing_binning",  "beam_direction",
+            "sample_offsets", "sample_inplane", "sample_outofplane"]
 
-    dict_parameters = ["actuators", "custom_motors"]
+        dict_parameters = ["actuators", "custom_motors"]
 
-    try:
-        for p in list_parameters:
-            if getattr(interface.Dataset, p) == "":
-                setattr(interface.Dataset, p, [])
-            else:
-                setattr(interface.Dataset, p, literal_eval(
-                    getattr(interface.Dataset, p)))
-    except ValueError:
-        print(f"Wrong list syntax for {p}")
-
-    try:
-        for p in tuple_parameters:
-            if getattr(interface.Dataset, p) == "":
-                setattr(interface.Dataset, p, ())
-            else:
-                setattr(interface.Dataset, p, literal_eval(
-                    getattr(interface.Dataset, p)))
-    except ValueError:
-        print(f"Wrong tuple syntax for {p}")
-
-    try:
-        for p in dict_parameters:
-            if getattr(interface.Dataset, p) == "":
-                setattr(interface.Dataset, p, None)  # or {}
-            else:
-                if literal_eval(getattr(interface.Dataset, p)) == {}:
-                    setattr(interface.Dataset, p, None)
+        try:
+            for p in list_parameters:
+                if getattr(interface.Dataset, p) == "":
+                    setattr(interface.Dataset, p, [])
                 else:
                     setattr(interface.Dataset, p, literal_eval(
                         getattr(interface.Dataset, p)))
-    except ValueError:
-        print(f"Wrong dict syntax for {p}")
+        except ValueError:
+            print(f"Wrong list syntax for {p}")
 
-    # Set None if we are not using custom scans
-    if not interface.Dataset.custom_scan:
-        interface.Dataset.custom_images = None
-        interface.Dataset.custom_monitor = None
+        try:
+            for p in tuple_parameters:
+                if getattr(interface.Dataset, p) == "":
+                    setattr(interface.Dataset, p, ())
+                else:
+                    setattr(interface.Dataset, p, literal_eval(
+                        getattr(interface.Dataset, p)))
+        except ValueError:
+            print(f"Wrong tuple syntax for {p}")
 
-    # Empty parameters are set to None (bcdi syntax)
-    if interface.Dataset.background_file == "":
-        interface.Dataset.background_file = None
+        try:
+            for p in dict_parameters:
+                if getattr(interface.Dataset, p) == "":
+                    setattr(interface.Dataset, p, None)  # or {}
+                else:
+                    if literal_eval(getattr(interface.Dataset, p)) == {}:
+                        setattr(interface.Dataset, p, None)
+                    else:
+                        setattr(interface.Dataset, p, literal_eval(
+                            getattr(interface.Dataset, p)))
+        except ValueError:
+            print(f"Wrong dict syntax for {p}")
 
-    if interface.Dataset.hotpixels_file == "":
-        interface.Dataset.hotpixels_file = None
+        # Set None if we are not using custom scans
+        if not interface.Dataset.custom_scan:
+            interface.Dataset.custom_images = None
+            interface.Dataset.custom_monitor = None
 
-    if interface.Dataset.flatfield_file == "":
-        interface.Dataset.flatfield_file = None
+        # Empty parameters are set to None (bcdi syntax)
+        if interface.Dataset.background_file == "":
+            interface.Dataset.background_file = None
 
-    if interface.Dataset.specfile_name == "":
-        interface.Dataset.specfile_name = None
+        if interface.Dataset.hotpixels_file == "":
+            interface.Dataset.hotpixels_file = None
+
+        if interface.Dataset.flatfield_file == "":
+            interface.Dataset.flatfield_file = None
+
+        if interface.Dataset.specfile_name == "":
+            interface.Dataset.specfile_name = None
+    else:
+        print("You must initialize the DataSet class first in the startup tab.")
 
     if run_preprocess in ("GUI", "terminal"):
         # Disable all widgets until the end of the program
