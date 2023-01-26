@@ -684,7 +684,7 @@ def init_preprocess_tab(
 
         display(button_save_metadata)
 
-    else:
+    elif run_preprocess == False:
         # Disable all widgets until the end of the program
         for w in interface.TabPreprocess.children[:-2]:
             if isinstance(w, (widgets.VBox, widgets.HBox)):
@@ -697,6 +697,11 @@ def init_preprocess_tab(
         plt.close()
         clear_output(True)
         print("Cleared window.")
+
+    elif run_preprocess == "init":
+        plt.close()
+        clear_output(True)
+        print("initialized parameters.")
 
 
 def create_yaml_file(

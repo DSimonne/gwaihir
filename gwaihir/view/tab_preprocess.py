@@ -419,6 +419,7 @@ class TabPreprocess(widgets.VBox):
         self.run_preprocess = widgets.ToggleButtons(
             options=[
                 ("False", False),
+                ("Initialize parameters", "init"),
                 ("In GUI.", "GUI"),
                 ("In terminal.", "terminal"),
             ],
