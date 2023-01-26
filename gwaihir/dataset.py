@@ -176,13 +176,13 @@ class Dataset:
                 # Also copy mode data to entry_1.image_2.modes_percentage
                 if self.reconstruction_file.endswith(".h5"):
                     try:
-                        self.reconstruction_file.copy(
+                        reconstruction_file.copy(
                             '/entry_1/data_2/',
                             f["entry_1"]["image_2"],
                             name="modes_percentage")
                     except RuntimeError:
                         del f["entry_1"]["image_2"]["modes_percentage"]
-                        self.reconstruction_file.copy(
+                        reconstruction_file.copy(
                             '/entry_1/data_2/',
                             f["entry_1"]["image_2"],
                             name="modes_percentage")
