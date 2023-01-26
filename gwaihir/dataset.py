@@ -662,10 +662,10 @@ class Dataset:
                         image_3.create_dataset("voxel_sizes",
                                                data=fi["output"]["voxel_sizes"])
 
-                        image_3.create_dataset("q_com",
-                                               data=fi["output"]["q_com"])
+                        image_3.create_dataset("qnorm",
+                                               data=fi["output"]["qnorm"])
 
-                        # Need to add trans matrix here
+                        # Need to add transformation matrix here
 
                     image_3.attrs['signal'] = 'phase'
 
