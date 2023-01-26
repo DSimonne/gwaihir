@@ -662,8 +662,8 @@ class Dataset:
                         image_3.create_dataset("voxel_sizes",
                                                data=fi["output"]["voxel_sizes"])
 
-                        image_3.create_dataset("qnorm",
-                                               data=fi["output"]["qnorm"])
+                        image_3.create_dataset("q_bragg",
+                                               data=fi["output"]["q_bragg"])
 
                         # Need to add transformation matrix here
 
