@@ -161,7 +161,7 @@ class TabPreprocess(widgets.VBox):
 
         self.centering_method_reciprocal_space = widgets.Dropdown(
             options=[
-                "max", "com", "user", "skip"],
+                "max", "com", "max_com"],
             value="max",
             description='Centering of Bragg peak method:',
             continuous_update=False,
