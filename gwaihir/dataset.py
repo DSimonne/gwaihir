@@ -689,7 +689,7 @@ class Dataset:
         print(
             "\n###########################################"
             "#############################################"
-            f"Saved file as {self.scan_folder}{self.sample_name}{self.scan}.cxi"
+            f"\nSaved file as {self.scan_folder}{self.sample_name}{self.scan}.cxi"
             "\n\tUse Dataset.postprocessing_output_file attribute."
             "\n###########################################"
             "#############################################"

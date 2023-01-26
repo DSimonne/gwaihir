@@ -701,7 +701,7 @@ def init_preprocess_tab(
     elif run_preprocess == "init":
         plt.close()
         clear_output(True)
-        print("initialized parameters.")
+        print("Initialized parameters.")
 
 
 def create_yaml_file(
