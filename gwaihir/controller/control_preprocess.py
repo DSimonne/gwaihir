@@ -519,7 +519,7 @@ def init_preprocess_tab(
             # parameters used in masking
             flag_interact=interface.Dataset.flag_interact,
             background_plot=interface.Dataset.background_plot,
-            backend=backend,
+            backend=interface.matplotlib_backend,
             # parameters related to data cropping/padding/centering
             centering_method=centering_method,
             fix_size=interface.Dataset.fix_size,
