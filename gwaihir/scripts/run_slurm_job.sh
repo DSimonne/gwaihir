@@ -124,10 +124,17 @@ echo "##############################"
 echo
 echo "Running sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm" "$reconstruct" "$username" "$path" "$modes" "$filtering"
 
-ssh $username@slurm-nice-devel << EOF
+hostname=$(hostname)
+if [[ $hostname == p9-* ]]; then
   sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm "$reconstruct" "$username" "$path" "$modes" "$filtering"
-  exit
+
+else
+  ssh $username@slurm-nice-devel << EOF
+    sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm "$reconstruct" "$username" "$path" "$modes" "$filtering"
+    exit
 EOF
+fi
+
 
 echo
 printf "You may follow the evolution of the job by typing:\n\t 'tail -f gwaihir_XXXXX.out'\n"
