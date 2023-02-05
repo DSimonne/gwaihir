@@ -97,7 +97,7 @@ if [[ $modes = "true" ]]; then
         echo "Running strain analysis"
         # ssh username@rnice9 << EOF
         #     cd $1
-        #     run_strain.py $2 $3
+        #     bcdi_postprocessing.py $2 $3
 
         #     echo "Strain.py is running ..."
 

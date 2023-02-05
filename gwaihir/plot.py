@@ -52,18 +52,17 @@ class Plotter:
         'plot'.
 
         :param filename: path to data, supported files extensions are .cxi,
-         .npy or .npz
+            .npy or .npz
         :param data_array: a np.ndarray
         :param plot: str in [
-            '2D', 'slices', 'contour_slices',
-            'sum_slices', 'sum_contour_slices',
-            '3D', False,
-         ]
+            '2D', 'slices', 'contour_slices', 'sum_slices',
+            'sum_contour_slices', '3D', False,
+            ]
         :param log: True to have a logarithmic scale
-         False to have a linear scale
+            False to have a linear scale
         :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
-         Other possible values are 'Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
-         'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'
+            Other possible values are 'Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
+            'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'
         :param figsize: default (10, 10)
         :param fontsize: default 15
         """
@@ -177,7 +176,8 @@ class Plotter:
                             "The file could not be loaded, verify that you are"
                             "loading a file with an hdf5 architecture (.nxs, "
                             ".cxi, .h5, ...) and that the file exists. Otherwise"
-                            ", verify that the data is saved in f.root.entry_1.data_1.data[:],"
+                            ", verify that the data is saved in "
+                            "f.root.entry_1.data_1.data[:],"
                             "or f.root.entry_1.image_1.data[:], as it should be"
                             "following cxi conventions."
                         )
@@ -200,13 +200,15 @@ class Plotter:
                         # Due to labelling of axes x,y,z and not z,y,x
                         self.data_array = np.swapaxes(self.data_array, 0, 2)
                     except (KeyError, OSError):
-                        raise KeyError("""
-                            The file could not be loaded, verify that you are\
-                            loading a file with an hdf5 architecture (.nxs, .cxi,\
-                            .h5, ...) and that the file exists. Otherwise, verify\
-                            that the data is saved in f.root.entry_1.data_1.data[:],\
-                            as it should be following cxi conventions.\
-                            """)
+                        raise KeyError(
+                            "The file could not be loaded, verify that you are"
+                            "loading a file with an hdf5 architecture (.nxs, "
+                            ".cxi, .h5, ...) and that the file exists. Otherwise"
+                            ", verify that the data is saved in "
+                            "f.root.entry_1.data_1.data[:],"
+                            "or f.root.entry_1.image_1.data[:], as it should be"
+                            "following cxi conventions."
+                        )
 
             # Plot data
             self.init_plot()
@@ -361,12 +363,11 @@ class ThreeDViewer(widgets.Box):
         self.d0 = None
 
         # Create final vertical box with all the widgets
-        self.vbox = widgets.VBox([self.threshold,
-                                  hbox1, hbox_toggle,
-                                  self.colormap,
-                                  # self.colormap_range, # useless for one contour
-                                  self.progress,
-                                  ])
+        self.vbox = widgets.VBox([
+            self.threshold, hbox1, hbox_toggle, self.colormap,
+            # self.colormap_range, # useless for one contour
+            self.progress,
+        ])
 
         # Load data
         if isinstance(input_file, np.ndarray):
@@ -378,7 +379,6 @@ class ThreeDViewer(widgets.Box):
                 display(self.fig)
 
             self.window = widgets.HBox([self.output_view, self.vbox])
-
             display(self.window)
 
         else:
