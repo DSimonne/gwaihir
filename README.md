@@ -15,6 +15,8 @@ And to the paper: [Simonne, D., Carnis, J., Atlan, C., Chatelier, C., Favre-Nico
 
 ![Gwahir](https://user-images.githubusercontent.com/51970962/168030371-7212abe3-f8be-4fef-9231-8b1be87abc2e.png)
 
+## Important code snippets
+
 To increase the width of the cells in Jupyter Notebook:
 
 ```python
@@ -31,7 +33,7 @@ IPython.OutputArea.prototype._should_scroll = function(lines) {
 }
 ```
 
-To open the GUI
+To open the GUI:
 
 ```python
 from gwaihir.gui import Interface

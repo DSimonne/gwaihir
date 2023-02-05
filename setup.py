@@ -5,16 +5,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gwaihir",
-    version="0.0.5",
+    version="0.0.6",
     description="Python package for BCDI data analysis",
     author="David Simonne",
     author_email="david.simonne@universite-paris-saclay.fr",
     download_url="https://pypi.org/project/gwaihir/",
     data_files=[('', ["licence.txt",
-                      "gwaihir/scripts/examples/config_postprocessing_sixs.yml",
-                      "gwaihir/scripts/examples/config_preprocessing_sixs.yml",
-                      "gwaihir/scripts/examples/config_postprocessing_P10.yml",
-                      "gwaihir/scripts/examples/config_preprocessing_P10.yml",
                       ])],
     url="https://github.com/DSimonne/gwaihir/tree/master",
     classifiers=[

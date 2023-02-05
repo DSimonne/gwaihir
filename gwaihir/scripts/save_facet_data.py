@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # trace generated using paraview version 5.10.0-RC1
-#paraview.compatibility.major = 5
-#paraview.compatibility.minor = 10
+# paraview.compatibility.major = 5
+# paraview.compatibility.minor = 10
 
 # Example file
 # can be used in the command line like this :
