@@ -169,13 +169,18 @@ class Plotter:
                         'entry_1/data_1/data'][()]
 
                 except (KeyError, OSError):
-                    print("""
-                        The file could not be loaded, verify that you are
-                        loading a file with an hdf5 architecture (.nxs, .cxi,
-                        .h5, ...) and that the file exists. Otherwise, verify
-                        that the data is saved in f.root.entry_1.data_1.data[:],
-                        as it should be following cxi conventions.
-                        """)
+                    try:
+                        self.data_array = h5.File(self.filename, mode='r')[
+                            'entry_1/image_1/data'][()]
+                    except (KeyError, OSError):
+                        print(
+                            "The file could not be loaded, verify that you are"
+                            "loading a file with an hdf5 architecture (.nxs, "
+                            ".cxi, .h5, ...) and that the file exists. Otherwise"
+                            ", verify that the data is saved in f.root.entry_1.data_1.data[:],"
+                            "or f.root.entry_1.image_1.data[:], as it should be"
+                            "following cxi conventions."
+                        )
 
             elif self.filename.endswith(".h5"):
                 try:
