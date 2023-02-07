@@ -470,14 +470,14 @@ class Interface:
                 ))
 
                 # Set tab names
-                self.window.set_title(0, "Startup")
-                self.window.set_title(1, "Detector")
-                self.window.set_title(2, "Instrument")
-                self.window.set_title(3, "Preprocess")
-                self.window.set_title(4, "Metadata")
-                self.window.set_title(5, "Postprocess")
-                self.window.set_title(6, "Plot data")
-                self.window.set_title(7, "Facet")
+                self.window.set_title(0, "1. Startup")
+                self.window.set_title(1, "2. Detector")
+                self.window.set_title(2, "3. Instrument")
+                self.window.set_title(3, "4. Preprocess")
+                self.window.set_title(4, "5. Metadata")
+                self.window.set_title(5, "6. Postprocess")
+                self.window.set_title(6, "7. Plot data")
+                self.window.set_title(7, "8. Facet")
                 self.window.set_title(8, "Readme")
 
             # Handlers specific to GUI because they

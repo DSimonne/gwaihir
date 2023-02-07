@@ -506,7 +506,7 @@ class TabPhaseRetrieval(widgets.VBox):
 
         self.unused_label_phase_retrieval = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
-            Click below to run the phase retrieval</p>",
+            I. Click below to run the phase retrieval</p>",
             style={
                 'description_width': 'initial'},
             layout=widgets.Layout(width='90%', height="35px")
@@ -545,7 +545,8 @@ class TabPhaseRetrieval(widgets.VBox):
 
         self.unused_label_run_pynx_tools = widgets.HTML(
             description="<p style='font-weight: bold;font-size:1.2em'>\
-            Click below to use a phase retrieval tool</p>",
+            II. Click below to filter your solutions or create a \
+            single solution after phase retrieval</p>",
             style={
                 'description_width': 'initial'},
             layout=widgets.Layout(width='90%', height="35px")
@@ -746,17 +747,20 @@ class TabPhaseRetrieval(widgets.VBox):
     def run_pynx_handler(self, change):
         """Handles changes related to the phase retrieval."""
         if change.new:
-            for w in self.children[:-1]:
+            for w in self.children:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
                     for wc in w.children:
                         wc.disabled = True
                 else:
                     w.disabled = True
 
-            self.run_phase_retrieval.disabled = False
+            if isinstance(self.run_phase_retrieval.value, str):
+                self.run_phase_retrieval.disabled = False
+            elif isinstance(self.run_pynx_tools.value, str):
+                self.run_pynx_tools.disabled = False
 
         elif not change.new:
-            for w in self.children[:-1]:
+            for w in self.children:
                 if isinstance(w, widgets.widgets.widget_box.HBox):
                     for wc in w.children:
                         wc.disabled = False
