@@ -19,6 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     scripts=[
+        "gwaihir/scripts/handle_sixs_data.py",
         "gwaihir/scripts/run_init_dir.py",
         "gwaihir/scripts/job_esrf.slurm",
         "gwaihir/scripts/run_slurm_job.sh",
