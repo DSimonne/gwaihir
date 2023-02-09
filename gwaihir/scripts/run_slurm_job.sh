@@ -45,16 +45,6 @@ while (( "$#" )); do
       fi
       ;;
 
-    -f|--filtering)
-      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-        filtering=$2
-        shift 2
-      else
-        echo "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
-
     -*|--*=) # unsupported flags
       echo "Error: Unsupported flag $1" >&2
       exit 1
@@ -100,13 +90,6 @@ else
     echo "Modes: "$modes
 fi
 
-if [[ -z $filtering ]]; then
-    filtering=false
-    echo "Defaulted filtering to false, assign with e.g.: -f 5"
-else
-    echo "Filtering: "$filtering
-fi
-
 echo "################################################################################################"
 echo
 
@@ -115,22 +98,20 @@ reconstruct=${reconstruct/#=/}
 username=${username/#=/}
 path=${path/#=/}
 modes=${modes/#=/}
-filtering=${filtering/#=/}
 
-# Old version, since the new one is kinda boggy
 echo "##############################"
 echo "Connecting to slurm-nice-devel"
 echo "##############################"
 echo
-echo "Running sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm" "$reconstruct" "$username" "$path" "$modes" "$filtering"
+echo "Running sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm" "$reconstruct" "$username" "$path" "$modes"
 
 hostname=$(hostname)
 if [[ $hostname == p9-* ]]; then
-  sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm "$reconstruct" "$username" "$path" "$modes" "$filtering"
+  sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm "$reconstruct" "$username" "$path" "$modes"
 
 else
   ssh $username@slurm-nice-devel << EOF
-    sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm "$reconstruct" "$username" "$path" "$modes" "$filtering"
+    sbatch /data/id01/inhouse/david/p9.dev/bin/job_esrf.slurm "$reconstruct" "$username" "$path" "$modes"
     exit
 EOF
 fi

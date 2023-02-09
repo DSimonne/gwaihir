@@ -403,24 +403,22 @@ def init_phase_retrieval_tab(
 
             if run_phase_retrieval == "batch":
                 # Runs modes directly and saves all data in a "gui_run"
-                # subdir, filter based on FLLK
+                # subdir, filter based only on FLLK criteria
                 print(
                     f"\nRunning: $ {interface.path_scripts}/run_slurm_job.sh "
                     f"--reconstruct gui --username {interface.user_name} "
                     f"--path {interface.preprocessing_folder} "
-                    f"--filtering {nb_run_keep_std} --modes true"
+                    " --modes true"
                 )
                 os.system(
                     "{}/run_slurm_job.sh \
                     --reconstruct gui \
                     --username {} \
                     --path {} \
-                    --filtering {} \
                     --modes true".format(
                         quote(interface.path_scripts),
                         quote(interface.user_name),
                         quote(interface.preprocessing_folder),
-                        quote(str(nb_run_keep_std)),
                     )
                 )
 

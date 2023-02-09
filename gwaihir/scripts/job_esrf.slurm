@@ -22,14 +22,12 @@ reconstruct=$1          # if launched via the gui or terminal
 username=$2             # username, if not specified, default to simonne
 path=$3             # pynxraw directory with npz files and pynx_run.txt file
 modes=$4                # if running modes analysis or not, in that case, run strain
-filtering=$5            # if applying standard deviation filter, should be an integer number, less than n_run
 
 echo "################################################################################################################"
 echo "Reconstruct data via: " $reconstruct
 echo "Username: " $username
 echo "Working directory: " $path
 echo "Running modes decomposition: " $modes
-echo "Filtering reconstructions: " $filtering
 echo "################################################################################################################"
 
 env | grep CUDA
@@ -90,22 +88,4 @@ if [[ $modes = "true" ]]; then
     /data/id01/inhouse/david/p9.dev/bin/pynx-cdi-analysis *LLK* modes=1 modes_output=modes.h5 |& tee README_modes.md
     echo "################################################################################################################"
     echo
-
-    if [[ $reconstruct = "terminal" ]]; then
-        # Nothing here yet
-        echo "################################################################################################################"
-        echo "Running strain analysis"
-        # ssh username@rnice9 << EOF
-        #     cd $1
-        #     bcdi_postprocessing.py $2 $3
-
-        #     echo "Strain.py is running ..."
-
-        #     exit
-
-        # EOF
-        echo "########################################################"
-        echo
-
-    fi
 fi
