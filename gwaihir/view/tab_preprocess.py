@@ -184,16 +184,6 @@ class TabPreprocess(widgets.VBox):
             style={'description_width': 'initial'}
         )
 
-        self.fix_size = widgets.Text(
-            placeholder="[zstart, zstop, ystart, ystop, xstart, xstop]",
-            description='Fix array size',
-            disabled=True,
-            continuous_update=False,
-            layout=widgets.Layout(
-                width='45%'),
-            style={'description_width': 'initial'}
-        )
-
         self.center_fft = widgets.Dropdown(
             options=[
                 'crop_sym_ZYX', 'crop_asym_ZYX', 'pad_asym_Z_crop_sym_YX',
@@ -450,7 +440,6 @@ class TabPreprocess(widgets.VBox):
             self.unused_label_centering,
             widgets.HBox(
                 [self.centering_method_reciprocal_space, self.bragg_peak]),
-            self.fix_size,
             widgets.HBox(
                 [self.center_fft, self.pad_size, self.normalize_flux]),
             self.unused_label_filtering,

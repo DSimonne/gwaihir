@@ -264,8 +264,6 @@ class Dataset:
                     "centering_method_reciprocal_space",
                     data=self.centering_method_reciprocal_space)
                 cropping_padding_centering.create_dataset(
-                    "fix_size", data=self.fix_size)
-                cropping_padding_centering.create_dataset(
                     "center_fft", data=self.center_fft)
                 cropping_padding_centering.create_dataset(
                     "pad_size", data=self.pad_size)

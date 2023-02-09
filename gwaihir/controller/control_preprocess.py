@@ -33,7 +33,6 @@ def init_preprocess_tab(
     unused_label_centering,
     centering_method_reciprocal_space,
     bragg_peak,
-    fix_size,
     center_fft,
     pad_size,
     normalize_flux,
@@ -121,10 +120,6 @@ def init_preprocess_tab(
     :param centering_method_reciprocal_space: e.g. "max"
      Bragg peak determination: 'max' or 'com', 'max' is better usually.
      It will be overridden by 'fix_bragg' if not empty
-    :param fix_size: e.g. [0, 256, 10, 240, 50, 350]
-     crop the array to that predefined size considering the full detector.
-     [zstart, zstop, ystart, ystop, xstart, xstop], ROI will be defaulted
-     to [] if fix_size is provided. Leave None otherwise
     :param center_fft: e.g. "skip"
      how to crop/pad/center the data, available options: 'crop_sym_ZYX',
      'crop_asym_ZYX', 'pad_asym_Z_crop_sym_YX', 'pad_sym_Z_crop_asym_YX',
@@ -361,7 +356,6 @@ def init_preprocess_tab(
         interface.Dataset.background_plot = str(background_plot)
         interface.Dataset.centering_method_reciprocal_space = centering_method_reciprocal_space
         interface.Dataset.bragg_peak = bragg_peak
-        interface.Dataset.fix_size = fix_size
         interface.Dataset.center_fft = center_fft
         interface.Dataset.pad_size = pad_size
         interface.Dataset.mask_zero_event = mask_zero_event
@@ -414,7 +408,7 @@ def init_preprocess_tab(
 
         # Extract dict, list and tuple from strings
         list_parameters = ["bragg_peak", "custom_images",
-                           "fix_size", "pad_size", "roi_detector",
+                           "pad_size", "roi_detector",
                            "direct_beam", "dirbeam_detector_angles"]
 
         tuple_parameters = [
@@ -522,7 +516,6 @@ def init_preprocess_tab(
             backend=interface.matplotlib_backend,
             # parameters related to data cropping/padding/centering
             centering_method=centering_method,
-            fix_size=interface.Dataset.fix_size,
             center_fft=interface.Dataset.center_fft,
             pad_size=interface.Dataset.pad_size,
             # parameters for data filtering

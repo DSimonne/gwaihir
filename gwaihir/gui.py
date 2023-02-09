@@ -205,7 +205,6 @@ class Interface:
                 unused_label_centering=self.TabPreprocess.unused_label_centering,
                 centering_method_reciprocal_space=self.TabPreprocess.centering_method_reciprocal_space,
                 bragg_peak=self.TabPreprocess.bragg_peak,
-                fix_size=self.TabPreprocess.fix_size,
                 center_fft=self.TabPreprocess.center_fft,
                 pad_size=self.TabPreprocess.pad_size,
                 normalize_flux=self.TabPreprocess.normalize_flux,
