@@ -638,8 +638,7 @@ def init_phase_retrieval_tab(
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
 
-                                # PSF is introduced at 66% of HIO and RAAR
-                                # so from cycle n°924
+                                # PSF is introduced after half the HIO cycles
                                 if psf_model != "pseudo-voigt":
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
