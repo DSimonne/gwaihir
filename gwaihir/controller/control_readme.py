@@ -48,7 +48,9 @@ def init_readme_tab(contents):
         display(Markdown("## SixS data (SOLEIL)"))
         display(Markdown(
             "Most of the initial guesses are valid. Be careful about the energy, scan number, central pixel and detector."
-            " If you are working with the vertical configuration, make sure that the mask is correct."))
+            " If you are working with the vertical configuration, make sure that the mask is correct."
+            "If a detector rotation is needed, you can look at the functions in gwaihir.scripts.handle_sixs_data.py"
+            ))
 
         display(Markdown("## ID01 data (ESRF)"))
         display(Markdown("* Scan number: `11`"))
