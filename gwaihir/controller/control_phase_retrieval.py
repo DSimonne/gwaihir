@@ -562,17 +562,9 @@ def init_phase_retrieval_tab(
                                     plot_axis=plot_axis,
                                     positivity=interface.Dataset.positivity,
                                     zero_mask=interface.Dataset.zero_mask,
-                                ) ** interface.Dataset.nb_hio * cdi
-                                cdi = RAAR(
-                                    beta=interface.Dataset.beta,
-                                    calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot,
-                                    plot_axis=plot_axis,
-                                    positivity=interface.Dataset.positivity,
-                                    zero_mask=interface.Dataset.zero_mask,
-                                ) ** (interface.Dataset.nb_raar // 2) * cdi
+                                ) ** (interface.Dataset.nb_hio // 2) * cdi
 
-                                # PSF is introduced at 66% of HIO and RAAR
+                                # PSF is introduced after half the HIO cycles
                                 if psf_model != "pseudo-voigt":
                                     cdi = InitPSF(
                                         model=interface.Dataset.psf_model,
@@ -588,6 +580,15 @@ def init_phase_retrieval_tab(
                                         filter=None,
                                     ) * cdi
 
+                                cdi = HIO(
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    zero_mask=interface.Dataset.zero_mask,
+                                ) ** (interface.Dataset.nb_raar // 2) * cdi
+
                                 cdi = RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
@@ -597,7 +598,8 @@ def init_phase_retrieval_tab(
                                     positivity=interface.Dataset.positivity,
                                     psf_filter=None,
                                     zero_mask=interface.Dataset.zero_mask,
-                                ) ** (interface.Dataset.nb_raar // 2) * cdi
+                                ) ** interface.Dataset.nb_raar * cdi
+
                                 cdi = ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
@@ -609,10 +611,10 @@ def init_phase_retrieval_tab(
                                 ) ** interface.Dataset.nb_er * cdi
 
                             else:
-                                hio_power = interface.Dataset.nb_hio \
+                                hio_power = (
+                                    interface.Dataset.nb_hio // 2) \
                                     // interface.Dataset.support_update_period
-                                raar_power = (
-                                    interface.Dataset.nb_raar // 2) \
+                                raar_power = interface.Dataset.nb_raar \
                                     // interface.Dataset.support_update_period
                                 er_power = interface.Dataset.nb_er \
                                     // interface.Dataset.support_update_period
@@ -627,16 +629,6 @@ def init_phase_retrieval_tab(
                                     zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** hio_power * cdi
-                                cdi = (sup * RAAR(
-                                    beta=interface.Dataset.beta,
-                                    calc_llk=interface.Dataset.calc_llk,
-                                    show_cdi=interface.Dataset.live_plot,
-                                    plot_axis=plot_axis,
-                                    positivity=interface.Dataset.positivity,
-                                    psf_filter=None,
-                                    zero_mask=interface.Dataset.zero_mask,
-                                )**interface.Dataset.support_update_period
-                                ) ** raar_power * cdi
 
                                 # PSF is introduced after half the HIO cycles
                                 if psf_model != "pseudo-voigt":
@@ -654,6 +646,17 @@ def init_phase_retrieval_tab(
                                         filter=None,
                                     ) * cdi
 
+                                cdi = (sup * HIO(
+                                    beta=interface.Dataset.beta,
+                                    calc_llk=interface.Dataset.calc_llk,
+                                    show_cdi=interface.Dataset.live_plot,
+                                    plot_axis=plot_axis,
+                                    positivity=interface.Dataset.positivity,
+                                    psf_filter=None,
+                                    zero_mask=interface.Dataset.zero_mask,
+                                )**interface.Dataset.support_update_period
+                                ) ** hio_power * cdi
+
                                 cdi = (sup * RAAR(
                                     beta=interface.Dataset.beta,
                                     calc_llk=interface.Dataset.calc_llk,
@@ -665,6 +668,7 @@ def init_phase_retrieval_tab(
                                     zero_mask=interface.Dataset.zero_mask,
                                 )**interface.Dataset.support_update_period
                                 ) ** raar_power * cdi
+
                                 cdi = (sup * ER(
                                     calc_llk=interface.Dataset.calc_llk,
                                     show_cdi=interface.Dataset.live_plot,
