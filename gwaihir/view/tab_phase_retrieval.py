@@ -533,7 +533,6 @@ class TabPhaseRetrieval(widgets.VBox):
                 r"Use operators on local environment, if using PSF, it is \
                 activated after 50\% of RAAR cycles"
             ],
-            description='Run phase retrieval ...',
             continuous_update=False,
             button_style='',
             layout=widgets.Layout(
@@ -567,7 +566,6 @@ class TabPhaseRetrieval(widgets.VBox):
                  files",
                 "Filter reconstructions"
             ],
-            description="Choose analysis:",
             continuous_update=False,
             button_style='',
             layout=widgets.Layout(

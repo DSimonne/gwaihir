@@ -231,47 +231,6 @@ Then you should create an alias such as: `alias source_p9="source /home/user/py3
 ## Using `Gwaihir` only as a plotting tool in Jupyter Notebook
 ![image](https://user-images.githubusercontent.com/51970962/157677934-d6983756-48d3-4a1d-8394-a86f0d2b721e.png)
 
-
-## Quick navigation between `vtk` files in the GUI (outdated but it can give you some ideas)
-
-It is possible to automate the navigation in the GUI !
-
-Here I have a pandas DataFrame that contains data about my scans, I use to automate the navigation:
-
-```python
-import time
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import glob
-
-df = pd.read_csv("reconstructions/scans_data.csv")
-
-GUI.tab_facet.children[3].value = False
-GUI.window.selected_index = 0
-time.sleep(1)
-
-GUI._list_widgets_init_dir.children[7].value = False
-time.sleep(1)
-
-scan = 3600
-row = df[df.scan == scan]
-
-particle = row.particle.values[0]
-temp = row.temp_given.values[0]
-condition = row.condition.values[0]
-
-GUI._list_widgets_init_dir.children[2].value = scan
-GUI._list_widgets_init_dir.children[
-    3].value = f"/data/id01/inhouse/david/SIXS_June_2021/reconstructions/{temp}/{condition}/{particle}/S{scan}/data/"
-GUI._list_widgets_init_dir.children[
-    4].value = f"/data/id01/inhouse/david/SIXS_June_2021/reconstructions/{temp}/{condition}/{particle}/"
-time.sleep(1)
-GUI._list_widgets_init_dir.children[7].value = True
-
-time.sleep(1)
-
-GUI.window.selected_index = 9
-
-GUI.tab_facet.children[3].value = "load_csv"
-```
+## To do :
+* cxi viewer
+* superpose mask and data or support and object in plot

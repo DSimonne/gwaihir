@@ -608,7 +608,6 @@ class TabPostprocess(widgets.VBox):
                 ("Determine SSC", "run_ssc"),
             ],
             value=False,
-            description='Run strain analysis',
             button_style='',
             icon='fast-forward',
             layout=widgets.Layout(width='90%'),

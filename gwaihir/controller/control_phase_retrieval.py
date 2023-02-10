@@ -816,6 +816,10 @@ def init_phase_retrieval_tab(
             change=interface.Dataset.scan_folder
         )
 
+        # After slurm job, we create a new folder, so we must reassign the folder
+        # in the tab
+        interface.TabPhaseRetrieval.parent_folder.value = interface.preprocessing_folder
+
         # Plot folder
         interface.TabPlotData.children[1].value = interface.preprocessing_folder
         interface.TabPlotData.plot_folder_handler(

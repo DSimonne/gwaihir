@@ -191,7 +191,7 @@ class Dataset:
             print(
                 "\n###########################################"
                 "#############################################"
-                "No file selected for phase retrieval output."
+                "\nNo file selected for phase retrieval output."
                 "\n\tUse Dataset.reconstruction_file attribute."
                 "\n###########################################"
                 "#############################################"

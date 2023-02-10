@@ -58,6 +58,7 @@ if [[ $reconstruct = "gui" ]]; then
 
     # Moving the results in gui_run/ sub-directory
     echo "Creating a subdirector gui_run/ and moving all the .cxi files there..."
+    rm latest.cxi
     mv S*LLK*.cxi gui_run/
     mv README_pynx.md gui_run/
     cd gui_run/
@@ -73,6 +74,7 @@ elif [[ $reconstruct = "terminal" ]]; then
 
     # Moving the results in terminal_run/ sub-directory
     echo "Creating a subdirector terminal_run/ and moving all the .cxi files there..."
+    rm latest.cxi
     mkdir terminal_run/
     mv S*LLK*.cxi terminal_run/
     mv README_pynx_terminal.md terminal_run/

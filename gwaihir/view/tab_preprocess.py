@@ -414,7 +414,6 @@ class TabPreprocess(widgets.VBox):
                 ("In terminal.", "terminal"),
             ],
             value=False,
-            description="Run preprocess:",
             continuous_update=False,
             button_style='',
             layout=widgets.Layout(
