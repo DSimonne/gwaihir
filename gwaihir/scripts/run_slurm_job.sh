@@ -118,6 +118,6 @@ fi
 
 
 echo
-printf "You may follow the evolution of the job by typing:\n\t 'tail -f gwaihir_XXXXX.out'\n"
+printf "You may follow the evolution of the job by typing:\n\t 'tail -f gwaihir_job_esrf.slurm-XXXXX.out'\n"
 echo "Replace XXXXX by the previous job number."
-echo "The job file should be in your home directory or in $path"
+echo "The job file should be in the same directory as the Jupyter Notebook."

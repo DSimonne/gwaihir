@@ -362,10 +362,8 @@ def init_postprocess_tab(
         print(
             "\n###########################################"
             "#############################################"
-            "\nReconstruction file used to save phase "
-            "retrieval results in the final .cxi file:"
-            f"\n\t{os.path.split(interface.Dataset.reconstruction_file)[0]}"
-            f"\n\t{os.path.split(interface.Dataset.reconstruction_file)[1]}"
+            f"\n\tDirectory: {os.path.split(interface.Dataset.reconstruction_file)[0]}"
+            f"\n\tFile: {os.path.split(interface.Dataset.reconstruction_file)[1]}"
             "\n###########################################"
             "#############################################"
         )
