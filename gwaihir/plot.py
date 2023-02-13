@@ -19,6 +19,8 @@ from ipywidgets import interact, fixed
 from IPython.core.display import display, HTML
 import ipyvolume as ipv
 
+from typing import Tuple, Union, Optional, List
+
 from bokeh.plotting import figure
 from bokeh.layouts import row
 from bokeh.io import output_notebook
@@ -33,40 +35,71 @@ warnings.filterwarnings("ignore")
 
 class Plotter:
     """
-    Class based on interactive functions for plotting.
-    Gets data array from file and plot if specified
+    Class to plot data from files or Numpy arrays.
+
+    Parameters
+    ----------
+    data : str or np.ndarray
+        The data to plot. This can either be the path to a file, or a Numpy
+        array directly.
+    plot : str, optional
+        Specifies the type of plot to create. Available options are:
+        '2D', 'slices', 'contour_slices', 'sum_slices', 'sum_contour_slices',
+        '3D', by default 'slices'.
+    log : bool, optional
+        Whether to display the plot in log scale, by default False.
+    cmap : str, optional
+        The colormap to use for the plot, by default 'turbo'.
+    figsize : tuple, optional
+        The size of the figure in inches, by default (10, 10).
+    fontsize : int, optional
+        The font size to use in the plot, by default 15.
+    title : str, optional
+        The title of the plot, by default None.
+
+    Attributes
+    ----------
+    data_array : np.ndarray
+        The Numpy array with the data.
+    plot : str
+        The type of plot specified.
+    log : bool
+        Whether to display the plot in log scale.
+    cmap : str
+        The colormap specified.
+    figsize : tuple
+        The size of the figure specified.
+    fontsize : int
+        The font size specified.
+    title : str
+        The title of the plot.
+    filename : str
+        The name of the file if data is given as a path.
+
     """
 
     def __init__(
         self,
-        data,
-        plot="slices",
-        log=False,
-        cmap="turbo",
-        figsize=(10, 10),
-        fontsize=15,
-        title=None,
+        data: Union[str, np.ndarray],
+        plot: str = "slices",
+        log: bool = False,
+        cmap: str = "turbo",
+        figsize: Tuple[int, int] = (10, 10),
+        fontsize: int = 15,
+        title: Optional[str] = None,
     ):
-        """Either directly loads a data array from 'data_array' or extracts a
-        data array from 'filename'. Plots the data according to the value of
-        'plot'.
+        """Initialize the Plotter class.
 
-        :param filename: path to data, supported files extensions are .cxi,
-            .npy or .npz
-        :param data_array: a np.ndarray
-        :param plot: str in [
-            '2D', 'slices', 'contour_slices', 'sum_slices',
-            'sum_contour_slices', '3D', False,
-            ]
-        :param log: True to have a logarithmic scale
-            False to have a linear scale
-        :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
-            Other possible values are 'Cool', 'Gray', 'Gray_r', 'Hot', 'Hsv',
-            'Inferno', 'Jet', 'Plasma', 'Rainbow', 'Viridis'
-        :param figsize: default (10, 10)
-        :param fontsize: default 15
+        Args:
+            data (Union[str, np.ndarray]): The data to plot. This can either be the path to a file, or a Numpy array directly.
+            plot (str, optional): Specifies the type of plot to create. Available options are: '2D', 'slices', 'contour_slices', 'sum_slices', 'sum_contour_slices', '3D', by default 'slices'.
+            log (bool, optional): Whether to display the plot in log scale, by default False.
+            cmap (str, optional): The colormap to use for the plot, by default 'turbo'.
+            figsize (tuple, optional): The size of the figure in inches, by default (10, 10).
+            fontsize (int, optional): The font size to use in the plot, by default 15.
+            title (str, optional): The title of the plot, by default None.
+
         """
-        self.filename = None
         self.data_array = None
         self.plot = plot
         self.log = log
@@ -74,9 +107,6 @@ class Plotter:
         self.figsize = figsize
         self.fontsize = fontsize
         self.title = title
-
-        # Future attributes
-        self.interact_scale = False
 
         # Get data array from any of the supported files
         if os.path.isfile(data):
@@ -94,7 +124,39 @@ class Plotter:
             )
 
     def init_plot(self):
-        """Initialize plotting widget with the given parameters"""
+        """Initialize a plot of the data stored in the `data_array` attribute.
+
+        The type of plot and the parameters are specified in the class constructor. The plot can be a 2D plot, 3D slices,
+        contour plots of slices, sum of slices, sum of contour plots of slices, or a 3D plot. The specific plot type is
+        determined by the value of the `plot` attribute. If the number of dimensions of the `data_array` is not compatible
+        with the specified plot type, the function simply prints the number of dimensions and shape of the `data_array`.
+
+        Attributes:
+        -----------
+        data_array : numpy.ndarray
+            An array containing the data to be plotted.
+        plot : str
+            The type of plot to be generated, which can be one of the following: "2D", "slices", "contour_slices",
+            "sum_slices", "sum_contour_slices", or "3D".
+        figsize : tuple
+            The size of the plot in inches.
+        fontsize : int
+            The font size of the plot.
+        log : bool
+            If True, plot the data in logarithmic scale.
+        cmap : str
+            The colormap to be used for the plot.
+        title : str
+            The title of the plot.
+
+        Raises:
+        -------
+        None
+
+        Returns:
+        -------
+        None
+        """
         if self.plot == "2D":
             plot_data(
                 data_array=self.data_array,
@@ -149,9 +211,23 @@ class Plotter:
             )
 
     def get_data_array(self):
-        """Get numpy array from file.
+        """
+        Returns the data array stored in the class instance by reading the specified file.
 
-        :param plot: either '2D', 'slices', '3D' or False
+        The file must have a .npy, .cxi, .h5, or .npz extension. If the file is a .npy or .h5 file, the data array is
+        directly loaded. If the file is a .cxi file, the data array is loaded from `f.root.entry_1.data_1.data[:]` or
+        `f.root.entry_1.image_1.data[:]`, following cxi conventions. If the file is a .npz file, the user is prompted
+        to select the data array from a dropdown list of arrays stored in the .npz file.
+
+        If the file extension is supported and the data array is successfully loaded, the `init_plot` function is called.
+
+        Returns:
+            numpy.ndarray: A Numpy array representing the data stored in the class, or None if the file could not be
+            loaded.
+
+        Raises:
+            KeyError: If the file is a .cxi or .h5 file, and the data could not be found in either
+            `f.root.entry_1.data_1.data[:]` or `f.root.entry_1.image_1.data[:]`.
         """
         # No need to select data array interactively
         if self.filename.endswith((".npy", ".h5", ".cxi")):
@@ -587,25 +663,36 @@ class ThreeDViewer(widgets.Box):
 # Methods
 
 def plot_data(
-    data_array,
-    figsize=(10, 10),
-    fontsize=15,
-    log="interact",
-    cmap="turbo",
-    title=None,
-):
+    data_array: np.ndarray,
+    figsize: Tuple[int, int] = (10, 10),
+    fontsize: int = 15,
+    log: Union[bool, str] = "interact",
+    cmap: str = "turbo",
+    title: Optional[Union[str, List[str]]] = None,
+) -> None:
     """
-    Create figure based on the data dimensions.
-    Data in 1D is plotted as a curve
-    Data in 2D is plotted as a 2D image
-    Data in 3D is plotted with Bokeh along one axis
+    Plot the data contained in a numpy array.
 
-    :param data_array: np.ndarray to plot
-    :param figsize: default (10, 10)
-    :param fontsize: default 15
-    :param log: True, False or "interact"
-    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
-    :param title: title for plot, string or list of 3 strings if 3d data
+    Parameters
+    ----------
+    data_array : np.ndarray
+        The data to be plotted, contained in a numpy array.
+    figsize : Tuple[int, int], optional
+        The size of the figure, by default (10, 10).
+    fontsize : int, optional
+        The font size to use for plot labels and titles, by default 15.
+    log : Union[bool, str], optional
+        If True, plot the data using a logarithmic scale. If False, plot using a linear scale.
+        If "interact", create an interactive toggle button to switch between linear and logarithmic scales.
+    cmap : str, optional
+        The color map to use for 2D data, by default "turbo".
+    title : Optional[Union[str, List[str]]], optional
+        The title(s) to be used for the plot. If data_array is 2D, title can be either a string or a list of strings
+        with one title per subplot. If data_array is 1D, title should be a string.
+
+    Returns
+    -------
+    None
     """
     # Get dimensions
     data_dimensions = data_array.ndim
@@ -720,21 +807,31 @@ def plot_data(
 
         # Define function used to get data slice
         def get_data_slice(
-            data,
-            axis="x",
-            index=0,
-            data_type="Module",
-            scale="linear",
-        ):
+            data: np.ndarray,
+            axis: str = "x",
+            index: int = 0,
+            data_type: str = "Module",
+            scale: str = "linear",
+        ) -> np.ndarray:
             """
-            Function used when using widgets with callbacks on the 3D image
+            Get a slice of 3D data along a specific axis and index.
 
-            :param data: 3D data array
-            :param axis: axis on which the data is projected in ("x", "y", "z")
-            :param index: index along param axis
-            :param data_type: plot module, phase, real or imaginary part of
-                the data
-            :param scale: "logarithmic" for log scale, otherwise linear scale
+            Parameters
+            ----------
+            data: np.ndarray
+                The input 3D data.
+            axis: str
+                The axis along which to slice the data. Must be one of "x", "y", or "z".
+            index: int
+                The index along the specified axis at which to slice the data.
+            data_type: str
+                The data type to be returned. Must be one of "Real", "Imaginary", "Module", or "Phase".
+            scale: str
+                The scale to apply to the data. Must be one of "linear" or "logarithmic".
+
+            Returns
+            -------
+                np.ndarray: The sliced data.
             """
             # Project on specific index
             if axis == "x":
@@ -980,34 +1077,49 @@ def plot_data(
 
 
 def plot_2d_image(
-    two_d_array,
-    fontsize=15,
-    fig=None,
-    ax=None,
-    log=False,
-    cmap="turbo",
-    title=None,
-    x_label="x",
-    y_label="y",
-    contour=False,
-):
+    two_d_array: np.ndarray,
+    fontsize: int = 15,
+    fig: Optional[matplotlib.figure.Figure] = None,
+    ax: Optional[matplotlib.axes._subplots.AxesSubplot] = None,
+    log: bool = False,
+    cmap: str = "turbo",
+    title: Optional[str] = None,
+    x_label: str = "x",
+    y_label: str = "y",
+    contour: bool = False,
+) -> Optional[matplotlib.image.AxesImage]:
     """
-    Plot 2d image from 2d array.
+    Plots a 2D image of the input data.
 
-    :param two_d_array: np.ndarray to plot, must be 2D
-    :param fontsize: default to 15
-    :param fig: plt.figure to plot in, default is None and
-     will create a figure, used to add 2d images to 3d figures
-    :param ax: axes of figure, default is None and will create axes
-    :param log: True to have a logarithmic scale, False to have a linear scale
-    :param cmap: matplotlib cmap used for plot, default 'turbo'
-    :param title: str, title for this axe
-    :param x_label: label on x axis
-    :param y_label: label on y axis
-    :param contour: True to plot contour of data
+    Parameters
+    ----------
+    two_d_array: np.ndarray
+        A 2D array of data to be plotted.
+    fontsize: (int, optional)
+        The font size for the x and y labels, title, and colorbar (default 15).
+    fig: matplotlib.figure.Figure, optional
+        A matplotlib figure object to be used for plotting.
+    ax: matplotlib.axes._subplots.AxesSubplot, optional
+        A matplotlib axes object to be used for plotting.
+    log: bool, optional
+        If True, the plot will be on a logarithmic scale (default False).
+    cmap: str, optional
+        The color map to be used for the image (default "turbo").
+    title: str, optional
+        The title for the plot (default None).
+    x_label: str, optional
+        The x label for the plot (default "x").
+    y_label: str, optional
+        The y label for the plot (default "y").
+    contour: bool, optional
+        If True, the plot will be a contour plot (default False).
 
-    :return: image on ax : ax.imshow()
+    Returns:
+    --------
+    Optional: matplotlib.image.AxesImage
+        An image object if the plot was successful, None otherwise.
     """
+
     if not fig and not ax:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
 
@@ -1053,28 +1165,52 @@ def plot_2d_image(
 
 
 def plot_3d_slices(
-    data_array,
-    fontsize=15,
-    figsize=None,
-    log=False,
-    cmap="turbo",
-    title=None,
-    contour=False,
-    sum_over_axis=False,
-):
+    data_array: np.ndarray,
+    fontsize: int = 15,
+    figsize: Tuple[int, int] = None,
+    log: bool = False,
+    cmap: str = "turbo",
+    title: str = None,
+    contour: bool = False,
+    sum_over_axis: bool = False,
+) -> None:
     """
-    Plot 3 slices for 3d data.
+    Plot slices of a 3D array as images.
 
-    :param data_array: np.ndarray to plot, must be 3D
-    :param fontsize: default 15
-    :param figsize: default (10, 10)
-    :param log: boolean (True, False) or, otherwise
-     raises an interactive window
-    :param cmap: matplotlib cmap used for plot, default 'YlGnBu_r'
-    :param title: string to set as title for main plot or list of
-     strings of length 3 for sub axes
-    :param contour: True to plot contour of data
-    :param sum_over_axis: True to plot sum intead of slices
+    The function takes a 3D `data_array` and plots three images, one for each axis, with the
+    slices being taken at the middle of the corresponding dimension. The slices can be plotted
+    with a logarithmic scale or linear scale and with a specified colormap. The images can also
+    be plotted with or without contour lines. If `sum_over_axis` is set to True, the images will
+    be obtained by summing the values over one of the dimensions.
+
+    Parameters
+    ----------
+    data_array: numpy.ndarray
+        The input 3D array.
+    fontsize: int, optional
+        The font size for the plot titles and axis labels. Default is 15.
+    figsize: tuple, optional
+        The size of the figure in inches. Default is None, meaning a default figure size is used.
+    log: bool or None, optional
+        If True, the images will be plotted on a logarithmic scale. If False, the images will
+        be plotted on a linear scale. If None, a toggle widget will appear to switch between the
+        two scales. Default is False.
+    cmap: str, optional
+        The colormap to use when plotting the images. Default is "turbo".
+    title: str or tuple or list, optional
+        The title for the figure or the titles for each of the three images. If a string is
+        passed, it will be used as the title for the figure. If a list or tuple of three strings
+        is passed, each string will be used as the title for one of the images. Default is None.
+    contour: bool, optional
+        If True, contour lines will be plotted over the images. Default is False.
+    sum_over_axis: bool, optional
+        If True, the images will be obtained by summing the values over one of the dimensions.
+        Default is False.
+
+    Returns
+    -------
+    None
+        The function displays the plots, but returns nothing.
     """
     if isinstance(log, bool):
         # Create figure
@@ -1188,40 +1324,39 @@ def plot_3d_slices(
 
 
 def complex2rgbalin(
-    s,
-    gamma=1.0,
-    smax=None,
-    smin=None,
-    percentile=(None, None),
-    alpha=(0, 1),
-    final_type='uint8'
-):
+    s: np.ndarray,
+    gamma: float = 1.0,
+    smax: float = None,
+    smin: float = None,
+    percentile: Tuple[float, float] = (None, None),
+    alpha: Tuple[float, float] = (0, 1),
+    final_type: str = 'uint8'
+) -> np.ndarray:
     """
-    Returns RGB image with with colour-coded phase and linear amplitude
-    in brightness. Optional exponent gamma is applied to the amplitude.
-    Taken from PyNX
+    Convert a complex valued array into an RGBA image with the magnitude
+    encoded in the alpha channel.
 
-    :param s: the complex data array (likely 2D, but can have higher
-     dimensions)
-    :param gamma: gamma parameter to change the brightness curve
-    :param smax: maximum value (brightness = 1). If not supplied and
-     percentile is not set, the maximum amplitude of the array is used.
-    :param smin: minimum value(brightness = 0). If not supplied and
-     percentile is not set, the maximum amplitude of the array is used.
-    :param percentile: a tuple of two values (percent_min, percent_max)
-     setting the percentile (between 0 and 100): the smax and smin values
-     will be  set as the percentile value in the array (see numpy.percentile).
-     These two values (when not None) supersede smax and smin.
-     Example: percentile=(0,99) to scale the brightness to 0-1 between the 1%
-     and 99% percentile of the data amplitude.
-    :param alpha: the minimum and maximum value for the alpha channel,
-     normally (0,1). Useful to have different max/min alpha when going
-     through slices of one object
-    final_type: either 'float': values are in the [0..1] range,
-     or 'uint8' (0..255) (new default)
-    Returns:
-     the RGBA array, with the same diemensions as the input array,
-     plus one additional R/G/B/A dimension appended.
+    Parameters
+    ----------
+    s : np.ndarray
+        The complex valued array to be converted.
+    gamma : float, optional
+        The gamma correction to apply to the magnitude, by default 1.0.
+    smax : float, optional
+        The maximum value to clip the magnitude to, by default None.
+    smin : float, optional
+        The minimum value to clip the magnitude to, by default None.
+    percentile : Tuple[float, float], optional
+        The percentiles used to compute smin and smax, by default (None, None).
+    alpha : Tuple[float, float], optional
+        The minimum and maximum values to use for the alpha channel, by default (0, 1).
+    final_type : str, optional
+        The type of the output image, either 'float' or 'uint8', by default 'uint8'.
+
+    Returns
+    -------
+    np.ndarray
+        The RGBA image with the magnitude encoded in the alpha channel.
     """
     rgba = phase2rgb(s)
     a = np.abs(s)
@@ -1244,14 +1379,23 @@ def complex2rgbalin(
     return (rgba * 255).astype(np.uint8)
 
 
-def phase2rgb(s):
+def phase2rgb(s: np.ndarray) -> np.ndarray:
     """
-    Crates RGB image with colour-coded phase from a complex array.
-    Taken from PyNX
+    Convert a complex numpy array into an RGBA image, color-coding the phase.
 
-    :param s: a complex numpy array
+    Parameters
+    ----------
+    s : np.ndarray
+        A complex numpy array.
 
-    Returns: an RGBA numpy array, with one additional dimension added
+    Returns
+    -------
+    np.ndarray
+        An RGBA numpy array with an added dimension.
+
+    Notes
+    -----
+    The conversion is based on code from PyNX.
     """
     ph = np.angle(s)
     t = np.pi / 3

@@ -661,8 +661,7 @@ class TabPhaseRetrieval(widgets.VBox):
             self.run_pynx_handler, names="value")
 
     # Define handlers
-    def pynx_folder_handler(self, change):
-        """Handles changes on the widget used to load a data file."""
+    def pynx_folder_handler(self, change: Any) -> None:
         if hasattr(change, "new"):
             change = change.new
 
@@ -711,8 +710,30 @@ class TabPhaseRetrieval(widgets.VBox):
         # mask list
         self.mask.options = sorted_mask_list
 
-    def pynx_psf_handler(self, change):
-        """Handles changes related to the psf."""
+    def pynx_psf_handler(self, change: Any) -> None:
+        """Handles changes related to the psf.
+
+        The function takes the `change` argument, which is expected to contain information
+        related to the change event. If `change` has a `new` attribute, the value of `change`
+        is set to `change.new`.
+
+        The function disables or enables a number of widget objects (`self.psf_model`,
+        `self.fwhm`, `self.eta`, `self.psf_filter`, and `self.update_psf`) based on the value
+        of `change`. If `change` is truthy, the widgets are enabled. If `change` is falsy,
+        the widgets are disabled.
+
+        The function also calls `self.pynx_peak_shape_handler` with the `change` argument set
+        to `self.psf_model.value`.
+
+        Parameters
+        ----------
+        change :
+            The new value of the change event.
+
+        Returns
+        -------
+        None
+        """
         if hasattr(change, "new"):
             change = change.new
 
@@ -731,8 +752,19 @@ class TabPhaseRetrieval(widgets.VBox):
         self.pynx_peak_shape_handler(
             change=self.psf_model.value)
 
-    def pynx_peak_shape_handler(self, change):
-        """Handles changes related to psf the peak shape."""
+    def pynx_peak_shape_handler(self, change: Any) -> None:
+        """
+        Handles changes related to psf the peak shape.
+
+        Parameters
+        ----------
+        change : Any
+            The new value of the change event.
+
+        Returns
+        -------
+        None
+        """
         if hasattr(change, "new"):
             change = change.new
 
@@ -742,8 +774,19 @@ class TabPhaseRetrieval(widgets.VBox):
         else:
             self.eta.disabled = False
 
-    def run_pynx_handler(self, change):
-        """Handles changes related to the phase retrieval."""
+    def run_pynx_handler(self, change: Any) -> None:
+        """
+        Handles changes related to the phase retrieval.
+
+        Parameters
+        ----------
+        change : Any
+            The new value of the change event.
+
+        Returns
+        -------
+        None
+        """
         if change.new:
             for w in self.children:
                 if isinstance(w, widgets.widgets.widget_box.HBox):

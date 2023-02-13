@@ -834,40 +834,59 @@ def init_phase_retrieval_tab(
 
 
 def filter_reconstructions(
-    folder,
-    nb_run_keep,
-    nb_run=None,
-    filter_criteria="FLLK"
-):
+    folder: str,
+    nb_run_keep: int,
+    nb_run: Optional[int] = None,
+    filter_criteria: str = "FLLK"
+) -> None:
+    """Filter the phase retrieval output based on a specified parameter.
+
+    The function filters phase retrieval output based on specified criteria,
+    such as "FLLK" or "standard deviation". The user can run multiple
+    reconstructions and the function will automatically keep the "best"
+    ones according to the specified criteria. If "standard_deviation" and
+    "FLLK" are specified as the criteria, half of the `nb_run_keep` files will
+    be filtered based on the first criteria and the remaining files will be
+    filtered based on the second criteria.
+
+    The parameters are specified in the phase retrieval tab.
+
+    Args:
+        folder (str): Parent folder to cxi files
+        nb_run_keep (int): The number of the best run results to keep in the end
+            according to the `filter_criteria`.
+        nb_run (Optional[int], optional): The number of times to run the optimization.
+            If `None`, it is equal to the number of files detected. Defaults to `None`.
+        filter_criteria (str, optional): The criteria based on which the best solutions
+            will be chosen. Possible values are "standard_deviation", "FLLK",
+            "standard_deviation_FLLK", "FLLK_standard_deviation". Defaults to "FLLK".
+
+    Returns:
+        None
     """
-    Filter the phase retrieval output depending on a given parameter,
-    for now only FLLK and standard deviation are available. This allows the
-    user to run a lot of reconstructions but to then automatically keep the
-    "best" ones, according to this parameter. filter_criteria can take the
-    values "FLLK" or "standard_deviation" If you filter based on both, the
-    function will filter nb_run_keep/2 files by the first criteria, and the
-    remaining files by the second criteria.
-
-    The parameters are specified in the phase retrieval tab
-
-    .param folder: parent folder to cxi files
-    :param nb_run_keep: number of best run results to keep in the end,
-     according to filter_criteria.
-    :param nb_run: number of times to run the optimization, if None, equal
-     to nb of files detected
-    :param filter_criteria: default "FLLK"
-     criteria onto which the best solutions will be chosen
-     possible values are ("standard_deviation", "FLLK",
-     "standard_deviation_FLLK", "FLLK_standard_deviation")
-    """
-    # Sorting functions depending on filtering criteria
-    def filter_by_std(cxi_files, nb_run_keep):
-        """Use the standard deviation of the reconstructed object as
-        filtering criteria.
-
-        The lowest standard deviations are best.
+    def filter_by_std(
+        cxi_files: List[str],
+        nb_run_keep: int
+    ) -> None:
         """
-        # Keep filtering criteria of reconstruction modules in dictionnary
+        Use the standard deviation of the reconstructed object as filtering criteria.
+
+        The function computes the standard deviation of the object modulus for each of the input `cxi_files`, and
+        removes the `cxi_files` with the highest standard deviations until only `nb_run_keep` remain. The files are
+        removed by removing the corresponding file on disk.
+
+        Parameters
+        ----------
+        cxi_files : List[str]
+            A list of strings representing the paths to the `cxi` files to be filtered.
+        nb_run_keep : int
+            The number of `cxi` files to keep after filtering. The files with the lowest standard deviation will be kept.
+
+        Returns
+        -------
+        None
+
+        """
         filtering_criteria_value = {}
 
         print(
@@ -906,13 +925,23 @@ def filter_reconstructions(
             "###################\n"
         )
 
-    def filter_by_FLLK(cxi_files, nb_run_keep):
-        """
-        Use the free log-likelihood values of the reconstructed object
-        as filtering criteria.
+    def filter_by_FLLK(
+        cxi_files: List[str],
+        nb_run_keep: int
+    ) -> None:
+        """Filter `cxi_files` using the free log-likelihood (FLLK) values.
 
-        The lowest standard deviations are best. See PyNX for
-        details
+        The `cxi_files` are filtered based on the FLLK values calculated from
+        the reconstructed object using poisson statistics. The files with the
+        lowest FLLK values are kept.
+
+        Args:
+            cxi_files: A list of paths to CXI files.
+            nb_run_keep: The number of files to keep, based on their FLLK values.
+
+        Returns:
+            None. The function modifies the list of `cxi_files` in place by
+            removing some of the files based on the FLLK values.
         """
         # Keep filtering criteria of reconstruction modules in dictionnary
         filtering_criteria_value = {}
@@ -970,7 +999,7 @@ def filter_reconstructions(
         if cxi_files == []:
             print(
                 f"No match for {folder}/*FLLK*.cxi"
-                f"Trying with {folder}/*LLK*.cxi"
+                f"\nTrying with {folder}/*LLK*.cxi"
             )
             glob_pattern = "*LLK*.cxi"
             cxi_files = list_files(
@@ -978,95 +1007,94 @@ def filter_reconstructions(
                 glob_pattern=glob_pattern,
             )
 
-        else:
-            # only standard_deviation
-            if filter_criteria == "standard_deviation":
-                filter_by_std(cxi_files, nb_run_keep)
+        # only standard_deviation
+        if filter_criteria == "standard_deviation":
+            filter_by_std(cxi_files, nb_run_keep)
 
-            # only FLLK
-            elif filter_criteria == "FLLK":
+        # only FLLK
+        elif filter_criteria == "FLLK":
+            filter_by_FLLK(cxi_files, nb_run_keep)
+
+        # standard_deviation then FLLK
+        elif filter_criteria == "standard_deviation_FLLK":
+            if nb_run is None:
+                nb_run = len(cxi_files)
+
+            filter_by_std(cxi_files, nb_run_keep +
+                          (nb_run - nb_run_keep) // 2)
+
+            print("Iterating on remaining files.")
+
+            cxi_files = list_files(
+                folder=folder,
+                glob_pattern=glob_pattern,
+            )
+
+            if cxi_files == []:
+                print(
+                    f"No {glob_pattern} files remaining in {folder}")
+            else:
                 filter_by_FLLK(cxi_files, nb_run_keep)
 
-            # standard_deviation then FLLK
-            elif filter_criteria == "standard_deviation_FLLK":
-                if nb_run is None:
-                    nb_run = len(cxi_files)
+        # FLLK then standard_deviation
+        elif filter_criteria == "FLLK_standard_deviation":
+            if nb_run is None:
+                nb_run = len(cxi_files)
 
-                filter_by_std(cxi_files, nb_run_keep +
-                              (nb_run - nb_run_keep) // 2)
+            filter_by_FLLK(cxi_files, nb_run_keep +
+                           (nb_run - nb_run_keep) // 2)
 
-                print("Iterating on remaining files.")
+            print("Iterating on remaining files.")
 
-                cxi_files = list_files(
-                    folder=folder,
-                    glob_pattern=glob_pattern,
-                )
+            cxi_files = list_files(
+                folder=folder,
+                glob_pattern=glob_pattern,
+            )
 
-                if cxi_files == []:
-                    print(
-                        f"No {glob_pattern} files remaining in {folder}")
-                else:
-                    filter_by_FLLK(cxi_files, nb_run_keep)
-
-            # FLLK then standard_deviation
-            elif filter_criteria == "FLLK_standard_deviation":
-                if nb_run is None:
-                    nb_run = len(cxi_files)
-
-                filter_by_FLLK(cxi_files, nb_run_keep +
-                               (nb_run - nb_run_keep) // 2)
-
-                print("Iterating on remaining files.")
-
-                cxi_files = list_files(
-                    folder=folder,
-                    glob_pattern=glob_pattern,
-                )
-
-                if cxi_files == []:
-                    print(
-                        f"No {glob_pattern} files remaining in {folder}")
-                else:
-                    filter_by_std(cxi_files, nb_run_keep)
-
+            if cxi_files == []:
+                print(
+                    f"No {glob_pattern} files remaining in {folder}")
             else:
-                print("No filtering")
+                filter_by_std(cxi_files, nb_run_keep)
+
+        else:
+            print("No filtering")
     except KeyboardInterrupt:
         print("File filtering stopped by user ...")
 
 
 def initialize_cdi_operator(
-    iobs,
-    mask=None,
-    support=None,
-    obj=None,
-    rebin=(1, 1, 1),
-    auto_center_resize=False,
-    max_size=None,
-    wavelength=None,
-    pixel_size_detector=None,
-    detector_distance=None,
-):
+    iobs: str,
+    mask: Optional[str] = None,
+    support: Optional[str] = None,
+    obj: Optional[str] = None,
+    rebin: Tuple[int, int, int] = (1, 1, 1),
+    auto_center_resize: bool = False,
+    max_size: Optional[int] = None,
+    wavelength: Optional[float] = None,
+    pixel_size_detector: Optional[float] = None,
+    detector_distance: Optional[float] = None,
+) -> Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
     """
-    Initialize the cdi operator by processing the possible inputs:
+    Initialize the CDI operator by processing the possible inputs:
         - iobs
         - mask
         - support
         - obj
     Will also crop and center the data if specified.
 
-    :param iobs: path to npz or npy that stores this array
-    :param mask: path to npz or npy that stores this array
-    :param support: path to npz or npy that stores this array
-    :param obj: path to npz or npy that stores this array
-    :param rebin: e.g. (1, 1, 1), applied to all the arrays
-    :param auto_center_resize:
-    :param max_size:
-    :param wavelength:
-    :param pixel_size_detector:
-    :param detector_distance:
+    :param iobs: path to npz or npy that stores the intensity observations data
+    :param mask: path to npz or npy that stores the mask data
+    :param support: path to npz or npy that stores the support data
+    :param obj: path to npz or npy that stores the object data
+    :param rebin: tuple, applied to all the arrays, e.g. (1, 1, 1)
+    :param auto_center_resize: flag to automatically crop and center the data
+    :param max_size: maximum size of the cropped data, optional
+    :param wavelength: wavelength of the data, optional
+    :param pixel_size_detector: pixel size of the detector, optional
+    :param detector_distance: detector distance, optional
 
-    return: cdi operator
+    :return: cdi operator or None if initialization fails
     """
     if os.path.isfile(str(iobs)):
         if iobs.endswith(".npy"):
@@ -1394,11 +1422,23 @@ def save_cdi_operator_as_cxi(
 
 
 def list_files(
-    folder,
-    glob_pattern="*FLLK*.cxi",
-    verbose=False,
-):
-    """List all cxi files in the folder and sort by creation time"""
+    folder: str,
+    glob_pattern: str = "*FLLK*.cxi",
+    verbose: bool = False
+) -> List[str]:
+    """List all files in a specified folder that match a specified glob pattern and sort by creation time.
+
+    Args:
+        folder (str): The path to the folder where the files are located.
+        glob_pattern (str, optional): A string that specifies the pattern of the filenames to match. Default is "*FLLK*.cxi".
+        verbose (bool, optional): If set to True, the function will print the filenames and their creation timestamps to the console. Default is False.
+
+    Returns:
+        list: A list of file paths that match the specified pattern and are sorted by creation time (most recent first).
+
+    Example:
+        file_list = list_files("/path/to/folder", verbose=True)
+    """
     file_list = sorted(
         glob.glob(folder + "/" + glob_pattern),
         key=os.path.getmtime,
@@ -1426,9 +1466,9 @@ def list_files(
 
 
 def run_modes_decomposition(
-    path_scripts,
-    folder,
-):
+    path_scripts: str,
+    folder: str
+) -> None:
     """
     Decomposes several phase retrieval solutions into modes, saves only
     the first mode to save space.
@@ -1436,9 +1476,18 @@ def run_modes_decomposition(
     All files corresponding to *FLLK* pattern are loaded, if no files are
     loaded, trying with *LLK* pattern.
 
-    :param path_scripts: absolute path to script containing
-     folder
-    :param folder: path to folder in which are stored the reconstructions
+    Args:
+    - path_scripts (str): absolute path to the script containing the folder
+    - folder (str): path to the folder in which the reconstructions are stored
+
+    Returns:
+    None
+
+    Raises:
+    - KeyboardInterrupt: if the decomposition into modes is stopped by the user
+
+    Example:
+    >>> run_modes_decomposition("/path/to/scripts", "/path/to/folder")
     """
     glob_pattern = "*FLLK*.cxi"
     cxi_files_list = list_files(
