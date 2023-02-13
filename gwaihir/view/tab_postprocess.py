@@ -156,7 +156,7 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.isosurface_strain = widgets.FloatText(
-            value=0.1,
+            value=0.3,
             step=0.01,
             max=1,
             min=0,
@@ -417,7 +417,7 @@ class TabPostprocess(widgets.VBox):
         )
 
         self.strain_range = widgets.FloatText(
-            value=0.0001,
+            value=0.0005,
             step=0.000001,
             continuous_update=False,
             description='Strain range:',
