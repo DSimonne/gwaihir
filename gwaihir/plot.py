@@ -9,6 +9,7 @@ from skimage.measure import marching_cubes
 from scipy.spatial.transform import Rotation
 from scipy.interpolate import RegularGridInterpolator
 
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import LogNorm, Normalize
@@ -75,7 +76,6 @@ class Plotter:
         The title of the plot.
     filename : str
         The name of the file if data is given as a path.
-
     """
 
     def __init__(
@@ -90,15 +90,22 @@ class Plotter:
     ):
         """Initialize the Plotter class.
 
-        Args:
-            data (Union[str, np.ndarray]): The data to plot. This can either be the path to a file, or a Numpy array directly.
-            plot (str, optional): Specifies the type of plot to create. Available options are: '2D', 'slices', 'contour_slices', 'sum_slices', 'sum_contour_slices', '3D', by default 'slices'.
-            log (bool, optional): Whether to display the plot in log scale, by default False.
-            cmap (str, optional): The colormap to use for the plot, by default 'turbo'.
-            figsize (tuple, optional): The size of the figure in inches, by default (10, 10).
-            fontsize (int, optional): The font size to use in the plot, by default 15.
-            title (str, optional): The title of the plot, by default None.
-
+        Parameters
+        ----------
+            data : Union[str, np.ndarray]
+                The data to plot. This can either be the path to a file, or a Numpy array directly.
+            plot : str, optional
+                Specifies the type of plot to create. Available options are: '2D', 'slices', 'contour_slices', 'sum_slices', 'sum_contour_slices', '3D', by default 'slices'.
+            log : bool, optional
+                Whether to display the plot in log scale, by default False.
+            cmap : str, optional
+                The colormap to use for the plot, by default 'turbo'.
+            figsize : tuple, optional
+                The size of the figure in inches, by default (10, 10).
+            fontsize : int, optional
+                The font size to use in the plot, by default 15.
+            title : str, optional
+                The title of the plot, by default None.
         """
         self.data_array = None
         self.plot = plot
@@ -897,8 +904,8 @@ def plot_data(
         source = ColumnDataSource(
             data=dict(
                 data=[np.abs(data_array[0, :, :])],
-                dw=[data_array.shape[1]],
-                dh=[data_array.shape[2]],
+                dw=[data_array.shape[2]],
+                dh=[data_array.shape[1]],
                 index=[0],
                 axis=["x"],
                 data_type=["Module"],
@@ -948,8 +955,8 @@ def plot_data(
             # Save new values
             source.data["data"] = [dt]
             source.data["axis"] = [new_axis]
-            source.data["dw"][0] = dt.shape[0]
-            source.data["dh"][0] = dt.shape[1]
+            source.data["dw"][0] = dt.shape[1]
+            source.data["dh"][0] = dt.shape[0]
 
             # Get new axis names and slider range
             if new_axis == "x":
@@ -1080,7 +1087,7 @@ def plot_2d_image(
     two_d_array: np.ndarray,
     fontsize: int = 15,
     fig: Optional[matplotlib.figure.Figure] = None,
-    ax: Optional[matplotlib.axes._subplots.AxesSubplot] = None,
+    ax: Optional[matplotlib.axes.Subplot] = None,
     log: bool = False,
     cmap: str = "turbo",
     title: Optional[str] = None,
@@ -1099,7 +1106,7 @@ def plot_2d_image(
         The font size for the x and y labels, title, and colorbar (default 15).
     fig: matplotlib.figure.Figure, optional
         A matplotlib figure object to be used for plotting.
-    ax: matplotlib.axes._subplots.AxesSubplot, optional
+    ax: matplotlib.axes.Subplot, optional
         A matplotlib axes object to be used for plotting.
     log: bool, optional
         If True, the plot will be on a logarithmic scale (default False).
@@ -1137,6 +1144,7 @@ def plot_2d_image(
                 norm={"linear": None, "logarithmic": LogNorm()}[
                     scale],
                 cmap=cmap,
+                origin="lower",
             )
         else:
             img = ax.imshow(
@@ -1144,6 +1152,7 @@ def plot_2d_image(
                 norm={"linear": None, "logarithmic": LogNorm()}[
                     scale],
                 cmap=cmap,
+                origin="lower",
             )
         ax.set_xlabel(x_label, fontsize=fontsize)
         ax.set_ylabel(y_label, fontsize=fontsize)
