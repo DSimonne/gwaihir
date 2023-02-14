@@ -371,7 +371,7 @@ def init_phase_retrieval_tab(
                 f'nb_ml = {interface.Dataset.nb_ml}\n',
                 '\n',
                 f'nb_run = {interface.Dataset.nb_run}\n',
-                f'nb_run_keep = {nb_run_keep_FLLK}\n',
+                f'nb_run_keep = {nb_run_keep_std}\n',
                 '\n',
                 f'# max_size = {interface.Dataset.max_size}\n',
                 f'zero_mask = {interface.Dataset.zero_mask}\n',

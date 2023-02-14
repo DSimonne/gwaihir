@@ -132,6 +132,7 @@ class TabPhaseRetrieval(widgets.VBox):
 
         self.support_update_period = widgets.BoundedIntText(
             value=20,
+            max=500,
             step=5,
             layout=widgets.Layout(
                 height="50px", width="20%"),
@@ -662,6 +663,17 @@ class TabPhaseRetrieval(widgets.VBox):
 
     # Define handlers
     def pynx_folder_handler(self, change: Any) -> None:
+        """
+        Handles changes related to the pynx folder.
+
+        Parameters:
+        ----------
+        change (Any): The change event triggered by the observer.
+
+        Returns:
+        -------
+        None
+        """
         if hasattr(change, "new"):
             change = change.new
 
@@ -711,7 +723,8 @@ class TabPhaseRetrieval(widgets.VBox):
         self.mask.options = sorted_mask_list
 
     def pynx_psf_handler(self, change: Any) -> None:
-        """Handles changes related to the psf.
+        """
+        Handles changes related to the psf.
 
         The function takes the `change` argument, which is expected to contain information
         related to the change event. If `change` has a `new` attribute, the value of `change`
