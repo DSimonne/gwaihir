@@ -103,12 +103,6 @@ def init_facet_tab(
                         description='Vector perpendicular to facet b:',
                         continuous_update=False,
                         style={'description_width': 'initial'},),
-                    w0=widgets.Text(
-                        value="[1, 1, -2]",
-                        placeholder="[1, 1, -2]",
-                        description='Cross product of u0 and v0:',
-                        continuous_update=False,
-                        style={'description_width': 'initial'},),
                     hkl_reference=widgets.Text(
                         value="[1, 1, 1]",
                         placeholder="[1, 1, 1]",
@@ -139,7 +133,6 @@ def init_facet_tab(
                     facet_b_id,
                     u0,
                     v0,
-                    w0,
                     hkl_reference,
                     elev,
                     azim,
@@ -153,14 +146,12 @@ def init_facet_tab(
                     interface.Dataset.Facets.facet_b_id = facet_b_id
                     interface.Dataset.Facets.u0 = u0
                     interface.Dataset.Facets.v0 = v0
-                    interface.Dataset.Facets.w0 = w0
                     interface.Dataset.Facets.hkl_reference = hkl_reference
                     interface.Dataset.Facets.elev = elev
                     interface.Dataset.Facets.azim = azim
 
                     # Extract list from strings
-                    list_parameters = ["u0", "v0",
-                                       "w0", "hkl_reference"]
+                    list_parameters = ["u0", "v0", "hkl_reference"]
                     try:
                         for p in list_parameters:
                             if getattr(interface.Dataset.Facets, p) == "":
@@ -224,12 +215,8 @@ def init_facet_tab(
                         ])
 
                         interface.Dataset.Facets.set_rotation_matrix(
-                            u0=interface.Dataset.Facets.u0 /
-                            np.linalg.norm(interface.Dataset.Facets.u0),
-                            v0=interface.Dataset.Facets.v0 /
-                            np.linalg.norm(interface.Dataset.Facets.v0),
-                            w0=interface.Dataset.Facets.w0 /
-                            np.linalg.norm(interface.Dataset.Facets.w0),
+                            u0=np.array(interface.Dataset.Facets.u0),
+                            v0=np.array(interface.Dataset.Facets.v0),
                             u=u,
                             v=v,
                         )

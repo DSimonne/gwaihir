@@ -5,7 +5,35 @@ import glob
 
 class TabFacet(widgets.VBox):
     """
+    A custom ipywidgets tab for loading and analyzing VTK files for facet analysis.
 
+    Attributes:
+    -----------
+    header: str
+        Brief header describing the tab.
+    box_style: str
+        CSS style to apply to the tab container.
+    unused_label_facet: widgets.HTML
+        HTML widget containing a description of the VTK loading process.
+    parent_folder: widgets.Dropdown
+        Dropdown widget for selecting the parent folder.
+    vtk_file: widgets.Dropdown
+        Dropdown widget for selecting a specific VTK file.
+    load_data: widgets.ToggleButtons
+        Toggle button for loading VTK data or clearing/reloading the folder list.
+    children: Tuple[Widget]
+        Tuple of child widgets to display in the tab.
+
+    Methods:
+    --------
+    __init__(self, box_style: str = "") -> None:
+        Initializes a new instance of the TabFacet class.
+
+    vtk_file_handler(self, change: dict) -> None:
+        Event handler for updating the list of VTK files when the parent folder changes.
+
+    __str__(self) -> str:
+        Returns a string representation of the TabFacet instance.
     """
 
     def __init__(self, box_style=""):

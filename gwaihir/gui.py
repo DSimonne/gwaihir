@@ -22,12 +22,12 @@ from gwaihir.controller.control_facet import init_facet_tab
 from gwaihir.controller.control_plot_data import init_plot_data_tab
 from gwaihir.controller.control_postprocess import init_postprocess_tab
 from gwaihir.controller.control_preprocess import init_preprocess_tab
-from gwaihir.controller.control_readme import init_readme_tab
 from gwaihir.controller.control_startup import init_startup_tab
 
 try:
     from gwaihir.view.tab_phase_retrieval import TabPhaseRetrieval
     from gwaihir.controller.control_phase_retrieval import init_phase_retrieval_tab
+    from gwaihir.controller.control_readme import init_readme_tab
     pynx_import_success = True
 except ModuleNotFoundError:
     pynx_import_success = False

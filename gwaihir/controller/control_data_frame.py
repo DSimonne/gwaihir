@@ -32,7 +32,7 @@ def init_data_frame_tab(
 
             # field data taken from facet analysis
             elif show_logs == "load_field_data":
-                logs = interface.Facets.field_data.copy()
+                logs = interface.Dataset.Facets.field_data.copy()
 
             @ interact(
                 cols=widgets.SelectMultiple(
