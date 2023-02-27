@@ -2,7 +2,7 @@
 
 # Example file
 # can be used in the command line like this :
-# plot_paraview_slices.py reconstructions/vti_files/S3572_amp-disp-strain_mode_avg3_apodize_blackman_crystalframe.vti strain 0.5
+# plot_paraview_slices.py reconstructions/vti_files/S3572.vti strain 0.5
 
 # import the simple module from the paraview
 try:

@@ -20,11 +20,9 @@ setuptools.setup(
     ],
     scripts=[
         "gwaihir/scripts/handle_sixs_data.py",
-        "gwaihir/scripts/run_init_dir.py",
         "gwaihir/scripts/job_esrf.slurm",
         "gwaihir/scripts/run_slurm_job.sh",
         "gwaihir/scripts/plot_paraview_slices.py",
-        "gwaihir/scripts/workflow_cli.sh",
     ],
     keywords=["BCDI", "ipywidgets", "PyNX"],
     long_description=long_description,
