@@ -5,7 +5,7 @@ channels:
   - menpo
   - conda-forge
 dependencies:
-  - python=3.8
+  - python
   - asteval
   - autopep8
   - bcdi
@@ -45,12 +45,7 @@ dependencies:
   - traits
   - vtk
   - xrayutilities
-  - black
-  - coverage
-  - doit
   - pycodestyle
   - pydocstyle
-  - twine
-  - wheel
   - pip:
     - hdf5plugin

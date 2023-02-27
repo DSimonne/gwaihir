@@ -64,10 +64,10 @@ class Interface:
             - TabReadme
 
         Here is also defined:
-            path_scripts: path to folder in which bcdi and pynx scripts are
+            path_scripts: path to the folder in which bcdi and pynx scripts are
                 stored
-            user_name: user_name used to login to slurm if working on the ESRF
-                cluster
+            user_name: user_name used to login to SLURM if working on the ESRF
+                HPC
 
         :param plot_tab_only: True to only work with the plotting tab
         """
