@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Simonne
+    given-names: David
+    orcid: https://orcid.org/0000-0002-0639-6742
+title: "Gwaihir"
+version: 0.0.6
+doi: https://doi.org/10.1107/s1600576722005854
+date-released: 2022-08-15
