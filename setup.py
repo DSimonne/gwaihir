@@ -48,5 +48,6 @@ setuptools.setup(
         "jupyter",
         "bokeh",
         "panel",
+        "scikit-image",
     ]
 )
