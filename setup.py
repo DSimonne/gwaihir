@@ -49,5 +49,6 @@ setuptools.setup(
         "bokeh",
         "panel",
         "scikit-image",
+        "ipython_genutils",
     ]
 )
