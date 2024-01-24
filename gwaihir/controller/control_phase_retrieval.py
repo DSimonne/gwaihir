@@ -13,7 +13,7 @@ from ast import literal_eval
 from typing import Tuple, Union, Optional, List, Any
 
 # GPU will be auto-selected
-from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport,\
+from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport, \
     InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI, InitFreePixels, \
     InterpIobsMask
 from pynx.cdi.runner.id01 import params
