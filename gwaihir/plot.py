@@ -1070,12 +1070,14 @@ def plot_data(
                 )
             ),
             pn.pane.Bokeh(
-                row(select_data_type)
+                row(
+                    select_data_type,
+                    slider_index,
+                )
             ),
             pn.pane.Bokeh(
                 row(
                     fig,
-                    slider_index,
                 )
             )
         )

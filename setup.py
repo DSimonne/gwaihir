@@ -50,5 +50,6 @@ setuptools.setup(
         "panel",
         "scikit-image",
         "ipython_genutils",
+        "nbclassic",
     ]
 )
