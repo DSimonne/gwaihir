@@ -20,6 +20,7 @@ from pynx.cdi.runner.runner import default_params as params
 from pynx.utils.math import smaller_primes
 from pynx.utils.array import rebin
 
+
 def init_phase_retrieval_tab(
     interface,
     unused_label_data,
@@ -1529,4 +1530,3 @@ def run_modes_decomposition(
         )
     except KeyboardInterrupt:
         print("Decomposition into modes stopped by user...")
-
