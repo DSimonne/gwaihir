@@ -46,7 +46,10 @@ class Interface:
     in the "README" tab of the GUI.
     """
 
-    def __init__(self, plot_tab_only=False):
+    def __init__(
+        self,
+        tabs="plot_and_phase_retrieval",
+    ):
         """
         The different tabs of the GUI are loaded from the submodule view.
         They are then laid out side by side by using the ipywidgets.Tabs()
@@ -69,7 +72,8 @@ class Interface:
             user_name: user_name used to login to SLURM if working on the ESRF
                 HPC
 
-        :param plot_tab_only: True to only work with the plotting tab
+        :param tabs: Use either "all", "plot" or "plot_and_phase_retrieval",
+            which is now the default.
         """
         super(Interface, self).__init__()
 
@@ -107,17 +111,17 @@ class Interface:
             print(
                 f"Login used for batch jobs: {self.user_name}"
             )
-        except Exception as e:
+        except Exception as E:
             self.user_name = None
 
             print(
                 "Could not get user name."
                 "\nPlease create self.user_name attribute for jobs"
             )
-            raise e
+            raise E
 
         # Display only the plot tab
-        if plot_tab_only:
+        if tabs == "plot":
             self.window = Tab(children=(
                 interactive(
                     init_plot_data_tab,
@@ -132,7 +136,88 @@ class Interface:
 
             self.window.set_title(0, "Plot data")
 
-        else:
+        elif tabs == "plot_and_phase_retrieval":
+            self.init_phase_retrieval_tab_gui = interactive(
+                init_phase_retrieval_tab,
+                interface=fixed(self),
+                unused_label_data=self.TabPhaseRetrieval.unused_label_data,
+                parent_folder=self.TabPhaseRetrieval.parent_folder,
+                iobs=self.TabPhaseRetrieval.iobs,
+                mask=self.TabPhaseRetrieval.mask,
+                support=self.TabPhaseRetrieval.support,
+                obj=self.TabPhaseRetrieval.obj,
+                auto_center_resize=self.TabPhaseRetrieval.auto_center_resize,
+                max_size=self.TabPhaseRetrieval.max_size,
+                unused_label_support=self.TabPhaseRetrieval.unused_label_support,
+                support_threshold=self.TabPhaseRetrieval.support_threshold,
+                support_only_shrink=self.TabPhaseRetrieval.support_only_shrink,
+                support_update_period=self.TabPhaseRetrieval.support_update_period,
+                support_smooth_width=self.TabPhaseRetrieval.support_smooth_width,
+                support_post_expand=self.TabPhaseRetrieval.support_post_expand,
+                support_method=self.TabPhaseRetrieval.support_method,
+                support_autocorrelation_threshold=self.TabPhaseRetrieval.support_autocorrelation_threshold,
+                unused_label_psf=self.TabPhaseRetrieval.unused_label_psf,
+                psf=self.TabPhaseRetrieval.psf,
+                psf_model=self.TabPhaseRetrieval.psf_model,
+                fwhm=self.TabPhaseRetrieval.fwhm,
+                eta=self.TabPhaseRetrieval.eta,
+                psf_filter=self.TabPhaseRetrieval.psf_filter,
+                update_psf=self.TabPhaseRetrieval.update_psf,
+                unused_label_algo=self.TabPhaseRetrieval.unused_label_algo,
+                nb_hio=self.TabPhaseRetrieval.nb_hio,
+                nb_raar=self.TabPhaseRetrieval.nb_raar,
+                nb_er=self.TabPhaseRetrieval.nb_er,
+                nb_ml=self.TabPhaseRetrieval.nb_ml,
+                nb_run=self.TabPhaseRetrieval.nb_run,
+                unused_label_filtering=self.TabPhaseRetrieval.unused_label_filtering,
+                filter_criteria=self.TabPhaseRetrieval.filter_criteria,
+                nb_run_keep=self.TabPhaseRetrieval.nb_run_keep,
+                unused_label_options=self.TabPhaseRetrieval.unused_label_options,
+                live_plot=self.TabPhaseRetrieval.live_plot,
+                plot_axis=self.TabPhaseRetrieval.plot_axis,
+                verbose=self.TabPhaseRetrieval.verbose,
+                rebin=self.TabPhaseRetrieval.rebin,
+                positivity=self.TabPhaseRetrieval.positivity,
+                beta=self.TabPhaseRetrieval.beta,
+                detwin=self.TabPhaseRetrieval.detwin,
+                calc_llk=self.TabPhaseRetrieval.calc_llk,
+                pixel_size_detector=self.TabPhaseRetrieval.pixel_size_detector,
+                unused_label_mask_options=self.TabPhaseRetrieval.unused_label_mask_options,
+                zero_mask=self.TabPhaseRetrieval.zero_mask,
+                mask_interp=self.TabPhaseRetrieval.mask_interp,
+                unused_label_phase_retrieval=self.TabPhaseRetrieval.unused_label_phase_retrieval,
+                run_phase_retrieval=self.TabPhaseRetrieval.run_phase_retrieval,
+                unused_label_run_pynx_tools=self.TabPhaseRetrieval.unused_label_run_pynx_tools,
+                run_pynx_tools=self.TabPhaseRetrieval.run_pynx_tools,
+            )
+
+            self.init_plot_data_tab_gui = interactive(
+                init_plot_data_tab,
+                interface=fixed(self),
+                unused_label_plot=self.TabPlotData.unused_label_plot,
+                parent_folder=self.TabPlotData.parent_folder,
+                filename=self.TabPlotData.filename,
+                cmap=self.TabPlotData.cmap,
+                data_use=self.TabPlotData.data_use,
+            )
+
+            # Create window
+            self.window = Tab(children=(
+                widgets.VBox([
+                    self.TabPhaseRetrieval,
+                    self.init_phase_retrieval_tab_gui.children[-1]
+                ]),
+                widgets.VBox([
+                    self.TabPlotData,
+                    self.init_plot_data_tab_gui.children[-1]
+                ]),
+            ))
+
+            # Set tab names
+            self.window.set_title(1, "Phase retrieval")
+            self.window.set_title(2, "Plot data")
+
+        elif tabs == "all":
             # Initialize functions
             self.init_startup_tab_gui = interactive(
                 init_startup_tab,

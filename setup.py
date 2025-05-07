@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gwaihir",
-    version="0.0.6",
+    version="0.0.7",
     description="Python package for BCDI data analysis",
     author="David Simonne",
     author_email="david.simonne@universite-paris-saclay.fr",
@@ -43,13 +43,11 @@ setuptools.setup(
         "xrayutilities",
         "tables",
         "h5glance",
-        "PyQt5",
         "h5py",
         "jupyter",
         "bokeh",
         "panel",
         "scikit-image",
         "ipython_genutils",
-        "nbclassic",
     ]
 )

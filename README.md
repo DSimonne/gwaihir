@@ -1,13 +1,13 @@
-# Welcome 
-
-Contact : david.simonne@universite-paris-saclay.fr
+# Welcome
 
 You can install the latest version of the package by cloning the repository and via the `setup.py` script (`pip install .`)
+
+The version `0.7` ships a version of the package with only the phase retrieval and poltting tabs, since `cdiutils` is no longer supported. It is however very helpful to interact with the reconstruction process in Jupyter Notebooks.
 
 * You can install gwaihir by typing `pip install -U gwaihir` in your command line. A stable version from the master branch uploaded to pypi.org will be used (`https://pypi.org/project/gwaihir/`)
 * Otherwise, you can install the latest commit of the package by cloning this repository and typing `pip install .` in the terminal (you must be in the same directory as the `setup.py` script), this will allow you to have the latest updates.
 
-Here is a link to a poster that tries to present Gwaihir:
+Here is a link to a poster that presents Gwaihir:
 [Poster_Gwaihir.pdf](https://www.dsimonne.eu/PhDAttachments/Poster_Gwaihir.pdf)
 
 And to the paper: [Simonne, D., Carnis, J., Atlan, C., Chatelier, C., Favre-Nicolin, V., Dupraz, M., Leake, S.  J., Zatterin, E., Resta, A., Coati, A. & Richard, M.  I. (2022). J. Appl. Cryst. 55, 1045-1054](https://scripts.iucr.org/cgi-bin/paper?S1600576722005854)
