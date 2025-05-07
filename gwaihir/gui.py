@@ -225,8 +225,8 @@ class Interface:
             ))
 
             # Set tab names
-            self.window.set_title(1, "Phase retrieval")
-            self.window.set_title(2, "Plot data")
+            self.window.set_title(0, "Phase retrieval")
+            self.window.set_title(1, "Plot data")
             display(self.window)
 
         elif tabs == "all" and bcdi_import_success:
