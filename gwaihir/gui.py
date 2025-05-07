@@ -26,25 +26,25 @@ try:
     from gwaihir.controller.control_facet import init_facet_tab
     from gwaihir.controller.control_postprocess import init_postprocess_tab
     from gwaihir.controller.control_preprocess import init_preprocess_tab
+    from gwaihir.controller.control_readme import init_readme_tab
 
     bcdi_import_success = True
 except ModuleNotFoundError:
     bcdi_import_success = False
     print(
         "Could not load bcdi."
-        "\nThe pre processing, post processing and facet analysis tabs "
+        "The pre processing, post processing and facet analysis tabs "
         "will be disabled."
     )
 
 try:
     from gwaihir.controller.control_phase_retrieval import init_phase_retrieval_tab
-    from gwaihir.controller.control_readme import init_readme_tab
     pynx_import_success = True
 except ModuleNotFoundError:
     pynx_import_success = False
     print(
         "Could not load PyNX."
-        "\nThe phase retrieval tab will be disabled."
+        "The phase retrieval tab will be disabled."
     )
 
 
@@ -131,7 +131,6 @@ class Interface:
             )
             raise E
 
-        # Display only the plot tab
         if tabs == "plot":
             self.window = Tab(children=(
                 interactive(
@@ -146,8 +145,9 @@ class Interface:
             ))
 
             self.window.set_title(0, "Plot data")
+            display(self.window)
 
-        elif tabs == "plot_and_phase_retrieval":
+        elif tabs == "plot_and_phase_retrieval" and pynx_import_success:
             self.init_phase_retrieval_tab_gui = interactive(
                 init_phase_retrieval_tab,
                 interface=fixed(self),
@@ -227,8 +227,9 @@ class Interface:
             # Set tab names
             self.window.set_title(1, "Phase retrieval")
             self.window.set_title(2, "Plot data")
+            display(self.window)
 
-        elif tabs == "all":
+        elif tabs == "all" and bcdi_import_success:
             # Initialize functions
             self.init_startup_tab_gui = interactive(
                 init_startup_tab,
@@ -584,8 +585,10 @@ class Interface:
             self.TabPreprocess.run_preprocess.observe(
                 self.preprocess_handler, names="value")
 
-        # Display the final window
-        display(self.window)
+            display(self.window)
+
+        else:
+            print("Could not display window. Check imports.")
 
     # Define handlers
     def root_folder_handler(self, change):
