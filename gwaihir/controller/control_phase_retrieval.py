@@ -10,13 +10,13 @@ from scipy.ndimage import center_of_mass
 from shlex import quote
 from IPython.display import clear_output
 from ast import literal_eval
-from typing import Tuple, Union, Optional, List, Any
+from typing import Tuple, Union, Optional, List
 
 # GPU will be auto-selected
-from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport,\
+from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport, \
     InitPSF, ShowCDI, HIO, RAAR, ER, SupportTooLarge, CDI, InitFreePixels, \
     InterpIobsMask
-from pynx.cdi.runner.id01 import params
+from pynx.cdi.runner.runner import default_params as params
 from pynx.utils.math import smaller_primes
 
 from bcdi.utils.utilities import bin_data
