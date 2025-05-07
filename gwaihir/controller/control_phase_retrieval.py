@@ -18,9 +18,7 @@ from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport, \
     InterpIobsMask
 from pynx.cdi.runner.runner import default_params as params
 from pynx.utils.math import smaller_primes
-
-from bcdi.utils.utilities import bin_data
-
+from pynx.utils.array import rebin
 
 def init_phase_retrieval_tab(
     interface,
@@ -1109,7 +1107,7 @@ def initialize_cdi_operator(
                 print("\t\"data\" key does not exist.")
                 return None
         if rebin != (1, 1, 1):
-            iobs = bin_data(iobs, rebin)
+            iobs = rebin(iobs, rebin)
             print("\tBinned data.")
 
         iobs = fftshift(iobs)
@@ -1142,7 +1140,7 @@ def initialize_cdi_operator(
                 print("\t\"mask\" key does not exist.")
 
         if rebin != (1, 1, 1):
-            mask = bin_data(mask, rebin)
+            mask = rebin(mask, rebin)
             print("\tBinned mask.")
 
         mask = fftshift(mask)
@@ -1177,7 +1175,7 @@ def initialize_cdi_operator(
                         )
 
         if rebin != (1, 1, 1):
-            support = bin_data(support, rebin)
+            support = rebin(support, rebin)
             print("\tBinned support.")
 
         support = fftshift(support)
@@ -1531,3 +1529,4 @@ def run_modes_decomposition(
         )
     except KeyboardInterrupt:
         print("Decomposition into modes stopped by user...")
+
