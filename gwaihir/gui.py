@@ -16,16 +16,27 @@ from gwaihir.view.tab_postprocess import TabPostprocess
 from gwaihir.view.tab_preprocess import TabPreprocess
 from gwaihir.view.tab_readme import TabReadme
 from gwaihir.view.tab_startup import TabStartup
+from gwaihir.view.tab_phase_retrieval import TabPhaseRetrieval
 
 from gwaihir.controller.control_data_frame import init_data_frame_tab
-from gwaihir.controller.control_facet import init_facet_tab
 from gwaihir.controller.control_plot_data import init_plot_data_tab
-from gwaihir.controller.control_postprocess import init_postprocess_tab
-from gwaihir.controller.control_preprocess import init_preprocess_tab
 from gwaihir.controller.control_startup import init_startup_tab
 
 try:
-    from gwaihir.view.tab_phase_retrieval import TabPhaseRetrieval
+    from gwaihir.controller.control_facet import init_facet_tab
+    from gwaihir.controller.control_postprocess import init_postprocess_tab
+    from gwaihir.controller.control_preprocess import init_preprocess_tab
+
+    bcdi_import_success = True
+except ModuleNotFoundError:
+    bcdi_import_success = False
+    print(
+        "Could not load bcdi."
+        "\nThe pre processing, post processing and facet analysis tabs "
+        "will be disabled."
+    )
+
+try:
     from gwaihir.controller.control_phase_retrieval import init_phase_retrieval_tab
     from gwaihir.controller.control_readme import init_readme_tab
     pynx_import_success = True

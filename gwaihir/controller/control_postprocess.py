@@ -1,19 +1,15 @@
 import glob
 import os
 import numpy as np
-# import matplotlib.pyplot as plt
 from datetime import datetime
 import ipywidgets as widgets
 from IPython.display import clear_output
 from ast import literal_eval
 
-# from scipy.fftpack import ifftn, fftshift
 from scipy.ndimage import center_of_mass
 
 from bcdi.postprocessing.postprocessing_runner import run as run_postprocessing
 from bcdi.utils.parser import ConfigParser
-
-# from pynx.utils import phase_retrieval_transfer_function
 
 from gwaihir import plot
 from gwaihir.controller.control_preprocess import create_yaml_file

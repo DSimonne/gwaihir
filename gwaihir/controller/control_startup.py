@@ -1,9 +1,5 @@
-import numpy as np
-from numpy import random
-import matplotlib.pyplot as plt
 import glob
 import os
-import h5py
 import shutil
 from IPython.display import display, clear_output
 import ipywidgets as widgets
