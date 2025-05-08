@@ -9,7 +9,7 @@ class TabPhaseRetrieval(widgets.VBox):
 
     """
 
-    def __init__(self, box_style=""):
+    def __init__(self, box_style="", work_dir=None):
         """
 
         """
@@ -18,6 +18,11 @@ class TabPhaseRetrieval(widgets.VBox):
         # Brief header describing the tab
         self.header = 'Phase retrieval'
         self.box_style = box_style
+
+        if work_dir is None:
+            self.work_dir = os.getcwd()
+        else:
+            self.work_dir = work_dir
 
         # Define widgets
         self.unused_label_data = widgets.HTML(
@@ -29,9 +34,9 @@ class TabPhaseRetrieval(widgets.VBox):
         )
 
         self.parent_folder = widgets.Dropdown(
-            options=[x[0] + "/" for x in os.walk(os.getcwd())],
-            value=os.getcwd() + "/",
-            placeholder=os.getcwd() + "/",
+            options=[x[0] + "/" for x in os.walk(self.work_dir)],
+            value=self.work_dir + "/",
+            placeholder=self.work_dir + "/",
             description='Parent folder:',
             continuous_update=False,
             layout=widgets.Layout(width='90%'),
@@ -41,7 +46,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.iobs = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
-                      glob.glob(os.getcwd() + "*.npz")],
+                      glob.glob(self.work_dir + "*.npz")],
                      key=os.path.getmtime),
             description='Dataset',
             layout=widgets.Layout(width='90%'),
@@ -51,7 +56,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.mask = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
-                      glob.glob(os.getcwd() + "*.npz")],
+                      glob.glob(self.work_dir + "*.npz")],
                      key=os.path.getmtime),
             description='Mask',
             layout=widgets.Layout(width='90%'),
@@ -61,7 +66,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.support = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
-                      glob.glob(os.getcwd() + "*.npz")],
+                      glob.glob(self.work_dir + "*.npz")],
                      key=os.path.getmtime),
             value="",
             description='Support',
@@ -72,7 +77,7 @@ class TabPhaseRetrieval(widgets.VBox):
         self.obj = widgets.Dropdown(
             options=[""]
             + sorted([os.path.basename(f) for f in
-                      glob.glob(os.getcwd() + "*.npz")],
+                      glob.glob(self.work_dir + "*.npz")],
                      key=os.path.getmtime),
             value="",
             description='Object',

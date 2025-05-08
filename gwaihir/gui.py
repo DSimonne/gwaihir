@@ -62,6 +62,7 @@ class Interface:
     def __init__(
         self,
         tabs="plot_and_phase_retrieval",
+        work_dir=None,
     ):
         """
         The different tabs of the GUI are loaded from the submodule view.
@@ -87,6 +88,8 @@ class Interface:
 
         :param tabs: Use either "all", "plot" or "plot_and_phase_retrieval",
             which is now the default.
+        :param work_dir: Used when tabs parameter is 'plot' or
+            'plot_and_phase_retrieval'
         """
         super(Interface, self).__init__()
 
@@ -96,18 +99,6 @@ class Interface:
         self.params = None
         self.preprocessing_folder = None
         self.postprocessing_folder = None
-
-        # Init tabs
-        self.TabStartup = TabStartup()
-        self.TabDetector = TabDetector()
-        self.TabInstrument = TabInstrument()
-        self.TabPreprocess = TabPreprocess()
-        self.TabDataFrame = TabDataFrame()
-        self.TabPhaseRetrieval = TabPhaseRetrieval()
-        self.TabPostprocess = TabPostprocess()
-        self.TabPlotData = TabPlotData()
-        self.TabFacet = TabFacet()
-        self.TabReadme = TabReadme()
 
         # Get path to scripts folder
         path_package = inspect.getfile(gwaihir).split("__")[0]
@@ -134,6 +125,9 @@ class Interface:
             raise E
 
         if tabs == "plot":
+            # Init tab
+            self.TabPlotData = TabPlotData()
+
             self.window = Tab(children=(
                 interactive(
                     init_plot_data_tab,
@@ -150,14 +144,23 @@ class Interface:
             display(self.window)
 
         elif tabs == "plot_and_phase_retrieval" and pynx_import_success:
+            # Init tabs
+            if work_dir is None:
+                work_dir = os.getcwd()
+
+            self.TabPhaseRetrieval = TabPhaseRetrieval(work_dir=work_dir)
+            self.TabPlotData = TabPlotData()
 
             # Create Dataset Class
             self.Dataset = gd.Dataset(
                 scan=None,
                 sample_name=None,
                 data_dir=None,
-                root_folder=os.getcwd(),
+                root_folder=work_dir,
             )
+
+            self.Dataset.scan_folder = self.Dataset.parent_folder
+            self.preprocessing_folder = self.Dataset.parent_folder
 
             self.init_phase_retrieval_tab_gui = interactive(
                 init_phase_retrieval_tab,
@@ -241,6 +244,18 @@ class Interface:
             display(self.window)
 
         elif tabs == "all" and bcdi_import_success:
+            # Init tabs
+            self.TabStartup = TabStartup()
+            self.TabDetector = TabDetector()
+            self.TabInstrument = TabInstrument()
+            self.TabPreprocess = TabPreprocess()
+            self.TabDataFrame = TabDataFrame()
+            self.TabPhaseRetrieval = TabPhaseRetrieval()
+            self.TabPostprocess = TabPostprocess()
+            self.TabPlotData = TabPlotData()
+            self.TabFacet = TabFacet()
+            self.TabReadme = TabReadme()
+
             # Initialize functions
             self.init_startup_tab_gui = interactive(
                 init_startup_tab,
