@@ -258,7 +258,7 @@ def init_phase_retrieval_tab(
     try:
         interface.Dataset.energy = interface.TabInstrument.energy.value
         interface.Dataset.detector_distance = interface.TabInstrument.detector_distance.value
-    except TypeError:
+    except (TypeError, AttributeError):
         interface.Dataset.energy = 8500
         interface.Dataset.detector_distance = 1.2
     finally:
