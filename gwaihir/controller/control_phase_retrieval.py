@@ -251,6 +251,7 @@ def init_phase_retrieval_tab(
 
     if interface.Dataset.live_plot == 0:
         interface.Dataset.live_plot = False
+    interface.Dataset.plot_axis = plot_axis
 
     print("Scan n°", interface.Dataset.scan)
 
@@ -266,8 +267,12 @@ def init_phase_retrieval_tab(
         f"\tCXI input: detector pixel size = {interface.Dataset.pixel_size_detector} m")
 
     # PyNX arguments text file
-    interface.Dataset.pynx_parameter_gui_file = interface.preprocessing_folder\
-        + "/pynx_run.txt"
+    try:
+        interface.Dataset.pynx_parameter_gui_file = interface.preprocessing_folder\
+            + "/pynx_run.txt"
+    except TypeError:
+        interface.Dataset.pynx_parameter_gui_file = interface.Dataset.parent_folder\
+            + "/pynx_run.txt"
 
     # Phase retrieval
     if run_phase_retrieval and not run_pynx_tools:
