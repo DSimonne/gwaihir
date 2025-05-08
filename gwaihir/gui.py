@@ -22,6 +22,8 @@ from gwaihir.controller.control_data_frame import init_data_frame_tab
 from gwaihir.controller.control_plot_data import init_plot_data_tab
 from gwaihir.controller.control_startup import init_startup_tab
 
+import gwaihir.dataset as gd
+
 try:
     from gwaihir.controller.control_facet import init_facet_tab
     from gwaihir.controller.control_postprocess import init_postprocess_tab
@@ -148,6 +150,15 @@ class Interface:
             display(self.window)
 
         elif tabs == "plot_and_phase_retrieval" and pynx_import_success:
+
+            # Create Dataset Class
+            self.Dataset = gd.Dataset(
+                scan=None,
+                sample_name=None,
+                data_dir=None,
+                root_folder=os.getcwd(),
+            )
+
             self.init_phase_retrieval_tab_gui = interactive(
                 init_phase_retrieval_tab,
                 interface=fixed(self),
