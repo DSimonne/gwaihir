@@ -7,15 +7,21 @@ exclude_patterns = [
 
 [[analyzers]]
 name = "shell"
-enabled = true
+enabled = false
 
 [[analyzers]]
 name = "python"
-enabled = true
+enabled = false
 
   [analyzers.meta]
   runtime_version = "3.x.x"
 
 [[transformers]]
 name = "autopep8"
-enabled = true
+enabled = false
+
+[notifications]
+email = false
+
+[automation]
+create_branches = false
