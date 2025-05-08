@@ -255,9 +255,14 @@ def init_phase_retrieval_tab(
 
     print("Scan n°", interface.Dataset.scan)
 
-    interface.Dataset.energy = interface.TabInstrument.energy.value
-    interface.Dataset.wavelength = 1.2399 * 1e-6 / interface.Dataset.energy
-    interface.Dataset.detector_distance = interface.TabInstrument.detector_distance.value
+    try:
+        interface.Dataset.energy = interface.TabInstrument.energy.value
+        interface.Dataset.detector_distance = interface.TabInstrument.detector_distance.value
+    except TypeError:
+        interface.Dataset.energy = 8500
+        interface.Dataset.detector_distance = 1.2
+    finally:
+        interface.Dataset.wavelength = 1.2399 * 1e-6 / interface.Dataset.energy
 
     print("\tCXI input: Energy = %8.2f eV" % interface.Dataset.energy)
     print(f"\tCXI input: Wavelength = {interface.Dataset.wavelength*1e10} A")
@@ -830,11 +835,15 @@ def init_phase_retrieval_tab(
         )
 
         # Strain folder
-        interface.TabPostprocess.strain_folder.value\
-            = interface.preprocessing_folder
-        interface.TabPostprocess.strain_folder_handler(
-            change=interface.preprocessing_folder
-        )
+        try:
+            interface.TabPostprocess.strain_folder.value\
+                = interface.preprocessing_folder
+            interface.TabPostprocess.strain_folder_handler(
+                change=interface.preprocessing_folder
+            )
+        except TypeError:
+            pass
+
 
 
 def filter_reconstructions(
