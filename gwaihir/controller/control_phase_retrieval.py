@@ -11,6 +11,7 @@ from shlex import quote
 from IPython.display import clear_output
 from ast import literal_eval
 from typing import Tuple, Union, Optional, List
+import traitlets
 
 # GPU will be auto-selected
 from pynx.cdi import SupportUpdate, ScaleObj, AutoCorrelationSupport, \
@@ -820,13 +821,19 @@ def init_phase_retrieval_tab(
         )
 
         # Refresh folders
-        interface.root_folder_handler(
-            change=interface.Dataset.scan_folder
-        )
+        try:
+            interface.root_folder_handler(
+                change=interface.Dataset.scan_folder
+            )
+        except AttributeError:
+            pass
 
         # After slurm job, we create a new folder, so we must reassign the folder
         # in the tab
-        interface.TabPhaseRetrieval.parent_folder.value = interface.preprocessing_folder
+        try:
+            interface.TabPhaseRetrieval.parent_folder.value = interface.preprocessing_folder
+        except traitlets.TraitError:
+            pass
 
         # Plot folder
         interface.TabPlotData.children[1].value = interface.preprocessing_folder
@@ -843,7 +850,6 @@ def init_phase_retrieval_tab(
             )
         except TypeError:
             pass
-
 
 
 def filter_reconstructions(
