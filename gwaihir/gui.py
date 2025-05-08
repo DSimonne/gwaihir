@@ -159,8 +159,8 @@ class Interface:
                 root_folder=work_dir,
             )
 
-            self.Dataset.scan_folder = self.Dataset.parent_folder
-            self.preprocessing_folder = self.Dataset.parent_folder
+            self.Dataset.scan_folder = work_dir
+            self.preprocessing_folder = work_dir
 
             self.init_phase_retrieval_tab_gui = interactive(
                 init_phase_retrieval_tab,
