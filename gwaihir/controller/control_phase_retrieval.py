@@ -1540,7 +1540,7 @@ def run_modes_decomposition(
         )
     try:
         os.system(
-            "{}/pynx-cdi-analysis {}/{} modes=1 modes_output={}/modes_gui.h5".format(
+            "{}/pynx-cdi-analysis {}/{} --modes 1 --modes_output {}/modes_gui.h5".format(
                 quote(path_scripts),
                 quote(folder),
                 glob_pattern,
